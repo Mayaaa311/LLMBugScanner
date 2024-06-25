@@ -1,8 +1,10 @@
 from detector_pkg.bug_detector import Detector
 
 detector = Detector(
-    model_id="TheBloke/Llama-2-7B-GGUF",
-    model_file="llama-2-7b.Q5_K_M.gguf"
+    # model_id="TheBloke/Llama-2-7B-GGUF",
+    # model_file="llama-2-7b.Q5_K_M.gguf"
+    # model_file="llama-2-7b.Q3_K_M.gguf"
+    model_path="models/llama-2-7b.Q5_K_M.gguf"
 )
 
 sample_code = """
@@ -29,3 +31,4 @@ detector.save_results()  # Save results to default result folder
 
 # Or save to a specific path
 # detector.save_results(path="path/to/your/file.txt")
+
