@@ -8,6 +8,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_community.llms import LlamaCpp
 from langchain_core.callbacks import CallbackManager, StreamingStdOutCallbackHandler
 import torch
+import logging
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print("using", device)
@@ -16,7 +17,7 @@ print("using", device)
 class Detector_dev:
     def __init__(self, model_path, 
                  log_dir='logger', n_auditors=3,
-                 n_gpu_layers=-1, n_batch=1024):
+                 n_gpu_layers=-1, n_ctx = 2048, n_batch=1024):
         
         self.model_path = model_path
         self.n_auditors = n_auditors
@@ -24,7 +25,14 @@ class Detector_dev:
         # Create the logger directory if it doesn't exist
         os.makedirs(log_dir, exist_ok=True)
         self.log_dir = log_dir
+         # Set the log filename with the current date and time
+        log_filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S.log")
+        log_path = os.path.join(log_dir, log_filename)
         
+        # Initialize logging
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename=log_path, filemode='w')
+        self.logger = logging.getLogger(__name__)
+               
         # Initialize callback manager
         self.callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
 
@@ -33,6 +41,7 @@ class Detector_dev:
             model_path=model_path,
             n_gpu_layers=n_gpu_layers,
             n_batch=n_batch,
+            n_ctx=n_ctx,
             callback_manager=self.callback_manager,
             verbose=True
         )
@@ -69,6 +78,7 @@ class Detector_dev:
     def run_auditor(self, code: str) -> dict:
         auditor_chain = self.auditor_prompt | self.llm_aud
         response = auditor_chain.invoke({"code": code})
+        self.logger.info(f'response from auditor: {response}')
         try:
             response_json = json.loads(response)
             return response_json
@@ -85,20 +95,19 @@ if __name__ == "__main__":
     
     # Sample smart contract code to audit
     sample_code = """
-    pragma solidity ^0.8.0;
+        contract Example {
+            mapping(address => uint256) public balances;
 
-    contract Vulnerable {
-        address private owner;
+            function deposit() public payable {
+                balances[msg.sender] += msg.value;
+            }
 
-        constructor() {
-            owner = msg.sender;
+            function withdraw(uint256 amount) public {
+                require(balances[msg.sender] >= amount, "Insufficient balance");
+                payable(msg.sender).transfer(amount);
+                balances[msg.sender] -= amount
+            }
         }
-
-        function withdraw() public {
-            require(msg.sender == owner);
-            payable(msg.sender).transfer(address(this).balance);
-        }
-    }
     """
     
     # Run the auditor
