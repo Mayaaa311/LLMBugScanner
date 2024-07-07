@@ -1,4 +1,4 @@
-from detector_pkg.bug_detector import Detector
+from sandbox.bug_detector import Detector
 
 detector = Detector(
     # model_id="TheBloke/Llama-2-7B-GGUF",
