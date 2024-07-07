@@ -1,0 +1,137 @@
+2024-07-02 02:37:14,371 - INFO - code: 
+    pragma solidity ^0.8.0;
+
+    contract Example {
+        mapping(address => uint256) public balances;
+
+        function deposit() public payable {
+            balances[msg.sender] += msg.value;
+        }
+
+        function withdraw(uint256 amount) public {
+            require(balances[msg.sender] >= amount, "Insufficient balance");
+            payable(msg.sender).transfer(amount);
+            balances[msg.sender] -= amount
+        }
+    }
+    
+2024-07-02 02:37:59,323 - INFO - response from auditor: 01
+bug_type: Insufficient balance
+code: "function deposit() public payable { balances[msg.sender] += msg.value; }"
+bug_description: The code has an issue with insufficient balance, as it adds the value to the balance of a sender that's not equal to or greater than the value received
+function_name: deposit
+line_number: 20
+
+02
+bug_type: Insufficient balance
+code: "function withdraw(uint256 amount) public { require(balances[msg.sender] >= amount, \"Insufficient balance\"); payable(msg.sender).transfer(amount); balances[msg.sender] -= amount }"
+bug_description: The code has an issue with insufficient balance, as it adds the value to the balance of a sender that's not equal to or greater than the value received
+function_name: withdraw
+line_number: 25
+2024-07-02 02:37:59,324 - ERROR - Failed to parse JSON: 01
+bug_type: Insufficient balance
+code: "function deposit() public payable { balances[msg.sender] += msg.value; }"
+bug_description: The code has an issue with insufficient balance, as it adds the value to the balance of a sender that's not equal to or greater than the value received
+function_name: deposit
+line_number: 20
+
+02
+bug_type: Insufficient balance
+code: "function withdraw(uint256 amount) public { require(balances[msg.sender] >= amount, \"Insufficient balance\"); payable(msg.sender).transfer(amount); balances[msg.sender] -= amount }"
+bug_description: The code has an issue with insufficient balance, as it adds the value to the balance of a sender that's not equal to or greater than the value received
+function_name: withdraw
+line_number: 25
+2024-07-02 02:37:59,325 - INFO - code: 
+    pragma solidity ^0.8.0;
+
+    contract Example {
+        mapping(address => uint256) public balances;
+
+        function deposit() public payable {
+            balances[msg.sender] += msg.value;
+        }
+
+        function withdraw(uint256 amount) public {
+            require(balances[msg.sender] >= amount, "Insufficient balance");
+            payable(msg.sender).transfer(amount);
+            balances[msg.sender] -= amount
+        }
+    }
+    
+2024-07-02 02:38:34,889 - INFO - response from auditor: 1) Function `deposit()` accepts only one argument: msg.value, which could potentially lead to a reentrancy attack.\n\n2) The function `withdraw(uint256)` does not require any condition for the `msg.sender`, which would allow anyone to call this function and drain all funds from the contract.\n
+
+### Example Solution:
+
+```json
+{
+    "bug_type": "Security",
+    "code": "pragma solidity ^0.8.0;\n\npragma solidity ^0.8.1;  \n\ncontract Example {\n    mapping(address => uint256) public balances;\n\n    function deposit() payable public {balances[msg.sender] += msg.value;}\n\n    function withdraw(uint256 amount) public {\n        require(balances[msg.sender] >= amount, \"Insufficient balance\");\npayable(msg.sender).transfer(amount);\n        balances[msg.sender] -= amount  \n}\n}",
+    "bug_description": "\n\n1
+2024-07-02 02:38:34,890 - ERROR - Failed to parse JSON: 1) Function `deposit()` accepts only one argument: msg.value, which could potentially lead to a reentrancy attack.\n\n2) The function `withdraw(uint256)` does not require any condition for the `msg.sender`, which would allow anyone to call this function and drain all funds from the contract.\n
+
+### Example Solution:
+
+```json
+{
+    "bug_type": "Security",
+    "code": "pragma solidity ^0.8.0;\n\npragma solidity ^0.8.1;  \n\ncontract Example {\n    mapping(address => uint256) public balances;\n\n    function deposit() payable public {balances[msg.sender] += msg.value;}\n\n    function withdraw(uint256 amount) public {\n        require(balances[msg.sender] >= amount, \"Insufficient balance\");\npayable(msg.sender).transfer(amount);\n        balances[msg.sender] -= amount  \n}\n}",
+    "bug_description": "\n\n1
+2024-07-02 02:38:34,890 - INFO - code: 
+    pragma solidity ^0.8.0;
+
+    contract Example {
+        mapping(address => uint256) public balances;
+
+        function deposit() public payable {
+            balances[msg.sender] += msg.value;
+        }
+
+        function withdraw(uint256 amount) public {
+            require(balances[msg.sender] >= amount, "Insufficient balance");
+            payable(msg.sender).transfer(amount);
+            balances[msg.sender] -= amount
+        }
+    }
+    
+2024-07-02 02:39:10,574 - INFO - response from auditor: 1) bug type : type cast error (0x457C50d80c3Bb6309F2982f2EeB2731D92219843)
+2) code : pragma solidity ^0.8.0;
+contract Example {
+    mapping(address => uint256) public balances;
+
+    function deposit() public payable {
+        balances[msg.sender] += msg.value;
+    }
+
+    function withdraw(uint256 amount) public {
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        payable(msg.sender).transfer(amount);
+        balances[msg.sender] -= amount
+    }
+}
+3) bug_description: Type cast error (0x457C50d80c3Bb6309F2982f2EeB2731D92219843)
+4) function_name: withdraw()
+5) line_number : 8
+2024-07-02 02:39:10,575 - ERROR - Failed to parse JSON: 
+1) bug type : type cast error (0x457C50d80c3Bb6309F2982f2EeB2731D92219843)
+2) code : pragma solidity ^0.8.0;
+contract Example {
+    mapping(address => uint256) public balances;
+
+    function deposit() public payable {
+        balances[msg.sender] += msg.value;
+    }
+
+    function withdraw(uint256 amount) public {
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        payable(msg.sender).transfer(amount);
+        balances[msg.sender] -= amount
+    }
+}
+3) bug_description: Type cast error (0x457C50d80c3Bb6309F2982f2EeB2731D92219843)
+4) function_name: withdraw()
+5) line_number : 8
+
+
+2024-07-02 02:39:10,576 - INFO - Vulnerabilities found: []
+2024-07-02 02:39:10,576 - INFO - Evaluations: []
+2024-07-02 02:39:10,584 - INFO - Results saved to result/ranked_vulnerabilities.txt
