@@ -1,34 +1,27 @@
-from sandbox.bug_detector import Detector
+from lens.llama_detector import Detector
+def main():
+    # Define the file path
+    file_path = "data/2018-13074.sol"
+    sample_code=""
+    # Read the file content
+    with open(file_path, "r") as file:
+        sample_code = file.read()
 
-detector = Detector(
-    # model_id="TheBloke/Llama-2-7B-GGUF",
-    # model_file="llama-2-7b.Q5_K_M.gguf"
-    # model_file="llama-2-7b.Q3_K_M.gguf"
-    model_path="models/llama-2-7b.Q5_K_M.gguf"
-)
+    # Initialize the detector
+    detector = Detector(
+        model_id= "codellama",
+        auditor_template_path='templates/auditor_basic.txt',
+        critic_template_path='templates/critic_basic.txt',
+        log_dir='log',
+        result_dir='result',
+        output = '2018-13074',
+        topk=3,
+        n_auditors=2,
+    )
 
-sample_code = """
-pragma solidity ^0.8.0;
-mapping(address => uint256) public balances;
+    # Run the pipeline with the sample code
+    detector.run_pipeline(sample_code)
+    detector.save_results()
 
-function deposit() public payable {
-    balances[msg.sender] += msg.value;
-}
-
-function withdraw(uint256 amount) public {
-    require(balances[msg.sender] >= amount, "Insufficient balance");
-    payable(msg.sender).transfer(amount);
-    balances[msg.sender] -= amount;
-}
-"""
-
-vulnerabilities = detector.run_pipeline(sample_code)
-for vulnerability in vulnerabilities:
-    print(vulnerability)
-    detector.logger.info(f'Ranked Vulnerability: {json.dumps(vulnerability, indent=2)}')
-
-detector.save_results()  # Save results to default result folder
-
-# Or save to a specific path
-# detector.save_results(path="path/to/your/file.txt")
-
+if __name__ == "__main__":
+    main()

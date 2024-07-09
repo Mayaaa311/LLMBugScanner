@@ -30,6 +30,14 @@ def parse_config(cfg_path = "config/llama.cfg",model_id = "llama3"):
             except ValueError:
                 pass  # Leave it as a string if it can't be converted
     return model_params
+def write_to_file(file_path, content, write = 'w'):
+    # Create the directory if it doesn't exist
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    
+    # Write the content to the file
+    with open(file_path, write) as file:
+        file.write(content)
+
 class Detector:
     def __init__(self,
                  model_id="llama3",
@@ -37,7 +45,7 @@ class Detector:
                  critic_template_path='templates/critic_v1.txt', 
                  ranker_template_path = 'templates/topk.txt',
                  topk = 3,
-                 log_dir='logger', result_dir='result', output="result.txt",n_auditors=3, config = "config/llama.cfg"):
+                 log_dir='logger', result_dir='result', output="output",n_auditors=3, config = "config/llama.cfg"):
         self.output = output
         self.n_auditors = n_auditors
         self.result_dir = result_dir
@@ -80,18 +88,22 @@ class Detector:
         self.ranker_chain = self.ranker_prompt | self.llm_ranker
 
         self.ranked_vulnerabilities = ""
-        self.logger.info(f"Detector initialized with parameters: \n"
-                    f"model_id={model_id}, \n"
-                    f"auditor_template_path={auditor_template_path}, \n"
-                    f"critic_template_path={critic_template_path}, \n"
-                    f"ranker_template_path={ranker_template_path}, \n"
-                    f"topk={topk}, \n"
-                    f"log_dir={log_dir}, \n"
-                    f"result_dir={result_dir}, \n"
-                    f"output={output}, \n"
-                    f"n_auditors={n_auditors}, \n"
-                    f"config_path={config}, \n"
-                    f"parsed_config_params={params}\n")
+        run_info = f'''Detector initialized with parameters: 
+            model_id={model_id}, 
+            auditor_template_path={auditor_template_path}, 
+            critic_template_path={critic_template_path}, 
+            ranker_template_path={ranker_template_path}, 
+            topk={topk}, 
+            log_dir={log_dir}, 
+            result_dir={result_dir}, 
+            output={output}, 
+            n_auditors={n_auditors}, 
+            config_path={config}, 
+            parsed_config_params={params}
+            '''
+
+        self.logger.info(run_info)
+        write_to_file(f"{self.result_dir}/{self.output}/{self.output}_run_info", run_info)
         
     def set_template(self, auditor_template_path, input_var):
         with open(auditor_template_path, 'r') as file:
@@ -116,17 +128,21 @@ class Detector:
             response = self.auditor_chain.invoke({"code": code,"topk": self.topk}).content
             self.logger.info(f'response from auditor {i+1}: {response}')
             responses.append(response)
+            write_to_file(f"{self.result_dir}/{self.output}/{self.output}_auditor", response,write='a')
         return responses
 
     def run_critic(self, code, vulnerabilities):
         # evaluations = []
+
         response = self.critic_chain.invoke({"code": code, "vulnerability": str(vulnerabilities)}).content
+        write_to_file(f"{self.result_dir}/{self.output}/{self.output}_critic", response)
         self.logger.info(f'response from critic: {response}')
         return response
     
     def run_ranker(self, vulnerability) -> list:
         response = self.ranker_chain.invoke({"topk": self.topk, "vulnerability":vulnerability}).content
         self.logger.info(f'response from ranker: {response}')
+        write_to_file(f"{self.result_dir}/{self.output}/{self.output}_rank", str(response))
         return response
     
     def run_pipeline(self, code: str):
@@ -168,9 +184,9 @@ def main():
         critic_template_path='templates/critic_basic.txt',
         log_dir='log',
         result_dir='result',
-        output = '2018-13074.json',
+        output = '2018-13074',
         topk=3,
-        n_auditors=3,
+        n_auditors=2,
     )
 
     # Run the pipeline with the sample code
