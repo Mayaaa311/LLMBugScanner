@@ -35,7 +35,18 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Run the Example
+### 4. install models
+download all model by running: 
+```sh
+./scripts/download_models.sh
+```
+
+download single model(llama3, llama2, codellama) by running:
+```sh
+# downloading llama3 for example
+./scripts/download_models.sh --model llama3
+```
+### 5. Run the Example
 
 ```sh
 python src/main.py
