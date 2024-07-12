@@ -72,10 +72,14 @@ class Detector:
             self.llm_aud=ChatOllama(model="llama3", **params)
             self.llm_critic = ChatOllama(model="llama3", **params)
             self.llm_ranker = ChatOllama(model="llama3", **params)
-        else:
+        elif model_id == "codellama":
             self.llm_aud=ChatOllama(model="codellama", **params)
             self.llm_critic = ChatOllama(model="codellama", **params)
-            self.llm_ranker = ChatOllama(model="codellama", **params)          
+            self.llm_ranker = ChatOllama(model="codellama", **params)    
+        else:
+            self.llm_aud=ChatOllama(model="codeqwen", **params)
+            self.llm_critic = ChatOllama(model="codeqwen", **params)
+            self.llm_ranker = ChatOllama(model="codellama", **params)               
         self.topk = topk
         # Initialize and set prompt templates
         self.auditor_prompt = self.set_template(auditor_template_path,['code'])
@@ -103,7 +107,7 @@ class Detector:
             '''
 
         self.logger.info(run_info)
-        write_to_file(f"{self.result_dir}/{self.output}/{self.output}_run_info", run_info)
+        write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}/{self.output}_run_info", run_info)
         
     def set_template(self, auditor_template_path, input_var):
         with open(auditor_template_path, 'r') as file:
@@ -128,21 +132,21 @@ class Detector:
             response = self.auditor_chain.invoke({"code": code,"topk": self.topk}).content
             self.logger.info(f'response from auditor {i+1}: {response}')
             responses.append(response)
-            write_to_file(f"{self.result_dir}/{self.output}/{self.output}_auditor.json", response,write='a')
+            write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}/{self.output}_auditor.json", response,write='a')
         return responses
 
     def run_critic(self, code, vulnerabilities):
         # evaluations = []
 
         response = self.critic_chain.invoke({"code": code, "vulnerability": str(vulnerabilities)}).content
-        write_to_file(f"{self.result_dir}/{self.output}/{self.output}_critic.json", response)
+        write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}/{self.output}_critic.json", response)
         self.logger.info(f'response from critic: {response}')
         return response
     
     def run_ranker(self, vulnerability) -> list:
         response = self.ranker_chain.invoke({"topk": self.topk, "vulnerability":vulnerability}).content
         self.logger.info(f'response from ranker: {response}')
-        write_to_file(f"{self.result_dir}/{self.output}/{self.output}_rank.json", str(response))
+        write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}/{self.output}_rank.json", str(response))
         return response
     
     def run_pipeline(self, code: str):
@@ -179,7 +183,7 @@ def main():
 
     # Initialize the detector
     detector = Detector(
-        model_id= "codellama",
+        model_id= "codeqwen",
         auditor_template_path='templates/auditor_basic.txt',
         critic_template_path='templates/critic_basic.txt',
         log_dir='log',
