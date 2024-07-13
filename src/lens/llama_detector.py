@@ -120,26 +120,28 @@ class Detector:
 
     def run_auditor(self, code: str):
         responses = []
+        write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}_k{self.topk}_n{self.n_auditors}/{self.output}_auditor.json", "",write='w')
+
         for i in range(self.n_auditors):
 
             response = self.auditor_chain.invoke({"code": code,"topk": self.topk}).content
             self.logger.info(f'response from auditor {i+1}: {response}')
             responses.append(response)
-            write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}/{self.output}_auditor.json", response,write='a')
+            write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}_k{self.topk}_n{self.n_auditors}/{self.output}_auditor.json", response,write='a')
         return responses
 
     def run_critic(self, code, vulnerabilities):
         # evaluations = []
 
         response = self.critic_chain.invoke({"auditor_resp": str(vulnerabilities)}).content
-        write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}/{self.output}_critic.json", response)
+        write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}_k{self.topk}_n{self.n_auditors}/{self.output}_critic.json", response)
         self.logger.info(f'response from critic: {response}')
         return response
     
     def run_ranker(self, vulnerability) -> list:
         response = self.ranker_chain.invoke({"topk": self.topk, "vulnerability":vulnerability}).content
         self.logger.info(f'response from ranker: {response}')
-        write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}/{self.output}_rank.json", str(response))
+        write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}_k{self.topk}_n{self.n_auditors}/{self.output}_rank.json", str(response))
         return response
     
     def run_pipeline(self, code: str):
