@@ -180,13 +180,14 @@ def main():
     detector = Detector(
         # model_id= "deepseek-coder-v2",
         # model_id = "codeqwen",
-        model_id = "llama3",
+        # model_id = "llama3",
+        model_id = "codellama",
         auditor_template_path='templates/auditor_v1.txt',
         critic_template_path='templates/critic_v1.txt',
         log_dir='log',
         result_dir='result',
         output = '2018-13074',
-        topk=3,
+        topk="all",
         n_auditors=1,
     )
 

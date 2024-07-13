@@ -1,0 +1,22 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transferFrom",
+            "code": "require(_value <= allowance[_from][msg.sender]);\nallowance[_from][msg.sender] -= _value;\n_transfer(_from, _to, _value);\nreturn true;",
+            "vulnerability": "Arbitrary transfer of tokens without approval",
+            "reason": "The function `transferFrom` does not check if the caller has been approved by the token owner to spend a specific amount. An attacker can use this function to transfer tokens on behalf of the owner, even if they have not been given permission."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "if (approve(_spender, _value)) {\nspender.receiveApproval(msg.sender, _value, this, _extraData);\nreturn true;\n}",
+            "vulnerability": "Allowance can be set to zero without calling the external contract",
+            "reason": "The `approveAndCall` function approves a spender and then calls a recipient's receiveApproval function. However, if the approval amount is set to 0, it does not call the external contract, leaving the allowance at 0 even though an approval was made."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "require(balanceOf[_from] >= _value); \nrequire(_value <= allowance[_from][msg.sender]); \nbalanceOf[_from] -= _value; \nallowance[_from][msg.sender] -= _value; \ntotalSupply -= _value;",
+            "vulnerability": "Unrestricted burning of tokens from other addresses",
+            "reason": "The `burnFrom` function allows the owner to burn tokens from any address, even if they are not approved for that amount. This can lead to unauthorized token destruction."
+        }
+    ]
+}
