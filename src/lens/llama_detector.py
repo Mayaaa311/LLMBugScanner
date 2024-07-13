@@ -104,6 +104,7 @@ class Detector:
     def set_template(self, auditor_template_path, input_var):
         with open(auditor_template_path, 'r') as file:
             auditor_template = file.read()
+        print(auditor_template)
         return PromptTemplate(input_variables=input_var, template=auditor_template)
 
 
@@ -130,7 +131,7 @@ class Detector:
     def run_critic(self, code, vulnerabilities):
         # evaluations = []
 
-        response = self.critic_chain.invoke({"code": code, "vulnerability": str(vulnerabilities)}).content
+        response = self.critic_chain.invoke({"auditor_resp": str(vulnerabilities)}).content
         write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}/{self.output}_critic.json", response)
         self.logger.info(f'response from critic: {response}')
         return response
@@ -175,14 +176,16 @@ def main():
 
     # Initialize the detector
     detector = Detector(
-        model_id= "deepseek-coder-v2",
-        auditor_template_path='templates/auditor_basic.txt',
-        critic_template_path='templates/critic_basic.txt',
+        # model_id= "deepseek-coder-v2",
+        # model_id = "codeqwen",
+        model_id = "llama3",
+        auditor_template_path='templates/auditor_v1.txt',
+        critic_template_path='templates/critic_v1.txt',
         log_dir='log',
         result_dir='result',
         output = '2018-13074',
         topk=3,
-        n_auditors=2,
+        n_auditors=1,
     )
 
     # Run the pipeline with the sample code

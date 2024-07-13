@@ -182,4 +182,25 @@ contract FIBToken is TokenERC20 {
 "bug_description": "The bug is in the _transfer function of the TokenERC20 contract. The require statement at line 14 is not checking if the sender has enough balance to transfer the tokens. This can lead to a situation where a user can transfer more tokens than they have, which can cause issues with the overall supply of the token.",
 "function_name": "_transfer",
 "line_number": "14"
+}{
+"output_list": [
+{
+"function_name": "transfer",
+"code": "_transfer(msg.sender, _to, _value);",
+"vulnerability": "Integer Overflow",
+"reason": "The function does not check for integer overflow when calculating the new balances of the sender and recipient."
+},
+{
+"function_name": "transferFrom",
+"code": "require(_value <= allowance[_from][msg.sender]);",
+"vulnerability": "Integer Underflow",
+"reason": "The function does not check for integer underflow when subtracting the value from the sender's balance."
+},
+{
+"function_name": "burnFrom",
+"code": "require(_value <= allowance[_from][msg.sender]);",
+"vulnerability": "Integer Underflow",
+"reason": "The function does not check for integer underflow when subtracting the value from the sender's balance."
+}
+]
 }
