@@ -1,0 +1,25 @@
+ ```json
+{
+  "bugs": [
+    {
+      "bug_type": "Logic Error",
+      "code": "contract FIBToken is owned, TokenERC20 {}",
+      "bug_description": "The function `mintToken` does not check if the total supply exceeds its limit. This can lead to an overflow of the uint256 variable `totalSupply`, causing unexpected behavior or even a contract failure.",
+      "function_name": "mintToken",
+      "line_number": 79
+    }
+  ]
+}
+``` ```json
+{
+  "bugs": [
+    {
+      "bug_type": "Integer Overflow",
+      "code": "_transfer(address _from, address _to, uint _value) internal {\n        require (_to != 0x0);\n        require (balanceOf[_from] >= _value);               \n        require (balanceOf[_to] + _value >= balanceOf[_to]);  // Potential bug\n        require(!frozenAccount[_from]);                      \n        require(!frozenAccount[_to]);                        \n        balanceOf[_from] -= _value;                          \n        balanceOf[_to] += _value;                            \n        emit Transfer(_from, _to, _value);\n    }",
+      "bug_description": "The condition `require (balanceOf[_to] + _value >= balanceOf[_to]);` can potentially be false if the addition of `_value` to `balanceOf[_to]` causes an integer overflow. This could lead to unexpected behavior, such as allowing a transfer that would not have been possible under normal circumstances.",
+      "function_name": "_transfer",
+      "line_number": 38
+    }
+  ]
+}
+```

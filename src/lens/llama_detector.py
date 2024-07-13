@@ -17,7 +17,7 @@ def parse_config(cfg_path = "config/llama.cfg",model_id = "llama3"):
     config = configparser.ConfigParser()
     config.read(cfg_path)
     # Choose the section based on the model
-    model_section = model_id # Change this based on the model
+    model_section = model_id if model_id in config else 'llama3'
     # Extract parameters from the chosen section
     model_params = {key: config.get(model_section, key) for key in config[model_section]}
     # Convert parameter values to appropriate types if necessary
@@ -67,19 +67,11 @@ class Detector:
         if model_id == "llama2":
             self.llm_aud = LlamaCpp(**params)
             self.llm_critic = LlamaCpp(**params)
-            self.llm_ranker = LlamaCpp(**params)
-        elif model_id == "llama3":
-            self.llm_aud=ChatOllama(model="llama3", **params)
-            self.llm_critic = ChatOllama(model="llama3", **params)
-            self.llm_ranker = ChatOllama(model="llama3", **params)
-        elif model_id == "codellama":
-            self.llm_aud=ChatOllama(model="codellama", **params)
-            self.llm_critic = ChatOllama(model="codellama", **params)
-            self.llm_ranker = ChatOllama(model="codellama", **params)    
+            self.llm_ranker = LlamaCpp(**params) 
         else:
-            self.llm_aud=ChatOllama(model="codeqwen", **params)
-            self.llm_critic = ChatOllama(model="codeqwen", **params)
-            self.llm_ranker = ChatOllama(model="codellama", **params)               
+            self.llm_aud=ChatOllama(model=model_id, **params)
+            self.llm_critic = ChatOllama(model=model_id, **params)
+            self.llm_ranker = ChatOllama(model=model_id, **params)               
         self.topk = topk
         # Initialize and set prompt templates
         self.auditor_prompt = self.set_template(auditor_template_path,['code'])
@@ -183,7 +175,7 @@ def main():
 
     # Initialize the detector
     detector = Detector(
-        model_id= "codeqwen",
+        model_id= "deepseek-coder-v2",
         auditor_template_path='templates/auditor_basic.txt',
         critic_template_path='templates/critic_basic.txt',
         log_dir='log',

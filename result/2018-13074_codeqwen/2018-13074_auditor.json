@@ -1,0 +1,22 @@
+{
+  "bug_type": "Logic Error",
+  "code": "require(!frozenAccount[_from]);                     \nrequire(!frozenAccount[_to]);",
+  "bug_description": "These require statements are checking if the sender and recipient accounts are frozen. However, they are placed inside the _transfer function which is called by both transfer and transferFrom functions. This means that if a user tries to send tokens from a frozen account, the transaction will still be executed but no tokens will be transferred. This can lead to loss of funds for the sender.",
+  "function_name": "_transfer",
+  "line_number": 117
+}{
+  "bug_type": "Logic Error",
+  "code": "function _transfer(address _from, address _to, uint _value) internal {
+    require (_to != 0x0);                            
+    require (balanceOf[_from] >= _value);            
+    require (balanceOf[_to] + _value >= balanceOf[_to]); 
+    require(!frozenAccount[_from]);                     
+    require(!frozenAccount[_to]);                    
+    balanceOf[_from] -= _value;                         
+    balanceOf[_to] += _value;                        
+    emit Transfer(_from, _to, _value);
+  }",
+  "bug_description": "The `_transfer` function does not check if the sender's balance is sufficient to cover the transfer amount before deducting it from the sender's balance. This can lead to a revert in case of insufficient balance.",
+  "function_name": "_transfer",
+  "line_number": 129
+}
