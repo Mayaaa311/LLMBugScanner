@@ -6,6 +6,9 @@ from langchain_core.prompts import PromptTemplate
 from langchain_community.llms import LlamaCpp
 from langchain_core.callbacks import CallbackManager, StreamingStdOutCallbackHandler
 from langchain_community.chat_models import ChatOllama
+from transformers import pipeline
+# Load model directly
+from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 import re
 import configparser
@@ -68,6 +71,10 @@ class Detector:
             self.llm_aud = LlamaCpp(**params)
             self.llm_critic = LlamaCpp(**params)
             self.llm_ranker = LlamaCpp(**params) 
+        if model_id == "Nxcode":
+            self.llm_aud = pipeline("text-generation", model="NTQAI/Nxcode-CQ-7B-orpo", **params)
+            self.llm_critic = pipeline("text-generation", model="NTQAI/Nxcode-CQ-7B-orpo", **params)
+            self.llm_ranker = pipeline("text-generation", model="NTQAI/Nxcode-CQ-7B-orpo", **params)
         else:
             self.llm_aud=ChatOllama(model=model_id, **params)
             self.llm_critic = ChatOllama(model=model_id, **params)
@@ -99,7 +106,7 @@ class Detector:
             '''
 
         self.logger.info(run_info)
-        write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}/{self.output}_run_info", run_info)
+        write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}_k{self.topk}_n{self.n_auditors}/{self.output}_run_info", run_info)
         
     def set_template(self, auditor_template_path, input_var):
         with open(auditor_template_path, 'r') as file:
@@ -181,7 +188,8 @@ def main():
         # model_id= "deepseek-coder-v2",
         # model_id = "codeqwen",
         # model_id = "llama3",
-        model_id = "codellama",
+        # model_id = "codellama",
+        model_id = "Nxcode",
         auditor_template_path='templates/auditor_v1.txt',
         critic_template_path='templates/critic_v1.txt',
         log_dir='log',
