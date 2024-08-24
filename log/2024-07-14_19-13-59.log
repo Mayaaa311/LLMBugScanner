@@ -1,0 +1,114 @@
+2024-07-14 19:13:59,043 - INFO - Detector initialized with parameters: 
+            model_id=codellama, 
+            auditor_template_path=templates/auditor_v1.txt, 
+            critic_template_path=templates/critic_v1.txt, 
+            ranker_template_path=templates/topk.txt, 
+            topk=3, 
+            log_dir=log, 
+            result_dir=result, 
+            output=2018-13074, 
+            n_auditors=2, 
+            config_path=config/llama.cfg, 
+            parsed_config_params={'n_gpu_layers': -1.0, 'n_batch': 1024, 'n_ctx': 4096, 'temperature': 0}
+            
+2024-07-14 19:14:12,003 - INFO - response from auditor 1: {
+"output_list": [
+{
+"function_name": "transfer",
+"code": "_transfer(msg.sender, _to, _value);",
+"vulnerability": "Integer Overflow",
+"reason": "The function does not check for integer overflow when calculating the new balances of the sender and recipient."
+},
+{
+"function_name": "transferFrom",
+"code": "require(_value <= allowance[_from][msg.sender]);\nallowance[_from][msg.sender] -= _value;",
+"vulnerability": "Integer Underflow",
+"reason": "The function does not check for integer underflow when subtracting the value from the sender's balance."
+},
+{
+"function_name": "burnFrom",
+"code": "require(_value <= allowance[_from][msg.sender]);\nallowance[_from][msg.sender] -= _value;",
+"vulnerability": "Integer Underflow",
+"reason": "The function does not check for integer underflow when subtracting the value from the sender's balance."
+}
+]
+}
+2024-07-14 19:14:17,728 - INFO - response from auditor 2: {
+"output_list": [
+{
+"function_name": "transfer",
+"code": "_transfer(msg.sender, _to, _value);",
+"vulnerability": "Integer Overflow",
+"reason": "The function does not check for integer overflow when calculating the new balances of the sender and recipient."
+},
+{
+"function_name": "transferFrom",
+"code": "require(_value <= allowance[_from][msg.sender]);\nallowance[_from][msg.sender] -= _value;",
+"vulnerability": "Integer Underflow",
+"reason": "The function does not check for integer underflow when subtracting the value from the sender's balance and the recipient's balance."
+},
+{
+"function_name": "burnFrom",
+"code": "require(_value <= allowance[_from][msg.sender]);\nallowance[_from][msg.sender] -= _value;",
+"vulnerability": "Integer Underflow",
+"reason": "The function does not check for integer underflow when subtracting the value from the sender's balance and the recipient's balance."
+}
+]
+}
+2024-07-14 19:14:24,467 - INFO - response from critic: {
+"output_list": [
+{
+"function_name": "transfer",
+"vulnerability": "Integer Overflow",
+"criticism": "The function does not check for integer overflow when calculating the new balances of the sender and recipient. This can lead to unexpected behavior, such as the transfer failing due to an integer overflow error.",
+"correctness": 5,
+"severity": 8,
+"profitability": 2
+},
+{
+"function_name": "transferFrom",
+"vulnerability": "Integer Underflow",
+"criticism": "The function does not check for integer underflow when subtracting the value from the sender's balance and the recipient's balance. This can lead to unexpected behavior, such as the transfer failing due to an integer underflow error.",
+"correctness": 3,
+"severity": 6,
+"profitability": 1
+},
+{
+"function_name": "burnFrom",
+"vulnerability": "Integer Underflow",
+"criticism": "The function does not check for integer underflow when subtracting the value from the sender's balance and the recipient's balance. This can lead to unexpected behavior, such as the transfer failing due to an integer underflow error.",
+"correctness": 3,
+"severity": 6,
+"profitability": 1
+}
+]
+}
+2024-07-14 19:14:30,906 - INFO - response from ranker: {
+"output_list": [
+{
+"function_name": "transfer",
+"vulnerability": "Integer Overflow",
+"criticism": "The function does not check for integer overflow when calculating the new balances of the sender and recipient. This can lead to unexpected behavior, such as the transfer failing due to an integer overflow error.",
+"correctness": 5,
+"severity": 8,
+"profitability": 2
+},
+{
+"function_name": "burnFrom",
+"vulnerability": "Integer Underflow",
+"criticism": "The function does not check for integer underflow when subtracting the value from the sender's balance and the recipient's balance. This can lead to unexpected behavior, such as the transfer failing due to an integer underflow error.",
+"correctness": 3,
+"severity": 6,
+"profitability": 1
+},
+{
+"function_name": "transferFrom",
+"vulnerability": "Integer Underflow",
+"criticism": "The function does not check for integer underflow when subtracting the value from the sender's balance and the recipient's balance. This can lead to unexpected behavior, such as the transfer failing due to an integer underflow error.",
+"correctness": 3,
+"severity": 6,
+"profitability": 1
+}
+]
+}
+2024-07-14 19:14:30,915 - INFO - Results saved to result/2018-13074
