@@ -9,6 +9,7 @@ from langchain_community.chat_models import ChatOllama
 from transformers import pipeline
 # Load model directly
 from transformers import AutoTokenizer, AutoModelForCausalLM
+from tokenizers import Tokenizer
 import torch
 import re
 import configparser
@@ -64,7 +65,7 @@ class Detector:
         # Initialize logging
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename=log_path, filemode='w')
         self.logger = logging.getLogger(__name__)
-        
+        callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
         self.model_id=model_id
         params = parse_config(cfg_path = config, model_id = model_id)
         if model_id == "llama2":
@@ -76,9 +77,9 @@ class Detector:
             self.llm_critic = pipeline("text-generation", model="NTQAI/Nxcode-CQ-7B-orpo", **params)
             self.llm_ranker = pipeline("text-generation", model="NTQAI/Nxcode-CQ-7B-orpo", **params)
         else:
-            self.llm_aud=ChatOllama(model=model_id, **params)
-            self.llm_critic = ChatOllama(model=model_id, **params)
-            self.llm_ranker = ChatOllama(model=model_id, **params)               
+            self.llm_aud=ChatOllama(model=model_id, n_ctx=4096,verbose=True,callback_manager = callback_manager)
+            self.llm_critic = ChatOllama(model=model_id, **params,verbose=True,callback_manager = callback_manager)
+            self.llm_ranker = ChatOllama(model=model_id, **params,verbose=True,callback_manager = callback_manager)               
         self.topk = topk
         # Initialize and set prompt templates
         self.auditor_prompt = self.set_template(auditor_template_path,['code'])
@@ -89,6 +90,9 @@ class Detector:
         self.auditor_chain = self.auditor_prompt | self.llm_aud
         self.critic_chain = self.critic_prompt | self.llm_critic
         self.ranker_chain = self.ranker_prompt | self.llm_ranker
+
+        
+
 
         self.ranked_vulnerabilities = ""
         run_info = f'''Detector initialized with parameters: 
@@ -108,10 +112,11 @@ class Detector:
         self.logger.info(run_info)
         write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}_k{self.topk}_n{self.n_auditors}/{self.output}_run_info", run_info)
         
+
     def set_template(self, auditor_template_path, input_var):
         with open(auditor_template_path, 'r') as file:
             auditor_template = file.read()
-        print(auditor_template)
+        tokenizer = Tokenizer.from_pretrained("TheBloke/Llama-2-70B-fp16")
         return PromptTemplate(input_variables=input_var, template=auditor_template)
 
 
@@ -187,9 +192,9 @@ def main():
     detector = Detector(
         # model_id= "deepseek-coder-v2",
         # model_id = "codeqwen",
-        # model_id = "llama3",
+        model_id = "llama3",
         # model_id = "codellama",
-        model_id = "Nxcode",
+        # model_id = "Nxcode",
         auditor_template_path='templates/auditor_v1.txt',
         critic_template_path='templates/critic_v1.txt',
         log_dir='log',
