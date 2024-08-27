@@ -1,27 +1,25 @@
-from lens.llama_detector import Detector
+from lens.detector import Detector
 def main():
-    # Define the file path
-    file_path = "data/2018-10666.sol"
-    sample_code=""
-    # Read the file content
-    with open(file_path, "r") as file:
-        sample_code = file.read()
-
+        # model_id = "codeqwen",
+        # model_id = "llama3",
+        # model_id = "codellama",
+        # model_id = "Nxcode",
     # Initialize the detector
-    detector = Detector(
-        model_id= "codellama",
+    deepseek = Detector(
+        model_id= "deepseek-coder-v2",
         auditor_template_path='templates/auditor_v1.txt',
         critic_template_path='templates/critic_v1.txt',
         log_dir='log',
-        result_dir='result',
-        output = '2018-10666',
-        topk=5,
-        n_auditors=2,
+        result_dir='result'
     )
-
     # Run the pipeline with the sample code
-    detector.run_pipeline(sample_code)
-    detector.save_results()
+    deepseek.run_pipeline(code_path = "data/2018-10299.sol", topk="10", n_auditors = 1, output= '2018-10299')
+    deepseek.run_pipeline(code_path = "data/2018-10299.sol", topk="3", n_auditors = 1, output= '2018-10299')
+    deepseek.run_pipeline(code_path = "data/2018-10299.sol", topk="all", n_auditors = 1, output= '2018-10299')
+
+
+
+
 
 if __name__ == "__main__":
     main()

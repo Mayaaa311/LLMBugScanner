@@ -48,10 +48,9 @@ class Detector:
                  auditor_template_path='templates/auditor_v1.txt', 
                  critic_template_path='templates/critic_v1.txt', 
                  ranker_template_path = 'templates/topk.txt',
-                 topk = 3,
-                 log_dir='logger', result_dir='result', output="output",n_auditors=3, config = "config/llama.cfg"):
-        self.output = output
-        self.n_auditors = n_auditors
+                 log_dir='logger', result_dir='result', config = "config/llama.cfg"):
+        self.output = "output"
+        self.n_auditors = "1"
         self.result_dir = result_dir
 
         # Create the logger directory if it doesn't exist
@@ -80,7 +79,7 @@ class Detector:
             self.llm_aud=ChatOllama(model=model_id, n_ctx=4096,verbose=True,callback_manager = callback_manager)
             self.llm_critic = ChatOllama(model=model_id, **params,verbose=True,callback_manager = callback_manager)
             self.llm_ranker = ChatOllama(model=model_id, **params,verbose=True,callback_manager = callback_manager)               
-        self.topk = topk
+        self.topk = "3"
         # Initialize and set prompt templates
         self.auditor_prompt = self.set_template(auditor_template_path,['code'])
         self.critic_prompt = self.set_template(critic_template_path,['code','vulnerability'])
@@ -95,7 +94,7 @@ class Detector:
 
 
         self.ranked_vulnerabilities = ""
-        run_info = f'''Detector initialized with parameters: 
+        self.run_info = f'''Detector initialized with parameters: 
             model_id={model_id}, 
             auditor_template_path={auditor_template_path}, 
             critic_template_path={critic_template_path}, 
@@ -109,8 +108,7 @@ class Detector:
             parsed_config_params={params}
             '''
 
-        self.logger.info(run_info)
-        write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}_k{self.topk}_n{self.n_auditors}/{self.output}_run_info", run_info)
+        self.logger.info(self.run_info)
         
 
     def set_template(self, auditor_template_path, input_var):
@@ -156,7 +154,14 @@ class Detector:
         write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}_k{self.topk}_n{self.n_auditors}/{self.output}_rank.json", str(response))
         return response
     
-    def run_pipeline(self, code: str):
+    def run_pipeline(self, code_path = "", topk = "3",output = "output"):
+        code = ""
+        with open(code_path, "r") as file:
+            code = code.read()
+        write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}_k{self.topk}_n{self.n_auditors}/{self.output}_run_info", self.run_info)
+        self.output = output
+        self.topk = topk
+
         # Step 1: Generate vulnerabilities using auditors
         vulnerabilities = self.run_auditor(code)
 
@@ -170,27 +175,13 @@ class Detector:
         return self.ranked_vulnerabilities
 
 
-    def save_results(self, path=None):
-        if path is None:
-            os.makedirs(self.result_dir, exist_ok=True)
-            path = os.path.join(self.result_dir, self.output)
-        # Write the extracted JSON to the output file
-        # with open(path, 'w') as file:
-        #     json.dump(vulnerabilities, file, indent=2)
-        
-        self.logger.info(f'Results saved to {path}')
-
 def main():
-    # Define the file path
-    file_path = "data/2018-10299.sol"
-    sample_code=""
-    # Read the file content
-    with open(file_path, "r") as file:
-        sample_code = file.read()
+    #  This is an example showing how to create a deepseek based pipeline, asking iit to generate top 10 vulnerabilities
+    # with 1 auditor. Saved in result/2018-10299, log in log
 
     # Initialize the detector
     detector = Detector(
-        # model_id= "deepseek-coder-v2",
+        model_id= "deepseek-coder-v2",
         # model_id = "codeqwen",
         # model_id = "llama3",
         # model_id = "codellama",
@@ -198,34 +189,12 @@ def main():
         auditor_template_path='templates/auditor_v1.txt',
         critic_template_path='templates/critic_v1.txt',
         log_dir='log',
-        result_dir='result',
-        output = '2018-10299',
-        topk="3",
-        n_auditors=1,
+        result_dir='result'
     )
 
     # Run the pipeline with the sample code
-    detector.run_pipeline(sample_code)
-    detector.save_results()
-    # Initialize the detector
-    detector = Detector(
-        # model_id= "deepseek-coder-v2",
-        # model_id = "codeqwen",
-        # model_id = "llama3",
-        # model_id = "codellama",
-        # model_id = "Nxcode",
-        auditor_template_path='templates/auditor_v1.txt',
-        critic_template_path='templates/critic_v1.txt',
-        log_dir='log',
-        result_dir='result',
-        output = '2018-10299',
-        topk="10",
-        n_auditors=1,
-    )
+    detector.run_pipeline(code_path = "data/2018-10299.sol", topk="10", n_auditors = 1, output= '2018-10299')
 
-    # Run the pipeline with the sample code
-    detector.run_pipeline(sample_code)
-    detector.save_results()
 
 
 
