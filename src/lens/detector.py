@@ -182,7 +182,7 @@ class Detector:
 
 def main():
     # Define the file path
-    file_path = "data/2018-13074.sol"
+    file_path = "data/2018-10299.sol"
     sample_code=""
     # Read the file content
     with open(file_path, "r") as file:
@@ -192,21 +192,43 @@ def main():
     detector = Detector(
         # model_id= "deepseek-coder-v2",
         # model_id = "codeqwen",
-        model_id = "llama3",
+        # model_id = "llama3",
         # model_id = "codellama",
         # model_id = "Nxcode",
         auditor_template_path='templates/auditor_v1.txt',
         critic_template_path='templates/critic_v1.txt',
         log_dir='log',
         result_dir='result',
-        output = '2018-13074',
-        topk="all",
+        output = '2018-10299',
+        topk="3",
         n_auditors=1,
     )
 
     # Run the pipeline with the sample code
     detector.run_pipeline(sample_code)
     detector.save_results()
+    # Initialize the detector
+    detector = Detector(
+        # model_id= "deepseek-coder-v2",
+        # model_id = "codeqwen",
+        # model_id = "llama3",
+        # model_id = "codellama",
+        # model_id = "Nxcode",
+        auditor_template_path='templates/auditor_v1.txt',
+        critic_template_path='templates/critic_v1.txt',
+        log_dir='log',
+        result_dir='result',
+        output = '2018-10299',
+        topk="10",
+        n_auditors=1,
+    )
+
+    # Run the pipeline with the sample code
+    detector.run_pipeline(sample_code)
+    detector.save_results()
+
+
+
 
 if __name__ == "__main__":
     main()
