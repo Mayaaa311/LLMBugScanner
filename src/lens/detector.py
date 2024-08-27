@@ -50,8 +50,12 @@ class Detector:
                  ranker_template_path = 'templates/topk.txt',
                  log_dir='logger', result_dir='result', config = "config/llama.cfg"):
         self.output = "output"
-        self.n_auditors = "1"
+        self.n_auditors = 1
         self.result_dir = result_dir
+        self.auditor_template_path= auditor_template_path
+        self.critic_template_path = critic_template_path
+        self.ranker_template_path = ranker_template_path
+        self.config = config
 
         # Create the logger directory if it doesn't exist
         os.makedirs(log_dir, exist_ok=True)
@@ -67,6 +71,7 @@ class Detector:
         callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
         self.model_id=model_id
         params = parse_config(cfg_path = config, model_id = model_id)
+        self.params = params
         if model_id == "llama2":
             self.llm_aud = LlamaCpp(**params)
             self.llm_critic = LlamaCpp(**params)
@@ -80,35 +85,8 @@ class Detector:
             self.llm_critic = ChatOllama(model=model_id, **params,verbose=True,callback_manager = callback_manager)
             self.llm_ranker = ChatOllama(model=model_id, **params,verbose=True,callback_manager = callback_manager)               
         self.topk = "3"
-        # Initialize and set prompt templates
-        self.auditor_prompt = self.set_template(auditor_template_path,['code'])
-        self.critic_prompt = self.set_template(critic_template_path,['code','vulnerability'])
-        self.ranker_prompt = self.set_template(ranker_template_path,['vulnerability','topk'])
-        
-        # Create RunnableSequence instances
-        self.auditor_chain = self.auditor_prompt | self.llm_aud
-        self.critic_chain = self.critic_prompt | self.llm_critic
-        self.ranker_chain = self.ranker_prompt | self.llm_ranker
-
-        
-
-
         self.ranked_vulnerabilities = ""
-        self.run_info = f'''Detector initialized with parameters: 
-            model_id={model_id}, 
-            auditor_template_path={auditor_template_path}, 
-            critic_template_path={critic_template_path}, 
-            ranker_template_path={ranker_template_path}, 
-            topk={topk}, 
-            log_dir={log_dir}, 
-            result_dir={result_dir}, 
-            output={output}, 
-            n_auditors={n_auditors}, 
-            config_path={config}, 
-            parsed_config_params={params}
-            '''
 
-        self.logger.info(self.run_info)
         
 
     def set_template(self, auditor_template_path, input_var):
@@ -153,15 +131,49 @@ class Detector:
         self.logger.info(f'response from ranker: {response}')
         write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}_k{self.topk}_n{self.n_auditors}/{self.output}_rank.json", str(response))
         return response
+    def save_run(self):
+        self.run_info = f'''Run Info: 
+            config_path={self.config}, 
+            parsed_config_params={self.params}
+            model_id={self.model_id}, 
+            auditor_template_path={self.auditor_template_path}, 
+            critic_template_path={self.critic_template_path}, 
+            ranker_template_path={self.ranker_template_path}, 
+            topk={self.topk}, 
+            log_dir={self.log_dir}, 
+            result_dir={self.result_dir}, 
+            output={self.output}, 
+            n_auditors={self.n_auditors}, 
+            '''
+        self.logger.info(self.run_info)
+        write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}_k{self.topk}_n{self.n_auditors}/{self.output}_run_info", self.run_info)
+
     
-    def run_pipeline(self, code_path = "", topk = "3",output = "output"):
+    def run_pipeline(self, code_path = "", topk = "3",output = "output", n_auditors = 1,
+                 auditor_template_path='templates/auditor_v1.txt', 
+                 critic_template_path='templates/critic_v1.txt', 
+                 ranker_template_path = 'templates/topk.txt',):
         code = ""
         with open(code_path, "r") as file:
-            code = code.read()
-        write_to_file(f"{self.result_dir}/{self.output}_{self.model_id}_k{self.topk}_n{self.n_auditors}/{self.output}_run_info", self.run_info)
+            code = file.read()
         self.output = output
         self.topk = topk
+        self.n_auditors = n_auditors
 
+        # set prompt path
+        self.auditor_template_path=auditor_template_path
+        self.critic_template_path =critic_template_path
+        self.ranker_template_path = ranker_template_path
+
+        # Initialize and set prompt templates
+        self.auditor_prompt = self.set_template(self.auditor_template_path,['code'])
+        self.critic_prompt = self.set_template(self.critic_template_path,['code','vulnerability'])
+        self.ranker_prompt = self.set_template(self.ranker_template_path,['vulnerability','topk'])
+        
+        # Create RunnableSequence instances
+        self.auditor_chain = self.auditor_prompt | self.llm_aud
+        self.critic_chain = self.critic_prompt | self.llm_critic
+        self.ranker_chain = self.ranker_prompt | self.llm_ranker
         # Step 1: Generate vulnerabilities using auditors
         vulnerabilities = self.run_auditor(code)
 
