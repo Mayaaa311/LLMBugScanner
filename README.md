@@ -35,17 +35,10 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. install models
-download all model by running: 
-```sh
-./scripts/download_models.sh
-```
+### 4. install models 
 
-download single model(llama3, llama2, codellama) by running:
-```sh
-# downloading llama3 for example
-./scripts/download_models.sh --model llama3
-```
+Follow instruction here to install Ollama models: https://github.com/ollama/ollama 
+
 ### 5. Run the Example
 
 ```sh
