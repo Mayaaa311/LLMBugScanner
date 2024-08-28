@@ -1,21 +1,27 @@
-from lens.detector import Detector
+from lens.BugScanner import BugScanner
+from lens.ChatOllama import ChatOllamaLLM
 def main():
-        # model_id = "codeqwen",
-        # model_id = "llama3",
-        # model_id = "codellama",
-        # model_id = "Nxcode",
-    # Initialize the detector
-    deepseek = Detector(
-        model_id= "deepseek-coder-v2",
-        auditor_template_path='templates/auditor_v1.txt',
-        critic_template_path='templates/critic_v1.txt',
-        log_dir='log',
-        result_dir='result'
-    )
+    # currently testing on models:
+    # model_id = "deepseek-coder-v2"
+    # model_id = "codeqwen",
+    # model_id = "llama3",
+    # model_id = "codellama",
+    # model_id = "Nxcode",
+    
+    auditor_models = [ChatOllamaLLM(model_id="deepseek-coder-v2",model_params_path="config/llama.json")]  # Add more models if needed
+    critic_model = ChatOllamaLLM(model_id="deepseek-coder-v2",model_params_path="config/llama.json")
+    ranker_model = ChatOllamaLLM(model_id="deepseek-coder-v2",model_params_path="config/llama.json")
+    
+    # Initialize the detector with multiple auditors
+    detector = BugScanner(auditor_models=auditor_models,
+                        critic_model=critic_model,
+                        ranker_model=ranker_model,
+                        auditor_template_path='templates/auditor_v1.txt',
+                        critic_template_path='templates/critic_v1.txt',
+                        ranker_template_path='templates/topk.txt')
+
     # Run the pipeline with the sample code
-    deepseek.run_pipeline(code_path = "data/2018-10299.sol", topk="10", n_auditors = 1, output= '2018-10299')
-    deepseek.run_pipeline(code_path = "data/2018-10299.sol", topk="3", n_auditors = 1, output= '2018-10299')
-    deepseek.run_pipeline(code_path = "data/2018-10299.sol", topk="all", n_auditors = 1, output= '2018-10299')
+    detector.run_pipeline(code_path="data/2018-10299.sol", topk="10", output="2018-10299")
 
 
 
