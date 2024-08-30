@@ -1,6 +1,6 @@
 from langchain_community.chat_models import ChatOllama
-from Base import BaseLLM
-import utils
+from lens.Base import BaseLLM
+from lens.utils import parse_config
 from langchain_core.callbacks import CallbackManager, StreamingStdOutCallbackHandler
 
 class ChatOllamaLLM(BaseLLM):
@@ -18,7 +18,7 @@ class ChatOllamaLLM(BaseLLM):
         self.model = ChatOllama(**self.model_params)
 
     def load_params(self, model_params_path, model_id):
-        self.model_params = utils.parse_config(cfg_path=model_params_path, model_id=model_id)
+        self.model_params = parse_config(cfg_path=model_params_path, model_id=model_id)
         print("loaded parameters: ",self.model_params)
         return self.model_params 
     

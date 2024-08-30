@@ -6,7 +6,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_community.llms import LlamaCpp
 from langchain_core.callbacks import CallbackManager, StreamingStdOutCallbackHandler
 import torch
-from utils import write_to_file
+from lens.utils import write_to_file
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print("using", device)
 
@@ -60,19 +60,19 @@ class BugScanner:
             response = auditor.invoke({"code": code, "topk": self.topk})
             self.logger.info(f'response from auditor {self.llm_auditors[i]}: {response}')
             responses.append(response)
-            write_to_file(f"{self.result_dir}/{self.output}_{self.llm_auditors[i]}_k{self.topk}_n{self.n_auditors}/{self.output}_auditor_{i+1}.json", response, write='a')
+            write_to_file(f"{self.result_dir}/{self.output}/{self.llm_auditors[i].model_id}_auditor.json", response, write='w')
         return responses
 
     def run_critic(self, code, vulnerabilities):
         response = self.critic_chain.invoke({"auditor_resp": str(vulnerabilities)})
-        write_to_file(f"{self.result_dir}/{self.output}_{self.llm_critic.model_id}_critic.json", response)
+        write_to_file(f"{self.result_dir}/{self.output}/{self.llm_critic.model_id}_critic.json", response)
         self.logger.info(f'response from critic: {response}')
         return response
     
     def run_ranker(self, vulnerability) -> list:
         response = self.ranker_chain.invoke({"topk": self.topk, "vulnerability": vulnerability})
         self.logger.info(f'response from ranker: {response}')
-        write_to_file(f"{self.result_dir}/{self.output}_{self.llm_ranker.model_id}_rank.json", str(response))
+        write_to_file(f"{self.result_dir}/{self.output}/{self.llm_ranker.model_id}_rank.json", str(response))
         return response
 
     def save_run(self):
@@ -92,21 +92,29 @@ class BugScanner:
         run_info += f'Ranker: model_id={self.llm_ranker.model_name}, params={self.llm_ranker.model_params}\n'
         
         self.logger.info(run_info)
-        write_to_file(f"{self.result_dir}/{self.output}_run_info.txt", run_info)
+        write_to_file(f"{self.result_dir}/{self.output}/run_info.txt", run_info)
 
-    def run_pipeline(self, code_path="", topk="3", output="output", n_auditors=1,
-                 auditor_template_path='templates/auditor_v1.txt', 
-                 critic_template_path='templates/critic_v1.txt', 
-                 ranker_template_path='templates/topk.txt'):
+    def run_pipeline(self, code_path="", topk="3", output=None, result_dir = None,
+                 auditor_template_path=None, 
+                 critic_template_path=None, 
+                 ranker_template_path=None):
         with open(code_path, "r") as file:
             code = file.read()
-        self.output = output
+        if output is not None:
+            self.output = output
         self.topk = topk
+        if result_dir is not None:
+            self.result_dir = result_dir
+
+        
 
         # set prompt path
-        self.auditor_template_path = auditor_template_path
-        self.critic_template_path = critic_template_path
-        self.ranker_template_path = ranker_template_path
+        if auditor_template_path is not None:
+            self.auditor_template_path = auditor_template_path
+        if critic_template_path is not None: 
+            self.critic_template_path = critic_template_path
+        if ranker_template_path is not None:
+            self.ranker_template_path = ranker_template_path
 
         # Initialize and set prompt templates
         self.auditor_prompt = self.set_template(self.auditor_template_path, ['code'])
@@ -133,7 +141,13 @@ class BugScanner:
 def main():
     # Example with multiple auditors and models
     from ChatOllama import ChatOllamaLLM
-    
+    # auditor_models = [
+    #                 ChatOllamaLLM(model_id="deepseek-coder-v2",model_params_path="config/temp0.9.json"),
+    #                 ChatOllamaLLM(model_id="codeqwen",model_params_path="config/temp0.9.json"),
+    #                 ChatOllamaLLM(model_id="llama3",model_params_path="config/temp0.9.json"),
+    #                 ChatOllamaLLM(model_id="codellama",model_params_path="config/temp0.9.json"),
+    #                 ChatOllamaLLM(model_id="starcoder2",model_params_path="config/temp0.9.json"),
+    #                 ]
     auditor_models = [ChatOllamaLLM(model_id="deepseek-coder-v2",model_params_path="config/llama.json")]  # Add more models if needed
     critic_model = ChatOllamaLLM(model_id="deepseek-coder-v2",model_params_path="config/llama.json")
     ranker_model = ChatOllamaLLM(model_id="deepseek-coder-v2",model_params_path="config/llama.json")
@@ -147,7 +161,7 @@ def main():
                         ranker_template_path='templates/topk.txt')
 
     # Run the pipeline with the sample code
-    detector.run_pipeline(code_path="data/2018-10299.sol", topk="10", output="2018-10299")
+    detector.run_pipeline(code_path="data/2018-10299.sol", topk="10",  output="2018-10299", result_dir = "result_10299")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "require(_value > 0 && _value <= balances[msg.sender]);",
+            "vulnerability": "Insufficient balance check",
+            "reason": "The transfer function does not check if the sender has enough tokens to cover the requested transfer amount, which can lead to a reentrancy attack."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "require(_value > 0 && _value <= allowed[_from][msg.sender]);",
+            "vulnerability": "Insufficient allowance check",
+            "reason": "The transferFrom function does not check if the sender has enough allowance to cover the requested transfer amount, which can lead to a reentrancy attack."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "require(cnt > 0 && cnt <= 20);",
+            "vulnerability": "Batch transfer vulnerability",
+            "reason": "The batchTransfer function does not check if the sender has enough tokens to cover the requested transfer amount for all receivers, which can lead to a reentrancy attack."
+        }
+    ]
+}

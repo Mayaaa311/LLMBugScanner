@@ -11,6 +11,13 @@ def write_to_file(file_path, content, write='w'):
         file.write(content)
 
 
+def read_file_to(file_paths):
+    outputs = []
+    with open(file_paths, 'r') as file:
+        o = json.load(file)
+        outputs.append(outputs)
+    return str(outputs)
+
 
 def parse_config(cfg_path, model_id="llama3"):
     # Load the JSON file

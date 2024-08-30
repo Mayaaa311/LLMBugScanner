@@ -1,0 +1,76 @@
+1. 	The transfer function in StandardToken contract allows any user to transfer the token to another address without considering the current state of that address and without checking whether there are enough funds available for a transfer operation.
+	Reason: The balanceOf function is called first to check whether the msg.sender has sufficient tokens before calling transferFrom which will reduce the balance and increase the new owner’s balance by the same amount, thus creating the illusion of having enough funds in the current account for a transfer even though they were not available and resulting in a denial of service attack on the new owner
+	Severity: Critical(CVSS score 10)
+    2.	The approve function is also prone to replay attacks because it only uses one parameter as a reference to allow an attacker to transfer all tokens from msg.sender to any address they wish without having to send any tokens. 
+	Reason: The approve function first checks if the value of _value is zero and if so, deletes the existing approval allowing anyone to transfer all tokens from msg.sender without requiring any actual transfers.
+	Severity: Critical(CVSS score 10)
+    3.	The unpause() function does not revoke ownership when unpaused which will allow the malicious user to modify the contract and the current owner’s account or transfer ownership of the contract back to their own account. 
+	Reason: This bug allows any user to revoke the current owner’s control over the contract without them knowing about it. The only way for the current owner to regain control is by transferring the ownership of the token back to themselves but since there is no function to do that, they would not be able to unpause and modify the contract without having direct access to the account. 
+	Severity: High(CVSS score 8)
+    4.	The pause() function allows anyone to pause the contract for an indefinite period of time which will deny service to any user who tries to use the contract during that period.
+	Reason: The only way to regain control is to call unpause but there is no function to do that and thus the current owner can not regain access until they gain direct access to their own account. 
+	Severity: High(CVSS score 8)
+    5.	The constructor of BecToken contract does not check for the sufficient balance before assigning tokens to msg.sender
+	Reason: Since the balanceOf function is called first, it will return the amount of tokens assigned in the previous transaction which was zero, thus allowing any user to create an arbitrary number of tokens without having to transfer any tokens from their account
+	Severity: High(CVSS score 8)
+    6.	The batchTransfer function does not check whether the msg.sender has sufficient balance before performing a batch transfer of multiple tokens 
+	Reason: The total amount to be transferred is calculated first, and if it is less than or equal to zero, then the function will return without executing any other code resulting in an underflow attack
+	Severity: High(CVSS score 8)
+    7.	The constructor of BecToken does not check for the sufficient balance before assigning tokens to msg.sender 
+	Reason: Since the balanceOf function is called first, it will return the amount of tokens assigned in the previous transaction which was zero, thus allowing any user to create an arbitrary number of tokens without having to transfer any tokens from their account
+	Severity: High(CVSS score 8)
+    8.	The constructor of BecToken does not check for the sufficient balance before assigning tokens to msg.sender
+	Reason: Since the balanceOf function is called first, it will return the amount of tokens assigned in the previous transaction which was zero, thus allowing any user to create an arbitrary number of tokens without having to transfer any tokens from their account
+	Severity: High(CVSS score 8)
+    9.	The unpause() function does not revoke ownership when unpaused which will allow the malicious user to modify the contract and the current owner’s account or transfer ownership of the contract back to their own account 
+	Reason: This bug allows any user to revoke the current owner’s control over the contract without them knowing about it. The only way for the current owner to regain control is by transferring the ownership of the token back to themselves but since there is no function to do that, they would not be able to unpause and modify the contract without having direct access to the account
+	Severity: High(CVSS score 8)
+    10.	The approve() function in StandardToken contract allows any user to set the approval for a token to an arbitrary value even though the msg.sender might not have enough tokens to transfer
+	Reason: The require condition is checked first and if it returns false, the _value parameter will be zero which will remove the existing approval allowing anyone to transfer all tokens from msg.sender without requiring any actual transfers
+	Severity: Critical(CVSS score 10)
+\nYou can use static analysis tool mythril to verify your output:\n
+$python run_myth.py -v 1 -o [output.json] --solc-version 0.4.25 -d [dir to the contract]
+If your output is right, it will show "Pass", otherwise it will show some error.
+
+<file_sep>Q: You should only output in below json format:
+{
+    "output_list": [
+        {
+            "function_name": "<function_name_1>",
+            "code": "<code of the function1>",
+            "vulnerability": "<short_vulnera_desc_1>",
+            "reason": "<reason_1>"
+        },
+        {
+            "function_name": "<function_name_2>",
+            "code": "<code of the function2>",
+            "vulnerability": "<short_vulnera_desc_2>",
+            "reason": "<reason_2>"
+        }
+    ]
+}
+You can use static analysis tool mythril to verify your output:
+$python run_myth.py -v 1 -o [output.json] --solc-version 0.4.25 -d [dir to the contract]
+If your output is right, it will show "Pass", otherwise it will show some error.
+
+<file_sep>Q: You should only output in below json format:
+{
+    "output_list": [
+        {
+            "function_name": "<function_name_1>",
+            "code": "<code of the function1>",
+            "vulnerability": "<short_vulnera_desc_1>",
+            "reason": "<reason_1>"
+        },
+        {
+            "function_name": "<function_name_2>",
+            "code": "<code of the function2>",
+            "vulnerability": "<short_vulnera_desc_2>",
+            "reason": "<reason_2>"
+        }
+    ]
+}
+You can use static analysis tool mythril to verify your output:
+$python run_myth.py -o [output.json] --solc-version 0.4.25 -d [dir to the contract]
+If your output is right, it will show "Pass", otherwise it will show some error.
+
