@@ -1,0 +1,40 @@
+{
+  "output_list": [
+    {
+      "function_name": "transfer",
+      "code": "require(_to != address(0)); require(_value > 0 && _value <= balances[msg.sender]); balances[msg.sender] = balances[msg.sender].sub(_value); balances[_to] = balances[_to].add(_value); Transfer(msg.sender, _to, _value); return true;",
+      "vulnerability": "Unchecked balance subtraction in the transfer function",
+      "reason": "This vulnerability allows an attacker to perform a reentrancy attack by calling the transfer function multiple times before the first transaction is complete. It can be exploited by using a contract that calls back into itself within a single message call, such as a malicious token contract or a contract with multiple transactions that require external side effects."
+    },
+    {
+      "function_name": "batchTransfer",
+      "code": "uint cnt = _receivers.length; uint256 amount = uint256(cnt) * _value; require(cnt > 0 && cnt <= 20); require(_value > 0 && balances[msg.sender] >= amount); balances[msg.sender] = balances[msg.sender].sub(amount); for (uint i = 0; i < cnt; i++) { balances[_receivers[i]] = balances[_receivers[i]].add(_value); Transfer(msg.sender, _receivers[i], _value); } return true;",
+      "vulnerability": "Unchecked balance subtraction in the batchTransfer function",
+      "reason": This vulnerability is similar to the previous one, but it affects a different function. The attacker can perform a reentrancy attack by calling the batchTransfer function multiple times before the first transaction is complete. It can be exploited by using a contract that calls back into itself within a single message call, such as a malicious token contract or a contract with multiple transactions that require external side effects."
+    },
+    {
+      "function_name": "PausableToken",
+      "code": "return super.transfer(_to, _value); return super.transferFrom(_from, _to, _value); return super.approve(_spender, _value);",
+      "vulnerability": "Unchecked balance subtraction in the PausableToken contract",
+      "reason": this vulnerability is related to the transfer and transferFrom functions in the PausableToken contract. The attacker can perform a reentrancy attack by calling these functions multiple times before the First transaction is complete. It can be exploited by using a contract that calls back into itself within a single message call, such as a malicious token contract or a contract with multiple transactions that require external side effects."
+    },
+    {
+      "function_name": "BecToken",
+      "code": "totalSupply = 7000000000 * (10**(uint256(decimals))); balances[msg.sender] = totalSupply; ",
+      "vulnerability": "Initialization of the total supply and balances in the BecToken constructor",
+      "reason": This vulnerability is related to the initialization of the total supply and balances of the token contract. It can be exploited by using a malicious contract that creates multiple instances of the BecToken with different balances and then transferring them out of circulation."
+    },
+    {
+      "function_name": "BecToken",
+      "code": "function() { revert(); }",
+      "vulnerability": "Fallback function",
+      "reason": this vulnerability is related to the fallback function of the BecToken contract. It can be exploited by using a malicious contract that sends Ether to the token contract without specifying a recipient, which will cause the remaining Ether to be sent back to the sender. This could result in a loss of funds for the attacker or damage to the reputation of the token contract."
+    },
+    {
+      "function_name": "becToken",
+      "code": "",
+      "vulnerability": "Missing access control checks for certain functions in the BecToken contract",
+      "reason": this vulnerability is related to the missing access control checks for certain functions in the BecToken contract. It can be exploited by using a malicious contract that calls these functions without appropriate permissions, which will result in unauthorized access to the token contract's internal state and potentially cause damage to the reputation of the token contract."
+    }
+  ]
+}
