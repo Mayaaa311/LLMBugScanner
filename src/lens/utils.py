@@ -19,7 +19,7 @@ def read_file_to(file_paths):
     return str(outputs)
 
 
-def parse_config(cfg_path, model_id="llama3"):
+def parse_config(cfg_path, model_id):
     # Load the JSON file
     with open(cfg_path, 'r') as file:
         config = json.load(file)
