@@ -36,7 +36,7 @@ def main():
                         ranker_template_path='templates/topk.txt')
 
     # Run the pipeline with the sample code
-    detector.run_pipeline(code_path="data/2018-10299.sol", topk="3",  output="2018-10299_codellama-S", result_dir = "result_10299")
+    detector.run_pipeline(code_path="data/2018-10299.sol", topk="10",  output="2018-10299_codellama-S-k10", result_dir = "result_10299")
     # detector.run_pipeline(code_path="data/2018-10299.sol", topk="10",  output="2018-10299_k10_n5_t9", result_dir = "result_10299")
 
 
