@@ -13,9 +13,13 @@ def write_to_file(file_path, content, write='w'):
 
 def read_file_to(file_paths):
     outputs = []
-    with open(file_paths, 'r') as file:
-        o = json.load(file)
-        outputs.append(outputs)
+    for i in file_paths:
+        with open(i, 'r') as file:
+            o = file.read()
+            outputs.append(o)
+            print("file: ",i)
+            print(o)
+    # print(outputs)
     return str(outputs)
 
 

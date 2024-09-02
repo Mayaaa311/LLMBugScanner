@@ -32,9 +32,9 @@ class Huggingface_LLM(BaseLLM):
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_id)
         self.model = AutoModelForCausalLM.from_pretrained(self.model_id, quantization_config=bnb_config, device_map="balanced_low_0")
 
-        # Ensure that callback_manager is a valid object
-        if isinstance(self.model_params.get("callback_manager"), str) and self.model_params["callback_manager"] == "default":
-            self.model_params["callback_manager"] = CallbackManager([StreamingStdOutCallbackHandler()])
+        # # Ensure that callback_manager is a valid object
+        # if isinstance(self.model_params.get("callback_manager"), str) and self.model_params["callback_manager"] == "default":
+        #     self.model_params["callback_manager"] = CallbackManager([StreamingStdOutCallbackHandler()])
 
     def load_params(self, model_params_path):
         self.model_params = parse_config(cfg_path=model_params_path, model_id=self.model_id)
