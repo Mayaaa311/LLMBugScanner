@@ -1,22 +1,5 @@
 Q: You are a smart contract auditor, identify and explain vulnerabilities in the provided smart contract for each function. Make sure that they are exploitable in real world and beneficial to attackers. Provide each identified vulnerability with intermediate reasoning and its associated function. Make your reasoning comprehensive and detailed. Smart contract code:
 {code}
-\nThis is an example of the output, you should output in same format:
-{{
-    "output_list": [
-        {{
-            "function_name": "transfer",
-            "code": "function transfer(address _to, uint256 _value) public returns (bool) { require(_to != address(0)); require(_value > 0 && _value <= balances[msg.sender]); balances[msg.sender] = balances[msg.sender].sub(_value); balances[_to] = balances[_to].add(_value); Transfer(msg.sender, _to, _value); return true; }",
-            "vulnerability": "Reentrancy Attack",
-            "reason": "The transfer function does not use the Checks-Effects-Interactions pattern. An external contract could exploit the function to perform a reentrancy attack by making recursive calls before the state (balances) is updated, potentially draining the contract's funds."
-        }},
-        {{
-            "function_name": "approve",
-            "code": "function approve(address _spender, uint256 _value) public returns (bool) { allowed[msg.sender][_spender] = _value; Approval(msg.sender, _spender, _value); return true; }",
-            "vulnerability": "Integer Overflow",
-            "reason": "The approve function allows setting an approval without any checks on the value of _value. This could potentially lead to an integer overflow if the _value exceeds the maximum uint256, allowing an attacker to approve more tokens than the actual supply."
-        }}
-    ]
-}}
 vulnerabilities could be in these categories, and look for indicators described below:
 1. Reentrancy Attack: Functions that call external contracts or send Ether before updating the contract's state. Look for patterns where external calls are made without proper safeguards, such as the Checks-Effects-Interactions pattern or using reentrancy guards (nonReentrant modifier).
 2. Integer Overflow/Underflow: Arithmetic operations (addition, subtraction, multiplication) without the use of SafeMath or similar libraries. You can check for potential vulnerabilities by identifying arithmetic operations and ensuring they are wrapped in safety checks.

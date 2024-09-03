@@ -38,7 +38,6 @@ class BugScanner:
         
         self.load_all_models(auditor_models, critic_model, ranker_model)
         self.create_chain(auditor_template_path, critic_template_path, ranker_template_path)
-
     def load_all_models(self, auditor_models, critic_model, ranker_model):
         # Initialize the models using the provided classes and parameters
         if auditor_models is not None:
@@ -62,7 +61,7 @@ class BugScanner:
            # set prompt path
         if auditor_template_path is not None:
             self.auditor_template_path = auditor_template_path        
-            self.auditor_prompt = self.set_template(self.auditor_template_path, ['code'])
+            self.auditor_prompt = self.set_template(self.auditor_template_path, ['code','topk'])
             self.auditor_chain = [self.auditor_prompt | auditor for auditor in self.llm_auditors]
 
         if critic_template_path is not None: 
@@ -75,17 +74,21 @@ class BugScanner:
             self.ranker_chain = self.ranker_prompt | self.llm_ranker
     
         
-    def run_auditor(self, write_to, code: str):
+    def run_auditor(self, code, write_to):
         responses = []
         for i, auditor in enumerate(self.auditor_chain):
             response = auditor.invoke({"code": code, "topk": self.topk})
             self.logger.info(f'response from auditor {self.llm_auditors[i]}: {response}')
             responses.append(response)
+            print("Auditor response written to : ", write_to+f"/{self.llm_auditors[i].model_id}_auditor.json")
             write_to_file(write_to+f"/{self.llm_auditors[i].model_id}_auditor.json", response, write='w')
         return responses
 
     def run_critic(self, vulnerabilities, write_to, code = None):
-        response = self.critic_chain.invoke({"auditor_resp": str(vulnerabilities)})
+        if code is not None:
+            response = self.critic_chain.invoke({"auditor_resp": str(vulnerabilities),"code":code})
+        else:
+            response = self.critic_chain.invoke({"auditor_resp": str(vulnerabilities)})
         write_to_file(write_to+f"/{self.llm_critic.model_id}_critic.json", response)
         self.logger.info(f'response from critic: {response}')
         return response
@@ -108,9 +111,9 @@ class BugScanner:
             n_auditors={len(self.llm_auditors)}, 
             '''
         for i, auditor in enumerate(self.llm_auditors):
-            run_info += f'Auditor {i+1}: model_id={auditor.model_name}, params={auditor.model_params}\n'
-        run_info += f'Critic: model_id={self.llm_critic.model_name}, params={self.llm_critic.model_params}\n'
-        run_info += f'Ranker: model_id={self.llm_ranker.model_name}, params={self.llm_ranker.model_params}\n'
+            run_info += f'Auditor {i+1}: model_id={auditor.model_id}, params={auditor.model_params}\n'
+        run_info += f'Critic: model_id={self.llm_critic.model_id}, params={self.llm_critic.model_params}\n'
+        run_info += f'Ranker: model_id={self.llm_ranker.model_id}, params={self.llm_ranker.model_params}\n'
         
         self.logger.info(run_info)
         write_to_file(write_to+"/run_info.txt", run_info)
@@ -123,7 +126,7 @@ class BugScanner:
         self.topk = topk
         if result_dir is not None:
             self.result_dir = result_dir
-        write_to = "{self.result_dir}/{self.output}"
+        write_to = f"{self.result_dir}/{self.output}"
 
         
         # Step 1: Generate vulnerabilities using auditors
