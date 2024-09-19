@@ -31,3 +31,7 @@ class ChatOllamaLLM(BaseLLM):
     
     def __call__(self, prompt) -> str:
         return self.invoke(prompt)
+
+    def __or__(self, prompt):
+        print("DEBUG< PIPELINED MODEL")
+        return prompt | self.model 

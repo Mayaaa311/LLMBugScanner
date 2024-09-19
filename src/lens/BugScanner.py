@@ -21,6 +21,12 @@ class BugScanner:
         self.auditor_template_path = None
         self.critic_template_path = None
         self.ranker_template_path = None
+        self.llm_auditors = None
+        self.llm_critic = None
+        self.llm_ranker = None
+        self.critic_chain = None
+        self.auditor_chain = None
+        self.ranker_chain = None
         self.topk = None
         self.ranked_vulnerabilities = ""   
         
@@ -76,8 +82,9 @@ class BugScanner:
         
     def run_auditor(self, code, write_to):
         responses = []
+        input_dict = {"code": code, "topk": self.topk}
         for i, auditor in enumerate(self.auditor_chain):
-            response = auditor.invoke({"code": code, "topk": self.topk})
+            response = auditor.invoke(input_dict)
             self.logger.info(f'response from auditor {self.llm_auditors[i]}: {response}')
             responses.append(response)
             print("Auditor response written to : ", write_to+f"/{self.llm_auditors[i].model_id}_auditor.json")
@@ -85,7 +92,8 @@ class BugScanner:
         return responses
 
     def run_critic(self, vulnerabilities, write_to, code = None):
-        if code is not None:
+
+        if code is not None: #currently not used
             response = self.critic_chain.invoke({"auditor_resp": str(vulnerabilities),"code":code})
         else:
             response = self.critic_chain.invoke({"auditor_resp": str(vulnerabilities)})
@@ -110,10 +118,13 @@ class BugScanner:
             output={self.output}, 
             n_auditors={len(self.llm_auditors)}, 
             '''
-        for i, auditor in enumerate(self.llm_auditors):
-            run_info += f'Auditor {i+1}: model_id={auditor.model_id}, params={auditor.model_params}\n'
-        run_info += f'Critic: model_id={self.llm_critic.model_id}, params={self.llm_critic.model_params}\n'
-        run_info += f'Ranker: model_id={self.llm_ranker.model_id}, params={self.llm_ranker.model_params}\n'
+        if self.llm_auditors is not None:
+            for i, auditor in enumerate(self.llm_auditors):
+                run_info += f'Auditor {i+1}: model_id={auditor.model_id}, params={auditor.model_params}\n'
+        if self.llm_critic is not None:
+            run_info += f'Critic: model_id={self.llm_critic.model_id}, params={self.llm_critic.model_params}\n'
+        if self.llm_ranker is not None:
+            run_info += f'Ranker: model_id={self.llm_ranker.model_id}, params={self.llm_ranker.model_params}\n'
         
         self.logger.info(run_info)
         write_to_file(write_to+"/run_info.txt", run_info)
@@ -131,12 +142,12 @@ class BugScanner:
         
         # Step 1: Generate vulnerabilities using auditors
         vulnerabilities = self.run_auditor(code, write_to)
-
-        # Step 2: Evaluate vulnerabilities using critic
-        evaluations = self.run_critic( vulnerabilities, write_to, code = code)
-
+        if(self.critic_chain is not None):
+        # Step 2: Evaluate vulnerabilities using critic   
+            evaluations = self.run_critic( vulnerabilities, write_to, code = code)
+        if(self.ranker_chain is not None):
         # Step 3: Rank vulnerabilities based on critic's evaluation
-        self.ranked_vulnerabilities = self.run_ranker(evaluations, write_to)
+            self.ranked_vulnerabilities = self.run_ranker(evaluations, write_to)
         self.save_run(write_to)
 
         return self.ranked_vulnerabilities
