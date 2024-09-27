@@ -29,7 +29,7 @@ def parse_config(cfg_path, model_id):
         config = json.load(file)
     
     # Choose the section based on the model
-    model_params = config.get(model_id, config.get('llama3', {}))
+    model_params = config.get(model_id)
     
     # Convert parameter values to appropriate types if necessary
     for key in model_params:
