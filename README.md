@@ -44,3 +44,27 @@ Follow instruction here to install Ollama models: https://github.com/ollama/olla
 ```sh
 python src/main.py
 ```
+
+
+## Currently Supported Models: 
+
+| Model Id                                | Model Class Name | Model source                                                     | model size |
+|-------------------------------------------|------------------|------------------------------------------------------------------|------------|
+| Llama 3                                   | ChatOllamaLLM    | https://ollama.com/library/llama3                                | 8B         |
+| codellama base                            | ChatOllamaLLM    | https://ollama.com/library/codellama                             | 7B         |
+| AlfredPros/CodeLlama-7b-Instruct-Solidity | Huggingface_LLM  | https://huggingface.co/AlfredPros/CodeLlama-7b-Instruct-Solidity | 7B         |
+| codeqwen                                  | ChatOllamaLLM    | https://ollama.com/library/codeqwen                              | 7B         |
+| deepseek-coder-v2                         | ChatOllamaLLM    | https://ollama.com/library/deepseek-coder-v2                     | 16B        |
+| starcoder2                                | ChatOllamaLLM    | https://ollama.com/library/starcoder2:7b                         | 15B        |
+| bartowski/Nxcode-CQ-7B-orpo-GGUF          | LlamaCpp_LLM     | https://huggingface.co/bartowski/Nxcode-CQ-7B-orpo-GGUF          | 7b         |
+
+
+## Example Creating Model objects
+
+ChatOllamaLLM(model_id="deepseek-coder-v2",model_params_path="config/temp0.json"),
+ChatOllamaLLM(model_id="codeqwen",model_params_path="config/temp0.json"),
+ChatOllamaLLM(model_id="llama3",model_params_path="config/temp0.json"),
+ChatOllamaLLM(model_id="codellama",model_params_path="config/temp0.json"),
+ChatOllamaLLM(model_id="starcoder2",model_params_path="config/temp0.json"),
+Huggingface_LLM(model_id="AlfredPros/CodeLlama-7b-Instruct-Solidity", model_params_path = "config/temp0.json")
+LlamaCpp_LLM(model_id="bartowski/Nxcode-CQ-7B-orpo-GGUF", model_path="Nxcode-CQ-7B-orpo-IQ1_M.gguf",model_params_path="config/temp0.json")
