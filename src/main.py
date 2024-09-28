@@ -31,7 +31,11 @@ def main():
                         # LlamaCpp_LLM(model_id="bartowski/Nxcode-CQ-7B-orpo-GGUF",
 	                    #             model_path="Nxcode-CQ-7B-orpo-IQ1_M.gguf",model_params_path="config/temp0.json")
                         # Huggingface_LLM(model_id="AlfredPros/CodeLlama-7b-Instruct-Solidity", model_params_path = "config/temp0.json"),
-                        Huggingface_LLM(model_id = "m-a-p/OpenCodeInterpreter-CL-13B", model_params_path = "config/temp0.json"),
+                        # Huggingface_LLM(model_id = "m-a-p/OpenCodeInterpreter-DS-6.7B"),
+                        # Huggingface_LLM(model_id = "NTQAI/Nxcode-CQ-7B-orpo"),
+                        # Huggingface_LLM(model_id = "deepseek-ai/deepseek-coder-33b-instruct") FOR SOME REAON NOT ABLE TO GENERATE GOOD OUTPUT
+                        # Huggingface_LLM(model_id="Artigenz/Artigenz-Coder-DS-6.7B")
+                        Huggingface_LLM(model_id="bigcode/starcoder2-15b")
                         # ChatOllamaLLM(model_id="deepseek-coder-v2",model_params_path="config/temp0.json"),
                         # ChatOllamaLLM(model_id="codeqwen",model_params_path="config/temp0.json"),
                         # ChatOllamaLLM(model_id="llama3",model_params_path="config/temp0.json"),
@@ -49,7 +53,7 @@ def main():
                         )
     # detector.create_chain("templates/auditor_v1.txt","templates/critic_v1.txt","templates/topk.txt")
     # Run the pipeline with the sample code
-    detector.run_pipeline(code_path="data/2018-10299.sol", topk="3",  output="2018-10299_OpenCodeInterpreter_k3", result_dir = "result_10299")
+    detector.run_pipeline(code_path="data/2018-10299.sol", topk="3",  output="2018-10299_testnew_k3", result_dir = "result_10299")
 
     # outputs = read_file_to([
     #                         "result_10299/2018-10299_k3_n5_t0/codellama_auditor.json"

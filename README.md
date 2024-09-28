@@ -68,3 +68,8 @@ ChatOllamaLLM(model_id="codellama",model_params_path="config/temp0.json"),
 ChatOllamaLLM(model_id="starcoder2",model_params_path="config/temp0.json"),
 Huggingface_LLM(model_id="AlfredPros/CodeLlama-7b-Instruct-Solidity", model_params_path = "config/temp0.json")
 LlamaCpp_LLM(model_id="bartowski/Nxcode-CQ-7B-orpo-GGUF", model_path="Nxcode-CQ-7B-orpo-IQ1_M.gguf",model_params_path="config/temp0.json")
+
+salloc --ntasks-per-node=40 --gpus=10
+module load anaconda3/2023.03
+conda activate /home/hice1/yyuan394/scratch/env
+python3 src/main.py

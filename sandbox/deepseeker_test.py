@@ -1,43 +1,36 @@
-from transformers import BitsAndBytesConfig, AutoTokenizer, AutoModelForCausalLM
-import torch
-import accelerate
 
-use_4bit = True
-bnb_4bit_compute_dtype = "float16"
-bnb_4bit_quant_type = "nf4"
-use_double_nested_quant = True
-compute_dtype = getattr(torch, bnb_4bit_compute_dtype)
+from transformers import AutoTokenizer, LlamaForCausalLM
+from human_eval.data import write_jsonl, read_problems
+from tqdm import tqdm
 
-# BitsAndBytesConfig 4-bit config
-bnb_config = BitsAndBytesConfig(
-    load_in_4bit=use_4bit,
-    bnb_4bit_use_double_quant=use_double_nested_quant,
-    bnb_4bit_quant_type=bnb_4bit_quant_type,
-    bnb_4bit_compute_dtype=compute_dtype,
-    load_in_8bit_fp32_cpu_offload=True
-)
+# initialize the model
 
-# Load model in 4-bit
-tokenizer = AutoTokenizer.from_pretrained("AlfredPros/CodeLlama-7b-Instruct-Solidity")
-model = AutoModelForCausalLM.from_pretrained("AlfredPros/CodeLlama-7b-Instruct-Solidity", quantization_config=bnb_config, device_map="balanced_low_0")
+model_path = "Phind/Phind-CodeLlama-34B-v2"
+model = LlamaForCausalLM.from_pretrained(model_path, device_map="auto")
+tokenizer = AutoTokenizer.from_pretrained(model_path)
 
-# Make input
-input='Make a smart contract to create a whitelist of approved wallets. The purpose of this contract is to allow the DAO (Decentralized Autonomous Organization) to approve or revoke certain wallets, and also set a checker address for additional validation if needed. The current owner address can be changed by the current owner.'
+# HumanEval helper
 
-# Make prompt template
-prompt = f"""### Instruction:
-Use the Task below and the Input given to write the Response, which is a programming code that can solve the following Task:
+def generate_one_completion(prompt: str):
+    tokenizer.pad_token = tokenizer.eos_token
+    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=4096)
 
-### Task:
-{input}
+    # Generate
+    generate_ids = model.generate(inputs.input_ids.to("cuda"), max_new_tokens=384, do_sample=True, top_p=0.75, top_k=40, temperature=0.1)
+    completion = tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
+    completion = completion.replace(prompt, "").split("\n\n\n")[0]
 
-### Solution:
-"""
+    return completion
 
-# Tokenize the input
-input_ids = tokenizer(prompt, return_tensors="pt", truncation=True).input_ids.cuda()
-# Run the model to infere an output
-outputs = model.generate(input_ids=input_ids, max_new_tokens=1024, do_sample=True, top_p=0.9, temperature=0.001, pad_token_id=1)
+# perform HumanEval
+problems = read_problems()
 
-# Detokenize and display the generated output
-print(tokenizer.batch_decode(outputs.detach().cpu().numpy(), skip_special_tokens=True)[0][len(prompt):])
+num_samples_per_task = 1
+samples = [
+    dict(task_id=task_id, completion=generate_one_completion(problems[task_id]["prompt"]))
+    for task_id in tqdm(problems)
+    for _ in range(num_samples_per_task)
+]
+write_jsonl("samples.jsonl", samples)
+
+# run `evaluate_functional_correctness samples.jsonl` in your HumanEval code sandbox

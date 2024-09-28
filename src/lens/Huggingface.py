@@ -1,4 +1,4 @@
-from transformers import BitsAndBytesConfig, AutoTokenizer, AutoModelForCausalLM
+from transformers import BitsAndBytesConfig, AutoTokenizer, AutoModelForCausalLM,  LlamaForCausalLM
 import torch
 from lens.Base import BaseLLM
 from lens.utils import parse_config
@@ -18,9 +18,7 @@ class Huggingface_LLM(BaseLLM):
 
         # Load model and tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_id,  trust_remote_code=True)
-        # if self.quantize:
-        #     self.model = AutoModelForCausalLM.from_pretrained(self.model_id, quantization_config=self.quantize_config(), device_map="balanced_low_0", **self.model_params)
-        # else:
+
         if self.model_params is not None and self.model_params:
             if 'quantization_config' in self.model_params:
                 use_4bit = True
@@ -57,14 +55,39 @@ class Huggingface_LLM(BaseLLM):
     def invoke(self, prompt) -> str:
         prompt = str(prompt)[6:-1]
         print(prompt)
-        # Tokenize the input prompt
-        input_ids = self.tokenizer(prompt, return_tensors="pt", truncation=True).input_ids.cuda()
-        # Run the model to generate an output
-        outputs = self.model.generate(input_ids=input_ids, max_new_tokens=1024, do_sample=True, top_p=0.9, temperature=0.001, pad_token_id=1)
-        # Detokenize and return the generated output
-        response = self.tokenizer.batch_decode(outputs.detach().cpu().numpy(), skip_special_tokens=True)[0][len(prompt):]
-        return response
-
+        if self.model_id == "AlfredPros/CodeLlama-7b-Instruct-Solidity":
+            # Tokenize the input prompt
+            input_ids = self.tokenizer(prompt, return_tensors="pt", truncation=True).input_ids.cuda()
+            # Run the model to generate an output
+            outputs = self.model.generate(input_ids=input_ids, max_new_tokens=1024, do_sample=True, top_p=0.9, temperature=0.001, pad_token_id=1)
+            # Detokenize and return the generated output
+            response = self.tokenizer.batch_decode(outputs.detach().cpu().numpy(), skip_special_tokens=True)[0][len(prompt):]
+            return response
+        elif self.model_id=="m-a-p/OpenCodeInterpreter-DS-6.7B":
+            inputs = self.tokenizer.apply_chat_template(
+                    [{'role': 'user', 'content': prompt }],
+                    return_tensors="pt"
+                )
+            outputs = self.model.generate(
+                inputs, 
+                max_new_tokens=4096,
+                do_sample=False,
+                pad_token_id=self.tokenizer.eos_token_id,
+                eos_token_id=self.tokenizer.eos_token_id,
+            )
+            return (self.tokenizer.decode(outputs[0][len(inputs[0]):], skip_special_tokens=True))
+        elif self.model_id == "bigcode/starcoder2-15b":
+            inputs = self.tokenizer.encode(prompt, return_tensors="pt")
+            outputs = self.model.generate(inputs, max_new_tokens=4096)
+            return self.tokenizer.decode(outputs[0])
+        else:
+            messages = [
+                {"role": "user", "content": prompt}
+            ]
+            inputs = self.tokenizer.apply_chat_template(messages, add_generation_prompt=True, return_tensors="pt")
+            outputs = self.model.generate(inputs, max_new_tokens=4096, do_sample=False, top_k=50, top_p=0.95, num_return_sequences=1, eos_token_id=self.tokenizer.eos_token_id)
+            return self.tokenizer.decode(outputs[0][len(inputs[0]):], skip_special_tokens=True)
+    
     def handle_response(self, response) -> dict:
         # Process the response as needed
         return {"response": response}

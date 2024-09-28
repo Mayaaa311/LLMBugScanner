@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) {\n    require(_to != address(0));\n    require(_value > 0 && _value <= balances[msg.sender]);\n    balances[msg.sender] = balances[msg.sender].sub(_value);\n    balances[_to] = balances[_to].add(_value);\n    Transfer(msg.sender, _to, _value);\n    return true;\n  }\n",
+            "vulnerability": "Reentrancy",
+            "reason": "The transfer function allows the contract to be called again before the first call has completed. This can lead to a situation where the contract is called again before the first call has completed, leading to a potential loss of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {\n    require(_to != address(0));\n    require(_value > 0 && _value <= balances[_from]);\n    require(_value <= allowed[_from][msg.sender]);\n    balances[_from] = balances[_from].sub(_value);\n    balances[_to] = balances[_to].add(_value);\n    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);\n    Transfer(_from, _to, _value);\n    return true;\n  }\n",
+            "vulnerability": "Reentrancy",
+            "reason": "The transferFrom function allows the contract to be called again before the first call has completed. This can lead to a situation where the contract is called again before the first call has completed, leading to a potential loss of funds."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public returns (bool) {\n    allowed[msg.sender][_spender] = _value;\n    Approval(msg.sender, _spender, _value);\n    return true;\n  }\n",
+            "vulnerability": "Denial of Service",
+            "reason": "The approve function allows the owner to approve a spender to spend a certain amount of tokens on their behalf. If the spender is a contract that can reenter the function, it could cause a Denial of Service attack, as it could potentially lock the tokens in the contract forever."
+        }
+    ]
+}

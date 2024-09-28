@@ -87,8 +87,8 @@ class BugScanner:
             response = auditor.invoke(input_dict)
             self.logger.info(f'response from auditor {self.llm_auditors[i]}: {response}')
             responses.append(response)
-            print("Auditor response written to : ", write_to+f"/{self.llm_auditors[i].model_id}_auditor.json")
-            write_to_file(write_to+f"/{self.llm_auditors[i].model_id}_auditor.json", response, write='w')
+            print("Auditor response written to : ", write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor.json")
+            write_to_file(write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor.json", response, write='w')
         return responses
 
     def run_critic(self, vulnerabilities, write_to, code = None):
@@ -97,14 +97,14 @@ class BugScanner:
             response = self.critic_chain.invoke({"auditor_resp": str(vulnerabilities),"code":code})
         else:
             response = self.critic_chain.invoke({"auditor_resp": str(vulnerabilities)})
-        write_to_file(write_to+f"/{self.llm_critic.model_id}_critic.json", response)
+        write_to_file(write_to+f"/{self.llm_critic.model_id.replace('/','_')}_critic.json", response)
         self.logger.info(f'response from critic: {response}')
         return response
     
     def run_ranker(self, vulnerability, write_to) -> list:
         response = self.ranker_chain.invoke({"topk": self.topk, "vulnerability": vulnerability})
         self.logger.info(f'response from ranker: {response}')
-        write_to_file(write_to+f"/{self.llm_ranker.model_id}_rank.json", str(response))
+        write_to_file(write_to+f"/{self.llm_ranker.model_id.replace('/','_')}_rank.json", str(response))
         return response
 
     def save_run(self,write_to):
