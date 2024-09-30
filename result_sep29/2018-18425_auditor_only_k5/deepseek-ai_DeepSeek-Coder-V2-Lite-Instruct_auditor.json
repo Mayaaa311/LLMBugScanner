@@ -1,0 +1,34 @@
+ {
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr public {\n    uint256 tokens = 0;\n    require( msg.value >= minContribution );\n    require( msg.value > 0 );\n    tokens = tokensPerEth.mul(msg.value) / 1 ether;    \n    address investor = msg.sender;\n    if (tokens > 0) {\n        distr(investor, tokens);\n    }\n    if (totalDistributed >= totalSupply) {\n        distributionFinished = true;\n    }\n}",
+            "vulnerability": "Front-running vulnerability",
+            "reason": "The 'getTokens' function does not include any mechanism to prevent front-running attacks. An attacker can see the transaction being sent to the contract and send a similar transaction with a higher gas price to be executed first, thus capturing the tokens before the original transaction is processed."
+        },
+        {
+            "function_name": "distr",
+            "code": "function distr(address _to, uint256 _amount) canDistr private returns (bool) {\n    totalDistributed = totalDistributed.add(_amount);    \n    balances[_to] = balances[_to].add(_amount);\n    emit Distr(_to, _amount);\n    emit Transfer(address(0), _to, _amount);\n    return true;\n}",
+            "vulnerability": "Denial of Service (DoS)",
+            "reason": "The 'distr' function does not check if the totalDistributed amount exceeds the totalSupply, which could lead to a situation where the contract cannot distribute more tokens, effectively freezing the contract and preventing any further token distribution."
+        },
+        {
+            "function_name": "adminClaimAirdrop",
+            "code": "function adminClaimAirdrop(address _participant, uint _amount) public onlyOwner {    \n    doAirdrop(_participant, _amount);\n}",
+            "vulnerability": "Unrestricted access to sensitive functions",
+            "reason": "The 'adminClaimAirdrop' function is marked as public and can be called by anyone, which allows anyone to distribute tokens to any address. This could be exploited by an attacker to distribute tokens to their own address, potentially leading to token dump scenarios."
+        },
+        {
+            "function_name": "withdraw",
+            "code": "function withdraw() onlyOwner public {\n    address myAddress = this;\n    uint256 etherBalance = myAddress.balance;\n    owner.transfer(etherBalance);\n}",
+            "vulnerability": "Withdrawal of Ether without restrictions",
+            "reason": "The 'withdraw' function allows the contract owner to withdraw all Ether stored in the contract, without any restrictions or checks. This could lead to the theft of funds if the owner's private key is compromised."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) onlyOwner public {\n    require(_value <= balances[msg.sender]);\n    address burner = msg.sender;\n    balances[burner] = balances[burner].sub(_value);\n    totalSupply = totalSupply.sub(_value);\n    totalDistributed = totalDistributed.sub(_value);\n    emit Burn(burner, _value);\n}",
+            "vulnerability": "Unrestricted burning of tokens",
+            "reason": "The 'burn' function allows the contract owner to burn any amount of tokens from any address, without any restrictions. This could lead to the devaluation of the token and potential loss of investor confidence."
+        }
+    ]
+}

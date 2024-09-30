@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _amount) onlyPayloadSize(2 * 32) public returns (bool success) {\n        require(_to != address(0));\n        require(_amount <= balances[msg.sender]);\n        balances[msg.sender] = balances[msg.sender].sub(_amount);\n        balances[_to] = balances[_to].add(_amount);\n        emit Transfer(msg.sender, _to, _amount);\n        return true;\n    }",
+            "vulnerability": "Reentrancy",
+            "reason": "The transfer function allows the contract to be called again before the first call has finished. This can lead to a situation where the contract can be called again before the first call has finished, leading to a potential loss of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _amount) onlyPayloadSize(3 * 32) public returns (bool success) {\n        require(_to != address(0));\n        require(_amount <= balances[_from]);\n        require(_amount <= allowed[_from][msg.sender]);\n        balances[_from] = balances[_from].sub(_amount);\n        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);\n        balances[_to] = balances[_to].add(_amount);\n        emit Transfer(_from, _to, _amount);\n        return true;\n    }",
+            "vulnerability": "Reentrancy",
+            "reason": "The transferFrom function allows the contract to be called again before the first call has finished. This can lead to a situation where the contract can be called again before the first call has finished, leading to a potential loss of funds."
+        },
+        {
+            "function_name": "getTokenBalance",
+            "code": "function getTokenBalance(address tokenAddress, address who) constant public returns (uint){\n        ForeignToken t = ForeignToken(tokenAddress);\n        uint bal = t.balanceOf(who);\n        return bal;\n    }",
+            "vulnerability": "Denial of Service",
+            "reason": "The getTokenBalance function can cause a Denial of Service (DoS) attack by causing the contract to consume all the gas of the Ethereum network, preventing other contracts from being able to execute their functions."
+        },
+        {
+            "function_name": "withdrawForeignTokens",
+            "code": "function withdrawForeignTokens(address _tokenContract) onlyOwner public returns (bool) {\n        ForeignToken token = ForeignToken(_tokenContract);\n        uint256 amount = token.balanceOf(address(this));\n        return token.transfer(owner, amount);\n    }",
+            "vulnerability": "Denial of Service",
+            "reason": "The withdrawForeignTokens function can cause a Denial of Service (DoS) attack by causing the contract to consume all the gas of the Ethereum network, preventing other contracts from being able to execute their functions."
+        },
+        {
+            "function_name": "finishDistribution",
+            "code": "function finishDistribution() onlyOwner canDistr public returns (bool) {\n        distributionFinished = true;\n        emit DistrFinished();\n        return true;\n    }",
+            "vulnerability": "Denial of Service",
+            "reason": "The finishDistribution function can cause a Denial of Service (DoS) attack by causing the contract to consume all the gas of the Ethereum network, preventing other contracts from being able to execute their functions."
+        }
+    ]
+}

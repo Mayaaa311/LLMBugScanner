@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool success) {\n    _transfer(msg.sender, _to, _value);\n    return true;\n}",
+            "vulnerability": "Reentrancy vulnerability",
+            "reason": "The transfer function does not check if the recipient contract is a contract and if it implements the ERC20 interface. This can lead to reentrancy attacks where the recipient contract can call back into the EAI_TokenERC contract during the transfer, causing the transfer to be reverted. This can be exploited by malicious contracts to drain the EAI_TokenERC contract."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {\n    require(_value <= allowance[_from][msg.sender]);     \n    allowance[_from][msg.sender] -= _value;\n    _transfer(_from, _to, _value);\n    return true;\n}",
+            "vulnerability": "Reentrancy vulnerability",
+            "reason": "The transferFrom function does not check if the recipient contract is a contract and if it implements the ERC20 interface. This can lead to reentrancy attacks where the recipient contract can call back into the EAI_TokenERC contract during the transfer, causing the transfer to be reverted. This can be exploited by malicious contracts to drain the EAI_TokenERC contract."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) {\n    require(balanceOf[msg.sender] >= _value);   \n    balanceOf[msg.sender] -= _value;            \n    totalSupply -= _value;                      \n    emit Burn(msg.sender, _value);\n    return true;\n}",
+            "vulnerability": "Burn function can be used to drain the contract",
+            "reason": "The burn function does not check if the sender has enough balance to burn. This can be exploited by malicious users to drain the EAI_TokenERC contract by burning more tokens than they have."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) public returns (bool success) {\n    require(balanceOf[_from] >= _value);                \n    require(_value <= allowance[_from][msg.sender]);    \n    balanceOf[_from] -= _value;                         \n    allowance[_from][msg.sender] -= _value;             \n    totalSupply -= _value;                              \n    emit Burn(_from, _value);\n    return true;\n}",
+            "vulnerability": "BurnFrom function can be used to drain the contract",
+            "reason": "The burnFrom function does not check if the sender has enough allowance to burn from the specified address. This can be exploited by malicious users to drain the EAI_TokenERC contract by burning more tokens than they have allowance for."
+        },
+        {
+            "function_name": "EAI_TokenERC20",
+            "code": "function EAI_TokenERC20(\n    uint256 initialSupply,\n    string tokenName,\n    string tokenSymbol\n) public {\n    totalSupply = initialSupply * 10 ** uint256(decimals);  \n    balanceOf[msg.sender] = totalSupply;                \n    name = tokenName;                                   \n    symbol = tokenSymbol;                               \n}",
+            "vulnerability": "Initial supply can be set to high",
+            "reason": "The initial supply can be set to a high value, which can lead to a large amount of tokens being created at the time of deployment. This can be exploited by malicious users to drain the EAI_TokenERC contract by creating a large amount of tokens."
+        }
+    ]
+}
