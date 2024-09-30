@@ -41,10 +41,10 @@ class pipeline_LLM(BaseLLM):
             do_sample=True,
             top_k=50,
             temperature=0.01,
-            top_p=0.5,
+            top_p=0.95,
             num_return_sequences=1,
             eos_token_id=self.tokenizer.eos_token_id,
-            max_length=8192,
+            max_length=10000,
         )
 
         return sequences[0]['generated_text'][len(prompt):]

@@ -65,8 +65,8 @@ def main():
     # detector.create_chain("templates/auditor_v1.txt","templates/critic_v1.txt","templates/topk.txt")
     # Run the pipeline with the sample code
     data_to_run = [
-        # "data_full/CVE_clean/2018-18425.sol"
-                #    "data_full/CVE_clean/2018-19830.sol", 
+        "data_full/CVE_clean/2018-18425.sol",
+                   "data_full/CVE_clean/2018-19830.sol", 
                    "data_full/CVE_clean/2019-15078.sol", 
                    "data_full/CVE_clean/2019-15079.sol"
                    ]

@@ -34,8 +34,8 @@ def main():
                         # Huggingface_LLM(model_id = "m-a-p/OpenCodeInterpreter-DS-6.7B"),
                         # Huggingface_LLM(model_id = "NTQAI/Nxcode-CQ-7B-orpo"),
                         # Huggingface_LLM(model_id="Artigenz/Artigenz-Coder-DS-6.7B"),
-                        Huggingface_LLM(model_id="bigcode/starcoder2-15b"),
-                        # Huggingface_LLM(model_id="deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct"),
+                        # Huggingface_LLM(model_id="bigcode/starcoder2-15b"),
+                        Huggingface_LLM(model_id="deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct"),
                         # pipeline_LLM(model_id="Qwen/CodeQwen1.5-7B"),
                         # pipeline_LLM(model_id="meta-llama/Llama-3.1-8B-Instruct"),
                         # pipeline_LLM(model_id="meta-llama/CodeLlama-7b-hf"),
@@ -66,7 +66,7 @@ def main():
     # Run the pipeline with the sample code
     data_to_run = [
         # "data_full/CVE_clean/2018-18425.sol"
-                #    "data_full/CVE_clean/2018-19830.sol", 
+                   "data_full/CVE_clean/2018-19830.sol", 
                    "data_full/CVE_clean/2019-15078.sol", 
                    "data_full/CVE_clean/2019-15079.sol"
                    ]
