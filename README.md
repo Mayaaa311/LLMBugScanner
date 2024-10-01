@@ -47,17 +47,19 @@ python src/main.py
 
 
 ## Currently Supported Models: 
-
-| Model Id                                | Model Class Name | Model source                                                     | model size |
-|-------------------------------------------|------------------|------------------------------------------------------------------|------------|
-| Llama 3                                   | ChatOllamaLLM    | https://ollama.com/library/llama3                                | 8B         |
-| codellama base                            | ChatOllamaLLM    | https://ollama.com/library/codellama                             | 7B         |
-| AlfredPros/CodeLlama-7b-Instruct-Solidity | Huggingface_LLM  | https://huggingface.co/AlfredPros/CodeLlama-7b-Instruct-Solidity | 7B         |
-| codeqwen                                  | ChatOllamaLLM    | https://ollama.com/library/codeqwen                              | 7B         |
-| deepseek-coder-v2                         | ChatOllamaLLM    | https://ollama.com/library/deepseek-coder-v2                     | 16B        |
-| starcoder2                                | ChatOllamaLLM    | https://ollama.com/library/starcoder2:7b                         | 15B        |
-| bartowski/Nxcode-CQ-7B-orpo-GGUF          | LlamaCpp_LLM     | https://huggingface.co/bartowski/Nxcode-CQ-7B-orpo-GGUF          | 7b         |
-
+| AlfredPros/CodeLlama-7b-Instruct-Solidity   | Huggingface_LLM | https://huggingface.co/AlfredPros/CodeLlama-7b-Instruct-Solidity   | 7B   |
+|---------------------------------------------|-----------------|--------------------------------------------------------------------|------|
+| m-a-p/OpenCodeInterpreter-DS-6.7B           | Huggingface_LLM | https://huggingface.co/m-a-p/OpenCodeInterpreter-DS-6.7B           | 6.7B |
+| NTQAI/Nxcode-CQ-7B-orpo                     | Huggingface_LLM | https://huggingface.co/NTQAI/Nxcode-CQ-7B-orpo                     | 7B   |
+| Artigenz/Artigenz-Coder-DS-6.7B             | Huggingface_LLM | https://huggingface.co/Artigenz/Artigenz-Coder-DS-6.7B             | 6.7B |
+| bigcode/starcoders2-15b                     | Huggingface_LLM | https://huggingface.co/bigcode/starcoders2-15b                     | 15B  |
+| deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct | Huggingface_LLM | https://huggingface.co/deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct | 16B  |
+| Qwen/CodeQwen1.5-7B                         | pipeline_LLM    | https://huggingface.co/Qwen/CodeQwen1.5-7B                         | 7B   |
+| meta-llama/Llama-3.1-8B-Instruct            | pipeline_LLM    | https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct            | 8B   |
+| meta-llama/CodeLlama-7b-hf                  | pipeline_LLM    | https://huggingface.co/meta-llama/CodeLlama-7b-hf                  | 7B   |
+| WisdomShell/CodeShell-7B-Chat               | Huggingface_LLM | https://huggingface.co/WisdomShell/CodeShell-7B-Chat               | 7B   |
+| THUDM/codegeex2-6b                          | Huggingface_LLM | https://huggingface.co/THUDM/codegeex2-6b                          | 6B   |
+| google/codegemma-7b                         | gemma_LLM       | https://huggingface.co/google/codegemma-7b                         | 7B   |
 
 ## Example Creating Model objects
 
