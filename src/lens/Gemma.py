@@ -30,7 +30,8 @@ class gemma_LLM(BaseLLM):
         return None
     
     def invoke(self, prompt) -> str:
-        prompt = str(prompt)[6:-1]
+        prompt_input = self.prompt.format_prompt(**prompt)
+        prompt = str(prompt_input)[6:-1]
         inputs = self.tokenizer(prompt, return_tensors="pt")
         prompt_len = inputs["input_ids"].shape[-1]
         outputs = self.model.generate(**inputs, max_new_tokens=100)

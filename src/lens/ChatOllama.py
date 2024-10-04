@@ -23,6 +23,8 @@ class ChatOllamaLLM(BaseLLM):
         return self.model_params 
     
     def invoke(self, prompt) -> str:
+        prompt_input = self.prompt.format_prompt(**prompt)
+        prompt = str(prompt_input)[6:-1]
         return self.model.invoke(prompt).content
 
     def handle_response(self, response) -> dict:

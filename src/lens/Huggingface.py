@@ -1,19 +1,20 @@
 from transformers import BitsAndBytesConfig, AutoTokenizer, AutoModelForCausalLM,  LlamaForCausalLM, AutoModel
 import transformers
+from langchain_core.prompts import PromptTemplate
 import torch
 from lens.Base import BaseLLM
 from lens.utils import parse_config
 from langchain_core.callbacks import CallbackManager, StreamingStdOutCallbackHandler
-from vllm import LLM, SamplingParams
 
 class Huggingface_LLM(BaseLLM):
-    def __init__(self, model_id, model_params_path=None):
+    def __init__(self, model_id, prompt_path, model_params_path=None):
         self.model_id = model_id
         self.model_params = None
         if model_params_path is not None:
             self.model_params = self.load_params(model_params_path)
         self.tokenizer = None
         self.model = None
+        self.prompt_path = prompt_path
 
 
     def load_model(self):
@@ -47,6 +48,7 @@ class Huggingface_LLM(BaseLLM):
                 self.model = AutoModelForCausalLM.from_pretrained(self.model_id, **self.model_params)
         else:
             self.model = AutoModelForCausalLM.from_pretrained(self.model_id,trust_remote_code=True)
+        
         # # Ensure that callback_manager is a valid object
         # if isinstance(self.model_params.get("callback_manager"), str) and self.model_params["callback_manager"] == "default":
         #     self.model_params["callback_manager"] = CallbackManager([StreamingStdOutCallbackHandler()])
@@ -59,29 +61,31 @@ class Huggingface_LLM(BaseLLM):
         return None
     
     def invoke(self, prompt) -> str:
-        prompt = str(prompt)[6:-1]
+        prompt_input = self.prompt.format_prompt(**prompt)
+        # print(prompt_input)
+        prompt = str(prompt_input)[6:-1]
         if self.model_id == "AlfredPros/CodeLlama-7b-Instruct-Solidity":
             # Tokenize the input prompt
             input_ids = self.tokenizer(prompt, return_tensors="pt", truncation=True).input_ids
             # Run the model to generate an output
-            outputs = self.model.generate(input_ids=input_ids, max_new_tokens=8192, do_sample=True, top_p=0.95, temperature=0, pad_token_id=1)
+            outputs = self.model.generate(input_ids=input_ids, max_new_tokens=10000, do_sample=True,top_k=50, top_p=0.95, temperature= 0.001, pad_token_id=1)
             # Detokenize and return the generated output
             response = self.tokenizer.batch_decode(outputs.detach().cpu().numpy(), skip_special_tokens=True)[0][len(prompt):]
             return response
         elif self.model_id == "WisdomShell/CodeShell-7B-Chat":
             history = []
             return self.model.chat(prompt, history, self.tokenizer)
-        elif self.model_id == "THUDM/codegeex2-6b" or self.model_id == "bigcode/starcoder2-15b":
+        elif self.model_id == "THUDM/codegeex2-6b" or self.model_id == "bigcode/starcoder2-7b":
             # remember adding a language tag for better performance
             inputs = self.tokenizer.encode(prompt, return_tensors="pt")
-            outputs = self.model.generate(inputs, max_length=8192, top_k=50)
+            outputs = self.model.generate(inputs, max_new_tokens=10000, top_k=50)
             return self.tokenizer.decode(outputs[0])
         else:
             messages = [
                 {"role": "user", "content": prompt}
             ]
             inputs = self.tokenizer.apply_chat_template(messages, add_generation_prompt=True, return_tensors="pt")
-            outputs = self.model.generate(inputs, max_new_tokens=8192, do_sample=False, top_k=50, top_p=0.95, num_return_sequences=1, eos_token_id=self.tokenizer.eos_token_id)
+            outputs = self.model.generate(inputs, max_new_tokens=10000, do_sample=True, temperature = 0.001,top_k=50, top_p=0.95, num_return_sequences=1, eos_token_id=self.tokenizer.eos_token_id)
             return self.tokenizer.decode(outputs[0][len(inputs[0]):], skip_special_tokens=True)
     
     def handle_response(self, response) -> dict:

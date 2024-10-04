@@ -74,4 +74,11 @@ LlamaCpp_LLM(model_id="bartowski/Nxcode-CQ-7B-orpo-GGUF", model_path="Nxcode-CQ-
 salloc --ntasks-per-node=60 --gpus=7
 module load anaconda3/2023.03
 conda activate /home/hice1/yyuan394/scratch/env
-python3 src/main.py
+<!-- python3 src/main.py -->
+python src/bugscanner_cli.py -a AlfredPros/CodeLlama-7b-Instruct-Solidity m-a-p/OpenCodeInterpreter-DS-6.7B NTQAI/Nxcode-CQ-7B-orpo -c m-a-p/OpenCodeInterpreter-DS-6.7B -r NTQAI/Nxcode-CQ-7B-orpo -d data -o result_test_parser -k 5 -log logs_oct1
+
+
+python src/bugscanner_cli.py -a AlfredPros/CodeLlama-7b-Instruct-Solidity -c m-a-p/OpenCodeInterpreter-DS-6.7B -r NTQAI/Nxcode-CQ-7B-orpo -d data -o result_test_parser -k 5 -log logs_oct1
+
+
+ <!-- m-a-p/OpenCodeInterpreter-DS-6.7B NTQAI/Nxcode-CQ-7B-orpo  -->

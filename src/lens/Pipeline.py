@@ -34,7 +34,8 @@ class pipeline_LLM(BaseLLM):
         return None
     
     def invoke(self, prompt) -> str:
-        prompt = str(prompt)[6:-1]
+        prompt_input = self.prompt.format_prompt(**prompt)
+        prompt = str(prompt_input)[6:-1]
        
         sequences = self.model(
             prompt,
