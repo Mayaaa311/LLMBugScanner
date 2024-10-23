@@ -5,7 +5,22 @@ import torch
 from lens.Base import BaseLLM
 from lens.utils import parse_config
 from langchain_core.callbacks import CallbackManager, StreamingStdOutCallbackHandler
-
+import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+param1 = {
+    "max_new_tokens": 5000,
+    "do_sample": True,
+    "temperature": 0.001,
+    "top_k": 50,
+    "top_p": 0.95,
+    "num_return_sequences": 1
+}
+param2 = {
+    "max_new_tokens": 8000,
+    "do_sample": False
+}
+generation_params=param2
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class Huggingface_LLM(BaseLLM):
     def __init__(self, model_id, prompt_path, model_params_path=None):
         self.model_id = model_id
@@ -21,7 +36,7 @@ class Huggingface_LLM(BaseLLM):
 
         # Load model and tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_id,  trust_remote_code=True)
-
+        self.tokenizer.model_max_length = 20000
         if self.model_id == "THUDM/codegeex2-6b":
             self.model = AutoModel.from_pretrained("THUDM/codegeex2-6b", trust_remote_code=True)
             self.model = self.model.eval()
@@ -43,11 +58,12 @@ class Huggingface_LLM(BaseLLM):
                     load_in_8bit_fp32_cpu_offload=True
                 )
                 self.model_params.pop('quantization_config')
-                self.model = AutoModelForCausalLM.from_pretrained(self.model_id, quantization_config = bnb_config, **self.model_params)
+                self.model = AutoModelForCausalLM.from_pretrained(self.model_id, 
+                                                                  quantization_config = bnb_config, device_map="auto",**self.model_params)
             else:
-                self.model = AutoModelForCausalLM.from_pretrained(self.model_id, **self.model_params)
+                self.model = AutoModelForCausalLM.from_pretrained(self.model_id,device_map="auto" ,**self.model_params)
         else:
-            self.model = AutoModelForCausalLM.from_pretrained(self.model_id,trust_remote_code=True)
+            self.model = AutoModelForCausalLM.from_pretrained(self.model_id,device_map="auto",trust_remote_code=True)
         
         # # Ensure that callback_manager is a valid object
         # if isinstance(self.model_params.get("callback_manager"), str) and self.model_params["callback_manager"] == "default":
@@ -64,11 +80,13 @@ class Huggingface_LLM(BaseLLM):
         prompt_input = self.prompt.format_prompt(**prompt)
         # print(prompt_input)
         prompt = str(prompt_input)[6:-1]
+        # print("Prompt: ",prompt_input)
         if self.model_id == "AlfredPros/CodeLlama-7b-Instruct-Solidity":
             # Tokenize the input prompt
-            input_ids = self.tokenizer(prompt, return_tensors="pt", truncation=True).input_ids
+            input_ids = self.tokenizer(prompt, return_tensors="pt", truncation=True).input_ids.to(device)
+            print("num tokens input: ", len(input_ids))
             # Run the model to generate an output
-            outputs = self.model.generate(input_ids=input_ids, max_new_tokens=10000, do_sample=True,top_k=50, top_p=0.95, temperature= 0.001, pad_token_id=1)
+            outputs = self.model.generate(input_ids=input_ids, **generation_params)
             # Detokenize and return the generated output
             response = self.tokenizer.batch_decode(outputs.detach().cpu().numpy(), skip_special_tokens=True)[0][len(prompt):]
             return response
@@ -77,17 +95,30 @@ class Huggingface_LLM(BaseLLM):
             return self.model.chat(prompt, history, self.tokenizer)
         elif self.model_id == "THUDM/codegeex2-6b" or self.model_id == "bigcode/starcoder2-7b":
             # remember adding a language tag for better performance
-            inputs = self.tokenizer.encode(prompt, return_tensors="pt")
-            outputs = self.model.generate(inputs, max_new_tokens=10000, top_k=50)
+            inputs = self.tokenizer.encode(prompt, return_tensors="pt").to(device)
+            print("num tokens input: ", len(inputs))
+            outputs = self.model.generate(inputs, **generation_params)
             return self.tokenizer.decode(outputs[0])
+        elif self.model_id == "m-a-p/OpenCodeInterpreter-DS-6.7B":
+
+            inputs = self.tokenizer.apply_chat_template(
+                [{'role': 'user', 'content': prompt }],
+                return_tensors="pt"
+            ).to(device)
+            print("num tokens input: ", len(inputs))
+            # Generate model output based on the inputs
+            outputs = self.model.generate(inputs, pad_token_id=self.tokenizer.eos_token_id,eos_token_id=self.tokenizer.eos_token_id,**generation_params)
+
+            # Decode the generated output, skipping special tokens
+            generated_text = self.tokenizer.decode(outputs[0][len(inputs[0]):], skip_special_tokens=True)
+            return generated_text
         else:
             messages = [
                 {"role": "user", "content": prompt}
             ]
-            inputs = self.tokenizer.apply_chat_template(messages, add_generation_prompt=True, return_tensors="pt")
-            outputs = self.model.generate(inputs, max_new_tokens=10000, do_sample=True, temperature = 0.001,top_k=50, top_p=0.95, num_return_sequences=1, eos_token_id=self.tokenizer.eos_token_id)
+            inputs = self.tokenizer.apply_chat_template(messages, add_generation_prompt=True, return_tensors="pt").to(device)
+            outputs = self.model.generate(inputs, **generation_params, eos_token_id=self.tokenizer.eos_token_id)
             return self.tokenizer.decode(outputs[0][len(inputs[0]):], skip_special_tokens=True)
-    
     def handle_response(self, response) -> dict:
         # Process the response as needed
         return {"response": response}

@@ -8,7 +8,7 @@ from lens import BugScanner
 
 # Import all the model classes
 from lens import Huggingface_LLM, pipeline_LLM, gemma_LLM
-
+from datetime import datetime
 # Model-to-class map
 MODEL_CLASS_MAP = {
     "AlfredPros/CodeLlama-7b-Instruct-Solidity": Huggingface_LLM,
@@ -62,6 +62,7 @@ def main():
     parser.add_argument('-a', '--auditors', nargs='+', required=True, help='One or more auditor model IDs')
     parser.add_argument('-c', '--critic', help='Optional critic model ID (only one allowed)')
     parser.add_argument('-r', '--ranker', help='Optional ranker model ID (only one allowed)')
+    parser.add_argument('-p', '--parser', help='Optional parser model ID (only one allowed)')
     parser.add_argument('-d', '--data_folder', required=True, help='Path to the data folder')
     parser.add_argument('-o', '--output_folder', required=True, help='Output results folder')
     parser.add_argument('-k', '--topk', required=True, help='Top k results')
@@ -92,12 +93,17 @@ def main():
         ranker_model = get_model_instance(args.ranker, prompt_path='templates/topk.txt')
     else:
         logging.info("No ranker model specified.")
-
+    if args.parser:
+        logging.info(f"Initializing parser model: {args.parser}")
+        summarizer_model = get_model_instance(args.parser, prompt_path='templates/summarizer.txt')
+    else:
+        logging.info("Default parser used")
     logging.info("Initializing BugScanner with the given models...")
     detector = BugScanner(
         auditor_models=auditor_models,
         critic_model=critic_model,
-        ranker_model=ranker_model
+        ranker_model=ranker_model,
+        summarizer_model= summarizer_model
     )
     logging.info("BugScanner initialization completed.")
 
@@ -110,36 +116,19 @@ def main():
     logging.info("Processing files one by one...\n")
 
     # Process each file
-    for data in data_files:
-        file_start_time = time.time()  # Start timing for each file
+    file_start_time = time.time()  # Start timing for each file
 
-        data_path = os.path.join(args.data_folder, data)
-        name = data.split('/')[-1].rsplit('.', 1)[0]
-        output_name = f"{name}_k{args.topk}_n{len(auditor_models)}"
-        output_dir = os.path.join(args.output_folder, output_name)
 
-        # Detailed log before processing each file
-        logging.info(f"Now running bug scanner for: {data}")
-        logging.info(f"Full file path: {data_path}")
-        logging.info(f"Output will be saved in: {output_dir}")
+    output_name = args.output_folder+f"/k{args.topk}_n{len(auditor_models)}_"+datetime.now().strftime("%Y-%m-%d_%H-%M-%S.log")
 
-        # Ensure the output directory exists
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-            logging.info(f"Created output directory: {output_dir}")
+    logging.info(f"Output will be saved in: {output_name}")
 
-        # Run the bug scanner pipeline
-        detector.run_pipeline(
-            code_path=data_path,
-            topk=args.topk,
-            output=output_name,
-            result_dir=args.output_folder
-        )
-
-        # Log completion of each file and timing
-        file_time_taken = time.time() - file_start_time
-        logging.info(f"Finished processing: {data} in {file_time_taken:.2f} seconds.")
-        logging.info(f"Results saved in: {output_dir}")
+    # Run the bug scanner pipeline
+    detector.run_pipeline(
+        code_folder=args.data_folder,
+        result_dir=output_name,
+        topk=args.topk
+    )
 
     # Log final completion and overall time
     overall_time_taken = time.time() - overall_start_time
