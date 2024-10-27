@@ -97,6 +97,7 @@ def main():
         logging.info(f"Initializing parser model: {args.parser}")
         summarizer_model = get_model_instance(args.parser, prompt_path='templates/summarizer.txt')
     else:
+        summarizer_model = get_model_instance("NTQAI/Nxcode-CQ-7B-orpo", prompt_path='templates/summarizer.txt')
         logging.info("Default parser used")
     logging.info("Initializing BugScanner with the given models...")
     detector = BugScanner(
