@@ -1,0 +1,34 @@
+
+
+### Solution:
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool success) {require(_to != address(0));require(_value <= balances[msg.sender]);balances[msg.sender] = balances[msg.sender].sub(_value);balances[_to] = balances[_to].add(_value);emit Transfer(msg.sender, _to, _value);return true;}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transfer() has a potential integer overflow vulnerability. The function uses the SafeMath library to prevent overflows, but the library is not used correctly. The function uses the mul() function to multiply two numbers, which can overflow if the numbers are large enough. The function also uses the add() function to add two numbers, which can also overflow if the numbers are large enough. The function does not check for overflows, which can lead to unexpected behavior and potentially exploitable bugs."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) onlyPayloadSize(3 * 32) public returns (bool success) {require(_to != address(0));require(_value <= balances[_from]);require(_value <= allowed[_from][msg.sender]);balances[_from] = balances[_from].sub(_value);allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);balances[_to] = balances[_to].add(_value);emit Transfer(_from, _to, _value);return true;}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transferFrom() has a potential integer overflow vulnerability. The function uses the SafeMath library to prevent overflows, but the library is not used correctly. The function uses the mul() function to multiply two numbers, which can overflow if the numbers are large enough. The function also uses the add() function to add two numbers, which can also overflow if the numbers are large enough. The function does not check for overflows, which can lead to unexpected behavior and potentially exploitable bugs."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public returns (bool success) {if (_value != 0 && allowed[msg.sender][_spender] != 0) {return false;}allowed[msg.sender][_spender] = _value;emit Approval(msg.sender, _spender, _value);return true;}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function approve() has a potential integer overflow vulnerability. The function uses the SafeMath library to prevent overflows, but the library is not used correctly. The function uses the mul() function to multiply two numbers, which can overflow if the numbers are large enough. The function does not check for overflows, which can lead to unexpected behavior and potentially exploitable bugs."
+        },
+        {
+            "function_name": "allowance",
+            "code": "function allowance(address _owner, address _spender) constant public returns (uint256) {return allowed[_owner][_spender];}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function allowance() has a potential integer overflow vulnerability. The function uses the SafeMath library to prevent overflows, but the library is not used correctly. The function uses the mul() function to multiply two numbers, which can overflow if the numbers are large enough. The function does not check for overflows, which can lead to unexpected behavior and potentially exploitable bugs."
+        },
+        {
+            "function_name": "getTokenBalance",
+            "code": "function getTokenBalance(address tokenAddress, address who) constant public returns (uint){AltcoinToken t = AltcoinToken(tokenAddress);uint bal = t.balanceOf(who);return bal;}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function getTokenBalance() has a potential integer overflow vulnerability. The function uses the SafeMath library to prevent overflows, but the library is not used correctly. The function uses the mul() function to multiply two numbers, which can overflow if the numbers are large enough. The function does not check

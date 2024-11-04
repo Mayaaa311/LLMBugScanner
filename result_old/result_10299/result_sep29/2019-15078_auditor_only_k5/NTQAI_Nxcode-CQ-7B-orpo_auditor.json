@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr onlyWhitelist public {\n    if (value > totalRemaining) {\n        value = totalRemaining;\n    }\n    require(value <= totalRemaining);\n    address investor = msg.sender;\n    uint256 toGive = value;\n    distr(investor, toGive);\n    if (toGive > 0) {\n        blacklist[investor] = true;\n    }\n    if (totalDistributed >= totalSupply) {\n        distributionFinished = true;\n    }\n    value = value.div(100000).mul(99999);\n}",
+            "vulnerability": "Reentrancy vulnerability",
+            "reason": "The function `getTokens` is vulnerable to reentrancy attacks. It allows users to call the `distr` function with a value that is not checked for sufficient balance. This can lead to a reentrancy attack where the `distr` function is called again before the first call has completed, resulting in an incorrect balance calculation and potentially loss of funds."
+        },
+        {
+            "function_name": "distr",
+            "code": "function distr(address _to, uint256 _amount) canDistr private returns (bool) {\n    totalDistributed = totalDistributed.add(_amount);\n    totalRemaining = totalRemaining.sub(_amount);\n    balances[_to] = balances[_to].add(_amount);\n    emit Distr(_to, _amount);\n    emit Transfer(address(0), _to, _amount);\n    return true;\n    if (totalDistributed >= totalSupply) {\n        distributionFinished = true;\n    }\n}",
+            "vulnerability": "Reentrancy vulnerability",
+            "reason": "The `distr` function is vulnerable to reentrancy attacks. It allows users to call the `distr` function with a value that is not checked for sufficient balance. This can lead to a reentrancy attack where the `distr` function is called again before the first call has completed, resulting in an incorrect balance calculation and potentially loss of funds."
+        },
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr onlyWhitelist public {\n    if (value > totalRemaining) {\n        value = totalRemaining;\n    }\n    require(value <= totalRemaining);\n    address investor = msg.sender;\n    uint256 toGive = value;\n    distr(investor, toGive);\n    if (toGive > 0) {\n        blacklist[investor] = true;\n    }\n    if (totalDistributed >= totalSupply) {\n        distributionFinished = true;\n    }\n    value = value.div(100000).mul(99999);\n}",
+            "vulnerability": "Unchecked balance transfer",
+            "reason": "The function `getTokens` does not check if the contract has sufficient balance before transferring tokens to the investor. This can lead to an underflow if the contract does not have enough balance to cover the transfer. This can be exploited by an attacker to drain the contract of tokens."
+        },
+        {
+            "function_name": "distr",
+            "code": "function distr(address _to, uint256 _amount) canDistr private returns (bool) {\n    totalDistributed = totalDistributed.add(_amount);\n    totalRemaining = totalRemaining.sub(_amount);\n    balances[_to] = balances[_to].add(_amount);\n    emit Distr(_to, _amount);\n    emit Transfer(address(0), _to, _amount);\n    return true;\n    if (totalDistributed >= totalSupply) {\n        distributionFinished = true;\n    }\n}",
+            "vulnerability": "Unchecked balance transfer",
+            "reason": "The `distr` function does not check if the contract has sufficient balance before transferring tokens to the investor. This can lead to an underflow if the contract does not have enough balance to cover the transfer. This can be exploited by an attacker to drain the contract of tokens."
+        },
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr onlyWhitelist public {\n    if (value > totalRemaining) {\n        value = totalRemaining;\n    }\n    require(value <= totalRemaining);\n    address investor = msg.sender;\n    uint256 toGive = value;\n    distr(investor, toGive);\n    if (toGive > 0) {\n        blacklist[investor] = true;\n    }\n    if (totalDistributed >= totalSupply) {\n        distributionFinished = true;\n    }\n    value = value.div(100000).mul(99999);\n}",
+            "vulnerability": "Unchecked balance transfer",
+            "reason": "The function `getTokens` does not check if the contract has sufficient balance before transferring tokens to the investor. This can lead to an underflow if the contract does not have enough balance to cover the transfer. This can be exploited by an attacker to drain the contract of tokens."
+        }
+    ]
+}

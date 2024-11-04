@@ -1,0 +1,35 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "balanceOf",
+            "code": "function balanceOf(address _owner) public constant returns (uint balance) { return balances[_owner]; }",
+            "vulnerability": "Vulnerability: Reentrancy",
+            "reason": "Reentrancy vulnerability: The balanceOf function does not check if the recipient contract is a contract or not. If the recipient contract is a contract, it can call back into the MP3Coin contract and manipulate the balances mapping. This can lead to incorrect balance calculations and potentially loss of funds. To mitigate this vulnerability, the balanceOf function should check if the recipient contract is a contract before transferring the tokens."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _amount) public returns (bool success) { require(_amount > 0 && balances[msg.sender] >= _amount); balances[msg.sender] -= _amount; balances[_to] += _amount; Transfer(msg.sender, _to, _amount); return true; }",
+            "vulnerability": "Vulnerability: Reentrancy",
+            "reason": "Reentrancy vulnerability: The transfer function does not check if the recipient contract is a contract or not. If the recipient contract is a contract, it can call back into the MP3Coin contract and manipulate the balances mapping. This can lead to incorrect balance calculations and potentially loss of funds. To mitigate this vulnerability, the transfer function should check if the recipient contract is a contract before transferring the tokens."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _amount) public returns (bool success) { require(_amount > 0 && balances[_from] >= _amount && allowed[_from][msg.sender] >= _amount); balances[_from] -= _amount; allowed[_from][msg.sender] -= _amount; balances[_to] += _amount; Transfer(_from, _to, _amount); return true; }",
+            "vulnerability": "Vulnerability: Reentrancy",
+            "reason": "Reentrancy vulnerability: The transferFrom function does not check if the recipient contract is a contract or not. If the recipient contract is a contract, it can call back into the MP3Coin contract and manipulate the balances mapping. This can lead to incorrect balance calculations and potentially loss of funds. To mitigate this vulnerability, the transferFrom function should check if the recipient contract is a contract before transferring the tokens."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint _amount) public returns (bool success) { allowed[msg.sender][_spender] = _amount; Approval(msg.sender, _spender, _amount); return true; }",
+            "vulnerability": "Vulnerability: Reentrancy",
+            "reason": "Reentrancy vulnerability: The approve function does not check if the recipient contract is a contract or not. If the recipient contract is a contract, it can call back into the MP3Coin contract and manipulate the balances mapping. This can lead to incorrect balance calculations and potentially loss of funds. To mitigate this vulnerability, the approve function should check if the recipient contract is a contract before approving the tokens."
+        },
+        {
+            "function_name": "distribute",
+            "code": "function distribute(address[] _addresses, uint[] _amounts) public returns (bool success) { require(_addresses.length < 256 && _addresses.length == _amounts.length); uint totalAmount; for (uint a = 0; a < _amounts.length; a++) { totalAmount += _amounts[a]; } require(totalAmount > 0 && balances[msg.sender] >= totalAmount); balances[msg.sender] -= totalAmount; for (uint b = 0; b < _addresses.length; b++) { if (_amounts[b] > 0) { balances[_addresses[b]] += _amounts[b]; Transfer(msg.sender, _addresses[b], _amounts[b]); } } return true; }",
+            "vulnerability": "Vulnerability: Reentrancy",
+            "reason": "Reentrancy vulnerability: The distribute function does not check if the recipient contract is a contract or not. If the recipient contract is a contract, it can call back into the MP3Coin contract and manipulate the balances mapping. This can lead to incorrect balance calculations and potentially loss of funds. To mitigate this vulnerability, the distribute function should check if the recipient contract is a contract before distributing the tokens."
+        }
+    ]
+}

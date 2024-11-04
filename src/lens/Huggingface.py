@@ -8,7 +8,7 @@ from langchain_core.callbacks import CallbackManager, StreamingStdOutCallbackHan
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 param1 = {
-    "max_new_tokens": 5000,
+    "max_new_tokens": 20000,
     "do_sample": True,
     "temperature": 0.001,
     "top_k": 50,
@@ -16,7 +16,7 @@ param1 = {
     "num_return_sequences": 1
 }
 param2 = {
-    "max_new_tokens": 8000,
+    "max_new_tokens": 20000,
     "do_sample": False
 }
 generation_params=param2
@@ -36,7 +36,7 @@ class Huggingface_LLM(BaseLLM):
 
         # Load model and tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_id,  trust_remote_code=True)
-        self.tokenizer.model_max_length = 20000
+        self.tokenizer.model_max_length = 35000
         if self.model_id == "THUDM/codegeex2-6b":
             self.model = AutoModel.from_pretrained("THUDM/codegeex2-6b", trust_remote_code=True)
             self.model = self.model.eval()
@@ -78,9 +78,16 @@ class Huggingface_LLM(BaseLLM):
     
     def invoke(self, prompt) -> str:
         prompt_input = self.prompt.format_prompt(**prompt)
-        # print(prompt_input)
+        
         prompt = str(prompt_input)[6:-1]
-        # print("Prompt: ",prompt_input)
+        prompt = (
+            prompt.replace('\\n', '\n')
+                    .replace('\\"', '"')
+                    .replace('{{', '{')
+                    .replace('}}', '}')
+                    .strip()
+        )
+        # print("PROMPT: ",prompt)
         if self.model_id == "AlfredPros/CodeLlama-7b-Instruct-Solidity":
             # Tokenize the input prompt
             input_ids = self.tokenizer(prompt, return_tensors="pt", truncation=True).input_ids.to(device)

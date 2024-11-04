@@ -1,0 +1,72 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "sellOffline",
+            "code": "function sellOffline(address rec_address,uint256 token_amount) public onlyOwner 
+{
+    if (remaining > 0)
+    {    
+        uint finalTokens =  (token_amount  * (10 ** 18));              
+        if(finalTokens < remaining)
+            {    
+                remaining = remaining - finalTokens;    
+                _transfer(owner,rec_address, finalTokens);    
+                TransferSell(owner, rec_address, finalTokens,'Offline');    
+            }    
+        else
+            {    
+                revert();    
+            }    
+    }    
+    else
+    {    
+        revert();    
+    }    
+}
+",
+            "vulnerability": "Unchecked Remaining Balance",
+            "reason": "The contract does not check if the remaining tokens are sufficient before transferring them to the recipient. This could lead to a revert if the remaining tokens are not sufficient, which could be exploited by an attacker."
+        },
+        {
+            "function_name": "getConBal",
+            "code": "function getConBal() onlyOwner public constant returns  (uint)            
+{
+    return this.balance;
+}
+",
+            "vulnerability": "Exposure of Private Information",
+            "reason": "The contract exposes the contract balance to anyone who calls the getConBal function. This could be exploited by an attacker to steal the contract's funds."
+        },
+        {
+            "function_name": "setEthRate",
+            "code": "function setEthRate (uint newEthRate) public  onlyOwner                    
+{
+     ethRate = newEthRate;
+}
+",
+            "vulnerability": "Unauthorized Access",
+            "reason": "The contract allows the owner to set the ETH rate, but it does not check if the caller is the owner or the backup address. This could be exploited by an attacker to change the ETH rate without the owner's or backup address's permission."
+        },
+        {
+            "function_name": "setTokenPrice",
+            "code": "function setTokenPrice (uint newTokenRate) public  onlyOwner               
+{
+     icoTokenPrice = newTokenRate;
+}
+",
+            "vulnerability": "Unauthorized Access",
+            "reason": "The contract allows the owner to set the token price, but it does not check if the caller is the owner or the backup address. This could be exploited by an attacker to change the token price without the owner's or backup address's permission."
+        },
+        {
+            "function_name": "setTransferStatus",
+            "code": "function setTransferStatus (uint status) public  onlyOwner                 
+{
+    allowTransferToken = status;
+}
+",
+            "vulnerability": "Unauthorized Access",
+            "reason": "The contract allows the owner to set the transfer status, but it does not check if the caller is the owner or the backup address. This could be exploited by an attacker to change the transfer status without the owner's or backup address's permission."
+        }
+    ]
+}

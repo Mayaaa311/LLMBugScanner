@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) { if (balanceOf[msg.sender] < _value) throw; if (balanceOf[_to] + _value < balanceOf[_to]) throw; balanceOf[msg.sender] -= _value; balanceOf[_to] += _value; Transfer(msg.sender, _to, _value); }",
+            "vulnerability": "Reentrancy",
+            "reason": "The transfer function does not check if the recipient contract has implemented the receiveApproval function. This could lead to a reentrancy attack where the recipient contract calls back into the token contract during the transfer, potentially allowing the attacker to execute arbitrary code."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) { if (balanceOf[_from] < _value) throw; if (balanceOf[_to] + _value < balanceOf[_to]) throw; if (_value > allowance[_from][msg.sender]) throw; balanceOf[_from] -= _value; balanceOf[_to] += _value; allowance[_from][msg.sender] -= _value; Transfer(_from, _to, _value); return true; }",
+            "vulnerability": "Reentrancy",
+            "reason": "The transferFrom function does not check if the recipient contract has implemented the receiveApproval function. This could lead to a reentrancy attack where the recipient contract calls back into the token contract during the transfer, potentially allowing the attacker to execute arbitrary code."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) { tokenRecipient spender = tokenRecipient(_spender); if (approve(_spender, _value)) { spender.receiveApproval(msg.sender, _value, this, _extraData); return true; } }",
+            "vulnerability": "Reentrancy",
+            "reason": "The approveAndCall function does not check if the recipient contract has implemented the receiveApproval function. This could lead to a reentrancy attack where the recipient contract calls back into the token contract during the transfer, potentially allowing the attacker to execute arbitrary code."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable { uint amount = msg.value / buyPrice; if (balanceOf[this] < amount) throw; balanceOf[msg.sender] += amount; balanceOf[this] -= amount; Transfer(this, msg.sender, amount); }",
+            "vulnerability": "Reentrancy",
+            "reason": "The buy function does not check if the recipient contract has implemented the receiveApproval function. This could lead to a reentrancy attack where the recipient contract calls back into the token contract during the transfer, potentially allowing the attacker to execute arbitrary code."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) { if (balanceOf[msg.sender] < amount ) throw; balanceOf[this] += amount; balanceOf[msg.sender] -= amount; if (!msg.sender.send(amount * sellPrice)) { throw; } else { Transfer(msg.sender, this, amount); } }",
+            "vulnerability": "Reentrancy",
+            "reason": "The sell function does not check if the recipient contract has implemented the receiveApproval function. This could lead to a reentrancy attack where the recipient contract calls back into the token contract during the transfer, potentially allowing the attacker to execute arbitrary code."
+        }
+    ]
+}

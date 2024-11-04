@@ -1,0 +1,35 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool success) { _transfer(msg.sender, _to, _value); return true; }",
+            "vulnerability": "Unchecked Return Value",
+            "reason": "The transfer function does not check if the transfer was successful. If the transfer fails, the function will return true, but the transaction will fail. This can be exploited by attackers to steal tokens from users."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) { require(_value <= allowance[_from][msg.sender]);     allowance[_from][msg.sender] -= _value; _transfer(_from, _to, _value); return true; }",
+            "vulnerability": "Unchecked Return Value",
+            "reason": "The transferFrom function does not check if the transfer was successful. If the transfer fails, the function will return true, but the transaction will fail. This can be exploited by attackers to steal tokens from users."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) { require(balanceOf[msg.sender] >= _value);   balanceOf[msg.sender] -= _value;            totalSupply -= _value;                      emit Burn(msg.sender, _value); return true; }",
+            "vulnerability": "Unchecked Return Value",
+            "reason": "The burn function does not check if the burn was successful. If the burn fails, the function will return true, but the transaction will fail. This can be exploited by attackers to steal tokens from users."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) public returns (bool success) { require(balanceOf[_from] >= _value);                require(_value <= allowance[_from][msg.sender]);    balanceOf[_from] -= _value;                         allowance[_from][msg.sender] -= _value;             totalSupply -= _value;                              emit Burn(_from, _value); return true; }",
+            "vulnerability": "Unchecked Return Value",
+            "reason": "The burnFrom function does not check if the burn was successful. If the burn fails, the function will return true, but the transaction will fail. This can be exploited by attackers to steal tokens from users."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) { require(balanceOf[msg.sender] >= _value);   balanceOf[msg.sender] -= _value;            totalSupply -= _value;                      emit Burn(msg.sender, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function does not check if the totalSupply will overflow. If the totalSupply is too large, the function will fail. This can be exploited by attackers to steal tokens from users."
+        }
+    ]
+}

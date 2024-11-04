@@ -1,0 +1,63 @@
+{
+"output_list": [
+{
+"function_name": "transfer",
+"code": "require(_to != address(0)); require(_value > 0 && _value <= balances[msg.sender]); balances[msg.sender] = balances[msg.sender].sub(_value); balances[_to] = balances[_to].add(_value); Transfer(msg.sender, _to, _value); return true;",
+"vulnerability": "Integer Overflow/Underflow Vulnerability",
+"reason": "The function uses SafeMath library for arithmetic operations, but it does not check if the result of the operation is greater than or equal to zero. This can lead to an integer overflow if the value being subtracted from the balance is too large."
+},
+{
+"function_name": "transferFrom",
+"code": "require(_to != address(0)); require(_value > 0 && _value <= balances[_from]); balances[_from] = balances[_from].sub(_value); balances[_to] = balances[_to].add(_value); Transfer(_from, _to, _value); return true;",
+"vulnerability": "Integer Overflow/Underflow Vulnerability",
+"reason": "The function uses SafeMath library for arithmetic operations, but it does not check if the result of the operation is greater than or equal to zero. This can lead to an integer overflow if the value being subtracted from the balance is too large."
+},
+{
+"function_name": "approve",
+"code": "require(_spender != address(0)); allowed[msg.sender][_spender] = _value; Approval(msg.sender, _spender, _value); return true;",
+"vulnerability": "Integer Overflow/Underflow Vulnerability",
+"reason": "The function uses SafeMath library for arithmetic operations, but it does not check if the result of the operation is greater than or equal to zero. This can lead to an integer overflow if the value being subtracted from the balance is too large."
+},
+{
+"function_name": "batchTransfer",
+"code": "require(cnt > 0 && cnt <= 20); require(_value > 0 && balances[msg.sender] >= amount); balances[msg.sender] = balances[msg.sender].sub(amount); for (uint i = 0; i < cnt; i++) { balances[_receivers[i]] = balances[_receivers[i]].add(_value); Transfer(msg.sender, _receivers[i], _value); } return true;",
+"vulnerability": "Integer Overflow/Underflow Vulnerability",
+"reason": "The function uses SafeMath library for arithmetic operations, but it does not check if the result of the operation is greater than or equal to zero. This can lead to an integer overflow if the value being subtracted from the balance is too large."
+},
+{
+"function_name": "pause",
+"code": "require(msg.sender == owner); paused = true; Pause();",
+"vulnerability": "Privilege Escalation Vulnerability",
+"reason": "The function allows anyone with the address of the contract owner to pause the contract, which could be exploited by an attacker who has access to the owner's private key."
+},
+{
+"function_name": "unpause",
+"code": "require(msg.sender == owner); paused = false; Unpause();",
+"vulnerability": "Privilege Escalation Vulnerability",
+"reason": "The function allows anyone with the address of the contract owner to unpause the contract, which could be exploited by an attacker who has access to the owner's private key."
+},
+{
+"function_name": "transferOwnership",
+"code": "require(newOwner != address(0)); OwnershipTransferred(owner, newOwner); owner = newOwner;",
+"vulnerability": "Privilege Escalation Vulnerability",
+"reason": "The function allows anyone with the address of the contract owner to transfer ownership to a new address, which could be exploited by an attacker who has access to the owner's private key."
+},
+{
+"function_name": "pause",
+"code": "require(msg.sender == owner); paused = true; Pause();",
+"vulnerability": "Privilege Escalation Vulnerability",
+"reason": "The function allows anyone with the address of the contract owner to pause the contract, which could be exploited by an attacker who has access to the owner's private key."
+},
+{
+"function_name": "unpause",
+"code": "require(msg.sender == owner); paused = false; Unpause();",
+"vulnerability": "Privilege Escalation Vulnerability",
+"reason": "The function allows anyone with the address of the contract owner to unpause the contract, which could be exploited by an attacker who has access to the owner's private key."
+},
+{
+"function_name": "transferOwnership",
+"code": "require(newOwner != address(0)); OwnershipTransferred(owner, newOwner); owner = newOwner;",
+"vulnerability": "Privilege Escalation Vulnerability",
+"reason": "The function allows anyone with the address of the contract owner to transfer ownership to a new address, which could be exploited by an attacker who has access to the owner's private key."
+}
+]

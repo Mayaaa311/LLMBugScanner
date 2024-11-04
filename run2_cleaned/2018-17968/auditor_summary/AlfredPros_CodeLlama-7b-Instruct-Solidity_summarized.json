@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "enter",
+            "code": "function enter(uint256 _roomId) public payable { Room storage room = allRooms[_roomId-1]; require(room.players.length < 6); require(msg.value >= room.entryPrice); room.players.push(msg.sender); room.balance += room.entryPrice; emit newPlayer(_roomId, msg.sender); if(room.players.length == 6){ executeRoom(_roomId); } }",
+            "vulnerability": "Reentrancy",
+            "reason": "The function `enter` allows users to enter the room and transfer Ether to the contract. However, the contract does not check if the `executeRoom` function has already been called for the same room. This can lead to reentrancy attacks where the `executeRoom` function is called again before the first call has finished, potentially leading to loss of funds."
+        },
+        {
+            "function_name": "executeRoom",
+            "code": "function executeRoom(uint256 _roomId) public { Room storage room = allRooms[_roomId-1]; require(room.players.length == 6); uint256 halfFee = SafeMath.div(room.entryPrice, 20); CTO.transfer(halfFee); CEO.transfer(halfFee); room.balance -= halfFee * 2; uint256 deadSeat = random(); distributeFunds(_roomId, deadSeat); delete room.players; }",
+            "vulnerability": "Reentrancy",
+            "reason": "The function `executeRoom` allows the contract owner to execute the room and distribute the funds. However, it does not check if the `distributeFunds` function has already been called for the same room. This can lead to reentrancy attacks where the `distributeFunds` function is called again before the first call has finished, potentially leading to loss of funds."
+        },
+        {
+            "function_name": "distributeFunds",
+            "code": "function distributeFunds(uint256 _roomId, uint256 _deadSeat) private returns(uint256) { Room storage room = allRooms[_roomId-1]; uint256 balanceToDistribute = SafeMath.div(room.balance,5); address victim = room.players[_deadSeat]; address[] memory winners = new address[](5); uint256 j = 0; for (uint i = 0; i<6; i++) { if(i != _deadSeat){ room.players[i].transfer(balanceToDistribute); room.balance -= balanceToDistribute; winners[j] = room.players[i]; j++; } } emit partyOver(_roomId, victim, winners); return address(this).balance; }",
+            "vulnerability": "Reentrancy",
+            "reason": "The function `distributeFunds` allows the contract owner to distribute the funds to the winners. However, it does not check if the `partyOver` event has already been emitted for the same room. This can lead to reentrancy attacks where the `partyOver` event is emitted again before the first call has finished, potentially leading to loss of funds."
+        },
+        {
+            "function_name": "refundPlayersInRoom",
+            "code": "function refundPlayersInRoom(uint256 _roomId) public onlyCTO{ Room storage room = allRooms[_roomId-1]; uint256 nbrOfPlayers = room.players.length; uint256 balanceToRefund = SafeMath.div(room.balance,nbrOfPlayers); for (uint i = 0; i<nbrOfPlayers; i++) { room.players[i].transfer(balanceToRefund); room.balance -= balanceToRefund; } emit roomRefunded(_roomId, room.players); delete room.players; }",
+            "vulnerability": "Reentrancy",
+            "reason": "The function `refundPlayersInRoom` allows the contract owner to refund the players in the room. However, it does not check if the `roomRefunded` event has already been emitted for the same room. This can lead to reentrancy attacks where the `roomRefunded` event is emitted again before the first call has finished, potentially leading to loss of funds."
+        },
+        {
+            "function_name": "random",
+            "code": "function random() private view returns (uint256) { return uint256(uint256(keccak256(block.timestamp, block.difficulty))%6); }",
+            "vulnerability": "Weak Randomness",
+            "reason": "The function `random` uses the current block timestamp and difficulty to generate a random number. However, this is not a secure randomness source and can be predicted by attackers. This can lead to unfair gameplay and loss of funds."
+        }
+    ]
+}

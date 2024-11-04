@@ -1,0 +1,35 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "setExportFee",
+            "code": "function setExportFee(address addr, uint256 fee) onlyOwner { require(addr != 0x0000000000000000000000000000000000000ff); exportFee[addr] = fee; }",
+            "vulnerability": "Vulnerability: Unauthorized Access",
+            "reason": "The function `setExportFee` allows anyone to set the export fee for a specific address. This could lead to unauthorized modification of the fee structure, potentially leading to unfair treatment of certain addresses. This vulnerability is exploitable in real-world scenarios and is beneficial to attackers."
+        },
+        {
+            "function_name": "setHoldingPeriod",
+            "code": "function setHoldingPeriod(uint256 ts) onlyOwner { mustHoldFor = ts; }",
+            "vulnerability": "Vulnerability: Unauthorized Access",
+            "reason": "The function `setHoldingPeriod` allows anyone to set the holding period for a specific address. This could lead to unauthorized modification of the holding period, potentially leading to unfair treatment of certain addresses. This vulnerability is exploitable in real-world scenarios and is beneficial to attackers."
+        },
+        {
+            "function_name": "feeFor",
+            "code": "function feeFor(address from, address to, uint256 amount) constant external returns (uint256 value) { uint256 fee = exportFee[from]; if (fee == 0) return 0; uint256 amountHeld; if (balanceOf[to] != 0) { if (validAfter[to].ts + mustHoldFor < now) amountHeld = balanceOf[to]; else amountHeld = validAfter[to].last; if (amountHeld >= singleIDXMQty) return 0; return amount*fee*(singleIDXMQty - amountHeld) / feeDivisor; } else return amount*fee / baseFeeDivisor; }",
+            "vulnerability": "Vulnerability: Information Exposure",
+            "reason": "The function `feeFor` exposes the export fee for a specific address. This could lead to information leakage, potentially leading to unfair treatment of certain addresses. This vulnerability is exploitable in real-world scenarios and is beneficial to attackers."
+        },
+        {
+            "function_name": "unlockToken",
+            "code": "function unlockToken() onlyOwner { locked = false; }",
+            "vulnerability": "Vulnerability: Unauthorized Access",
+            "reason": "The function `unlockToken` allows anyone to unlock the token. This could lead to unauthorized modification of the token state, potentially leading to unfair treatment of certain addresses. This vulnerability is exploitable in real-world scenarios and is beneficial to attackers."
+        },
+        {
+            "function_name": "precalculate",
+            "code": "function precalculate() internal returns (bool success) { baseFeeDivisor = pow10(1, feeDecimals); feeDivisor = pow10(1, feeDecimals + decimals); singleIDXMQty = pow10(1, decimals); }",
+            "vulnerability": "Vulnerability: Information Exposure",
+            "reason": "The function `precalculate` exposes the base fee divisor, fee divisor, and single IDXM quantity. This could lead to information leakage, potentially leading to unfair treatment of certain addresses. This vulnerability is exploitable in real-world scenarios and is beneficial to attackers."
+        }
+    ]
+}

@@ -93,12 +93,13 @@ def main():
         ranker_model = get_model_instance(args.ranker, prompt_path='templates/topk.txt')
     else:
         logging.info("No ranker model specified.")
+    summarizer_model = None
     if args.parser:
         logging.info(f"Initializing parser model: {args.parser}")
         summarizer_model = get_model_instance(args.parser, prompt_path='templates/summarizer.txt')
     else:
-        summarizer_model = get_model_instance("NTQAI/Nxcode-CQ-7B-orpo", prompt_path='templates/summarizer.txt')
-        logging.info("Default parser used")
+        # summarizer_model = get_model_instance("NTQAI/Nxcode-CQ-7B-orpo", prompt_path='templates/summarizer.txt')
+        logging.info("No ranker model specified.")
     logging.info("Initializing BugScanner with the given models...")
     detector = BugScanner(
         auditor_models=auditor_models,
@@ -120,7 +121,7 @@ def main():
     file_start_time = time.time()  # Start timing for each file
 
 
-    output_name = args.output_folder+f"/k{args.topk}_n{len(auditor_models)}_"+datetime.now().strftime("%Y-%m-%d_%H-%M-%S.log")
+    output_name = args.output_folder+f"/k{args.topk}_n{len(auditor_models)}_"+datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
     logging.info(f"Output will be saved in: {output_name}")
 

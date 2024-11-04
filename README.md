@@ -35,18 +35,16 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. install models 
-
-Follow instruction here to install Ollama models: https://github.com/ollama/ollama 
 
 ### 5. Run the Example
 
 ```sh
-python src/main.py
+python src/bugscanner_cli.py -a NTQAI/Nxcode-CQ-7B-orpo  -c m-a-p/OpenCodeInterpreter-DS-6.7B -r NTQAI/Nxcode-CQ-7B-orpo -d data -o result_test_pipe -k 5 -log logs_nov3
 ```
 
+### if running +10 data, recomend using run_batch folder's method
 
-## Currently Supported Models: 
+## Currently Tested Model: 
 | AlfredPros/CodeLlama-7b-Instruct-Solidity   | Huggingface_LLM | https://huggingface.co/AlfredPros/CodeLlama-7b-Instruct-Solidity   | 7B   |
 |---------------------------------------------|-----------------|--------------------------------------------------------------------|------|
 | m-a-p/OpenCodeInterpreter-DS-6.7B           | Huggingface_LLM | https://huggingface.co/m-a-p/OpenCodeInterpreter-DS-6.7B           | 6.7B |
@@ -63,23 +61,19 @@ python src/main.py
 
 ## Example Creating Model objects
 
-ChatOllamaLLM(model_id="deepseek-coder-v2",model_params_path="config/temp0.json"),
-ChatOllamaLLM(model_id="codeqwen",model_params_path="config/temp0.json"),
-ChatOllamaLLM(model_id="llama3",model_params_path="config/temp0.json"),
-ChatOllamaLLM(model_id="codellama",model_params_path="config/temp0.json"),
-ChatOllamaLLM(model_id="starcoder2",model_params_path="config/temp0.json"),
-Huggingface_LLM(model_id="AlfredPros/CodeLlama-7b-Instruct-Solidity", model_params_path = "config/temp0.json")
-LlamaCpp_LLM(model_id="bartowski/Nxcode-CQ-7B-orpo-GGUF", model_path="Nxcode-CQ-7B-orpo-IQ1_M.gguf",model_params_path="config/temp0.json")
 
+## Commands for testing
 salloc --ntasks-per-node=60 --gpus=7
 module load anaconda3/2023.03
 conda activate /home/hice1/yyuan394/scratch/env
+
 python src/bugscanner_cli.py -a  AlfredPros/CodeLlama-7b-Instruct-Solidity -c m-a-p/OpenCodeInterpreter-DS-6.7B -r m-a-p/OpenCodeInterpreter-DS-6.7B -p m-a-p/OpenCodeInterpreter-DS-6.7B -d data_2 -o result_test_parser/trail3 -k 5 -log logs_oct1
-<!-- python3 src/main.py -->
+
+### multiple auditors
 python src/bugscanner_cli.py -a AlfredPros/CodeLlama-7b-Instruct-Solidity m-a-p/OpenCodeInterpreter-DS-6.7B NTQAI/Nxcode-CQ-7B-orpo -c m-a-p/OpenCodeInterpreter-DS-6.7B -r NTQAI/Nxcode-CQ-7B-orpo -d data -o result_test_parser -k 5 -log logs_oct1
 
-
-python src/bugscanner_cli.py -a AlfredPros/CodeLlama-7b-Instruct-Solidity -c m-a-p/OpenCodeInterpreter-DS-6.7B -r NTQAI/Nxcode-CQ-7B-orpo -d data -o result_test_parser -k 5 -log logs_oct1
+### single auditor(currently testing on)
+python src/bugscanner_cli.py -a NTQAI/Nxcode-CQ-7B-orpo  -c m-a-p/OpenCodeInterpreter-DS-6.7B -r NTQAI/Nxcode-CQ-7B-orpo -d data -o result_test_pipe -k 5 -log logs_nov3
 
 
  <!-- m-a-p/OpenCodeInterpreter-DS-6.7B NTQAI/Nxcode-CQ-7B-orpo  -->

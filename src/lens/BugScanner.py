@@ -129,7 +129,6 @@ class BugScanner:
                     print("FILEPATH: ", file_path)
                     with open(file_path, "r") as f:
                         o = f.read()
-                        print("output to summarize", o)
                         func(o, write_to, *args, **kwargs, idx = auditor_idx) 
 
                 result.append(write_to)
@@ -185,7 +184,6 @@ class BugScanner:
                     print("dataname: ",name[-2])
                     response = self.llm_summarizer.invoke({"dataname": name[-2], "inputjson":o})
                     write_to_file(write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized{i}.csv", str(response))
-
 
 
 

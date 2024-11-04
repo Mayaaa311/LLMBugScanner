@@ -1,0 +1,28 @@
+
+
+### Solution:
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) {require(_to != address(0));require(_value <= balances[msg.sender]);balances[msg.sender] = balances[msg.sender].sub(_value);balances[_to] = balances[_to].add(_value);emit Transfer(msg.sender, _to, _value);return true;}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transfer() has a potential integer overflow vulnerability. The function uses the SafeMath library to prevent overflows, but the library is not used correctly. The function uses the add() function from SafeMath, which can overflow if the sum of the two values exceeds 2^256. The function also uses the sub() function from SafeMath, which can underflow if the difference between the two values is less than 0. The function does not check for overflows or underflows, which can lead to unexpected behavior and potentially exploitable bugs."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) onlyPayloadSize(3 * 32) public returns (bool success) {require(_to != address(0));require(_value <= balances[_from]);require(_value <= allowed[_from][msg.sender]);balances[_from] = balances[_from].sub(_value);allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);balances[_to] = balances[_to].add(_value);emit Transfer(_from, _to, _value);return true;}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transferFrom() has a potential integer overflow vulnerability. The function uses the SafeMath library to prevent overflows, but the library is not used correctly. The function uses the add() function from SafeMath, which can overflow if the sum of the two values exceeds 2^256. The function also uses the sub() function from SafeMath, which can underflow if the difference between the two values is less than 0. The function does not check for overflows or underflows, which can lead to unexpected behavior and potentially exploitable bugs."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public returns (bool success) {if (_value != 0 && allowed[msg.sender][_spender] != 0) {return false;}allowed[msg.sender][_spender] = _value;emit Approval(msg.sender, _spender, _value);return true;}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function approve() has a potential integer overflow vulnerability. The function uses the SafeMath library to prevent overflows, but the library is not used correctly. The function uses the add() function from SafeMath, which can overflow if the sum of the two values exceeds 2^256. The function also uses the sub() function from SafeMath, which can underflow if the difference between the two values is less than 0. The function does not check for overflows or underflows, which can lead to unexpected behavior and potentially exploitable bugs."
+        },
+        {
+            "function_name": "distr",
+            "code": "function distr(address _to, uint256 _amount) canDistr private returns (bool) {totalDistributed = totalDistributed.add(_amount);totalRemaining = totalRemaining.sub(_amount);balances[_to] = balances[_to].add(_amount);emit Distr(_to, _amount);emit Transfer(address(0), _to, _amount);return true;}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function distr() has a potential integer overflow vulnerability. The function uses the SafeMath library to prevent overflows, but the library is not used correctly. The function uses the add() function from SafeMath, which can overflow if the sum of the two values exceeds 2^256. The function also uses the sub() function from SafeMath, which can underflow if the difference between the two values is less than 0.

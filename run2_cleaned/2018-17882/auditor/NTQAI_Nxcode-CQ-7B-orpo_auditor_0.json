@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "safeAdd",
+            "code": "function safeAdd(uint256 a, uint256 b) internal pure returns (uint256) { uint256 c = a + b; assert(c >= a); return c; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `safeAdd` is used to add two unsigned integers `a` and `b`. However, it does not handle the case where the sum of `a` and `b` exceeds the maximum value that can be represented by an unsigned integer. This can lead to an integer overflow, which can cause the contract to behave unexpectedly or even crash. This vulnerability can be exploited by an attacker who can manipulate the input values to cause the contract to perform an invalid operation."
+        },
+        {
+            "function_name": "safeSub",
+            "code": "function safeSub(uint256 a, uint256 b) internal pure returns (uint256) { assert(b <= a); return a - b; }",
+            "vulnerability": "Integer Underflow",
+            "reason": "The function `safeSub` is used to subtract two unsigned integers `a` and `b`. However, it does not handle the case where `b` is greater than `a`. This can lead to an integer underflow, which can cause the contract to behave unexpectedly or even crash. This vulnerability can be exploited by an attacker who can manipulate the input values to cause the contract to perform an invalid operation."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool success) { balances[msg.sender] = safeSub(balances[msg.sender], _value); balances[_to] = safeAdd(balances[_to], _value); Transfer(msg.sender, _to, _value); return true; }",
+            "vulnerability": "Unchecked Return Value",
+            "reason": "The function `transfer` is used to transfer tokens from the sender's account to another account. However, it does not check whether the transfer was successful. If the transfer fails for any reason (e.g. insufficient balance), the function will still return `true`, which can lead to confusion and potential security issues. This vulnerability can be exploited by an attacker who can manipulate the input values to cause the transfer to fail, but still return `true`. This can be mitigated by adding a check for the success of the transfer and reverting the transaction if the transfer fails."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) { balances[_to] = safeAdd(balances[_to], _value); balances[_from] = safeSub(balances[_from], _value); if (_to != fights) { allowed[_from][msg.sender] = safeSub(allowed[_from][msg.sender], _value); } Transfer(_from, _to, _value); return true; }",
+            "vulnerability": "Unchecked Return Value",
+            "reason": "The function `transferFrom` is used to transfer tokens from one account to another on behalf of another account. However, it does not check whether the transfer was successful. If the transfer fails for any reason (e.g. insufficient balance), the function will still return `true`, which can lead to confusion and potential security issues. This vulnerability can be exploited by an attacker who can manipulate the input values to cause the transfer to fail, but still return `true`. This can be mitigated by adding a check for the success of the transfer and reverting the transaction if the transfer fails."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _to, uint _value) public { balances[msg.sender] = safeSub(balances[msg.sender], _to.length * _value); for (uint i = 0; i < _to.length; i++) { balances[_to[i]] = safeAdd(balances[_to[i]], _value); Transfer(msg.sender, _to[i], _value); } }",
+            "vulnerability": "Unchecked Return Value",
+            "reason": "The function `batchTransfer` is used to transfer tokens from the sender's account to multiple accounts in a single transaction. However, it does not check whether each transfer was successful. If any transfer fails for any reason (e.g. insufficient balance), the function will still continue to transfer the remaining tokens, which can lead to confusion and potential security issues. This vulnerability can be exploited by an attacker who can manipulate the input values to cause some of the transfers to fail, but still return `true`. This can be mitigated by adding a check for the success of each transfer and reverting the transaction if any transfer fails."
+        }
+    ]
+}

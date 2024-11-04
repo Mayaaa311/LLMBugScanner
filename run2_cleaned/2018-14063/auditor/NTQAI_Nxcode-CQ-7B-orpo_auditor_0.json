@@ -1,0 +1,68 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _amount) notThisContract(_to) returns (bool success) {
+                require(_to != 0x0);
+                require(_amount > 0);
+                require(balances[msg.sender] >= _amount);
+                require(balances[_to] + _amount > balances[_to]);
+                balances[msg.sender] -= _amount;
+                balances[_to] += _amount;
+                Transfer(msg.sender, _to, _amount);
+                return true;
+            }",
+            "vulnerability": "Reentrancy",
+            "reason": "The transfer function does not check if the recipient contract is a contract or not. If the recipient contract is a contract, it may revert the transaction and cause the sender's balance to be reduced. This vulnerability can be exploited by a malicious contract that calls the transfer function and then reverts. This can lead to a loss of funds for the sender."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _amount) notThisContract(_to) returns (bool success) {
+                require(balances[_from] >= _amount);
+                require(allowed[_from][msg.sender] >= _amount);
+                require(_amount > 0);
+                require(balances[_to] + _amount > balances[_to]);
+                balances[_from] -= _amount;
+                allowed[_from][msg.sender] -= _amount;
+                balances[_to] += _amount;
+                Transfer(_from, _to, _amount);
+                return true;
+            }",
+            "vulnerability": "Reentrancy",
+            "reason": "The transferFrom function does not check if the recipient contract is a contract or not. If the recipient contract is a contract, it may revert the transaction and cause the sender's balance to be reduced. This vulnerability can be exploited by a malicious contract that calls the transferFrom function and then reverts. This can lead to a loss of funds for the sender."
+        },
+        {
+            "function_name": "increaseApproval",
+            "code": "function increaseApproval (address _spender, uint _addedValue) returns (bool success) {
+                allowed[msg.sender][_spender] += _addedValue;
+                Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+                return true;
+            }",
+            "vulnerability": "Front-running",
+            "reason": "The increaseApproval function does not check if the spender is a contract or not. If the spender is a contract, it may revert the transaction and cause the sender's allowance to be reduced. This vulnerability can be exploited by a malicious contract that calls the increaseApproval function and then reverts. This can lead to a loss of funds for the sender."
+        },
+        {
+            "function_name": "decreaseApproval",
+            "code": "function decreaseApproval (address _spender, uint _subtractedValue) returns (bool success) {
+                uint oldValue = allowed[msg.sender][_spender];
+                if (_subtractedValue > oldValue) {
+                    allowed[msg.sender][_spender] = 0;
+                } else {
+                    allowed[msg.sender][_spender] -= _subtractedValue;
+                }
+                Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+                return true;
+            }",
+            "vulnerability": "Front-running",
+            "reason": "The decreaseApproval function does not check if the spender is a contract or not. If the spender is a contract, it may revert the transaction and cause the sender's allowance to be reduced. This vulnerability can be exploited by a malicious contract that calls the decreaseApproval function and then reverts. This can lead to a loss of funds for the sender."
+        },
+        {
+            "function_name": "transferOwnership",
+            "code": "function transferOwnership(address newOwner) onlyOwner {
+                owner = newOwner;
+            }",
+            "vulnerability": "Ownership Transfer",
+            "reason": "The transferOwnership function does not check if the new owner is a contract or not. If the new owner is a contract, it may revert the transaction and cause the ownership to be transferred to the contract. This vulnerability can be exploited by a malicious contract that calls the transferOwnership function and then reverts. This can lead to a loss of funds for the contract."
+        }
+    ]
+}

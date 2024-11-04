@@ -1,0 +1,25 @@
+
+
+### Solution:
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) {require(_to != address(0));require(_value > 0 && _value <= balances[msg.sender]);balances[msg.sender] = balances[msg.sender].sub(_value);balances[_to] = balances[_to].add(_value);Transfer(msg.sender, _to, _value);return true;}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transfer() has a potential integer overflow vulnerability. The function uses the SafeMath library to prevent overflows, but the library does not provide a function to prevent underflows. An attacker could exploit this vulnerability by sending a large amount of tokens to the contract, causing the contract to run out of gas and revert the transaction."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {require(_to != address(0));require(_value > 0 && _value <= balances[_from]);require(_value <= allowed[_from][msg.sender]);balances[_from] = balances[_from].sub(_value);balances[_to] = balances[_to].add(_value);allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);Transfer(_from, _to, _value);return true;}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transferFrom() has a potential integer overflow vulnerability. The function uses the SafeMath library to prevent overflows, but the library does not provide a function to prevent underflows. An attacker could exploit this vulnerability by sending a large amount of tokens to the contract, causing the contract to run out of gas and revert the transaction."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {uint cnt = _receivers.length;uint256 amount = uint256(cnt) * _value;require(cnt > 0 && cnt <= 20);require(_value > 0 && balances[msg.sender] >= amount);balances[msg.sender] = balances[msg.sender].sub(amount);for (uint i = 0; i < cnt; i++) {balances[_receivers[i]] = balances[_receivers[i]].add(_value);Transfer(msg.sender, _receivers[i], _value);}}return true;}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function batchTransfer() has a potential integer overflow vulnerability. The function uses the SafeMath library to prevent overflows, but the library does not provide a function to prevent underflows. An attacker could exploit this vulnerability by sending a large amount of tokens to the contract, causing the contract to run out of gas and revert the transaction."
+        }
+    ]
+}

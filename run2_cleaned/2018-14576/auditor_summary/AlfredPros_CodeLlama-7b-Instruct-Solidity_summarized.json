@@ -1,0 +1,74 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) {
+    if (block.number < tokenFrozenUntilBlock) throw;   
+    if (restrictedAddresses[_to]) throw;               
+    if (balances[msg.sender] < _value) throw;          
+    if (balances[_to] + _value < balances[_to]) throw; 
+    balances[msg.sender] -= _value;                    
+    balances[_to] += _value;                           
+    Transfer(msg.sender, _to, _value);                 
+    return true;
+}",
+            "vulnerability": "Reentrancy vulnerability",
+            "reason": "The transfer function does not check if the recipient contract has implemented the receiveApproval function. This could lead to a reentrancy attack where the recipient contract calls back into the SunContractToken contract before the transfer is complete, allowing the attacker to execute additional code."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {           
+    tokenRecipient spender = tokenRecipient(_spender);             
+    approve(_spender, _value);                                     
+    spender.receiveApproval(msg.sender, _value, this, _extraData); 
+    return true;    
+}",
+            "vulnerability": "Reentrancy vulnerability",
+            "reason": "The approveAndCall function does not check if the recipient contract has implemented the receiveApproval function. This could lead to a reentrancy attack where the recipient contract calls back into the SunContractToken contract before the approval is complete, allowing the attacker to execute additional code."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {     
+    if (block.number < tokenFrozenUntilBlock) throw;   
+    if (restrictedAddresses[_to]) throw;               
+    if (balances[_from] < _value) throw;               
+    if (balances[_to] + _value < balances[_to]) throw; 
+    if (_value > allowances[_from][msg.sender]) throw; 
+    balances[_from] -= _value;                         
+    balances[_to] += _value;                           
+    allowances[_from][msg.sender] -= _value;           
+    Transfer(_from, _to, _value);                      
+    return true;    
+}",
+            "vulnerability": "Reentrancy vulnerability",
+            "reason": "The transferFrom function does not check if the recipient contract has implemented the receiveApproval function. This could lead to a reentrancy attack where the recipient contract calls back into the SunContractToken contract before the transfer is complete, allowing the attacker to execute additional code."
+        },
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(address _to, uint256 _amount) {        
+    if (msg.sender != icoContractAddress) throw;           
+    if (restrictedAddresses[_to]) throw;                   
+    if (balances[_to] + _amount < balances[_to]) throw;    
+    supply += _amount;                                     
+    balances[_to] += _amount;                              
+    Mint(_to, _amount);                                    
+    Transfer(0x0, _to, _amount);                           
+}",
+            "vulnerability": "Unauthorized minting",
+            "reason": "The mintTokens function allows anyone to mint tokens, which is not authorized. This could lead to a loss of funds if the contract is exploited."
+        },
+        {
+            "function_name": "burnTokens",
+            "code": "function burnTokens(uint256 _amount) onlyOwner {
+    if(balances[msg.sender] < _amount) throw;              
+    if(supply < _amount) throw;                            
+    supply -= _amount;                                     
+    balances[msg.sender] -= _amount;                       
+    Burn(msg.sender, _amount);                             
+    Transfer(msg.sender, 0x0, _amount);                    
+}",
+            "vulnerability": "Unauthorized burning",
+            "reason": "The burnTokens function allows anyone to burn tokens, which is not authorized. This could lead to a loss of funds if the contract is exploited."
+        }
+    ]
+}

@@ -1,0 +1,34 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool success) {\n        _transfer(msg.sender, _to, _value);\n        return true;\n    }",
+            "vulnerability": "Arbitrary Transfer of Tokens",
+            "reason": "The function `transfer` does not check if the recipient address is valid (i.e., is not 0x0). An attacker can specify a contract as the recipient, and if that contract has a fallback function (or receive function in Solidity 0.6.x and later), it could execute arbitrary code with the attacker's privileges, leading to token theft."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) {\n        require(balanceOf[msg.sender] >= _value);   \n        balanceOf[msg.sender] -= _value;            \n        totalSupply -= _value;                      \n        emit Burn(msg.sender, _value);\n        return true;\n    }",
+            "vulnerability": "Front Running of Burn Function",
+            "reason": "The `burn` function does not consider the possibility of front-running. An attacker could observe a transaction to the `burn` function, then immediately call the `burn` function themselves with the same parameters to burn more tokens than intended, effectively stealing tokens from the original caller."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {\n        require(_value <= allowance[_from][msg.sender]);     \n        allowance[_from][msg.sender] -= _value;\n        _transfer(_from, _to, _value);\n        return true;\n    }",
+            "vulnerability": "Insufficient Approval Check",
+            "reason": "The function `transferFrom` does not check if the allowance is sufficient when transferring tokens on behalf of another user. This allows an attacker to transfer tokens that were not approved by the owner, effectively stealing tokens from the owner."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) public returns (bool success) {\n        require(balanceOf[_from] >= _value);                \n        require(_value <= allowance[_from][msg.sender]);    \n        balanceOf[_from] -= _value;                         \n        allowance[_from][msg.sender] -= _value;             \n        totalSupply -= _value;                              \n        emit Burn(_from, _value);\n        return true;\n    }",
+            "vulnerability": "Double Spending in Burn Function",
+            "reason": "The `burnFrom` function allows an attacker to burn tokens that the owner has not yet approved for transfer. By calling `burnFrom` multiple times with the same parameters, an attacker can effectively double-spend tokens, burning more than the owner intended."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal {\n        require(_to != 0x0);\n        require(balanceOf[_from] >= _value);\n        require(balanceOf[_to] + _value >= balanceOf[_to]);\n        uint previousBalances = balanceOf[_from] + balanceOf[_to];\n        balanceOf[_from] -= _value;\n        balanceOf[_to] += _value;\n        emit Transfer(_from, _to, _value);\n        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);\n    }",
+            "vulnerability": "Integer Overflow in Transfer",
+            "reason": "The `_transfer` function does not protect against integer overflow when updating the balance of the recipient. If an attacker can manipulate the `_to` address to cause an overflow, they can gain tokens from other users without their knowledge."
+        }
+    ]
+}

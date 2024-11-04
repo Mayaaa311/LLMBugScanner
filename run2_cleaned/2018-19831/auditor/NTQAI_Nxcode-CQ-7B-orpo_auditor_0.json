@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "balanceOf",
+            "code": "function balanceOf(address _owner) constant public returns (uint256) { t    return balances[_owner]; t}",
+            "vulnerability": "Vulnerability: Reentrancy",
+            "reason": "The balanceOf function does not check if the transfer operation is successful. If the transfer operation fails, the balance of the sender will not be reduced, which may lead to incorrect balance information. This vulnerability can be exploited by an attacker who can manipulate the transfer operation to increase the balance of the sender."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _amount) onlyPayloadSize(2 * 32) public returns (bool success) { t    require(_to != address(0)); t    require(_amount <= balances[msg.sender]); t    balances[msg.sender] = balances[msg.sender].sub(_amount); t    balances[_to] = balances[_to].add(_amount); t    Transfer(msg.sender, _to, _amount); t    return true; t}",
+            "vulnerability": "Vulnerability: Reentrancy",
+            "reason": "The transfer function does not check if the transfer operation is successful. If the transfer operation fails, the balance of the sender will not be reduced, which may lead to incorrect balance information. This vulnerability can be exploited by an attacker who can manipulate the transfer operation to increase the balance of the sender."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _amount) onlyPayloadSize(3 * 32) public returns (bool success) { t    require(_to != address(0)); t    require(_amount <= balances[_from]); t    require(_amount <= allowed[_from][msg.sender]); t    balances[_from] = balances[_from].sub(_amount); t    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount); t    balances[_to] = balances[_to].add(_amount); t    Transfer(_from, _to, _amount); t    return true; t}",
+            "vulnerability": "Vulnerability: Reentrancy",
+            "reason": "The transferFrom function does not check if the transfer operation is successful. If the transfer operation fails, the balance of the sender will not be reduced, which may lead to incorrect balance information. This vulnerability can be exploited by an attacker who can manipulate the transfer operation to increase the balance of the sender."
+        },
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr onlyWhitelist public { t    require(value <= totalRemaining); t    address investor = msg.sender; t    uint256 toGive = value; t    if (msg.value < minReq){ t        toGive = value.sub(value); t    } t    distr(investor, toGive); t    if (toGive > 0) { t        blacklist[investor] = true; t    } t    if (totalDistributed >= totalSupply) { t        distributionFinished = true; t    } t}",
+            "vulnerability": "Vulnerability: Reentrancy",
+            "reason": "The getTokens function does not check if the transfer operation is successful. If the transfer operation fails, the balance of the sender will not be reduced, which may lead to incorrect balance information. This vulnerability can be exploited by an attacker who can manipulate the transfer operation to increase the balance of the sender."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) onlyOwner public { t    require(_value <= balances[msg.sender]); t    address burner = msg.sender; t    balances[burner] = balances[burner].sub(_value); t    totalSupply = totalSupply.sub(_value); t    totalDistributed = totalDistributed.sub(_value); t    Burn(burner, _value); t}",
+            "vulnerability": "Vulnerability: Reentrancy",
+            "reason": "The burn function does not check if the transfer operation is successful. If the transfer operation fails, the balance of the sender will not be reduced, which may lead to incorrect balance information. This vulnerability can be exploited by an attacker who can manipulate the transfer operation to increase the balance of the sender."
+        }
+    ]
+}
