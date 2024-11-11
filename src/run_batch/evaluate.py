@@ -3,8 +3,8 @@ import csv
 import json
 
 # Path to the base folder and JSON file
-base_folder = '/home/hice1/yyuan394/scratch/LLMBugScanner/result_test_parser/trail3/k5_n1_2024-10-18_04-49-35.log/'
-json_file_path = '/home/hice1/yyuan394/scratch/LLMBugScanner/data_full/CVE_label/CVElabel3_full.json'
+base_folder = 'result_batches_run3/'
+json_file_path = 'data_full/CVE_label/CVElabel3_full.json'
 
 # Load JSON data
 with open(json_file_path, 'r') as jsonfile:
@@ -78,7 +78,7 @@ def process_folder(folder_path, json_data):
     dataname = os.path.basename(folder_path)
     
     # Path to the file inside the folder
-    file_path = os.path.join(folder_path, 'final_output/m-a-p_OpenCodeInterpreter-DS-6.7B_summarized0.json')
+    file_path = os.path.join(folder_path, 'final_output/AlfredPros_CodeLlama-7b-Instruct-Solidity_summarized0.csv')
     
     # Check if the file exists
     if os.path.exists(file_path):
@@ -118,7 +118,7 @@ for result in all_comparison_results:
     print(result)
 
 # Optional: Save the results to a CSV
-output_csv_path = 'all_comparison_results.csv'
+output_csv_path = 'result_batches_run3/evaluation.csv'
 with open(output_csv_path, mode='w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(['dataname', 'vulnerability', 'function_name', 'match'])
