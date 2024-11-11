@@ -1,0 +1,88 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) {
+            if(funding) throw;
+            if(!allowTransfer)throw;
+            var senderBalance = balances[msg.sender];
+            if (senderBalance >= _value && _value > 0) {
+                senderBalance -= _value;
+                balances[msg.sender] = senderBalance;
+                balances[_to] += _value;
+                lastTransferred[msg.sender]=block.timestamp;
+                Transfer(msg.sender, _to, _value);
+                return true;
+            }
+            return false;
+        }",
+            "vulnerability": "Reentrancy Vulnerability",
+            "reason": "The transfer function is vulnerable to reentrancy attacks. It allows the sender to call the transfer function again within the same transaction, leading to potential loss of funds. This can be exploited by malicious actors to drain the contract's balance."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _amount) returns (bool success) {
+            if(funding) throw;
+            if(!allowTransfer)throw;
+            allowed[msg.sender][_spender] = _amount;
+            Approval(msg.sender, _spender, _amount);
+            return true;
+        }",
+            "vulnerability": "Reentrancy Vulnerability",
+            "reason": "The approve function is vulnerable to reentrancy attacks. It allows the sender to call the approve function again within the same transaction, leading to potential loss of funds. This can be exploited by malicious actors to drain the contract's balance."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from,address _to,uint256 _amount) returns (bool success) {
+            if(funding) throw;
+            if(!allowTransfer)throw;
+            if (balances[_from] >= _amount
+                && allowed[_from][msg.sender] >= _amount
+                && _amount > 0
+                && balances[_to] + _amount > balances[_to]) {
+                balances[_from] -= _amount;
+                allowed[_from][msg.sender] -= _amount;
+                balances[_to] += _amount;
+                Transfer(_from, _to, _amount);
+                return true;
+            } else {
+                return false;
+            }
+        }",
+            "vulnerability": "Reentrancy Vulnerability",
+            "reason": "The transferFrom function is vulnerable to reentrancy attacks. It allows the sender to call the transferFrom function again within the same transaction, leading to potential loss of funds. This can be exploited by malicious actors to drain the contract's balance."
+        },
+        {
+            "function_name": "finalize",
+            "code": "function finalize(uint percentOfTotal) external {
+            if(msg.sender!=master)throw;
+            if(funding)throw;
+            funding = false;
+            uint256 additionalTokens = totalTokens * percentOfTotal / (100 - percentOfTotal);
+            totalTokens += additionalTokens;
+            balances[master] += additionalTokens;
+            Transfer(0, master, additionalTokens);
+            if (!master.send(this.balance)) throw;
+        }",
+            "vulnerability": "Unauthorized Access",
+            "reason": "The finalize function is vulnerable to unauthorized access. Only the master address can call this function, but it does not check if the caller is the master address. This can be exploited by malicious actors to drain the contract's balance."
+        },
+        {
+            "function_name": "refund",
+            "code": "function refund() external {
+            if(!startRefund) throw;
+            var gntValue = balances[msg.sender];
+            var ethValue = balancesEther[msg.sender];
+            if (gntValue == 0) throw;
+            balances[msg.sender] = 0;
+            balancesEther[msg.sender] = 0;
+            totalTokens -= gntValue;
+            Refund(msg.sender, ethValue);
+            if (!msg.sender.send(ethValue)) throw;
+        }",
+            "vulnerability": "Unauthorized Access",
+            "reason": "The refund function is vulnerable to unauthorized access. Only the master address can call this function, but it does not check if the caller is the master address. This can be exploited by malicious actors to drain the contract's balance."
+        }
+    ]
+}

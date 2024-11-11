@@ -1,0 +1,930 @@
+
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Reentrancy",
+            "reason": "The function can be called recursively by the callee contract and cause the state to change."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Reentrancy",
+            "reason": "The function can be called recursively by the callee contract and cause the state to change."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Reentrancy",
+            "reason": "The function can be called recursively by the callee contract and cause the state to change."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Reentrancy",
+            "reason": "The function can be called recursively by the callee contract and cause the state to change."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked return value",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked return value",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked return value",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked return value",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked call result",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked call result",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked call result",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked call result",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {\r\n    uint cnt = _receivers.length;\r\n    uint256 amount = uint256(cnt) * _value;\r\n    require(cnt > 0 && cnt <= 20);\r\n    require(_value > 0 && balances[msg.sender] >= amount);\r\n    balances[msg.sender] = balances[msg.sender].sub(amount);\r\n    for (uint i = 0; i < cnt; i++) {\r\n        balances[_receivers[i]] = balances[_receivers[i]].add(_value);\r\n        Transfer(msg.sender, _receivers[i], _value);\r\n     }\r\n    return true;\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transfer(_to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.transferFrom(_from, _to, _value);\r\n  }",
+            "vulnerability": "Unchecked low level calls",
+            "reason": "The function call may fail and the state may not be changed."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {\r\n    return super.approve(_spender, _value);\r\

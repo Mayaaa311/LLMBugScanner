@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public { uint market_value = _value * sellPrice; uint commission = market_value * 4 / 1000; if (commission < minimumCommission){ commission = minimumCommission; } address contr = this; require(contr.balance >= commission); commissionGetter.transfer(commission); _transfer(msg.sender, _to, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `transfer` calculates the commission based on the market value of the tokens to be transferred. However, the calculation of the commission is not checked for overflow. If the market value of the tokens to be transferred is too large, the commission calculation may result in an overflow, leading to incorrect commission being calculated and transferred."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) public { require(!closeSell); address contr = this; uint market_value = amount * sellPrice; uint commission = market_value * 4 / 1000; if (commission < minimumCommission){ commission = minimumCommission; } uint amount_weis = market_value + commission; require(contr.balance >= amount_weis); commissionGetter.transfer(commission); _transfer(msg.sender, this, amount); msg.sender.transfer(market_value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `sell` calculates the commission based on the market value of the tokens to be sold. However, the calculation of the commission is not checked for overflow. If the market value of the tokens to be sold is too large, the commission calculation may result in an overflow, leading to incorrect commission being calculated and transferred."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable public { require(!closeBuy); uint amount = msg.value / buyPrice; uint market_value = amount * buyPrice; uint commission = market_value * 4 / 1000; if (commission < minimumCommission){ commission = minimumCommission; } address contr = this; require(contr.balance >= commission); commissionGetter.transfer(commission); _transfer(this, msg.sender, amount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `buy` calculates the commission based on the market value of the tokens to be bought. However, the calculation of the commission is not checked for overflow. If the market value of the tokens to be bought is too large, the commission calculation may result in an overflow, leading to incorrect commission being calculated and transferred."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public { sellPrice = newSellPrice; buyPrice = newBuyPrice; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `setPrices` allows the owner to set the sell and buy prices. However, the function does not check for overflow when updating the prices. If the new prices are too large, the update may result in incorrect prices being set."
+        },
+        {
+            "function_name": "setStatus",
+            "code": "function setStatus(bool isClosedBuy, bool isClosedSell) onlyOwner public { closeBuy = isClosedBuy; closeSell = isClosedSell; }",
+            "vulnerability": "Access Control",
+            "reason": "The function `setStatus` allows the owner to close the buy and sell functionality. However, the function does not check if the caller is the owner before updating the status. An attacker could potentially call this function and close the buy and sell functionality, leading to loss of funds."
+        }
+    ]
+}

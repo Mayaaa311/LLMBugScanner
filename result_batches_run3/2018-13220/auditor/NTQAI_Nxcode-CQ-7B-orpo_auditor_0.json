@@ -1,0 +1,62 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+                if (balanceOf[msg.sender] < _value) throw;           
+                if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+                if (frozenAccount[msg.sender]) throw;                
+                balanceOf[msg.sender] -= _value;                     
+                balanceOf[_to] += _value;                            
+                Transfer(msg.sender, _to, _value);                   
+            }",
+            "vulnerability": "Access Control",
+            "reason": "The transfer function does not check if the sender has sufficient balance or if the recipient account is frozen. This could allow an attacker to transfer tokens from a frozen account, leading to a loss of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+                if (frozenAccount[_from]) throw;                        
+                if (balanceOf[_from] < _value) throw;                 
+                if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+                if (_value > allowance[_from][msg.sender]) throw;   
+                balanceOf[_from] -= _value;                          
+                balanceOf[_to] += _value;                            
+                allowance[_from][msg.sender] -= _value;
+                Transfer(_from, _to, _value);
+                return true;
+            }",
+            "vulnerability": "Access Control",
+            "reason": "The transferFrom function does not check if the sender has sufficient balance or if the recipient account is frozen. This could allow an attacker to transfer tokens from a frozen account, leading to a loss of funds."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+                balanceOf[target] += mintedAmount;
+                totalSupply += mintedAmount;
+                Transfer(0, this, mintedAmount);
+                Transfer(this, target, mintedAmount);
+            }",
+            "vulnerability": "Access Control",
+            "reason": "The mintToken function is only callable by the contract owner. This means that anyone can mint tokens, potentially leading to a loss of funds if the contract owner's account is compromised."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner {
+                frozenAccount[target] = freeze;
+                FrozenFunds(target, freeze);
+            }",
+            "vulnerability": "Access Control",
+            "reason": "The freezeAccount function is only callable by the contract owner. This means that anyone can freeze or unfreeze accounts, potentially leading to a loss of funds if the contract owner's account is compromised."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+                sellPrice = newSellPrice;
+                buyPrice = newBuyPrice;
+            }",
+            "vulnerability": "Access Control",
+            "reason": "The setPrices function is only callable by the contract owner. This means that anyone can set the sell and buy prices, potentially leading to a loss of funds if the contract owner's account is compromised."
+        }
+    ]
+}

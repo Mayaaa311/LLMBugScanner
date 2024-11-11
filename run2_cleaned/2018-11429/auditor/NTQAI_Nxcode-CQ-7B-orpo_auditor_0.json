@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address _holder, uint _value) external { require(msg.sender == ico); require(_value != 0); require(totalSupply + _value <= TOKEN_LIMIT); balances[_holder] += _value; totalSupply += _value; Transfer(0x0, _holder, _value); }",
+            "vulnerability": "Token minting limit bypass",
+            "reason": "The mint function does not check if the total supply of tokens exceeds the token limit. This could allow an attacker to mint more tokens than the limit, potentially leading to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "unfreeze",
+            "code": "function unfreeze() external { require(msg.sender == ico); tokensAreFrozen = false; }",
+            "vulnerability": "Token transfer and approval restrictions bypass",
+            "reason": "The unfreeze function allows the ICO contract to unfreeze the token transfers and approvals, which can be exploited by an attacker to bypass the token transfer and approval restrictions."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _value) public { require(!tokensAreFrozen); super.transfer(_to, _value); }",
+            "vulnerability": "Token transfer restrictions bypass",
+            "reason": "The transfer function checks if the tokens are frozen before allowing the transfer. However, the unfreeze function allows the ICO contract to unfreeze the token transfers, which can be exploited by an attacker to bypass the token transfer restrictions."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _value) public { require(!tokensAreFrozen); super.transferFrom(_from, _to, _value); }",
+            "vulnerability": "Token transfer restrictions bypass",
+            "reason": "The transferFrom function checks if the tokens are frozen before allowing the transfer. However, the unfreeze function allows the ICO contract to unfreeze the token transfers, which can be exploited by an attacker to bypass the token transfer restrictions."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint _value) public { require(!tokensAreFrozen); super.approve(_spender, _value); }",
+            "vulnerability": "Token approval restrictions bypass",
+            "reason": "The approve function checks if the tokens are frozen before allowing the approval. However, the unfreeze function allows the ICO contract to unfreeze the token approvals, which can be exploited by an attacker to bypass the token approval restrictions."
+        }
+    ]
+}

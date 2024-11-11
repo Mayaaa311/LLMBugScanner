@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) { if (balances[msg.sender] >= _value && _value > 0) { balances[msg.sender] -= _value; balances[_to] += _value; Transfer(msg.sender, _to, _value); return true; } else { return false; } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `transfer` does not check if the transfer operation will cause an integer overflow. If `_value` is very large, it may cause an integer overflow and result in incorrect balance calculations. This can be exploited by an attacker to steal tokens from users."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) { if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) { balances[_to] += _value; balances[_from] -= _value; allowed[_from][msg.sender] -= _value; Transfer(_from, _to, _value); return true; } else { return false; } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `transferFrom` does not check if the transfer operation will cause an integer overflow. If `_value` is very large, it may cause an integer overflow and result in incorrect balance calculations. This can be exploited by an attacker to steal tokens from users."
+        },
+        {
+            "function_name": "Bittelux",
+            "code": "function Bittelux() { balances[msg.sender] = 10000000000000000000000000000; totalSupply = 10000000000000000000000000000; name = "Bittelux"; decimals = 18; symbol = "BTX"; unitsOneEthCanBuy = 22500; fundsWallet = msg.sender; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The constructor of the `Bittelux` contract initializes the total supply of tokens to a very large number (10^28). This can cause an integer overflow when adding the initial supply to the `balances` mapping. This can be exploited by an attacker to steal tokens from the contract."
+        },
+        {
+            "function_name": "Bittelux",
+            "code": "function Bittelux() { balances[msg.sender] = 10000000000000000000000000000; totalSupply = 10000000000000000000000000000; name = "Bittelux"; decimals = 18; symbol = "BTX"; unitsOneEthCanBuy = 22500; fundsWallet = msg.sender; }",
+            "vulnerability": "Access Control",
+            "reason": "The constructor of the `Bittelux` contract sets the initial balance of the contract owner to a very large number (10^28). This can be exploited by an attacker to steal tokens from the contract. Additionally, the contract does not have any access control mechanism to prevent the contract owner from transferring tokens to other addresses."
+        },
+        {
+            "function_name": "Bittelux",
+            "code": "function Bittelux() { balances[msg.sender] = 10000000000000000000000000000; totalSupply = 10000000000000000000000000000; name = "Bittelux"; decimals = 18; symbol = "BTX"; unitsOneEthCanBuy = 22500; fundsWallet = msg.sender; }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor of the `Bittelux` contract initializes the total supply of tokens to a very large number (10^28). This can cause an integer overflow when adding the initial supply to the `balances` mapping. This can be exploited by an attacker to steal tokens from the contract. Additionally, the contract does not have any access control mechanism to prevent the contract owner from transferring tokens to other addresses. Finally, the constructor of the `Bittelux` contract has a typo in the variable name `totalSupply`. This can be exploited by an attacker to exploit the contract."
+        }
+    ]
+}

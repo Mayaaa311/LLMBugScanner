@@ -1,0 +1,11 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) {\n    require(_to != address(0));\n    require(_value > 0 && _value <= balances[msg.sender]);\n    balances[msg.sender] = balances[msg.sender].sub(_value);\n    balances[_to] = balances[_to].add(_value);\n    Transfer(msg.sender, _to, _value);\n    return true;\n}",
+            "vulnerability": "Arbitrary transfer of tokens",
+            "reason": "The function does not check if the contract has enough balance before transferring tokens to an address. This allows attackers to drain funds from the contract by sending a large number of transactions with small amounts."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to,

@@ -1,0 +1,72 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "balanceOf",
+            "code": "function balanceOf(address _owner) public constant returns (uint balance) {
+ttif (!created[_owner] && balances[_owner] == 0) {
+tttreturn free;
+tt}
+ttelse
+tt{
+tttreturn balances[_owner];
+tt}
+t}",
+            "vulnerability": "Uninitialized balances",
+            "reason": "The function balanceOf checks if the address has been created and if not, it returns the free balance. However, it does not check if the address has been initialized with a balance. If the address has not been initialized, the balance will be 0, which is incorrect. This can be exploited by an attacker to manipulate the balance of an address."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal {
+        require(_to != 0x0);
+        if (!created[_from]) {
+tttbalances[_from] = free;
+tttcreated[_from] = true;
+tt}
+        if (!created[_to]) {
+tttcreated[_to] = true;
+tt}
+        require(balances[_from] >= _value);
+        require(balances[_to] + _value >= balances[_to]);
+        uint previousBalances = balances[_from] + balances[_to];
+        balances[_from] -= _value;
+        balances[_to] += _value;
+        emit Transfer(_from, _to, _value);
+        assert(balances[_from] + balances[_to] == previousBalances);
+    }",
+            "vulnerability": "Uninitialized balances",
+            "reason": "The function _transfer checks if the sender and receiver addresses have been created and if not, it initializes them with the free balance. However, it does not check if the addresses have been initialized with a balance. If the addresses have not been initialized, the balance will be 0, which is incorrect. This can be exploited by an attacker to manipulate the balance of an address."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public {
+        _transfer(msg.sender, _to, _value);
+    }",
+            "vulnerability": "Uninitialized balances",
+            "reason": "The function transfer calls the _transfer function to transfer the tokens. However, it does not check if the sender and receiver addresses have been created and if not, it initializes them with the free balance. If the addresses have not been initialized, the balance will be 0, which is incorrect. This can be exploited by an attacker to manipulate the balance of an address."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);    
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }",
+            "vulnerability": "Uninitialized balances",
+            "reason": "The function transferFrom calls the _transfer function to transfer the tokens. However, it does not check if the sender and receiver addresses have been created and if not, it initializes them with the free balance. If the addresses have not been initialized, the balance will be 0, which is incorrect. This can be exploited by an attacker to manipulate the balance of an address."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) {
+        require(balances[msg.sender] >= _value);   
+        balances[msg.sender] -= _value;            
+        totalSupply -= _value;                      
+        emit Burn(msg.sender, _value);
+        return true;
+    }",
+            "vulnerability": "Uninitialized balances",
+            "reason": "The function burn checks if the sender has enough balance to burn. However, it does not check if the sender has been initialized with a balance. If the sender has not been initialized, the balance will be 0, which is incorrect. This can be exploited by an attacker to manipulate the balance of an address."
+        }
+    ]
+}

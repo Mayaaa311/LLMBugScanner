@@ -1,0 +1,72 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) {
+        require(!isblacklistedAccount[msg.sender]);
+        require(!isblacklistedAccount[_to]);
+        require(balanceOf[msg.sender] > 0);
+        require(balanceOf[msg.sender] >= _value);
+        require(_to != address(0));
+        require(_value > 0);
+        require(balanceOf[_to] .add(_value) >= balanceOf[_to]);
+        require(_to != msg.sender);
+        balanceOf[msg.sender] = balanceOf[msg.sender].sub(_value);
+        balanceOf[_to] = balanceOf[_to].add(_value);
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }",
+            "vulnerability": "Reentrancy vulnerability",
+            "reason": "The transfer function does not check if the recipient contract has implemented the ERC20Receiver interface. This could lead to reentrancy attacks where the recipient contract calls back into the token contract during the transfer, potentially leading to loss of funds or other unintended behavior."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _amount) public returns (bool success) {
+        if (balanceOf[_from] >= _amount
+            && allowed[_from][msg.sender] >= _amount
+            && _amount > 0
+            && balanceOf[_to].add(_amount) > balanceOf[_to]){
+            balanceOf[_from] = balanceOf[_from].sub(_amount);
+            allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+            balanceOf[_to] = balanceOf[_to].add(_amount);
+            return true;
+        } else {
+            return false;
+        }
+    }",
+            "vulnerability": "Reentrancy vulnerability",
+            "reason": "The transferFrom function does not check if the recipient contract has implemented the ERC20Receiver interface. This could lead to reentrancy attacks where the recipient contract calls back into the token contract during the transfer, potentially leading to loss of funds or other unintended behavior."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public onlyOwner {
+        require(_value <= balanceOf[msg.sender]);
+        address burner = msg.sender;
+        balanceOf[burner] = balanceOf[burner].sub(_value);
+        totalSupply = totalSupply.sub(_value);
+        Burn(burner, _value);
+    }",
+            "vulnerability": "Unauthorized burning",
+            "reason": "The burn function allows anyone to burn tokens, which is not secure. It should only be accessible to the contract owner."
+        },
+        {
+            "function_name": "blacklistAccount",
+            "code": "function blacklistAccount(address _target, bool _isBlacklisted) public onlyOwner {
+        isblacklistedAccount[_target] = _isBlacklisted;
+    }",
+            "vulnerability": "Unauthorized blacklisting",
+            "reason": "The blacklistAccount function allows anyone to blacklist accounts, which is not secure. It should only be accessible to the contract owner."
+        },
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(uint256 _mintedAmount) public onlyOwner {
+        balanceOf[owner] = balanceOf[owner].add(_mintedAmount);
+        totalSupply = totalSupply.add(_mintedAmount);
+        Transfer(0, owner, _mintedAmount);
+    }",
+            "vulnerability": "Unauthorized minting",
+            "reason": "The mintTokens function allows anyone to mint tokens, which is not secure. It should only be accessible to the contract owner."
+        }
+    ]
+}

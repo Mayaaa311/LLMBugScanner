@@ -1,0 +1,35 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) { if( _value > balanceOf[msg.sender] || (balanceOf[_to]+_value) < balanceOf[_to]) return false; balanceOf[msg.sender] -= _value; balanceOf[_to] += _value; Transfer(msg.sender, _to, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not check if the sum of the sender's balance and the transfer amount exceeds the maximum value that can be stored in a uint256 variable. This can lead to integer overflow, where the result of the addition is greater than the maximum value that can be stored in a uint256 variable. This can be exploited by an attacker to transfer more tokens than they have, leading to loss of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool) { if( _value > balanceOf[_from] || _value > allowance[_from][msg.sender] || (balanceOf[_to]+_value) < balanceOf[_to] ) return false; balanceOf[_from] -=_value; balanceOf[_to] += _value; allowance[_from][msg.sender] -= _value; Transfer(_from, _to, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check if the sum of the sender's balance and the transfer amount exceeds the maximum value that can be stored in a uint256 variable. This can lead to integer overflow, where the result of the addition is greater than the maximum value that can be stored in a uint256 variable. This can be exploited by an attacker to transfer more tokens than they have, leading to loss of funds."
+        },
+        {
+            "function_name": "Trade",
+            "code": "function Trade(uint256 _qty, uint256 _price, bytes32 _data, address _seller, address _buyer) payable onlyManager { if(balanceOf[_seller]<_qty)return; if(balanceOf[_buyer]+_qty<balanceOf[_buyer])return; uint256 total = _qty*_price; _seller.transfer(total); balanceOf[_seller]-=_qty; balanceOf[_buyer]+=_qty; Transfer(_seller,_buyer,_qty); deal(_seller,_buyer,_qty,_price,_data); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The Trade function does not check if the sum of the seller's balance and the quantity of tokens to be sold exceeds the maximum value that can be stored in a uint256 variable. This can lead to integer overflow, where the result of the addition is greater than the maximum value that can be stored in a uint256 variable. This can be exploited by an attacker to sell more tokens than they have, leading to loss of funds."
+        },
+        {
+            "function_name": "Trade",
+            "code": "function Trade(uint256 _qty, uint256 _price, bytes32 _data, address _seller, address _buyer) payable onlyManager { if(balanceOf[_seller]<_qty)return; if(balanceOf[_buyer]+_qty<balanceOf[_buyer])return; uint256 total = _qty*_price; _seller.transfer(total); balanceOf[_seller]-=_qty; balanceOf[_buyer]+=_qty; Transfer(_seller,_buyer,_qty); deal(_seller,_buyer,_qty,_price,_data); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The Trade function does not check if the sum of the buyer's balance and the quantity of tokens to be bought exceeds the maximum value that can be stored in a uint256 variable. This can lead to integer overflow, where the result of the addition is greater than the maximum value that can be stored in a uint256 variable. This can be exploited by an attacker to buy more tokens than they can afford, leading to loss of funds."
+        },
+        {
+            "function_name": "Trade",
+            "code": "function Trade(uint256 _qty, uint256 _price, bytes32 _data, address _seller, address _buyer) payable onlyManager { if(balanceOf[_seller]<_qty)return; if(balanceOf[_buyer]+_qty<balanceOf[_buyer])return; uint256 total = _qty*_price; _seller.transfer(total); balanceOf[_seller]-=_qty; balanceOf[_buyer]+=_qty; Transfer(_seller,_buyer,_qty); deal(_seller,_buyer,_qty,_price,_data); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The Trade function does not check if the sum of the total amount to be transferred and the seller's balance exceeds the maximum value that can be stored in a uint256 variable. This can lead to integer overflow, where the result of the addition is greater than the maximum value that can be stored in a uint256 variable. This can be exploited by an attacker to sell more tokens than they have, leading to loss of funds."
+        }
+    ]
+}

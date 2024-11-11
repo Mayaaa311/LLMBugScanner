@@ -1,0 +1,55 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) {        
+        if (balances[msg.sender] >= _value && _value > 0) {
+            balances[msg.sender] -= _value;
+            balances[_to] += _value;
+            Transfer(msg.sender, _to, _value);
+            return true;
+        } else { return false; }
+    }",
+            "vulnerability": "Reentrancy Vulnerability",
+            "reason": "The transfer function does not check if the transfer is successful before updating the balances. This can lead to reentrancy attacks where an attacker can call the transfer function again within the same transaction, leading to a double-spend. This can be exploited by an attacker to steal tokens from the contract."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
+            balances[_to] += _value;
+            balances[_from] -= _value;
+            allowed[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        } else { return false; }
+    }",
+            "vulnerability": "Reentrancy Vulnerability",
+            "reason": "The transferFrom function does not check if the transfer is successful before updating the balances. This can lead to reentrancy attacks where an attacker can call the transferFrom function again within the same transaction, leading to a double-spend. This can be exploited by an attacker to steal tokens from the contract."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);        
+        if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) { throw; }
+        return true;
+    }",
+            "vulnerability": "Unchecked Call Return Value",
+            "reason": "The approveAndCall function does not check if the call to the spender's receiveApproval function is successful. If the call fails, the approveAndCall function will revert, but the approve and allowance will still be set. This can lead to loss of funds if the spender's receiveApproval function fails. This can be exploited by an attacker to steal tokens from the contract."
+        },
+        {
+            "function_name": "totalSupply",
+            "code": "function totalSupply() constant returns (uint256 supply) {}",
+            "vulnerability": "Constant Function",
+            "reason": "The totalSupply function is constant, meaning it can be called without incurring gas costs. However, it does not return the actual total supply of tokens. This can lead to incorrect balances and potentially loss of funds. This can be exploited by an attacker to manipulate the contract's balance."
+        },
+        {
+            "function_name": "balanceOf",
+            "code": "function balanceOf(address _owner) constant returns (uint256 balance) {}",
+            "vulnerability": "Constant Function",
+            "reason": "The balanceOf function is constant, meaning it can be called without incurring gas costs. However, it does not return the actual balance of the owner. This can lead to incorrect balances and potentially loss of funds. This can be exploited by an attacker to manipulate the contract's balance."
+        }
+    ]
+}

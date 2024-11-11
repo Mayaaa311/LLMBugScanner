@@ -1,0 +1,69 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+                if (balanceOf[msg.sender] < _value) throw;           
+                if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+                balanceOf[msg.sender] -= _value;                     
+                balanceOf[_to] += _value;                            
+                Transfer(msg.sender, _to, _value);                   
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not check if the recipient's balance will overflow. If the recipient's balance is greater than the maximum possible value for a uint256, the transfer will fail and the sender's balance will be reduced by the amount that failed to be transferred. This can be exploited by an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+                if (balanceOf[_from] < _value) throw;                 
+                if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+                if (_value > allowance[_from][msg.sender]) throw;   
+                balanceOf[_from] -= _value;                          
+                balanceOf[_to] += _value;                            
+                allowance[_from][msg.sender] -= _value;
+                Transfer(_from, _to, _value);
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check if the recipient's balance will overflow. If the recipient's balance is greater than the maximum possible value for a uint256, the transfer will fail and the sender's balance will be reduced by the amount that failed to be transferred. This can be exploited by an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+                balanceOf[target] += mintedAmount;
+                totalSupply += mintedAmount;
+                Transfer(0, this, mintedAmount);
+                Transfer(this, target, mintedAmount);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function does not check if the recipient's balance will overflow. If the recipient's balance is greater than the maximum possible value for a uint256, the minting will fail and the contract's total supply will be reduced by the amount that failed to be minted. This can be exploited by an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable {
+                uint amount = msg.value / buyPrice;                
+                if (balanceOf[this] < amount) throw;               
+                balanceOf[msg.sender] += amount;                   
+                balanceOf[this] -= amount;                         
+                Transfer(this, msg.sender, amount);                
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The buy function does not check if the recipient's balance will overflow. If the recipient's balance is greater than the maximum possible value for a uint256, the purchase will fail and the contract's balance will be reduced by the amount that failed to be purchased. This can be exploited by an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) {
+                if (balanceOf[msg.sender] < amount ) throw;        
+                balanceOf[this] += amount;                         
+                balanceOf[msg.sender] -= amount;                   
+                if (!msg.sender.send(amount * sellPrice)) {        
+                    throw;                                         
+                } else {
+                    Transfer(msg.sender, this, amount);            
+                }
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The sell function does not check if the recipient's balance will overflow. If the recipient's balance is greater than the maximum possible value for a uint256, the sale will fail and the contract's balance will be reduced by the amount that failed to be sold. This can be exploited by an attacker to drain the contract's balance."
+        }
+    ]
+}

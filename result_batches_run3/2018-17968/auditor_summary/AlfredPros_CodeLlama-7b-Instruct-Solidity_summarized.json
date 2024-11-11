@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "enter",
+            "code": "function enter(uint256 _roomId) public payable { Room storage room = allRooms[_roomId-1]; require(room.players.length < 6); require(msg.value >= room.entryPrice); room.players.push(msg.sender); room.balance += room.entryPrice; emit newPlayer(_roomId, msg.sender); if(room.players.length == 6){ executeRoom(_roomId); } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `enter` allows anyone to enter a room by paying the entry price. However, the code does not check if the addition of the entry price to the room's balance will cause an integer overflow. This could lead to the room's balance being set to a very large number, potentially causing the contract to run out of gas or cause other issues."
+        },
+        {
+            "function_name": "enterWithReferral",
+            "code": "function enterWithReferral(uint256 _roomId, address referrer) public payable { Room storage room = allRooms[_roomId-1]; require(room.players.length < 6); require(msg.value >= room.entryPrice); uint256 referrerCut = SafeMath.div(room.entryPrice, 100); referrer.transfer(referrerCut); room.players.push(msg.sender); room.balance += room.entryPrice - referrerCut; emit newPlayer(_roomId, msg.sender); if(room.players.length == 6){ emit fullRoom(_roomId); executeRoom(_roomId); } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `enterWithReferral` allows anyone to enter a room by paying the entry price and also paying a referrer cut. However, the code does not check if the addition of the referrer cut to the room's balance will cause an integer overflow. This could lead to the room's balance being set to a very large number, potentially causing the contract to run out of gas or cause other issues."
+        },
+        {
+            "function_name": "executeRoom",
+            "code": "function executeRoom(uint256 _roomId) public { Room storage room = allRooms[_roomId-1]; require(room.players.length == 6); uint256 halfFee = SafeMath.div(room.entryPrice, 20); CTO.transfer(halfFee); CEO.transfer(halfFee); room.balance -= halfFee * 2; uint256 deadSeat = random(); distributeFunds(_roomId, deadSeat); delete room.players; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `executeRoom` calculates the half fee by dividing the entry price by 20. However, the code does not check if the division will cause an integer overflow. This could lead to the half fee being set to a very large number, potentially causing the contract to run out of gas or cause other issues."
+        },
+        {
+            "function_name": "distributeFunds",
+            "code": "function distributeFunds(uint256 _roomId, uint256 _deadSeat) private returns(uint256) { Room storage room = allRooms[_roomId-1]; uint256 balanceToDistribute = SafeMath.div(room.balance,5); address victim = room.players[_deadSeat]; address[] memory winners = new address[](5); uint256 j = 0; for (uint i = 0; i<6; i++) { if(i != _deadSeat){ room.players[i].transfer(balanceToDistribute); room.balance -= balanceToDistribute; winners[j] = room.players[i]; j++; } } emit partyOver(_roomId, victim, winners); return address(this).balance; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `distributeFunds` calculates the balance to distribute by dividing the room's balance by 5. However, the code does not check if the division will cause an integer overflow. This could lead to the balance to distribute being set to a very large number, potentially causing the contract to run out of gas or cause other issues."
+        },
+        {
+            "function_name": "random",
+            "code": "function random() private view returns (uint256) { return uint256(uint256(keccak256(block.timestamp, block.difficulty))%6); }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function `random` uses the block timestamp and difficulty to generate a random number. However, the code does not check if the modulo operation will cause an integer overflow. This could lead to the random number being set to a very large number, potentially causing the contract to run out of gas or cause other issues."
+        }
+    ]
+}

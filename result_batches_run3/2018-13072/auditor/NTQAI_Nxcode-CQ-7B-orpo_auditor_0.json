@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "buy",
+            "code": "function buy() payable { if(isSelling == false) revert(); uint amount = msg.value * buyRate; balanceOf[msg.sender] += amount; balanceOf[owner] -= amount; Transfer(owner, msg.sender, amount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `buy()` allows users to buy tokens by paying Ether. The calculation `msg.value * buyRate` can cause an integer overflow if `msg.value` is large enough and `buyRate` is not a small number. This can lead to the loss of funds for the contract owner and the user."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { balanceOf[target] += mintedAmount; Transfer(0, owner, mintedAmount); Transfer(owner, target, mintedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `mintToken()` allows the contract owner to mint new tokens and transfer them to a specified address. The calculation `balanceOf[target] += mintedAmount` can cause an integer overflow if `mintedAmount` is large enough and the current balance of `target` is close to the maximum value that can be stored in a `uint256`. This can lead to the loss of funds for the contract owner and the user."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) { if (balanceOf[msg.sender] < _value) revert(); if (balanceOf[_to] + _value < balanceOf[_to]) revert(); if (frozenAccount[msg.sender]) revert(); balanceOf[msg.sender] -= _value; balanceOf[_to] += _value; Transfer(msg.sender, _to, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `transfer()` allows users to transfer tokens to another address. The calculation `balanceOf[_to] += _value` can cause an integer overflow if `_value` is large enough and the current balance of `_to` is close to the maximum value that can be stored in a `uint256`. This can lead to the loss of funds for the contract owner and the user."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) { if (frozenAccount[_from]) revert(); if (balanceOf[_from] < _value) revert(); if (balanceOf[_to] + _value < balanceOf[_to]) revert(); if (_value > allowance[_from][msg.sender]) revert(); balanceOf[_from] -= _value; balanceOf[_to] += _value; allowance[_from][msg.sender] -= _value; Transfer(_from, _to, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `transferFrom()` allows users to transfer tokens from another address to their own address. The calculation `balanceOf[_to] += _value` can cause an integer overflow if `_value` is large enough and the current balance of `_to` is close to the maximum value that can be stored in a `uint256`. This can lead to the loss of funds for the contract owner and the user."
+        },
+        {
+            "function_name": "withdrawToOwner",
+            "code": "function withdrawToOwner(uint256 amountWei) onlyOwner { owner.transfer(amountWei); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `withdrawToOwner()` allows the contract owner to withdraw Ether from the contract. The calculation `owner.transfer(amountWei)` can cause an integer overflow if `amountWei` is large enough and the contract does not have enough Ether to cover the transfer. This can lead to the loss of funds for the contract owner."
+        }
+    ]
+}

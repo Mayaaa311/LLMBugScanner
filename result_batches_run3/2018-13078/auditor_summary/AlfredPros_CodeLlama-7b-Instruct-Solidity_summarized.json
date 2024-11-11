@@ -1,0 +1,35 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public { if (balanceOf[msg.sender] < _value) revert(); if (balanceOf[_to] + _value < balanceOf[_to]) revert(); balanceOf[msg.sender] -= _value; balanceOf[_to] += _value; Transfer(msg.sender, _to, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not check if the addition of the sender's balance and the transfer amount will result in an overflow. This can lead to the sender's balance being reduced to a negative value, which is not a valid state for a token holder."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) { if (balanceOf[_from] < _value) revert(); if (balanceOf[_to] + _value < balanceOf[_to]) revert(); if (_value > allowance[_from][msg.sender]) revert(); balanceOf[_from] -= _value; balanceOf[_to] += _value; allowance[_from][msg.sender] -= _value; Transfer(_from, _to, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check if the addition of the recipient's balance and the transfer amount will result in an overflow. This can lead to the recipient's balance being reduced to a negative value, which is not a valid state for a token holder."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) public onlyOwner { balanceOf[target] += mintedAmount; Transfer(0, owner, mintedAmount); Transfer(owner, target, mintedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function does not check if the addition of the target's balance and the minted amount will result in an overflow. This can lead to the target's balance being reduced to a negative value, which is not a valid state for a token holder."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) public onlyOwner { frozenAccount[target] = freeze; FrozenFunds(target, freeze); }",
+            "vulnerability": "Access Control",
+            "reason": "The freezeAccount function is only accessible to the contract owner. This means that anyone can freeze or unfreeze accounts, which can lead to unauthorized access to the contract's funds."
+        },
+        {
+            "function_name": "constructor",
+            "code": "function Jitech(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) public token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor function is named 'Jitech', but it is actually a constructor for the 'token' contract. This can lead to confusion and potential errors when deploying the contract."
+        }
+    ]
+}

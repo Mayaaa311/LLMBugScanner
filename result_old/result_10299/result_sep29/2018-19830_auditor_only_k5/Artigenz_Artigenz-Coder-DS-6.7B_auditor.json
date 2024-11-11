@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _value) onlyPayloadSize(2 * 32) unFrozenAccount onlyTransferable {\n    if (frozenAccount[_to]) {\n        InvalidAccount(_to, \"The receiver account is frozen\");\n    } else {\n        balances[msg.sender] = balances[msg.sender].sub(_value);\n        balances[_to] = balances[_to].add(_value);\n        Transfer(msg.sender, _to, _value);\n    } \n  }\n",
+            "vulnerability": "Reentrancy",
+            "reason": "The function transfer is vulnerable to reentrancy attacks. An attacker can call the transfer function multiple times in a single transaction, leading to a denial of service or a loss of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _value) onlyPayloadSize(3 * 32) unFrozenAccount onlyTransferable{\n    var _allowance = allowed[_from][msg.sender];\n    require(!frozenAccount[_from]&&!frozenAccount[_to]);\n    balances[_to] = balances[_to].add(_value);\n    balances[_from] = balances[_from].sub(_value);\n    allowed[_from][msg.sender] = _allowance.sub(_value);\n    Transfer(_from, _to, _value);\n  }\n",
+            "vulnerability": "Reentrancy",
+            "reason": "The function transferFrom is vulnerable to reentrancy attacks. An attacker can call the transferFrom function multiple times in a single transaction, leading to a denial of service or a loss of funds."
+        },
+        {
+            "function_name": "switchLiquidity",
+            "code": "function switchLiquidity (bool _transferable) onlyOwner returns (bool success) {\n      transferable=_transferable;\n      return true;\n  }\n",
+            "vulnerability": "Authorization",
+            "reason": "The function switchLiquidity does not have any authorization checks. Anyone can call this function to switch the liquidity status, which could lead to unauthorized changes."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner public {\n      frozenAccount[target]=freeze;\n      FrozenFunds(target, freeze);\n    }\n",
+            "vulnerability": "Authorization",
+            "reason": "The function freezeAccount does not have any authorization checks. Anyone can call this function to freeze an account, which could lead to unauthorized changes."
+        },
+        {
+            "function_name": "transferOwnership",
+            "code": "function transferOwnership(address newOwner) onlyOwner public {\n      if (newOwner != address(0)) {\n          address oldOwner=owner;\n          owner = newOwner;\n          OwnershipTransferred(oldOwner, owner);\n        }\n  }\n",
+            "vulnerability": "Authorization",
+            "reason": "The function transferOwnership does not have any authorization checks. Anyone can call this function to transfer ownership, which could lead to unauthorized changes."
+        }
+    ]
+}

@@ -1,0 +1,35 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public { require(!frozenAccount[msg.sender]); if (msg.sender.balance<minBalanceForAccounts) { sell((minBalanceForAccounts-msg.sender.balance)/sellPrice); } _transfer(msg.sender, _to, _value); }",
+            "vulnerability": "Unchecked Balance",
+            "reason": "The contract does not check if the sender has enough balance to transfer. This can lead to a revert if the sender does not have enough balance. This vulnerability can be exploited by an attacker who wants to transfer more tokens than they have. The attacker can send a transaction with a large value to the transfer function, causing the contract to revert and prevent the transfer."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable public returns (uint amount) { amount = msg.value / buyPrice; require(balanceOf[this] >= amount); balanceOf[msg.sender] += amount; balanceOf[this] -= amount; emit Transfer(this, msg.sender, amount); return amount; }",
+            "vulnerability": "Unchecked Balance",
+            "reason": "The contract does not check if the contract has enough balance to buy tokens. This can lead to a revert if the contract does not have enough balance. This vulnerability can be exploited by an attacker who wants to buy more tokens than the contract has. The attacker can send a transaction with a large value to the buy function, causing the contract to revert and prevent the buy."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint amount) public returns (uint revenue) { require(balanceOf[msg.sender] >= amount); balanceOf[this] += amount; balanceOf[msg.sender] -= amount; revenue = amount * sellPrice; msg.sender.transfer(revenue); emit Transfer(msg.sender, this, amount); return revenue; }",
+            "vulnerability": "Unchecked Balance",
+            "reason": "The contract does not check if the contract has enough balance to sell tokens. This can lead to a revert if the contract does not have enough balance. This vulnerability can be exploited by an attacker who wants to sell more tokens than the contract has. The attacker can send a transaction with a large value to the sell function, causing the contract to revert and prevent the sell."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public { balanceOf[target] += mintedAmount; totalSupply += mintedAmount; emit Transfer(0, owner, mintedAmount); emit Transfer(owner, target, mintedAmount); }",
+            "vulnerability": "Unchecked Balance",
+            "reason": "The contract does not check if the contract has enough balance to mint tokens. This can lead to a revert if the contract does not have enough balance. This vulnerability can be exploited by an attacker who wants to mint more tokens than the contract has. The attacker can send a transaction with a large value to the mintToken function, causing the contract to revert and prevent the mint."
+        },
+        {
+            "function_name": "setMinBalance",
+            "code": "function setMinBalance(uint minimumBalanceInFinney) onlyOwner public { minBalanceForAccounts = minimumBalanceInFinney * 1 finney; }",
+            "vulnerability": "Unchecked Balance",
+            "reason": "The contract does not check if the contract has enough balance to set the minimum balance for accounts. This can lead to a revert if the contract does not have enough balance. This vulnerability can be exploited by an attacker who wants to set a higher minimum balance for accounts than the contract has. The attacker can send a transaction with a large value to the setMinBalance function, causing the contract to revert and prevent the setting of the minimum balance."
+        }
+    ]
+}

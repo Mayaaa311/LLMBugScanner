@@ -1,0 +1,35 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "MyToken",
+            "code": "function MyToken(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol, address centralMinter) { if(centralMinter != 0 ) owner = msg.sender; balanceOf[msg.sender] = initialSupply; totalSupply = initialSupply; name = tokenName; symbol = tokenSymbol; decimals = decimalUnits; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function MyToken takes in a parameter initialSupply which is used to initialize the totalSupply and balanceOf mapping. If the initialSupply is too large, it may cause an integer overflow, leading to incorrect results and potentially loss of funds. This can be mitigated by using SafeMath library or ensuring that the input values are within a safe range."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) { if (frozenAccount[msg.sender]) throw; if (balanceOf[msg.sender] < _value) throw; if (balanceOf[_to] + _value < balanceOf[_to]) throw; if(msg.sender.balance<minBalanceForAccounts) sell((minBalanceForAccounts-msg.sender.balance)/sellPrice); if(_to.balance<minBalanceForAccounts)      _to.send(sell((minBalanceForAccounts-_to.balance)/sellPrice)); balanceOf[msg.sender] -= _value; balanceOf[_to] += _value; Transfer(msg.sender, _to, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transfer takes in a parameter _value which is used to update the balanceOf mapping. If the _value is too large, it may cause an integer overflow, leading to incorrect results and potentially loss of funds. This can be mitigated by using SafeMath library or ensuring that the input values are within a safe range."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0, owner, mintedAmount); Transfer(owner, target, mintedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function mintToken takes in a parameter mintedAmount which is used to update the balanceOf and totalSupply mapping. If the mintedAmount is too large, it may cause an integer overflow, leading to incorrect results and potentially loss of funds. This can be mitigated by using SafeMath library or ensuring that the input values are within a safe range."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint amount) returns (uint revenue){ if (balanceOf[msg.sender] < amount ) throw; balanceOf[this] += amount; balanceOf[msg.sender] -= amount; revenue = amount * sellPrice; msg.sender.send(revenue); Transfer(msg.sender, this, amount); return revenue; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function sell takes in a parameter amount which is used to update the balanceOf mapping. If the amount is too large, it may cause an integer overflow, leading to incorrect results and potentially loss of funds. This can be mitigated by using SafeMath library or ensuring that the input values are within a safe range."
+        },
+        {
+            "function_name": "setMinBalance",
+            "code": "function setMinBalance(uint minimumBalanceInFinney) onlyOwner { minBalanceForAccounts = minimumBalanceInFinney * 1 finney; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function setMinBalance takes in a parameter minimumBalanceInFinney which is used to update the minBalanceForAccounts variable. If the minimumBalanceInFinney is too large, it may cause an integer overflow, leading to incorrect results and potentially loss of funds. This can be mitigated by using SafeMath library or ensuring that the input values are within a safe range."
+        }
+    ]
+}

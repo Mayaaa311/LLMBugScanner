@@ -1,0 +1,35 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0, owner, mintedAmount); Transfer(owner, target, mintedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function mintToken is vulnerable to integer overflow. The line 'totalSupply += mintedAmount;' can cause an overflow if the totalSupply is close to the maximum value of uint256. This can be exploited by an attacker to mint more tokens than the total supply, leading to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) { require(balanceOf[msg.sender] >= _value); balanceOf[msg.sender] -= _value; totalSupply -= _value; Burn(msg.sender, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function burn is vulnerable to integer overflow. The line 'totalSupply -= _value;' can cause an overflow if the totalSupply is close to the minimum value of uint256. This can be exploited by an attacker to burn more tokens than they own, leading to a loss of funds for the attacker."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) public returns (bool success) { require(balanceOf[_from] >= _value); require(_value <= allowance[_from][msg.sender]); balanceOf[_from] -= _value; allowance[_from][msg.sender] -= _value; totalSupply -= _value; Burn(_from, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function burnFrom is vulnerable to integer overflow. The line 'totalSupply -= _value;' can cause an overflow if the totalSupply is close to the minimum value of uint256. This can be exploited by an attacker to burn more tokens than they are allowed to burn, leading to a loss of funds for the attacker."
+        },
+        {
+            "function_name": "distributeToken",
+            "code": "function distributeToken(address[] addresses, uint256 _value) onlyOwner { for (uint i = 0; i < addresses.length; i++) { balanceOf[owner] -= _value; balanceOf[addresses[i]] += _value; Transfer(owner, addresses[i], _value); } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function distributeToken is vulnerable to integer overflow. The line 'balanceOf[owner] -= _value;' can cause an overflow if the owner's balance is close to the minimum value of uint256. This can be exploited by an attacker to distribute more tokens than they own, leading to a loss of funds for the attacker."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0, owner, mintedAmount); Transfer(owner, target, mintedAmount); }",
+            "vulnerability": "Access Control",
+            "reason": "The function mintToken is only accessible to the contract owner. This can be exploited by an attacker to mint tokens without the owner's permission, leading to a loss of funds for the contract owner."
+        }
+    ]
+}

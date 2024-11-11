@@ -1,0 +1,64 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+            if (frozenAccount[msg.sender]) throw;
+            if (balanceOf[msg.sender] < _value) throw;           
+            if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+            if(msg.sender.balance<minBalanceForAccounts) sell((minBalanceForAccounts-msg.sender.balance)/sellPrice);
+            if(_to.balance<minBalanceForAccounts)      _to.send(sell((minBalanceForAccounts-_to.balance)/sellPrice));
+            balanceOf[msg.sender] -= _value;                     
+            balanceOf[_to] += _value;                            
+            Transfer(msg.sender, _to, _value);                   
+        }",
+            "vulnerability": "Reentrancy",
+            "reason": "The transfer function is vulnerable to reentrancy attacks. It allows the sender to send tokens to another address, which can then call the transfer function again, leading to a recursive call. This can result in the sender's tokens being transferred to themselves, or even to a third party, causing a loss of funds. To mitigate this vulnerability, the transfer function should be modified to use the SafeMath library to prevent reentrancy attacks."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() returns (uint amount){
+            amount = msg.value / buyPrice;                     
+            if (balanceOf[this] < amount) throw;               
+            balanceOf[msg.sender] += amount;                   
+            balanceOf[this] -= amount;                         
+            Transfer(this, msg.sender, amount);                
+            return amount;                                     
+        }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The buy function is vulnerable to integer overflow attacks. If the sender sends a large amount of Ether to the contract, the contract may not have enough tokens to fulfill the purchase. This can result in the sender's Ether being lost, or even the contract being unable to sell tokens. To mitigate this vulnerability, the buy function should be modified to use the SafeMath library to prevent integer overflow attacks."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint amount) returns (uint revenue){
+            if (balanceOf[msg.sender] < amount ) throw;        
+            balanceOf[this] += amount;                         
+            balanceOf[msg.sender] -= amount;                   
+            revenue = amount * sellPrice;                      
+            msg.sender.send(revenue);                          
+            Transfer(msg.sender, this, amount);                
+            return revenue;                                    
+        }",
+            "vulnerability": "Integer Underflow",
+            "reason": "The sell function is vulnerable to integer underflow attacks. If the sender sells a large amount of tokens, the contract may not have enough Ether to fulfill the sale. This can result in the sender's tokens being lost, or even the contract being unable to buy tokens. To mitigate this vulnerability, the sell function should be modified to use the SafeMath library to prevent integer underflow attacks."
+        },
+        {
+            "function_name": "setMinBalance",
+            "code": "function setMinBalance(uint minimumBalanceInFinney) onlyOwner {
+            minBalanceForAccounts = minimumBalanceInFinney * 1 finney;
+        }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The setMinBalance function is vulnerable to integer overflow attacks. If the minimum balance is set to a very large number, it may cause an integer overflow when the contract is deployed. To mitigate this vulnerability, the setMinBalance function should be modified to use the SafeMath library to prevent integer overflow attacks."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+            sellPrice = newSellPrice;
+            buyPrice = newBuyPrice;
+        }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The setPrices function is vulnerable to integer overflow attacks. If the sell price or buy price is set to a very large number, it may cause an integer overflow when the contract is deployed. To mitigate this vulnerability, the setPrices function should be modified to use the SafeMath library to prevent integer overflow attacks."
+        }
+    ]
+}

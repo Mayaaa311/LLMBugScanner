@@ -1,0 +1,35 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address _holder, uint _value) external { require(msg.sender == ico); require(_value != 0); require(totalSupply + _value <= TOKEN_LIMIT); balances[_holder] += _value; totalSupply += _value; emit Transfer(0x0, _holder, _value); }",
+            "vulnerability": "Token minting limit",
+            "reason": "The mint function in the ETY contract does not enforce a maximum token supply limit. This could lead to a situation where the total supply of tokens exceeds the predefined limit, potentially causing the contract to run out of tokens and potentially leading to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint _value) public { require(_value > 0); address burner = msg.sender; balances[burner] = balances[burner].sub(_value); totalSupply = totalSupply.sub(_value); emit Burn(burner, _value); }",
+            "vulnerability": "Burn function without access control",
+            "reason": "The burn function in the ETY contract does not enforce any access control. This could allow anyone to burn tokens from any account, potentially leading to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "unfreeze",
+            "code": "function unfreeze() external { require(msg.sender == ico); tokensAreFrozen = false; }",
+            "vulnerability": "Unfreeze function without access control",
+            "reason": "The unfreeze function in the ETY contract does not enforce any access control. This could allow anyone to unfreeze the token transfers, potentially leading to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _value) public { require(!tokensAreFrozen); super.transfer(_to, _value); }",
+            "vulnerability": "Token transfer function is frozen",
+            "reason": "The transfer function in the ETY contract is frozen by default, meaning that token transfers are not allowed. This could prevent users from transferring their tokens, potentially leading to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _value) onlyPayloadSize(3 * 32) public { require(!tokensAreFrozen); super.transferFrom(_from, _to, _value); }",
+            "vulnerability": "Token transferFrom function is frozen",
+            "reason": "The transferFrom function in the ETY contract is frozen by default, meaning that token transfers are not allowed. This could prevent users from transferring their tokens, potentially leading to a loss of funds for the contract owner."
+        }
+    ]
+}

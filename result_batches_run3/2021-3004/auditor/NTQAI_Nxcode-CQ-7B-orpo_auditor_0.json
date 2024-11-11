@@ -1,0 +1,70 @@
+{
+    "output_list": [
+        {
+            "function_name": "stake",
+            "code": "function stake(uint256 amount) external nonReentrant updateReward(msg.sender) {
+                require(amount > 0, "Cannot stake 0");
+                stakedSupply += amount;
+                stakes[msg.sender] += amount;
+                _transferTokens(msg.sender, address(this), amount);
+                emit Staked(msg.sender, amount);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function stake() takes an input amount and adds it to the stakedSupply. If the stakedSupply is very large, the addition operation may cause an integer overflow. This can be exploited by an attacker to manipulate the stakedSupply and potentially gain more tokens than they should."
+        },
+        {
+            "function_name": "unstake",
+            "code": "function unstake(uint amount) public nonReentrant updateReward(msg.sender) {
+                require(amount > 0, "Cannot withdraw 0");
+                stakedSupply -= amount;
+                stakes[msg.sender] -= amount;
+                _transferTokens(address(this), msg.sender, amount);
+                emit Unstaked(msg.sender, amount);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function unstake() takes an input amount and subtracts it from the stakedSupply. If the stakedSupply is very small, the subtraction operation may cause an integer overflow. This can be exploited by an attacker to manipulate the stakedSupply and potentially gain more tokens than they should."
+        },
+        {
+            "function_name": "notifyFeeAmount",
+            "code": "function notifyFeeAmount(uint reward) internal updateReward(address(0)) {
+                if (block.timestamp >= periodFinish) {
+                    rewardRate = reward / DURATION;
+                } else {
+                    uint remaining = periodFinish - block.timestamp;
+                    uint leftover = remaining * rewardRate;
+                    rewardRate = (reward + leftover) / DURATION;
+                }
+                uint balance = balances[address(this)];
+                require(rewardRate <= balance / DURATION, "Provided reward too high");
+                lastUpdateTime = block.timestamp;
+                periodFinish = block.timestamp + DURATION;
+                emit Fees(reward);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function notifyFeeAmount() takes an input reward and calculates the rewardRate based on the remaining time until the periodFinish. If the remaining time is very large, the calculation may cause an integer overflow. This can be exploited by an attacker to manipulate the rewardRate and potentially gain more tokens than they should."
+        },
+        {
+            "function_name": "rewardPerToken",
+            "code": "function rewardPerToken() public view returns (uint) {
+                if (stakedSupply == 0) {
+                    return rewardPerTokenStored;
+                }
+                return
+                    rewardPerTokenStored +
+                        ((lastTimeRewardApplicable() - 
+                        lastUpdateTime) * 
+                        rewardRate * 1e18 / stakedSupply);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function rewardPerToken() calculates the rewardPerToken based on the stakedSupply and the rewardRate. If the stakedSupply is very large, the calculation may cause an integer overflow. This can be exploited by an attacker to manipulate the rewardPerToken and potentially gain more tokens than they should."
+        },
+        {
+            "function_name": "earned",
+            "code": "function earned(address account) public view returns (uint) {
+                return (stakes[account] * (rewardPerToken() - userRewardPerTokenPaid[account]) / 1e18) + rewards[account];
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function earned() calculates the earned amount based on the stakedSupply and the rewardPerToken. If the stakedSupply is very large, the calculation may cause an integer overflow. This can be exploited by an attacker to manipulate the earned amount and potentially gain more tokens than they should."
+        }
+    ]
+}

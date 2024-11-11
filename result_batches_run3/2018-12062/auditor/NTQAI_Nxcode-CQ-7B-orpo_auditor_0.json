@@ -1,0 +1,71 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+                if (balanceOf[msg.sender] < _value) throw;           
+                if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+                if (frozenAccount[msg.sender]) throw;                
+                balanceOf[msg.sender] -= _value;                     
+                balanceOf[_to] += _value;                            
+                Transfer(msg.sender, _to, _value);                   
+            }",
+            "vulnerability": "Access Control",
+            "reason": "The function `transfer` does not check if the sender's account is frozen. This could allow an attacker to transfer tokens from a frozen account, potentially leading to loss of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+                if (frozenAccount[_from]) throw;                        
+                if (balanceOf[_from] < _value) throw;                 
+                if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+                if (_value > allowance[_from][msg.sender]) throw;   
+                balanceOf[_from] -= _value;                          
+                balanceOf[_to] += _value;                            
+                allowance[_from][msg.sender] -= _value;
+                Transfer(_from, _to, _value);
+                return true;
+            }",
+            "vulnerability": "Access Control",
+            "reason": "The function `transferFrom` does not check if the sender's account is frozen. This could allow an attacker to transfer tokens from a frozen account, potentially leading to loss of funds."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable {
+                uint amount = msg.value / buyPrice;                
+                if (balanceOf[this] < amount) throw;               
+                balanceOf[msg.sender] += amount;                   
+                balanceOf[this] -= amount;                         
+                Transfer(this, msg.sender, amount);                
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `buy` does not check if the amount of tokens to be bought will cause an integer overflow. This could allow an attacker to buy an extremely large amount of tokens, potentially leading to loss of funds."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) {
+                if (balanceOf[msg.sender] < amount ) throw;        
+                balanceOf[this] += amount;                         
+                balanceOf[msg.sender] -= amount;                   
+                if (!msg.sender.send(amount * sellPrice)) {        
+                    throw;                                         
+                } else {
+                    Transfer(msg.sender, this, amount);            
+                }               
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `sell` does not check if the amount of tokens to be sold will cause an integer overflow. This could allow an attacker to sell an extremely large amount of tokens, potentially leading to loss of funds."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+                balanceOf[target] += mintedAmount;
+                totalSupply += mintedAmount;
+                Transfer(0, this, mintedAmount);
+                Transfer(this, target, mintedAmount);
+            }",
+            "vulnerability": "Access Control",
+            "reason": "The function `mintToken` does not check if the caller is the contract owner. This could allow an attacker to mint tokens to any address, potentially leading to loss of funds."
+        }
+    ]
+}

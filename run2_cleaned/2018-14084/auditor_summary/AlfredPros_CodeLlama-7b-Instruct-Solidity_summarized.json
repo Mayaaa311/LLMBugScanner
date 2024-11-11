@@ -1,0 +1,35 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "selfdestructs",
+            "code": "function selfdestructs() payable public { selfdestruct(owner); }",
+            "vulnerability": "Self-destruction",
+            "reason": "This function allows anyone to self-destruct the contract, which can lead to loss of funds and potential damage to the contract's functionality. It is recommended to implement a modifier to restrict the ability to self-destruct to the contract owner only."
+        },
+        {
+            "function_name": "getEth",
+            "code": "function getEth(uint num) payable public { owner.transfer(num); }",
+            "vulnerability": "Unauthorized transfer",
+            "reason": "This function allows anyone to transfer ETH from the contract to the contract owner, which can lead to loss of funds and potential damage to the contract's functionality. It is recommended to implement a modifier to restrict the ability to transfer ETH to the contract owner only."
+        },
+        {
+            "function_name": "newinitialSupply",
+            "code": "function newinitialSupply(uint256 _initialSupply) public onlyOwner { totalSupply = _initialSupply; }",
+            "vulnerability": "Unauthorized modification of total supply",
+            "reason": "This function allows the contract owner to modify the total supply of the token, which can lead to loss of funds and potential damage to the contract's functionality. It is recommended to implement a modifier to restrict the ability to modify the total supply to the contract owner only."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public { sellPrice = newSellPrice; buyPrice = newBuyPrice; }",
+            "vulnerability": "Unauthorized modification of exchange rates",
+            "reason": "This function allows the contract owner to modify the exchange rates between the token and ETH, which can lead to loss of funds and potential damage to the contract's functionality. It is recommended to implement a modifier to restrict the ability to modify the exchange rates to the contract owner only."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable public { uint amount = msg.value / buyPrice; _transfer(this, msg.sender, amount); }",
+            "vulnerability": "Unauthorized purchase",
+            "reason": "This function allows anyone to purchase tokens at the current exchange rate, which can lead to loss of funds and potential damage to the contract's functionality. It is recommended to implement a modifier to restrict the ability to purchase tokens to the contract owner only."
+        }
+    ]
+}

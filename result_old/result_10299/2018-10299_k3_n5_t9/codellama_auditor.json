@@ -1,0 +1,22 @@
+{
+"output_list": [
+    {
+        "function_name": "transfer",
+        "code": "contract BecToken is PausableToken { function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) { return super.transfer(_to, _value); } }",
+        "vulnerability": "Reentrancy Vulnerability",
+        "reason": "The function transfer is not protected against reentrancy attacks."
+    },
+    {
+        "function_name": "batchTransfer",
+        "code": "contract BecToken is PausableToken { function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) { return super.transferFrom(_from, _to, _value); } }",
+        "vulnerability": "Unprotected Function Call",
+        "reason": "The function batchTransfer is calling the function transferFrom unprotected."
+    },
+    {
+        "function_name": "batchTransfer",
+        "code": "contract BecToken is PausableToken { function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) { return super.transfer(_to, _value); } }",
+        "vulnerability": "Unprotected Function Call",
+        "reason": "The function batchTransfer is calling the function transfer unprotected."
+    }
+]
+}

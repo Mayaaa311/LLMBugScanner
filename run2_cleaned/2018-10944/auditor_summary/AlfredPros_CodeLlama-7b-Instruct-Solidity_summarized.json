@@ -1,0 +1,76 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "__callback",
+            "code": "function __callback(bytes32 myid, string result) {
+    if (msg.sender != oraclize_cbAddress()) {
+      throw;
+    }
+    if(userqueryID[myid]== myid)
+    {
+       one_ether_usd_price = stringToUint(result);
+    valuee(one_ether_usd_price);
+    if(one_ether_usd_price<1000)
+    {
+        one_ether_usd_price = one_ether_usd_price*100;
+    }
+    else if(one_ether_usd_price<10000)
+    {
+        one_ether_usd_price = one_ether_usd_price*10;
+    }
+    valuee(one_ether_usd_price);
+            uint no_of_token = (one_ether_usd_price*uservalue[userAddress[myid]])/(275*10000000000000000*100); 
+            balances[owner] -= (no_of_token*10000000000);
+            balances[userAddress[myid]] += (no_of_token*10000000000);
+             Transfer(owner, userAddress[myid] , no_of_token);
+              check_array_add(userAddress[myid]);
+    }
+ }",
+            "vulnerability": "Vulnerability: Unchecked Return Value",
+            "reason": "The function `__callback` does not check the return value of the `transfer` function. If the transfer fails, the contract will not be able to handle the error and will continue to execute the rest of the code. This could lead to unexpected behavior and potential loss of funds."
+        },
+        {
+            "function_name": "request_dividend",
+            "code": "function request_dividend(address token_holder) payable
+    {
+        holder_token_balance = balanceOf(token_holder)/10000000000;
+        Message(holder_token_balance);
+        holder_profit = holder_token_balance * profit_per_token;
+        Message(holder_profit);
+         Transfer(owner, token_holder , (holder_profit/10**18)); 
+        token_holder.send(holder_profit);   
+    }",
+            "vulnerability": "Vulnerability: Unchecked Return Value",
+            "reason": "The function `request_dividend` does not check the return value of the `transfer` function. If the transfer fails, the contract will not be able to handle the error and will continue to execute the rest of the code. This could lead to unexpected behavior and potential loss of funds."
+        },
+        {
+            "function_name": "transfer_ownership",
+            "code": "function transfer_ownership(address to) onlyOwner {
+        if (msg.sender != owner) throw;
+        owner = to;
+         balances[owner]=balances[msg.sender];
+         balances[msg.sender]=0;
+    }",
+            "vulnerability": "Vulnerability: Unchecked Return Value",
+            "reason": "The function `transfer_ownership` does not check the return value of the `transfer` function. If the transfer fails, the contract will not be able to handle the error and will continue to execute the rest of the code. This could lead to unexpected behavior and potential loss of funds."
+        },
+        {
+            "function_name": "drain",
+            "code": "function drain() onlyOwner {
+ttif (!owner.send(this.balance)) throw;
+t}",
+            "vulnerability": "Vulnerability: Unchecked Return Value",
+            "reason": "The function `drain` does not check the return value of the `send` function. If the send fails, the contract will not be able to handle the error and will continue to execute the rest of the code. This could lead to unexpected behavior and potential loss of funds."
+        },
+        {
+            "function_name": "convert",
+            "code": "function convert(uint _value) returns (bool ok)
+     {
+         return true;
+     }",
+            "vulnerability": "Vulnerability: Unchecked Return Value",
+            "reason": "The function `convert` does not check the return value of the `transfer` function. If the transfer fails, the contract will not be able to handle the error and will continue to execute the rest of the code. This could lead to unexpected behavior and potential loss of funds."
+        }
+    ]
+}

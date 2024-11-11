@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "INTToken",
+            "code": "function INTToken(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}",
+            "vulnerability": "Vulnerability: Missing Access Control",
+            "reason": "The constructor of the contract does not have any access control. Anyone can call the constructor and create a new instance of the contract, which can lead to potential security issues. This can be exploited by malicious actors to create multiple instances of the contract and manipulate the state of the contract."
+        },
+        {
+            "function_name": "INTToken",
+            "code": "function _transfer(address _from, address _to, uint _value) internal { require (_to != 0x0); require (balanceOf[_from] > _value); require (balanceOf[_to] + _value > balanceOf[_to]); require(!frozenAccount[_from]); require(!frozenAccount[_to]); balanceOf[_from] -= _value; balanceOf[_to] += _value; Transfer(_from, _to, _value); }",
+            "vulnerability": "Vulnerability: Missing Access Control",
+            "reason": "The _transfer function does not have any access control. Anyone can call the _transfer function and transfer tokens between accounts, which can lead to potential security issues. This can be exploited by malicious actors to transfer tokens between accounts and manipulate the state of the contract."
+        },
+        {
+            "function_name": "INTToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0, this, mintedAmount); Transfer(this, target, mintedAmount); }",
+            "vulnerability": "Vulnerability: Missing Access Control",
+            "reason": "The mintToken function does not have any access control. Only the owner of the contract can call the mintToken function and mint tokens to a target address, which can lead to potential security issues. This can be exploited by malicious actors to mint tokens to their own address and manipulate the state of the contract."
+        },
+        {
+            "function_name": "INTToken",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner { frozenAccount[target] = freeze; FrozenFunds(target, freeze); }",
+            "vulnerability": "Vulnerability: Missing Access Control",
+            "reason": "The freezeAccount function does not have any access control. Only the owner of the contract can call the freezeAccount function and freeze or unfreeze an account, which can lead to potential security issues. This can be exploited by malicious actors to freeze or unfreeze an account and manipulate the state of the contract."
+        },
+        {
+            "function_name": "INTToken",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner { sellPrice = newSellPrice; buyPrice = newBuyPrice; }",
+            "vulnerability": "Vulnerability: Missing Access Control",
+            "reason": "The setPrices function does not have any access control. Only the owner of the contract can call the setPrices function and set the sell and buy prices, which can lead to potential security issues. This can be exploited by malicious actors to set the sell and buy prices to high values and manipulate the state of the contract."
+        }
+    ]
+}

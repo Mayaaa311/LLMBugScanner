@@ -1,0 +1,73 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "tfunction transfer(address _to, uint256 _value) public returns (bool) {
+        require(!isblacklistedAccount[msg.sender]);                 
+        require(!isblacklistedAccount[_to]);                        
+ttrequire(balanceOf[msg.sender] > 0);                     
+ttrequire(balanceOf[msg.sender] >= _value);                   
+ttrequire(_to != address(0));                                 
+ttrequire(_value > 0);
+ttrequire(balanceOf[_to] .add(_value) >= balanceOf[_to]);     
+ttrequire(_to != msg.sender);                                 
+ttbalanceOf[msg.sender] = balanceOf[msg.sender].sub(_value);  
+ttbalanceOf[_to] = balanceOf[_to].add(_value);                
+ttTransfer(msg.sender, _to, _value);                          
+        return true;
+t}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `transfer` does not check for integer overflow when adding the `_value` to the `balanceOf[_to]`. This could lead to an overflow if the `balanceOf[_to]` exceeds the maximum value that can be stored in a `uint256`. The code should be modified to use SafeMath's `add` function to prevent this vulnerability."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "    function transferFrom(address _from, address _to, uint256 _amount) public returns (bool success) {
+         if (balanceOf[_from] >= _amount
+             && allowed[_from][msg.sender] >= _amount
+             && _amount > 0
+             && balanceOf[_to].add(_amount) > balanceOf[_to]){
+             balanceOf[_from] = balanceOf[_from].sub(_amount);
+             allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+             balanceOf[_to] = balanceOf[_to].add(_amount);
+             return true;
+        } else {
+             return false;
+        }
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `transferFrom` does not check for integer overflow when adding the `_amount` to the `balanceOf[_to]`. This could lead to an overflow if the `balanceOf[_to]` exceeds the maximum value that can be stored in a `uint256`. The code should be modified to use SafeMath's `add` function to prevent this vulnerability."
+        },
+        {
+            "function_name": "mintTokens",
+            "code": "    function mintTokens(uint256 _mintedAmount) public onlyOwner {
+        balanceOf[owner] = balanceOf[owner].add(_mintedAmount);
+        totalSupply = totalSupply.add(_mintedAmount);
+        Transfer(0, owner, _mintedAmount);      
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `mintTokens` does not check for integer overflow when adding the `_mintedAmount` to the `balanceOf[owner]` and `totalSupply`. This could lead to an overflow if the `balanceOf[owner]` or `totalSupply` exceeds the maximum value that can be stored in a `uint256`. The code should be modified to use SafeMath's `add` function to prevent this vulnerability."
+        },
+        {
+            "function_name": "burn",
+            "code": "    function burn(uint256 _value) public onlyOwner {
+      require(_value <= balanceOf[msg.sender]);
+      address burner = msg.sender;
+      balanceOf[burner] = balanceOf[burner].sub(_value);
+      totalSupply = totalSupply.sub(_value);
+      Burn(burner, _value);
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `burn` does not check for integer overflow when subtracting the `_value` from the `balanceOf[msg.sender]` and `totalSupply`. This could lead to an overflow if the `balanceOf[msg.sender]` or `totalSupply` exceeds the maximum value that can be stored in a `uint256`. The code should be modified to use SafeMath's `sub` function to prevent this vulnerability."
+        },
+        {
+            "function_name": "MorphToken",
+            "code": "    function MorphToken() 
+tERC20 (tokenSupply,"MORPH","MORPH") public
+    {
+ttowner = msg.sender;
+t}",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor of the `MorphToken` contract has a typo in the function name. The correct function name should be `MorphToken` instead of `MorhpToken`. This typo could lead to confusion and potential errors in the code. The code should be modified to correct the typo."
+        }
+    ]
+}

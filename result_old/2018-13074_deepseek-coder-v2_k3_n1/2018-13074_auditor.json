@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "_transfer",
+            "code": "require(!frozenAccount[_from]);\nrequire(!frozenAccount[_to]);",
+            "vulnerability": "Reentrancy Attack",
+            "reason": "The function does not implement reentrancy guard mechanisms. An attacker can exploit this by calling the contract's fallback function during a transfer, allowing them to drain funds."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "if (approve(_spender, _value)) {\nspender.receiveApproval(msg.sender, _value, this, _extraData);\nreturn true;\n}",
+            "vulnerability": "Arbitrary Call During Approval",
+            "reason": "This function allows an attacker to call any external contract during the approval process, which can lead to unauthorized actions or theft of tokens."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "balanceOf[target] += mintedAmount;\ntotalSupply += mintedAmount;",
+            "vulnerability": "Unrestricted Minting Privileges",
+            "reason": "The contract allows the owner to mint an unlimited amount of tokens, which can lead to inflation and devaluation of the token's value."
+        }
+    ]
+}

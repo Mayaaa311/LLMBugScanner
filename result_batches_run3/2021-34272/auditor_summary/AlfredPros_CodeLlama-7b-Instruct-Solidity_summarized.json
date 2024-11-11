@@ -1,0 +1,35 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public { _transfer(msg.sender, _to, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `transfer` does not check if the transfer operation will cause an integer overflow. If `_value` is very large, it may exceed the maximum value that can be stored in a `uint256` variable, leading to an incorrect balance for the sender and receiver. This can be exploited by an attacker to manipulate the token balances."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) { require(_value <= allowance[_from][msg.sender]);     allowance[_from][msg.sender] -= _value; _transfer(_from, _to, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `transferFrom` does not check if the transfer operation will cause an integer overflow. If `_value` is very large, it may exceed the maximum value that can be stored in a `uint256` variable, leading to an incorrect balance for the sender and receiver. This can be exploited by an attacker to manipulate the token balances."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) { require(balanceOf[msg.sender] >= _value);   balanceOf[msg.sender] -= _value;            totalSupply -= _value;                      Burn(msg.sender, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `burn` does not check if the burn operation will cause an integer overflow. If `_value` is very large, it may exceed the maximum value that can be stored in a `uint256` variable, leading to an incorrect total supply and potentially leading to a loss of tokens for the caller. This can be exploited by an attacker to manipulate the token balances."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) public returns (bool success) { require(balanceOf[_from] >= _value);                require(_value <= allowance[_from][msg.sender]);    balanceOf[_from] -= _value;            allowance[_from][msg.sender] -= _value;             totalSupply -= _value;                              Burn(_from, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `burnFrom` does not check if the burn operation will cause an integer overflow. If `_value` is very large, it may exceed the maximum value that can be stored in a `uint256` variable, leading to an incorrect total supply and potentially leading to a loss of tokens for the caller. This can be exploited by an attacker to manipulate the token balances."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable public { require(isOpened); uint amount = msg.value / buyPrice;               _transfer(this, msg.sender, amount);               }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `buy` does not check if the transfer operation will cause an integer overflow. If the price of a token is very high, it may result in an incorrect balance for the sender and receiver. This can be exploited by an attacker to manipulate the token balances."
+        }
+    ]
+}

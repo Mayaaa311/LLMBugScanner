@@ -1,0 +1,35 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "transferProxy",
+            "code": "function transferProxy(address _from, address _to, uint256 _value, uint256 _feeSmt, uint8 _v,bytes32 _r, bytes32 _s) public transferAllowed(_from) returns (bool){ if(balances[_from] < _feeSmt + _value) revert(); uint256 nonce = nonces[_from]; bytes32 h = keccak256(_from,_to,_value,_feeSmt,nonce); if(_from != ecrecover(h,_v,_r,_s)) revert(); if(balances[_to] + _value < balances[_to] || balances[msg.sender] + _feeSmt < balances[msg.sender]) revert(); balances[_to] += _value; Transfer(_from, _to, _value); balances[msg.sender] += _feeSmt; Transfer(_from, msg.sender, _feeSmt); balances[_from] -= _value + _feeSmt; nonces[_from] = nonce + 1; return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `transferProxy` has an integer overflow vulnerability. The line `balances[_to] += _value;` can cause an overflow if the sum of `balances[_to]` and `_value` exceeds the maximum value that can be stored in a `uint256` variable. This can be exploited by malicious users to steal tokens from other users."
+        },
+        {
+            "function_name": "allocateTokens",
+            "code": "function allocateTokens(address[] _owners, uint256[] _values) public onlyOwner { if(allocateEndTime < now) revert(); if(_owners.length != _values.length) revert(); for(uint256 i = 0; i < _owners.length ; i++){ address to = _owners[i]; uint256 value = _values[i]; if(totalSupply + value <= totalSupply || balances[to] + value <= balances[to]) revert(); totalSupply += value; balances[to] += value; } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `allocateTokens` has an integer overflow vulnerability. The line `totalSupply += value;` can cause an overflow if the sum of `totalSupply` and `value` exceeds the maximum value that can be stored in a `uint256` variable. This can be exploited by malicious users to steal tokens from other users."
+        },
+        {
+            "function_name": "allocateTokens",
+            "code": "function allocateTokens(address[] _owners, uint256[] _values) public onlyOwner { if(allocateEndTime < now) revert(); if(_owners.length != _values.length) revert(); for(uint256 i = 0; i < _owners.length ; i++){ address to = _owners[i]; uint256 value = _values[i]; if(totalSupply + value <= totalSupply || balances[to] + value <= balances[to]) revert(); totalSupply += value; balances[to] += value; } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `allocateTokens` has an integer overflow vulnerability. The line `balances[to] += value;` can cause an overflow if the sum of `balances[to]` and `value` exceeds the maximum value that can be stored in a `uint256` variable. This can be exploited by malicious users to steal tokens from other users."
+        },
+        {
+            "function_name": "allocateTokens",
+            "code": "function allocateTokens(address[] _owners, uint256[] _values) public onlyOwner { if(allocateEndTime < now) revert(); if(_owners.length != _values.length) revert(); for(uint256 i = 0; i < _owners.length ; i++){ address to = _owners[i]; uint256 value = _values[i]; if(totalSupply + value <= totalSupply || balances[to] + value <= balances[to]) revert(); totalSupply += value; balances[to] += value; } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `allocateTokens` has an integer overflow vulnerability. The line `balances[to] += value;` can cause an overflow if the sum of `balances[to]` and `value` exceeds the maximum value that can be stored in a `uint256` variable. This can be exploited by malicious users to steal tokens from other users."
+        },
+        {
+            "function_name": "allocateTokens",
+            "code": "function allocateTokens(address[] _owners, uint256[] _values) public onlyOwner { if(allocateEndTime < now) revert(); if(_owners.length != _values.length) revert(); for(uint256 i = 0; i < _owners.length ; i++){ address to = _owners[i]; uint256 value = _values[i]; if(totalSupply + value <= totalSupply || balances[to] + value <= balances[to]) revert(); totalSupply += value; balances[to] += value; } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `allocateTokens` has an integer overflow vulnerability. The line `balances[to] += value;` can cause an overflow if the sum of `balances[to]` and `value` exceeds the maximum value that can be stored in a `uint256` variable. This can be exploited by malicious users to steal tokens from other users."
+        }
+    ]
+}

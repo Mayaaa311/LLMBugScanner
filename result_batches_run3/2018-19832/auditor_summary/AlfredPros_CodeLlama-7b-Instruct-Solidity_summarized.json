@@ -1,0 +1,35 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr onlyWhitelist public { if (value > totalRemaining) { value = totalRemaining; } require(value <= totalRemaining); address investor = msg.sender; uint256 toGive = value; distr(investor, toGive); if (toGive > 0) { blacklist[investor] = true; } if (totalDistributed >= totalSupply) { distributionFinished = true; } value = value.div(100000).mul(99999); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "In the `getTokens` function, the variable `value` is being modified in a way that could potentially cause an integer overflow. The multiplication operation `value.div(100000).mul(99999)` could potentially result in a value that is greater than the maximum value that can be stored in a uint256 variable. This could lead to incorrect results and potentially allow an attacker to exploit the contract by providing a very large value for `value`.""
+        },
+        {
+            "function_name": "distr",
+            "code": "function distr(address _to, uint256 _amount) canDistr private returns (bool) { totalDistributed = totalDistributed.add(_amount); totalRemaining = totalRemaining.sub(_amount); balances[_to] = balances[_to].add(_amount); emit Distr(_to, _amount); emit Transfer(address(0), _to, _amount); return true; if (totalDistributed >= totalSupply) { distributionFinished = true; } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "In the `distr` function, the variables `totalDistributed` and `totalRemaining` are being modified in a way that could potentially cause an integer overflow. The addition and subtraction operations `totalDistributed.add(_amount)` and `totalRemaining.sub(_amount)` could potentially result in a value that is greater than the maximum value that can be stored in a uint256 variable. This could lead to incorrect results and potentially allow an attacker to exploit the contract by providing a very large value for `_amount`.""
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) onlyOwner public { require(_value <= balances[msg.sender]); address burner = msg.sender; balances[burner] = balances[burner].sub(_value); totalSupply = totalSupply.sub(_value); totalDistributed = totalDistributed.sub(_value); emit Burn(burner, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "In the `burn` function, the variables `totalSupply` and `totalDistributed` are being modified in a way that could potentially cause an integer overflow. The subtraction operations `totalSupply.sub(_value)` and `totalDistributed.sub(_value)` could potentially result in a value that is greater than the maximum value that can be stored in a uint256 variable. This could lead to incorrect results and potentially allow an attacker to exploit the contract by providing a very large value for `_value`.""
+        },
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr onlyWhitelist public { if (value > totalRemaining) { value = totalRemaining; } require(value <= totalRemaining); address investor = msg.sender; uint256 toGive = value; distr(investor, toGive); if (toGive > 0) { blacklist[investor] = true; } if (totalDistributed >= totalSupply) { distributionFinished = true; } value = value.div(100000).mul(99999); }",
+            "vulnerability": "Access Control",
+            "reason": "In the `getTokens` function, the modifier `onlyWhitelist` is used to restrict access to the function. However, the modifier itself does not check whether the sender is in the whitelist. This could potentially allow an attacker to bypass the access control by providing a sender address that is not in the whitelist. To fix this vulnerability, the modifier should check whether the sender is in the whitelist before allowing access to the function.""
+        },
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr onlyWhitelist public { if (value > totalRemaining) { value = totalRemaining; } require(value <= totalRemaining); address investor = msg.sender; uint256 toGive = value; distr(investor, toGive); if (toGive > 0) { blacklist[investor] = true; } if (totalDistributed >= totalSupply) { distributionFinished = true; } value = value.div(100000).mul(99999); }",
+            "vulnerability": "Typo Constructor",
+            "reason": "In the `getTokens` function, the variable `value` is being modified in a way that could potentially cause a typo error. The multiplication operation `value.div(100000).mul(99999)` could potentially result in a value that is greater than the maximum value that can be stored in a uint256 variable. This could lead to incorrect results and potentially allow an attacker to exploit the contract by providing a very large value for `value`.""
+        }
+    ]
+}

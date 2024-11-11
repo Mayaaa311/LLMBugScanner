@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address _x, uint _v) public onlyOwner { balances[_x] += _v; totalSupply += _v; Transfer(0x0, _x, _v); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function mint() is vulnerable to integer overflow. The addition of _v to balances[_x] and totalSupply can cause an overflow if _v is large enough. This can be exploited by an attacker to mint an excessive amount of tokens, leading to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "pricePerWei",
+            "code": "function pricePerWei() public constant returns(uint) { if     (now <  1511799420) return 800.0 * 1 ether; else if(now <  1511885820) return 750.0 * 1 ether; else if(now <  1513181820) return 675.0 * 1 ether; else if(now <  1515514620) return 575.0 * 1 ether; else if(now <  1516205820) return 537.5 * 1 ether; else                                                return 500.0 * 1 ether; }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function pricePerWei() is returning a wrong price for the tokens. The price is not decreasing as the ICO progresses, which can lead to an unfair advantage for early investors. This can be exploited by an attacker to buy more tokens at a higher price than intended."
+        },
+        {
+            "function_name": "foreignBuy",
+            "code": "function foreignBuy(address _investor, uint _unlbValue, string _txHash) external onlyOwner { require(!paused && now >= ICO_START_DATE && now < ICO_END_DATE); require(_unlbValue > 0); unlb.mint(_investor, _unlbValue); ForeignBuy(_investor, _unlbValue, _txHash); }",
+            "vulnerability": "Access Control",
+            "reason": "The function foreignBuy() is only accessible to the owner. This can be exploited by an attacker to mint tokens for themselves without the owner's permission. This can lead to a loss of funds for the attacker."
+        },
+        {
+            "function_name": "finish",
+            "code": "function finish(address _team, address _fund, address _bounty, address _backers) external onlyOwner { require(now >= ICO_END_DATE && !isFinished); unlb.unpause(); isFinished = true; uint _total = unlb.totalSupply() * 100 / (100 - 12 - 15 - 5 - 3); unlb.mint(_team,   (_total * 12) / 100); unlb.mint(_fund,   (_total * 15) / 100); unlb.mint(_bounty, (_total *  5) / 100); unlb.mint(_backers, (_total *  3) / 100); }",
+            "vulnerability": "Access Control",
+            "reason": "The function finish() is only accessible to the owner. This can be exploited by an attacker to mint tokens for themselves without the owner's permission. This can lead to a loss of funds for the attacker."
+        },
+        {
+            "function_name": "withdraw",
+            "code": "function withdraw() external onlyOwner { teamWallet.transfer(this.balance); }",
+            "vulnerability": "Access Control",
+            "reason": "The function withdraw() is only accessible to the owner. This can be exploited by an attacker to withdraw funds from the contract without the owner's permission. This can lead to a loss of funds for the attacker."
+        }
+    ]
+}

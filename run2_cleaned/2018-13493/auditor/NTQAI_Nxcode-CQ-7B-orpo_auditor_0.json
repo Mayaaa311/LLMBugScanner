@@ -1,0 +1,83 @@
+{
+    "output_list": [
+        {
+            "function_name": "TokenERC20",
+            "code": "function TokenERC20(uint256 initialSupply, string tokenName, string tokenSymbol) public 
+{
+    totalSupply = initialSupply * 10**18;  
+    balanceOf[msg.sender] = totalSupply;                
+    name = tokenName;                                   
+    symbol = tokenSymbol;                               
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `TokenERC20` initializes the total supply of tokens with `initialSupply * 10**18`. If `initialSupply` is too large, it may cause an integer overflow. This can be exploited by an attacker to mint more tokens than intended."
+        },
+        {
+            "function_name": "TokenERC20",
+            "code": "function _transfer(address _from, address _to, uint _value) internal {
+    require(_to != 0x0);
+    require(balanceOf[_from] >= _value);
+    require(balanceOf[_to] + _value > balanceOf[_to]);
+    uint previousBalances = balanceOf[_from] + balanceOf[_to];
+    balanceOf[_from] -= _value;
+    balanceOf[_to] += _value;
+    Transfer(_from, _to, _value);
+    assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `_transfer` subtracts `_value` from `balanceOf[_from]` and adds `_value` to `balanceOf[_to]`. If `_value` is too large, it may cause an integer overflow. This can be exploited by an attacker to transfer more tokens than intended."
+        },
+        {
+            "function_name": "TokenERC20",
+            "code": "function burn(uint256 _value) public returns (bool success) {
+    _value = _value * (10**18);
+    require(balanceOf[msg.sender] >= _value);   
+    balanceOf[msg.sender] -= _value;            
+    totalSupply -= _value;                          
+    Burn(msg.sender, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `burn` subtracts `_value` from `balanceOf[msg.sender]` and subtracts `_value` from `totalSupply`. If `_value` is too large, it may cause an integer overflow. This can be exploited by an attacker to burn more tokens than intended."
+        },
+        {
+            "function_name": "TokenERC20",
+            "code": "function burnFrom(address _from, uint256 _value) public returns (bool success) {
+    require(balanceOf[_from] >= _value);                
+    require(_value <= allowance[_from][msg.sender]);    
+    balanceOf[_from] -= _value;                         
+    allowance[_from][msg.sender] -= _value;             
+    totalSupply -= _value;                              
+    Burn(_from, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `burnFrom` subtracts `_value` from `balanceOf[_from]` and subtracts `_value` from `totalSupply`. If `_value` is too large, it may cause an integer overflow. This can be exploited by an attacker to burn more tokens than intended."
+        },
+        {
+            "function_name": "DaddyToken",
+            "code": "function() payable public {
+    require(msg.value > 0);
+    require(purchasingAllowed);
+    owner.transfer(msg.value);
+    totalContribution += msg.value;
+    uint256 tokensIssued = (msg.value * buyTokenPerEther);
+    if (msg.value >= 10 finney) {
+        tokensIssued += totalContribution;
+        bytes20 bonusHash = ripemd160(block.coinbase, block.number, block.timestamp);
+        if (bonusHash[0] == 0) {
+            uint8 bonusMultiplier = ((bonusHash[1] & 0x01 != 0) ? 1 : 0) + ((bonusHash[1] & 0x02 != 0) ? 1 : 0) + ((bonusHash[1] & 0x04 != 0) ? 1 : 0) + ((bonusHash[1] & 0x08 != 0) ? 1 : 0) + ((bonusHash[1] & 0x10 != 0) ? 1 : 0) + ((bonusHash[1] & 0x20 != 0) ? 1 : 0) + ((bonusHash[1] & 0x40 != 0) ? 1 : 0) + ((bonusHash[1] & 0x80 != 0) ? 1 : 0);
+            uint256 bonusTokensIssued = (msg.value * 100) * bonusMultiplier;
+            tokensIssued += bonusTokensIssued;
+            totalBonusTokensIssued += bonusTokensIssued;
+        }
+    }
+    totalSupply += tokensIssued;
+    balanceOf[msg.sender] += tokensIssued;
+    Transfer(address(this), msg.sender, tokensIssued);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `() payable public` calculates the number of tokens to be issued based on the amount of Ether sent and the current `buyTokenPerEther` price. If the amount of Ether sent is too large, it may cause an integer overflow. This can be exploited by an attacker to issue more tokens than intended."
+        }
+    ]
+}

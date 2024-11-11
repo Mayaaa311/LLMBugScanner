@@ -1,0 +1,63 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+                if (balanceOf[msg.sender] < _value) throw;           
+                if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+                if (frozenAccount[msg.sender]) throw;                
+                balanceOf[msg.sender] -= _value;                     
+                balanceOf[_to] += _value;                            
+                Transfer(msg.sender, _to, _value);                   
+            }",
+            "vulnerability": "Frozen Account Vulnerability",
+            "reason": "The transfer function checks if the sender's account is frozen before transferring tokens. However, it does not check if the recipient's account is frozen. This vulnerability allows an attacker to freeze their own account and prevent them from transferring tokens to other accounts."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+                if (frozenAccount[_from]) throw;                        
+                if (balanceOf[_from] < _value) throw;                 
+                if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+                if (_value > allowance[_from][msg.sender]) throw;   
+                balanceOf[_from] -= _value;                          
+                balanceOf[_to] += _value;                            
+                allowance[_from][msg.sender] -= _value;
+                Transfer(_from, _to, _value);
+                return true;
+            }",
+            "vulnerability": "Frozen Account Vulnerability",
+            "reason": "The transferFrom function checks if the sender's account is frozen before transferring tokens. However, it does not check if the recipient's account is frozen. This vulnerability allows an attacker to freeze their own account and prevent them from transferring tokens to other accounts."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+                balanceOf[target] += mintedAmount;
+                totalSupply += mintedAmount;
+                Transfer(0, this, mintedAmount);
+                Transfer(this, target, mintedAmount);
+            }",
+            "vulnerability": "Unauthorized Token Minting",
+            "reason": "The mintToken function is only accessible to the contract owner. However, it does not check if the contract owner has the authority to mint tokens. This vulnerability allows an attacker to mint tokens without the contract owner's permission."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner {
+                frozenAccount[target] = freeze;
+                FrozenFunds(target, freeze);
+            }",
+            "vulnerability": "Unauthorized Account Freezing",
+            "reason": "The freezeAccount function is only accessible to the contract owner. However, it does not check if the contract owner has the authority to freeze accounts. This vulnerability allows an attacker to freeze accounts without the contract owner's permission."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+                sellPrice = newSellPrice;
+                buyPrice = newBuyPrice;
+            }",
+            "vulnerability": "Unauthorized Price Setting",
+            "reason": "The setPrices function is only accessible to the contract owner. However, it does not check if the contract owner has the authority to set prices. This vulnerability allows an attacker to set prices without the contract owner's permission."
+        }
+    ]
+}

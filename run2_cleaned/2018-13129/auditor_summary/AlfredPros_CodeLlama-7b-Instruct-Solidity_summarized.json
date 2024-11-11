@@ -1,0 +1,35 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address holder, uint value) public { require(msg.sender == ico); require(value > 0); require(totalSupply + value <= TOKEN_LIMIT); balances[holder] += value; totalSupply += value; Transfer(0x0, holder, value); }",
+            "vulnerability": "Unchecked Return Value",
+            "reason": "The function mint does not check if the transfer of tokens to the holder was successful. This could lead to loss of funds if the transfer fails. The transfer function should be called with a return value check to ensure that the tokens were successfully transferred."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _value) public returns (bool) { require(_to != address(0)); require(!isFrozen); return super.transfer(_to, _value); }",
+            "vulnerability": "Unchecked Return Value",
+            "reason": "The function transfer does not check if the transfer of tokens to the recipient was successful. This could lead to loss of funds if the transfer fails. The transfer function should be called with a return value check to ensure that the tokens were successfully transferred."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _value) public returns (bool) { require(!isFrozen); return super.transferFrom(_from, _to, _value); }",
+            "vulnerability": "Unchecked Return Value",
+            "reason": "The function transferFrom does not check if the transfer of tokens from the sender to the recipient was successful. This could lead to loss of funds if the transfer fails. The transferFrom function should be called with a return value check to ensure that the tokens were successfully transferred."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint _value) public returns (bool) { require(!isFrozen); return super.approve(_spender, _value); }",
+            "vulnerability": "Unchecked Return Value",
+            "reason": "The function approve does not check if the approval of tokens to the spender was successful. This could lead to loss of funds if the approval fails. The approve function should be called with a return value check to ensure that the tokens were successfully approved."
+        },
+        {
+            "function_name": "migrate",
+            "code": "function migrate(uint value) external { require(migrationAgent != 0); require(value > 0); require(value <= balances[msg.sender]); balances[msg.sender] -= value; totalSupply -= value; totalMigrated += value; MigrationAgent(migrationAgent).migrateFrom(msg.sender, value); Migrate(msg.sender, migrationAgent, value); }",
+            "vulnerability": "Unchecked Return Value",
+            "reason": "The function migrate does not check if the migration of tokens from the sender to the migration agent was successful. This could lead to loss of funds if the migration fails. The migrateFrom function should be called with a return value check to ensure that the tokens were successfully migrated."
+        }
+    ]
+}

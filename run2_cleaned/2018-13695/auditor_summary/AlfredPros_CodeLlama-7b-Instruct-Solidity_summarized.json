@@ -1,0 +1,35 @@
+ 
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address receiver, uint amount) public { tokenAmount = ((msg.value*rate)/(1 ether)); if (tokenAmount != amount || amount == 0 || receiver != msg.sender) { revert(); } totalSupply = totalSupply + (amount*1 ether); balances[receiver] += (amount*1 ether); Transfer(0, receiver, (amount*1 ether)); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `mint` takes in an `amount` parameter and multiplies it by the `rate` to calculate `tokenAmount`. However, the calculation is not checked for integer overflow. If the `amount` is too large, the multiplication could result in an overflow, leading to incorrect calculations and potentially loss of funds. This vulnerability can be exploited by an attacker who sends a large amount of Ether to the contract, causing the `tokenAmount` to exceed the maximum safe integer value, leading to an integer overflow and incorrect calculations."
+        },
+        {
+            "function_name": "()",
+            "code": "function () payable { uint256 oldSupply = totalSupply; totalSupply = (totalSupply/1 ether); if (totalSupply > 999999) { revert(); } if (totalSupply < 25000) { rate = 3340; } if (totalSupply >= 25000) { rate = 668; } if (totalSupply >= 125000) { rate = 334; } if (totalSupply >= 525000) { rate = 134; } tokenAmount = 0; tokenAmount = ((msg.value*rate)/(1 ether)); if (tokenAmount < 0) { revert(); } check = 0; check = safeAdd(totalSupply, tokenAmount); if (check > 1000000) { revert(); } if (totalSupply < 25000 && check > 25000) { revert(); } if (totalSupply < 125000 && check > 125000) { revert(); } if (totalSupply < 525000 && check > 525000) { revert(); } uint256 senderBalance = (balances[msg.sender]/1 ether); if ((senderBalance + tokenAmount) > 50 && totalSupply < 25000) { revert(); } totalSupply = oldSupply; mint(msg.sender, tokenAmount); tokenAmount = 0; check = 0; rate = 0; Founder1.transfer((msg.value/3)); Founder2.transfer((msg.value/3)); Founder3.transfer((msg.value/3)); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `()` is the fallback function that is called when Ether is sent to the contract. It contains multiple calculations and checks, including `totalSupply`, `rate`, `tokenAmount`, and `check`. However, the calculation of `totalSupply` is not checked for integer overflow. If the `totalSupply` is too large, the addition or subtraction could result in an overflow, leading to incorrect calculations and potentially loss of funds. This vulnerability can be exploited by an attacker who sends a large amount of Ether to the contract, causing the `totalSupply` to exceed the maximum safe integer value, leading to an integer overflow and incorrect calculations."
+        },
+        {
+            "function_name": "Burn",
+            "code": "function Burn () { if (msg.sender == owner && totalSupply < 1000000) { totalSupply = 1000000; } else {throw;} }",
+            "vulnerability": "Unauthorized Access",
+            "reason": "The function `Burn` allows anyone to call it, regardless of their role or permissions. However, it only allows the contract owner to set the `totalSupply` to 1000000. If an attacker calls the `Burn` function, they can potentially set the `totalSupply` to a higher value, leading to a loss of funds. This vulnerability can be exploited by an attacker who has access to the contract and calls the `Burn` function, causing the `totalSupply` to be set to a higher value, leading to a loss of funds."
+        },
+        {
+            "function_name": "safeAdd",
+            "code": "function safeAdd(uint a, uint b) internal returns (uint) { uint c = a + b; assert(c>=a && c>=b); return c; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `safeAdd` is used to add two numbers `a` and `b`. However, it does not check for integer overflow. If the sum of `a` and `b` exceeds the maximum safe integer value, the addition could result in an overflow, leading to incorrect calculations and potentially loss of funds. This vulnerability can be exploited by an attacker who calls the `safeAdd` function with large values of `a` and `b`, causing the addition to exceed the maximum safe integer value, leading to an integer overflow and incorrect calculations."
+        },
+        {
+            "function_name": "safeSub",
+            "code": "function safeSub(uint a, uint b) internal returns (uint) { assert(b <= a); return a - b; }",
+            "vulnerability": "Underflow",
+            "reason": "The function `safeSub` is used to subtract two numbers `a` and `b`. However, it does not check for underflow. If `b` is greater than `a`, the subtraction could result in an underflow, leading to incorrect calculations and potentially loss of funds. This vulnerability can be exploited by an attacker who calls the `safeSub` function with large values of `a` and `b`, causing the subtraction to result in an underflow, leading to incorrect calculations and potentially loss of funds."
+        }
+    ]
+}
