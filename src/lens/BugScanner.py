@@ -111,7 +111,7 @@ class BugScanner:
     
     def run_batch_auditor(self, code_folder):
         code_path = [f for f in os.listdir(code_folder) if f.endswith('.sol')]
-        auditor_result_dirs = []
+        auditor_result_dirs = [] 
         self.load_all_models(True, False, False, False)
         for file in code_path:
             # Step 1: Generate vulnerabilities using auditors
@@ -134,6 +134,7 @@ class BugScanner:
         print("all auditor output write to : ", auditor_result_dirs)
         return auditor_result_dirs
     def run_batch_summarizer1(self, auditor_result_dirs):
+
         self.load_all_models(False, False, False, True)
         summarized_vulnerabilities_dirs = self.run_llm_on_dir_list(auditor_result_dirs, self.run_summarizer, "auditor_summary")
         print("all auditor summary write to : ", summarized_vulnerabilities_dirs)

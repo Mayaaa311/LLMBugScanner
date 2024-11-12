@@ -96,7 +96,6 @@ def main():
     parser.add_argument('-r', '--ranker', help='Optional ranker model ID (only one allowed)')
     parser.add_argument('-p', '--parser', help='Optional parser model ID (only one allowed)')
     parser.add_argument('-d', '--data_folder', required=True, help='Path to the data folder')
-    parser.add_argument('-res', '--resume_folder', required=False, help='Path to the data folder')
     parser.add_argument('-o', '--output_folder', required=False, help='Output results folder')
     parser.add_argument('-k', '--topk', required=True, help='Top k results')
     parser.add_argument('-log', '--log_folder', required=True, help='Folder to save log files')
