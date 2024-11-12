@@ -97,7 +97,7 @@ def main():
     parser.add_argument('-p', '--parser', help='Optional parser model ID (only one allowed)')
     parser.add_argument('-d', '--data_folder', required=True, help='Path to the data folder')
     parser.add_argument('-res', '--resume_folder', required=False, help='Path to the data folder')
-    parser.add_argument('-o', '--output_folder', required=True, help='Output results folder')
+    parser.add_argument('-o', '--output_folder', required=False, help='Output results folder')
     parser.add_argument('-k', '--topk', required=True, help='Top k results')
     parser.add_argument('-log', '--log_folder', required=True, help='Folder to save log files')
 
@@ -150,42 +150,46 @@ def main():
     # List all files in the data folder
     data_files = [f for f in os.listdir(args.data_folder) if f.endswith('.sol')]
     logging.info(f"Found {len(data_files)} .sol files in the folder: {args.data_folder}")
-    output_name = args.output_folder+f"/k{args.topk}_n{len(auditor_models)}_"+datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    output_name = "output"
+    if args.output_folder:
+        output_name = args.output_folder
 
     logging.info(f"Output will be saved in: {output_name}")
 
-    if args.resume_folder:
-        logging.info(f"Initializing resuming: {args.resume_folder}")
-        folder_nm = find_earliest_missing_folder(args.resume_folder)
-        folders = detector.recreate_subfolder_name_list(args.resume_folder, folder_nm)
-        print("missing folder: ", folders)
-        detector.topk = args.topk
-        if output_name is not None:
-            detector.result_dir = args.output_folder
+    # if args.resume_folder:
+    #     logging.info(f"Initializing resuming: {args.resume_folder}")
+    #     folder_nm = find_earliest_missing_folder(args.resume_folder)
+        
+    #     if(folder_nm != 'auditor'):
+    #         folder_nm1 = required_folders[required_folders.index(folder_nm)-1] 
+    #         folders = detector.recreate_subfolder_name_list(args.resume_folder, folder_nm1)
+    #         print("missing folder: ", folders)
+    #         detector.topk = args.topk
+    #         detector.result_dir = args.resume_folder
 
-        # Define the processing steps in sequential order
-        steps = [
-            detector.run_batch_auditor,
-            detector.run_batch_summarizer1,
-            detector.run_batch_critic,
-            detector.run_batch_summarizer2,
-            detector.run_batch_ranker,
-            detector.run_batch_output_formatter
-        ]
+    #         # Define the processing steps in sequential order
+    #         steps = [
+    #             detector.run_batch_auditor,
+    #             detector.run_batch_summarizer1,
+    #             detector.run_batch_critic,
+    #             detector.run_batch_summarizer2,
+    #             detector.run_batch_ranker,
+    #             detector.run_batch_output_formatter
+    #         ]
 
-        # Find the starting index based on the folder's position in required_folders
-        start_index = required_folders.index(folder_nm) if folder_nm in required_folders else 0
-
-        # Execute steps starting from the determined index
-        for idx, step in enumerate(steps[start_index:], start=start_index):
-            print(step)
-            if idx == 2:
-                folders = step(folders, args.data_folder)
-            elif idx > 0:
-                folders = step(folders)
-            else:
-                folders = step(args.data_folder)
-        return
+    #         # Find the starting index based on the folder's position in required_folders
+    #         start_index = required_folders.index(folder_nm) 
+    #         print("stratr from step: ",start_index)
+    #         # Execute steps starting from the determined index
+    #         for idx, step in enumerate(steps[start_index:], start=start_index):
+    #             print(step)
+    #             if idx == 2:
+    #                 folders = step(folders, args.data_folder)
+    #             elif idx > 0:
+    #                 folders = step(folders)
+    #             else:
+    #                 folders = step(args.data_folder)
+    #         return
 
   
 

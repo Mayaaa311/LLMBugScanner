@@ -95,13 +95,16 @@ class BugScanner:
             files = [f for f in os.listdir(dir)]
             name = dir.split('/')
             write_to = '/'.join(name[:-1]) + '/' + append_name
-            for file in files:
-                file_path = os.path.join(dir, file)  
-                auditor_idx =  file.split('/')[-1].split('.')[-2].split('_')[-1]
-                print("FILEPATH: ", file_path)
-                with open(file_path, "r") as f:
-                    o = f.read()
-                    func(o, write_to, *args, **kwargs, idx = auditor_idx) 
+            if os.path.isfile(write_to):
+                print('found ',write_to)
+            else:
+                for file in files:
+                    file_path = os.path.join(dir, file)  
+                    auditor_idx =  file.split('/')[-1].split('.')[-2].split('_')[-1]
+                    print("FILEPATH: ", file_path)
+                    with open(file_path, "r") as f:
+                        o = f.read()
+                        func(o, write_to, *args, **kwargs, idx = auditor_idx) 
 
             result.append(write_to)
         return result
@@ -117,7 +120,10 @@ class BugScanner:
                 code = f.read()
                 name = file.split('/')[-1].rsplit('.', 1)[0]
                 write_to = f"{self.result_dir}/{name}"
-                self.run_auditor(code, write_to+"/auditor")
+                if os.path.isfile(write_to+"/auditor"):
+                    print('found ',write_to+"/auditor")
+                else:
+                    self.run_auditor(code, write_to+"/auditor")
                 auditor_result_dirs.append(write_to+"/auditor")
 
         for model in self.llm_auditors:
@@ -139,17 +145,20 @@ class BugScanner:
             files = [f for f in os.listdir(dir)]
             name = dir.split('/')
             write_to = '/'.join(name[:-1]) + '/' + "critic"
+            
             code_file_name = code_folder+'/'+name[-2]+'.sol'
-
-            for file in files:
-                file_path = os.path.join(dir, file)  
-                auditor_idx =  file.split('/')[-1].split('.')[-2].split('_')[-1]
-                print("FILEPATH: ", file_path)
-                with open(file_path, "r") as f:
-                    o = f.read()
-                    with open(code_file_name, "r") as f1:
-                        code = f1.read()
-                        self.run_critic(o, write_to, code = code, idx = auditor_idx) 
+            if os.path.isfile(write_to):
+                print('found ',write_to)
+            else:
+                for file in files:
+                    file_path = os.path.join(dir, file)  
+                    auditor_idx =  file.split('/')[-1].split('.')[-2].split('_')[-1]
+                    print("FILEPATH: ", file_path)
+                    with open(file_path, "r") as f:
+                        o = f.read()
+                        with open(code_file_name, "r") as f1:
+                            code = f1.read()
+                            self.run_critic(o, write_to, code = code, idx = auditor_idx) 
 
             critic_output_dir.append(write_to)
 
@@ -160,6 +169,8 @@ class BugScanner:
 
         return critic_output_dir
     def run_batch_summarizer2(self, critic_output_dir):
+        if self.llm_summarizer.model is None:
+            self.load_all_models(False, False, False, True)
         self.llm_summarizer.load_template(['content'], prompt_path = 'templates/summarizer2.txt')
         summarized_vulnerabilities_dirs = self.run_llm_on_dir_list(critic_output_dir, self.run_summarizer, "critic_summary")
         print("all critic summary write to : ", summarized_vulnerabilities_dirs)
@@ -174,40 +185,48 @@ class BugScanner:
                 files = [f for f in os.listdir(dir)]
                 name = dir.split('/')
                 write_to = '/'.join(name[:-1])+'/ranker'
-                
-                critic_folder_data = []
-                for file in files:
-                    file_path = os.path.join(dir, file)  
-                    with open(file_path, "r") as f:
-                        o = f.read()
-                        critic_folder_data.append(o)
-                self.run_ranker(str(critic_folder_data), write_to) 
+                if os.path.isfile(write_to):
+                    print('found ',write_to)
+                else:
+                    critic_folder_data = []
+                    for file in files:
+                        file_path = os.path.join(dir, file)  
+                        with open(file_path, "r") as f:
+                            o = f.read()
+                            critic_folder_data.append(o)
+                    self.run_ranker(str(critic_folder_data), write_to) 
                 ranker_dirs.append(write_to)
         print("ranker output write to : ", ranker_dirs)
 
     def run_batch_output_formatter(self, ranker_dirs):
+        if self.llm_summarizer.model is None:
+            self.load_all_models(False, False, False, True)
         self.llm_summarizer.load_template(['dataname','inputjson'], prompt_path = 'templates/output_formatter.txt')
         sum_dirs = []
         for dir in ranker_dirs:
             files = [f for f in os.listdir(dir)]
             name = dir.split('/')
             write_to = '/'.join(name[:-1])+'/final_output'
-            i = 0
-            for file in files:
-                file_path = os.path.join(dir, file)  
-                with open(file_path, "r") as f:
-                    o = f.read() 
-                    print("dataname: ",name[-2])
-                    response = self.llm_summarizer.invoke({"dataname": name[-2], "inputjson":o})
-                    write_to_file(write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized{i}.csv", str(response))
+            if os.path.isfile(write_to):
+                print('found ',write_to)
+            else:
+                i = 0
+                for file in files:
+                    file_path = os.path.join(dir, file)  
+                    with open(file_path, "r") as f:
+                        o = f.read() 
+                        print("dataname: ",name[-2])
+                        response = self.llm_summarizer.invoke({"dataname": name[-2], "inputjson":o})
+                        write_to_file(write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized{i}.csv", str(response))
             sum_dirs.append(write_to)
         return sum_dirs
 
     def recreate_subfolder_name_list(self, folder, name):
         files = [f for f in os.listdir(folder)]
+        final =[]
         for i in files:
-            i=i+'/'+name
-        return files
+            final.append(folder+'/'+i+'/'+name)
+        return final
 
     def run_pipeline(self, code_folder, result_dir, topk="3"):
 

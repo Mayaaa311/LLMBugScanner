@@ -8,7 +8,7 @@ from langchain_core.callbacks import CallbackManager, StreamingStdOutCallbackHan
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 param1 = {
-    "max_new_tokens": 40000,
+    "max_new_tokens": 4000,
     "do_sample": True,
     "temperature": 0.001,
     "top_k": 50,
@@ -16,7 +16,8 @@ param1 = {
     "num_return_sequences": 1
 }
 param2 = {
-    "max_new_tokens": 40000,
+    "max_new_tokens": 4000
+    ,
     "do_sample": False
 }
 generation_params=param2
@@ -41,30 +42,25 @@ class Huggingface_LLM(BaseLLM):
             self.model = AutoModel.from_pretrained("THUDM/codegeex2-6b", trust_remote_code=True)
             self.model = self.model.eval()
             return
-        if self.model_params is not None and self.model_params:
-            if 'quantization_config' in self.model_params:
-                use_4bit = True
-                bnb_4bit_compute_dtype = "float16"
-                bnb_4bit_quant_type = "nf4"
-                use_double_nested_quant = True
-                compute_dtype = getattr(torch, bnb_4bit_compute_dtype)
 
-                # BitsAndBytesConfig 4-bit config
-                bnb_config = BitsAndBytesConfig(
-                    load_in_4bit=use_4bit,
-                    bnb_4bit_use_double_quant=use_double_nested_quant,
-                    bnb_4bit_quant_type=bnb_4bit_quant_type,
-                    bnb_4bit_compute_dtype=compute_dtype,
-                    load_in_8bit_fp32_cpu_offload=True
-                )
-                self.model_params.pop('quantization_config')
-                self.model = AutoModelForCausalLM.from_pretrained(self.model_id, 
-                                                                  quantization_config = bnb_config, device_map="auto",**self.model_params)
-            else:
-                self.model = AutoModelForCausalLM.from_pretrained(self.model_id,device_map="auto" ,**self.model_params)
-        else:
-            self.model = AutoModelForCausalLM.from_pretrained(self.model_id,device_map="auto",trust_remote_code=True)
-        
+        use_4bit = True
+        bnb_4bit_compute_dtype = "float16"
+        bnb_4bit_quant_type = "nf4"
+        use_double_nested_quant = True
+        compute_dtype = getattr(torch, bnb_4bit_compute_dtype)
+
+        # BitsAndBytesConfig 4-bit config
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=use_4bit,
+            bnb_4bit_use_double_quant=use_double_nested_quant,
+            bnb_4bit_quant_type=bnb_4bit_quant_type,
+            bnb_4bit_compute_dtype=compute_dtype,
+            load_in_8bit_fp32_cpu_offload=True
+        )
+
+        self.model = AutoModelForCausalLM.from_pretrained(self.model_id, 
+                                                            quantization_config = bnb_config, device_map="auto")
+
         # # Ensure that callback_manager is a valid object
         # if isinstance(self.model_params.get("callback_manager"), str) and self.model_params["callback_manager"] == "default":
         #     self.model_params["callback_manager"] = CallbackManager([StreamingStdOutCallbackHandler()])
