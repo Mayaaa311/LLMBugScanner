@@ -26,7 +26,7 @@ data_base_path = '/home/hice1/yyuan394/scratch/LLMBugScanner/data_full/CVE_clean
 # this is sbatch folder, do not change this 
 sbatch_output_path = '/home/hice1/yyuan394/scratch/LLMBugScanner/src/run_batch/sbatch_files'
 
-result_folder_name = 'result_nxcodes_k3'
+result_folder_name = 'result_nxcodes_k3_beforeft'
 # Check if the directory exists
 if os.path.exists(sbatch_output_path):
     # Clear the directory by removing it and all its contents

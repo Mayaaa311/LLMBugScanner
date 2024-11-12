@@ -59,8 +59,8 @@ def find_earliest_missing_folder(resume_folder):
     in the expected order ('auditor', 'auditor_summary', 'critic', 'critic_summary', 'ranker', 'final_output')
     across all subfolders. If all stages are complete, returns -1.
     """
-    earliest_missing_stage = None
-    earliest_missing_subfolder = None
+    earliest_missing_stage = 'final_output'
+    # earliest_missing_subfolder = 'final_output'
     
     # Iterate through each subfolder
     for subfolder in os.listdir(resume_folder):
@@ -75,16 +75,14 @@ def find_earliest_missing_folder(resume_folder):
             folder_path = os.path.join(subfolder_path, folder)
             if not os.path.exists(folder_path):
                 # Update if this is the first missing stage found
-                if earliest_missing_stage is None or required_folders.index(folder) < required_folders.index(earliest_missing_stage):
+                if required_folders.index(folder) < required_folders.index(earliest_missing_stage):
                     earliest_missing_stage = folder
-                    earliest_missing_subfolder = subfolder_path
-                break  # Stop checking further folders in this subfolder
     
     # Return -1 if all folders are present
     if earliest_missing_stage is None:
         return -1, -1
     
-    return earliest_missing_stage, earliest_missing_subfolder
+    return earliest_missing_stage
 
 
 def main():
@@ -158,8 +156,36 @@ def main():
 
     if args.resume_folder:
         logging.info(f"Initializing resuming: {args.resume_folder}")
-        _, folder = find_earliest_missing_folder(args.resume_folder)
-        folders = detector.recreate_subfolder_name_list(args.resume_folder)
+        folder_nm = find_earliest_missing_folder(args.resume_folder)
+        folders = detector.recreate_subfolder_name_list(args.resume_folder, folder_nm)
+        print("missing folder: ", folders)
+        detector.topk = args.topk
+        if output_name is not None:
+            detector.result_dir = args.output_folder
+
+        # Define the processing steps in sequential order
+        steps = [
+            detector.run_batch_auditor,
+            detector.run_batch_summarizer1,
+            detector.run_batch_critic,
+            detector.run_batch_summarizer2,
+            detector.run_batch_ranker,
+            detector.run_batch_output_formatter
+        ]
+
+        # Find the starting index based on the folder's position in required_folders
+        start_index = required_folders.index(folder_nm) if folder_nm in required_folders else 0
+
+        # Execute steps starting from the determined index
+        for idx, step in enumerate(steps[start_index:], start=start_index):
+            print(step)
+            if idx == 2:
+                folders = step(folders, args.data_folder)
+            elif idx > 0:
+                folders = step(folders)
+            else:
+                folders = step(args.data_folder)
+        return
 
   
 

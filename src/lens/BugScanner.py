@@ -3,7 +3,7 @@ import logging
 import os
 from datetime import datetime
 from langchain_core.prompts import PromptTemplate
-from langchain_community.llms import LlamaCpp
+# from langchain_community.llms import LlamaCpp
 from langchain_core.callbacks import CallbackManager, StreamingStdOutCallbackHandler
 import torch
 from lens.Huggingface import Huggingface_LLM
@@ -109,7 +109,7 @@ class BugScanner:
     def run_batch_auditor(self, code_folder):
         code_path = [f for f in os.listdir(code_folder) if f.endswith('.sol')]
         auditor_result_dirs = []
-        self.load_all_models(True, False, False, True)
+        self.load_all_models(True, False, False, False)
         for file in code_path:
             # Step 1: Generate vulnerabilities using auditors
             data_path = os.path.join(code_folder, file)
@@ -127,6 +127,7 @@ class BugScanner:
         print("all auditor output write to : ", auditor_result_dirs)
         return auditor_result_dirs
     def run_batch_summarizer1(self, auditor_result_dirs):
+        self.load_all_models(False, False, False, True)
         summarized_vulnerabilities_dirs = self.run_llm_on_dir_list(auditor_result_dirs, self.run_summarizer, "auditor_summary")
         print("all auditor summary write to : ", summarized_vulnerabilities_dirs)
         return summarized_vulnerabilities_dirs
@@ -138,22 +139,23 @@ class BugScanner:
             files = [f for f in os.listdir(dir)]
             name = dir.split('/')
             write_to = '/'.join(name[:-1]) + '/' + "critic"
-            code_file_name = code_folder+'/'+name[:-1]+'.sol'
+            code_file_name = code_folder+'/'+name[-2]+'.sol'
+
             for file in files:
                 file_path = os.path.join(dir, file)  
                 auditor_idx =  file.split('/')[-1].split('.')[-2].split('_')[-1]
                 print("FILEPATH: ", file_path)
                 with open(file_path, "r") as f:
                     o = f.read()
-                    code = code_file_name.read()
-                    self.run_critic(o, write_to, code = code, idx = auditor_idx) 
+                    with open(code_file_name, "r") as f1:
+                        code = f1.read()
+                        self.run_critic(o, write_to, code = code, idx = auditor_idx) 
 
             critic_output_dir.append(write_to)
 
         print("all critic write to : ", critic_output_dir)
         
         del self.llm_critic.model  # This removes the model from memory
-
         torch.cuda.empty_cache()  
 
         return critic_output_dir
@@ -205,6 +207,7 @@ class BugScanner:
         files = [f for f in os.listdir(folder)]
         for i in files:
             i=i+'/'+name
+        return files
 
     def run_pipeline(self, code_folder, result_dir, topk="3"):
 
