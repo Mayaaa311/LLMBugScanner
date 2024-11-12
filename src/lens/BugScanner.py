@@ -98,10 +98,10 @@ class BugScanner:
             if os.path.isfile(write_to):
                 print('found ',write_to)
             else:
+                print('Running ',write_to)
                 for file in files:
                     file_path = os.path.join(dir, file)  
                     auditor_idx =  file.split('/')[-1].split('.')[-2].split('_')[-1]
-                    print("FILEPATH: ", file_path)
                     with open(file_path, "r") as f:
                         o = f.read()
                         func(o, write_to, *args, **kwargs, idx = auditor_idx) 
@@ -123,6 +123,7 @@ class BugScanner:
                 if os.path.isfile(write_to+"/auditor"):
                     print('found ',write_to+"/auditor")
                 else:
+                    print('Running ',write_to+"/auditor")
                     self.run_auditor(code, write_to+"/auditor")
                 auditor_result_dirs.append(write_to+"/auditor")
 
@@ -197,6 +198,7 @@ class BugScanner:
                     self.run_ranker(str(critic_folder_data), write_to) 
                 ranker_dirs.append(write_to)
         print("ranker output write to : ", ranker_dirs)
+        return ranker_dirs
 
     def run_batch_output_formatter(self, ranker_dirs):
         if self.llm_summarizer.model is None:
