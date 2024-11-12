@@ -43,9 +43,7 @@ python src/bugscanner_cli.py -a NTQAI/Nxcode-CQ-7B-orpo  -c m-a-p/OpenCodeInterp
 ```
 
 ### 6. to resume a run
-```
-python src/bugscanner_cli.py -a NTQAI/Nxcode-CQ-7B-orpo  -c NTQAI/Nxcode-CQ-7B-orpo -r NTQAI/Nxcode-CQ-7B-orpo -d data_full/CVE_clean_organized -o result -k 5 -log logger/log_nxcode -res result_nxcodes_k3_beforeft/k3_n1_2024-11-11_19-21-40
-```
+rerun the command, make sure the result file remain the same
 ### if running +10 data, recomend using run_batch folder's method
 
 ## Currently Tested Model: 
