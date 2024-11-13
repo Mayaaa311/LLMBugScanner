@@ -14,9 +14,12 @@ sbatch_template = """#!/bin/bash
 #SBATCH --mail-user=yyuan394@gatech.edu # E-mail address for notifications
 
 cd $SLURM_SUBMIT_DIR                    # Correctly change to the submit directory
+export TRITON_CACHE_DIR=/home/hice1/yyuan394/scratch/triton_cache
+mkdir -p $TRITON_CACHE_DIR  # Ensure the directory exists
 
-module load anaconda3/2023.03       
+module load anaconda3/2023.03            # Load module dependencies
 conda activate /home/hice1/yyuan394/scratch/env
+
 
 python src/bugscanner_cli.py -a {model_name} -c {model_name} -r {model_name} -p {model_name} -d {data_folder} -o {result_folder} -k {k} -log logger
 """
