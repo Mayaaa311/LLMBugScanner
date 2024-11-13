@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(this, target, mintedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function allows the owner to mint tokens to any address. However, the totalSupply is not checked for overflow. If the totalSupply is too large, it can cause an integer overflow, leading to incorrect calculations and potentially loss of tokens."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) returns (bool success) { require (balanceOf[msg.sender] > _value); balanceOf[msg.sender] -= _value; totalSupply -= _value; Burn(msg.sender, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function allows users to burn their own tokens. However, the totalSupply is not checked for overflow. If the totalSupply is too large, it can cause an integer overflow, leading to incorrect calculations and potentially loss of tokens."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) returns (bool success) { require(balanceOf[_from] >= _value); require(_value <= allowance[_from][msg.sender]); balanceOf[_from] -= _value; allowance[_from][msg.sender] -= _value; totalSupply -= _value; Burn(_from, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burnFrom function allows users to burn tokens on behalf of others. However, the totalSupply is not checked for overflow. If the totalSupply is too large, it can cause an integer overflow, leading to incorrect calculations and potentially loss of tokens."
+        }
+    ]
+}

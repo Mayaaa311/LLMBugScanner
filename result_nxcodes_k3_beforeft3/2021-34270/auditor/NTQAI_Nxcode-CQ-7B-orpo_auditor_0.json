@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address _target, uint256 _mintedAmount) onlyOwner { require (_target != 0x0); balanceOf[_target] += _mintedAmount; _totalSupply += _mintedAmount; Transfer(0, this, _mintedAmount); Transfer(this, _target, _mintedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function allows the owner to mint tokens to any address. However, the function does not check if the total supply will exceed the maximum possible value of uint256. This could lead to an integer overflow, where the total supply becomes larger than the maximum possible value, causing the contract to behave unexpectedly or fail."
+        },
+        {
+            "function_name": "mine",
+            "code": "function mine(address _target, uint256 _minedAmount) onlyDoftManager { require (_minedAmount > 0); require (_target != 0x0); require (miningStorage - _minedAmount >= 0); require (balanceOf[doftManager] >= _minedAmount); require (balanceOf[_target] + _minedAmount > balanceOf[_target]); balanceOf[doftManager] -= _minedAmount; balanceOf[_target] += _minedAmount; miningStorage -= _minedAmount; Mine(_target, _minedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mine function allows the doftManager to mine tokens to any address. However, the function does not check if the miningStorage will exceed the maximum possible value of uint256. This could lead to an integer overflow, where the miningStorage becomes larger than the maximum possible value, causing the contract to behave unexpectedly or fail."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable { require(buyPrice > 0); uint amount = msg.value / buyPrice; _transfer(this, msg.sender, amount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The buy function allows anyone to buy tokens by paying a certain amount of ether. However, the function does not check if the amount of tokens that can be bought will exceed the maximum possible value of uint256. This could lead to an integer overflow, where the amount of tokens that can be bought becomes larger than the maximum possible value, causing the contract to behave unexpectedly or fail."
+        }
+    ]
+}

@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "increaseTotalSupply",
+            "code": "function increaseTotalSupply (address target,  uint256 increaseBy )  onlyOwner { balanceOf[target] += increaseBy; totalSupply += increaseBy; Transfer(0, owner, increaseBy); Transfer(owner, target, increaseBy); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `increaseTotalSupply` allows the owner to increase the total supply of the token by a certain amount. However, the calculation of the new total supply is not checked for overflow. If the increaseBy value is too large, it could cause an integer overflow, leading to incorrect total supply values and potentially loss of funds."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable returns (uint256 amount){ if(!usersCanTrade && !canTrade[msg.sender]) revert(); amount = msg.value * buyPrice; require(balanceOf[this] >= amount); balanceOf[msg.sender] += amount; balanceOf[this] -= amount; Transfer(this, msg.sender, amount); return amount; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The `buy` function allows users to buy tokens by paying a certain amount of ether. The calculation of the amount of tokens to be bought is not checked for overflow. If the buyPrice is too large, it could cause an integer overflow, leading to incorrect token balances and potentially loss of funds."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) returns (uint revenue){ require(!frozen[msg.sender]); if(!usersCanTrade && !canTrade[msg.sender]) { require(minBalanceForAccounts > amount/sellPrice); } require(balanceOf[msg.sender] >= amount); balanceOf[this] += amount; balanceOf[msg.sender] -= amount; revenue = amount / sellPrice; require(msg.sender.send(revenue)); Transfer(msg.sender, this, amount); return revenue; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The `sell` function allows users to sell tokens by receiving a certain amount of ether. The calculation of the amount of ether to be received is not checked for overflow. If the sellPrice is too large, it could cause an integer overflow, leading to incorrect ether balances and potentially loss of funds."
+        }
+    ]
+}

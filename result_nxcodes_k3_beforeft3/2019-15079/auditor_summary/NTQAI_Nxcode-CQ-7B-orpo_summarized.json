@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "EAI_TokenERC20",
+            "code": "function EAI_TokenERC20(uint256 initialSupply, string tokenName, string tokenSymbol) public { totalSupply = initialSupply * 10 ** uint256(decimals); balanceOf[msg.sender] = totalSupply; name = tokenName; symbol = tokenSymbol; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The initialSupply is multiplied by 10 ** uint256(decimals) which can lead to an integer overflow if initialSupply is too large. This can be exploited by an attacker to create a token with more supply than intended."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal { require(_to != 0x0); require(balanceOf[_from] >= _value); require(balanceOf[_to] + _value >= balanceOf[_to]); uint previousBalances = balanceOf[_from] + balanceOf[_to]; balanceOf[_from] -= _value; balanceOf[_to] += _value; emit Transfer(_from, _to, _value); assert(balanceOf[_from] + balanceOf[_to] == previousBalances); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The balanceOf[_from] -= _value; line can lead to an integer overflow if _value is too large. This can be exploited by an attacker to transfer more tokens than they have."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) { require(balanceOf[msg.sender] >= _value); balanceOf[msg.sender] -= _value; totalSupply -= _value; emit Burn(msg.sender, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The totalSupply -= _value; line can lead to an integer overflow if _value is too large. This can be exploited by an attacker to burn more tokens than they have."
+        }
+    ]
+}

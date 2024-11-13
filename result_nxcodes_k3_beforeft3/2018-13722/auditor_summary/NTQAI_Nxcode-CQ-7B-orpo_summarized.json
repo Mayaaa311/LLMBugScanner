@@ -1,0 +1,28 @@
+{
+    "output_list": [
+        {
+            "function_name": "safeMul",
+            "code": "function safeMul(uint a, uint b) internal returns (uint) { uint c = a * b; assert(a == 0 || c / a == b); return c; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `safeMul` multiplies two unsigned integers `a` and `b`. If `a` is 0, the result is always 0. If `a` is not 0, the result is `a * b`. However, the assertion `c / a == b` checks if the division of `c` by `a` equals `b`. If `a` is 0, this assertion will always hold true, which is not the case. This can lead to an integer overflow if `b` is very large. The correct assertion should be `c / a == b || b == 0`, which ensures that if `b` is 0, the result is 0, and if `b` is not 0, the result is `a * b`. This ensures that the function `safeMul` is safe against integer overflow."
+        },
+        {
+            "function_name": "safeDiv",
+            "code": "function safeDiv(uint a, uint b) internal returns (uint) { assert(b > 0); uint c = a / b; assert(a == b * c + a % b); return c; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `safeDiv` divides two unsigned integers `a` and `b`. The assertion `b > 0` ensures that `b` is not 0. The result of the division is stored in `c`. The assertion `a == b * c + a % b` checks if the sum of `c` times `b` and the remainder of `a` divided by `b` equals `a`. If `b` is 0, this assertion will always hold true, which is not the case. This can lead to an integer overflow if `a` is very large. The correct assertion should be `a == b * c + a % b || b == 0`, which ensures that if `b` is 0, the result is 0, and if `b` is not 0, the result is `a / b`. This ensures that the function `safeDiv` is safe against integer overflow."
+        },
+        {
+            "function_name": "safeSub",
+            "code": "function safeSub(uint a, uint b) internal returns (uint) { assert(b <= a); return a - b; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `safeSub` subtracts two unsigned integers `a` and `b`. The assertion `b <= a` ensures that `b` is not greater than `a`. The result of the subtraction is stored in `c`. The assertion `a == b * c + a % b` checks if the sum of `c` times `b` and the remainder of `a` divided by `b` equals `a`. If `b` is 0, this assertion will always hold true, which is not the case. This can lead to an integer overflow if `a` is very large. The correct assertion should be `a == b * c + a % b || b == 0`, which ensures that if `b` is 0, the result is 0, and if `b` is not 0, the result is `a - b`. This ensures that the function `safeSub` is safe against integer overflow."
+        },
+        {
+            "function_name": "safeAdd",
+            "code": "function safeAdd(uint a, uint b) internal returns (uint) { uint c = a + b; assert(c>=a && c>=b); return c; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `safeAdd` adds two unsigned integers `a` and `b`. The assertion `c>=a && c>=b` ensures that the sum of `a` and `b` is greater than or equal to both `a` and `b`. The result of the addition is stored in `c`. The assertion `a == b * c + a % b` checks if the sum of `c` times `b` and the remainder of `a` divided by `b` equals `a`. If `b` is 0, this assertion will always hold true, which is not the case. This can lead to an integer overflow if `a` is very large. The correct assertion should be `a == b * c + a % b || b == 0`, which ensures that if `b` is 0, the result is 0, and if `b` is not 0, the result is `a + b`. This ensures that the function `safeAdd` is safe against integer overflow."
+        }
+    ]
+}

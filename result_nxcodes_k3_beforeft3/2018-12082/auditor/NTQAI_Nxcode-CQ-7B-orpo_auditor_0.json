@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "buy",
+            "code": "function buy() payable { if(isSelling == false) revert(); uint amount = msg.value * buyRate; balanceOf[msg.sender] += amount; balanceOf[owner] -= amount; Transfer(owner, msg.sender, amount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `buy()` allows users to buy tokens by paying Ether. The calculation `msg.value * buyRate` can cause an integer overflow if `msg.value` is large enough. This can lead to the contract's balance of tokens being larger than the actual supply, potentially leading to a loss of tokens for the contract owner."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { balanceOf[target] += mintedAmount; Transfer(0, owner, mintedAmount); Transfer(owner, target, mintedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `mintToken()` allows the contract owner to mint new tokens and transfer them to a specified address. The calculation `balanceOf[target] += mintedAmount` can cause an integer overflow if `mintedAmount` is large enough. This can lead to the contract's total supply being larger than the actual supply, potentially leading to a loss of tokens for the contract owner."
+        },
+        {
+            "function_name": "withdrawToOwner",
+            "code": "function withdrawToOwner(uint256 amountWei) onlyOwner { owner.transfer(amountWei); }",
+            "vulnerability": "Access Control",
+            "reason": "The function `withdrawToOwner()` allows the contract owner to withdraw Ether from the contract. However, it does not check if the contract has sufficient Ether balance before transferring it. This can lead to a loss of Ether for the contract owner if the contract's Ether balance is insufficient."
+        }
+    ]
+}

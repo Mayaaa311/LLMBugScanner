@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "balanceOf",
+            "code": "function balanceOf(address _owner) public constant returns (uint balance) { return balances[_owner]; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The balanceOf function does not check for integer overflow when calculating the balance of an address. This could lead to incorrect balance calculations if the total supply of tokens is very large."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _amount) public returns (bool success) { require(_amount > 0 && balances[msg.sender] >= _amount); balances[msg.sender] -= _amount; balances[_to] += _amount; Transfer(msg.sender, _to, _amount); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not check for integer overflow when subtracting the transfer amount from the sender's balance and adding it to the recipient's balance. This could lead to incorrect balance calculations if the transfer amount is very large."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _amount) public returns (bool success) { require(_amount > 0 && balances[_from] >= _amount && allowed[_from][msg.sender] >= _amount); balances[_from] -= _amount; allowed[_from][msg.sender] -= _amount; balances[_to] += _amount; Transfer(_from, _to, _amount); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check for integer overflow when subtracting the transfer amount from the sender's balance and adding it to the recipient's balance. This could lead to incorrect balance calculations if the transfer amount is very large."
+        }
+    ]
+}

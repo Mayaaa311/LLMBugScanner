@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(address _investor) external onlyOwner { balances[_investor] +=  promoValue; totalSupply += promoValue; Transfer(0x0, _investor, promoValue); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function mintTokens() is vulnerable to integer overflow. The variable totalSupply is incremented by the value of promoValue, which is a uint256. If the totalSupply is close to the maximum value of uint256, adding another promoValue will cause an overflow. This can lead to incorrect results and potentially loss of funds."
+        },
+        {
+            "function_name": "balanceOf",
+            "code": "function balanceOf(address _investor) public constant returns(uint256) { return balances[_investor]; }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function balanceOf() is returning the balance of the provided address, but it is not checking if the address is valid. This could lead to incorrect results if the address is not in the balances mapping. It is recommended to add a check to ensure that the address is valid before returning the balance."
+        },
+        {
+            "function_name": "setPromo",
+            "code": "function setPromo(uint256 _newValue) external onlyOwner { promoValue = _newValue; }",
+            "vulnerability": "Access Control",
+            "reason": "The function setPromo() is only accessible to the owner of the contract. This means that anyone can change the value of promoValue, which could lead to unexpected behavior or loss of funds. It is recommended to add a check to ensure that only the owner can call this function."
+        }
+    ]
+}

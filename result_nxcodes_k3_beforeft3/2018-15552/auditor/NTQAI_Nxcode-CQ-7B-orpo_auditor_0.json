@@ -1,0 +1,65 @@
+{
+    "output_list": [
+        {
+            "function_name": "AddTicket",
+            "code": "function AddTicket() public payable 
+    {
+        require(msg.value == ticketPrice); 
+        require(numtickets < maxTickets);
+ttlastTicketTime = now;
+        numtickets += 1;
+        totalBounty += ticketPrice;
+        bool success = numtickets == maxTickets;
+        NewTicket(msg.sender, success);
+        if(success) 
+        {
+            PayWinner(msg.sender);
+        } 
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function AddTicket() has an integer overflow vulnerability. The variable numtickets is incremented by 1 in each ticket purchase, but it is not checked whether the result exceeds the maximum value of uint256. This could lead to an overflow, causing the contract to behave unexpectedly or even crash. The fix is to add a check for the maximum value of uint256 before incrementing numtickets."
+        },
+        {
+            "function_name": "PayWinner",
+            "code": "function PayWinner( address winner ) private 
+    { 
+        require(numtickets == maxTickets);
+        uint ownerTax = 6 * totalBounty / 100;
+        uint winnerPrice = totalBounty - ownerTax;
+        LottoComplete(msg.sender, lottoIndex, winnerPrice);
+        lottoIndex += 1;
+        numtickets = 0;
+        totalBounty = 0;
+ttif(_direction == 0 && maxTickets < 20) maxTickets += 1;
+ttif(_direction == 1 && maxTickets > 10) maxTickets -= 1;
+ttif(_direction == 0 && maxTickets == 20) _direction = 1;
+ttif(_direction == 1 && maxTickets == 10) _direction = 0;
+        worldOwner.transfer(ownerTax);
+        winner.transfer(winnerPrice); 
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function PayWinner() has an integer overflow vulnerability. The variable maxTickets is incremented or decremented based on the value of _direction, but it is not checked whether the result exceeds the maximum value of uint256. This could lead to an overflow, causing the contract to behave unexpectedly or even crash. The fix is to add a check for the maximum value of uint256 before incrementing or decrementing maxTickets."
+        },
+        {
+            "function_name": "PayWinner",
+            "code": "function PayWinner( address winner ) private 
+    { 
+        require(numtickets == maxTickets);
+        uint ownerTax = 6 * totalBounty / 100;
+        uint winnerPrice = totalBounty - ownerTax;
+        LottoComplete(msg.sender, lottoIndex, winnerPrice);
+        lottoIndex += 1;
+        numtickets = 0;
+        totalBounty = 0;
+ttif(_direction == 0 && maxTickets < 20) maxTickets += 1;
+ttif(_direction == 1 && maxTickets > 10) maxTickets -= 1;
+ttif(_direction == 0 && maxTickets == 20) _direction = 1;
+ttif(_direction == 1 && maxTickets == 10) _direction = 0;
+        worldOwner.transfer(ownerTax);
+        winner.transfer(winnerPrice); 
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function PayWinner() has an integer overflow vulnerability. The variable maxTickets is incremented or decremented based on the value of _direction, but it is not checked whether the result exceeds the maximum value of uint256. This could lead to an overflow, causing the contract to behave unexpectedly or even crash. The fix is to add a check for the maximum value of uint256 before incrementing or decrementing maxTickets."
+        }
+    ]
+}

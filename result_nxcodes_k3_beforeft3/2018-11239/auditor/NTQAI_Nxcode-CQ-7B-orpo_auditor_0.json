@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool success) { _transfer(msg.sender, _to, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not check if the sender's balance is sufficient to cover the transaction amount plus the burnPerTransaction. This could lead to an integer overflow if the sender's balance is very large."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal { require (_to != 0x0); require (balanceOf[_from] >= _value + burnPerTransaction); require (balanceOf[_to] + _value > balanceOf[_to]); balanceOf[_from] -= _value + burnPerTransaction; balanceOf[_to] += _value; balanceOf[0x0] += burnPerTransaction; currentSupply -= burnPerTransaction; Burn(_from, burnPerTransaction); Transfer(_from, _to, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The _transfer function does not check if the recipient's balance will overflow. This could lead to an integer overflow if the recipient's balance is very large."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) { require(balanceOf[msg.sender] >= _value); balanceOf[msg.sender] -= _value; balanceOf[0x0] += _value; currentSupply -= _value; Burn(msg.sender, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function does not check if the sender's balance will overflow. This could lead to an integer overflow if the sender's balance is very large."
+        }
+    ]
+}

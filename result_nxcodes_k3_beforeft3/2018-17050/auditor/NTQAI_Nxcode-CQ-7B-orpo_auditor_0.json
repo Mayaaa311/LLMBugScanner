@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) { if (balanceOf[msg.sender] < _value) revert(); if (balanceOf[_to] + _value < balanceOf[_to]) revert(); balanceOf[msg.sender] -= _value; balanceOf[_to] += _value; Transfer(msg.sender, _to, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not check if the transfer operation will cause an integer overflow. If the balanceOf[_to] + _value exceeds the maximum value of uint256, it will cause an integer overflow. This can be exploited by sending a large amount of tokens to a contract that does not have enough balance to receive them, resulting in a loss of tokens."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) { if (balanceOf[_from] < _value) revert(); if (balanceOf[_to] + _value < balanceOf[_to]) revert(); if (_value > allowance[_from][msg.sender]) revert(); balanceOf[_from] -= _value; balanceOf[_to] += _value; allowance[_from][msg.sender] -= _value; Transfer(_from, _to, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check if the transfer operation will cause an integer overflow. If the balanceOf[_to] + _value exceeds the maximum value of uint256, it will cause an integer overflow. This can be exploited by sending a large amount of tokens to a contract that does not have enough balance to receive them, resulting in a loss of tokens."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { balanceOf[target] += mintedAmount; Transfer(0, owner, mintedAmount); Transfer(owner, target, mintedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function does not check if the addition of mintedAmount to balanceOf[target] will cause an integer overflow. If the balanceOf[target] + mintedAmount exceeds the maximum value of uint256, it will cause an integer overflow. This can be exploited by minting a large amount of tokens to a contract that does not have enough balance to receive them, resulting in a loss of tokens."
+        }
+    ]
+}

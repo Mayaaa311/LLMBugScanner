@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "buy",
+            "code": "function buy() payable { if(isSelling == false) revert(); uint amount = msg.value * buyRate; balanceOf[msg.sender] += amount; balanceOf[owner] -= amount; Transfer(owner, msg.sender, amount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The buy function multiplies the amount of tokens to be bought by the buyRate, which is a uint256. If the msg.value is large enough, the multiplication could potentially cause an integer overflow, leading to an incorrect amount of tokens being transferred to the sender. This could be exploited by a malicious user to buy an excessive amount of tokens, potentially leading to a loss of funds."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { balanceOf[target] += mintedAmount; Transfer(0, owner, mintedAmount); Transfer(owner, target, mintedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function adds the mintedAmount to the balance of the target address. If the mintedAmount is large enough, the addition could potentially cause an integer overflow, leading to an incorrect amount of tokens being minted. This could be exploited by a malicious user to mint an excessive amount of tokens, potentially leading to a loss of funds."
+        },
+        {
+            "function_name": "withdrawToOwner",
+            "code": "function withdrawToOwner(uint256 amountWei) onlyOwner { owner.transfer(amountWei); }",
+            "vulnerability": "Access Control",
+            "reason": "The withdrawToOwner function is only callable by the contract owner. This means that anyone who has the contract owner's private key can call this function, potentially leading to a loss of funds. This could be exploited by a malicious user to withdraw funds from the contract."
+        }
+    ]
+}

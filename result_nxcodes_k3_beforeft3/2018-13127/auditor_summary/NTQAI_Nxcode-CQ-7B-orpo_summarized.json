@@ -1,0 +1,35 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address holder, uint value) {
+    require(msg.sender == preSale);
+    require(value > 0);
+    require(totalSupply + value <= TOKEN_LIMIT);
+    balances[holder] += value;
+    totalSupply += value;
+    Transfer(0x0, holder, value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `mint` allows anyone to mint tokens, but it does not check if the total supply will exceed the token limit. This could lead to an integer overflow, where the total supply becomes larger than the maximum allowed supply. This could be exploited by a malicious user to mint an unlimited amount of tokens."
+        },
+        {
+            "function_name": "unfreeze",
+            "code": "function unfreeze() external {
+      require(msg.sender == team);
+      isFrozen = false;
+  }",
+            "vulnerability": "Access Control",
+            "reason": "The function `unfreeze` is public and can be called by anyone. This could lead to unauthorized access to the contract and potentially allow malicious users to unfreeze the contract, allowing transfers and approvals. This could be exploited by a malicious user to bypass the freeze mechanism and perform unauthorized operations."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _value) public returns (bool) {
+      require(!isFrozen);
+      return super.transfer(_to, _value);
+  }",
+            "vulnerability": "Access Control",
+            "reason": "The function `transfer` is public and can be called by anyone. This could lead to unauthorized access to the contract and potentially allow malicious users to transfer tokens without the freeze mechanism. This could be exploited by a malicious user to bypass the freeze mechanism and perform unauthorized operations."
+        }
+    ]
+}

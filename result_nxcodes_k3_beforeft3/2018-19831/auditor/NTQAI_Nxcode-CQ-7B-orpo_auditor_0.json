@@ -1,0 +1,55 @@
+{
+    "output_list": [
+        {
+            "function_name": "Mining24",
+            "code": "function Mining24 (uint256 _value, uint256 _minReq) public {
+    owner = msg.sender;
+    value = _value;
+    minReq = _minReq;
+    balances[msg.sender] = totalDistributed;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function Mining24 takes two parameters _value and _minReq, which are not checked for overflow. If the input values are too large, it may cause integer overflow and result in incorrect results."
+        },
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr onlyWhitelist public {
+    require(value <= totalRemaining);
+    address investor = msg.sender;
+    uint256 toGive = value;
+    if (msg.value < minReq){
+        toGive = value.sub(value);
+    }
+    distr(investor, toGive);
+    if (toGive > 0) {
+        blacklist[investor] = true;
+    }
+    if (totalDistributed >= totalSupply) {
+        distributionFinished = true;
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function getTokens takes no parameters, but it uses the value and minReq variables which are not checked for overflow. If the input values are too large, it may cause integer overflow and result in incorrect results."
+        },
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr onlyWhitelist public {
+    require(value <= totalRemaining);
+    address investor = msg.sender;
+    uint256 toGive = value;
+    if (msg.value < minReq){
+        toGive = value.sub(value);
+    }
+    distr(investor, toGive);
+    if (toGive > 0) {
+        blacklist[investor] = true;
+    }
+    if (totalDistributed >= totalSupply) {
+        distributionFinished = true;
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function getTokens takes no parameters, but it uses the value and minReq variables which are not checked for overflow. If the input values are too large, it may cause integer overflow and result in incorrect results."
+        }
+    ]
+}

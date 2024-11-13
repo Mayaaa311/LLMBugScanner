@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) { if (balanceOf[msg.sender] < _value) throw; if (balanceOf[_to] + _value < balanceOf[_to]) throw; balanceOf[msg.sender] -= _value; balanceOf[_to] += _value; Transfer(msg.sender, _to, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "In the transfer function, the balanceOf[_to] += _value line can cause an integer overflow if the balanceOf[_to] exceeds the maximum value that can be stored in a uint256. This can be exploited by sending a large amount of tokens to a contract that does not have enough balance to receive them, causing the contract's balance to overflow."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) { if (balanceOf[_from] < _value) throw; if (balanceOf[_to] + _value < balanceOf[_to]) throw; if (_value > allowance[_from][msg.sender]) throw; balanceOf[_from] -= _value; balanceOf[_to] += _value; allowance[_from][msg.sender] -= _value; Transfer(_from, _to, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "In the transferFrom function, the balanceOf[_to] += _value line can cause an integer overflow if the balanceOf[_to] exceeds the maximum value that can be stored in a uint256. This can be exploited by sending a large amount of tokens to a contract that does not have enough balance to receive them, causing the contract's balance to overflow."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable { uint amount = msg.value / buyPrice; if (balanceOf[this] < amount) throw; balanceOf[msg.sender] += amount; balanceOf[this] -= amount; Transfer(this, msg.sender, amount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "In the buy function, the balanceOf[msg.sender] += amount line can cause an integer overflow if the balanceOf[msg.sender] exceeds the maximum value that can be stored in a uint256. This can be exploited by buying a large amount of tokens at a low price, causing the contract's balance to overflow."
+        }
+    ]
+}

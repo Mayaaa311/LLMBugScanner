@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newPrice, uint256 newPriceInc, uint256 newTransferFees) onlyOwner public { require(newTransferFees > newPriceInc); price = newPrice; priceInc = newPriceInc; transferFees = newTransferFees; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function setPrices takes three parameters: newPrice, newPriceInc, and newTransferFees. The requirement newTransferFees > newPriceInc is not checked, which could lead to an integer overflow if newPriceInc is very large. This could result in the transferFees being set to a very large value, potentially leading to financial losses for the contract owner."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable public { require(msg.value == price); uint amount = msg.value / price; _transfer(this, msg.sender, amount); price += priceInc; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function buy takes no parameters. It checks if the value sent in the transaction is equal to the current price, and if so, it calculates the amount of tokens to be bought based on the price. However, the calculation of the amount is not checked for overflow, which could lead to an integer overflow if the price is very large. This could result in the tokens being bought at a very high price, potentially leading to financial losses for the contract owner."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) public { require(amount == 1); require(address(this).balance >= amount * price); _transfer(msg.sender, this, amount); msg.sender.transfer(amount * price - transferFees); price -= priceInc; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function sell takes one parameter: amount. It checks if the amount is equal to 1, and if so, it calculates the price to be paid based on the amount. However, the calculation of the price is not checked for overflow, which could lead to an integer overflow if the amount is very large. This could result in the tokens being sold at a very low price, potentially leading to financial losses for the contract owner."
+        }
+    ]
+}

@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public { _transfer(msg.sender, _to, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not check if the balance of the sender is sufficient to transfer the specified amount. This could lead to integer overflow if the sender's balance is greater than the maximum safe integer value."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) { require(_value <= allowance[_from][msg.sender]);     allowance[_from][msg.sender] -= _value; _transfer(_from, _to, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check if the allowance of the sender for the specified amount is sufficient to transfer the specified amount. This could lead to integer overflow if the allowance is greater than the maximum safe integer value."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) { require(balanceOf[msg.sender] >= _value);   balanceOf[msg.sender] -= _value;            totalSupply -= _value;                      Burn(msg.sender, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function does not check if the balance of the sender is sufficient to burn the specified amount. This could lead to integer overflow if the sender's balance is greater than the maximum safe integer value."
+        }
+    ]
+}

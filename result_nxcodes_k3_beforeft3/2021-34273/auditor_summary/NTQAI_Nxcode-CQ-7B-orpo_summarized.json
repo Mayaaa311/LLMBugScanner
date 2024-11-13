@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "distributeToken",
+            "code": "function distributeToken(address[] addresses, uint256 _value) { for (uint i = 0; i < addresses.length; i++) { balances[msg.sender] -= _value; balances[addresses[i]] += _value; Transfer(msg.sender, addresses[i], _value); } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "In the distributeToken function, the sender's balance is decreased by _value before the transfer is made. If _value is large enough, it could cause an integer overflow, leading to a loss of tokens for the sender."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) { if (balances[msg.sender] >= _value && _value > 0) { balances[msg.sender] -= _value; balances[_to] += _value; Transfer(msg.sender, _to, _value); return true; } else { return false; } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "In the transfer function, the sender's balance is decreased by _value before the transfer is made. If _value is large enough, it could cause an integer overflow, leading to a loss of tokens for the sender."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) { if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) { balances[_to] += _value; balances[_from] -= _value; allowed[_from][msg.sender] -= _value; Transfer(_from, _to, _value); return true; } else { return false; } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "In the transferFrom function, the sender's balance is decreased by _value before the transfer is made. If _value is large enough, it could cause an integer overflow, leading to a loss of tokens for the sender."
+        }
+    ]
+}

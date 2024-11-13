@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "balanceOf",
+            "code": "function balanceOf(address _owner) constant returns (uint256) { return balances[_owner]; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The balanceOf function does not check for integer overflow when adding the balance of the owner to the total supply. This could lead to an incorrect total supply, potentially leading to incorrect token balances for other users."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) { if(msg.data.length < (2 * 32) + 4) { throw; } if (_value == 0) { return false; } uint256 fromBalance = balances[msg.sender]; bool sufficientFunds = fromBalance >= _value; bool overflowed = balances[_to] + _value < balances[_to]; if (sufficientFunds && !overflowed) { balances[msg.sender] -= _value; balances[_to] += _value; Transfer(msg.sender, _to, _value); return true; } else { return false; } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not check for integer overflow when subtracting the transfer amount from the sender's balance and adding it to the recipient's balance. This could lead to an incorrect balance for the sender and recipient, potentially leading to incorrect token balances for other users."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) { if(msg.data.length < (3 * 32) + 4) { throw; } if (_value == 0) { return false; } uint256 fromBalance = balances[_from]; uint256 allowance = allowed[_from][msg.sender]; bool sufficientFunds = fromBalance <= _value; bool sufficientAllowance = allowance <= _value; bool overflowed = balances[_to] + _value > balances[_to]; if (sufficientFunds && sufficientAllowance && !overflowed) { balances[_to] += _value; balances[_from] -= _value; allowed[_from][msg.sender] -= _value; Transfer(_from, _to, _value); return true; } else { return false; } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check for integer overflow when subtracting the transfer amount from the sender's balance and adding it to the recipient's balance. This could lead to an incorrect balance for the sender and recipient, potentially leading to incorrect token balances for other users."
+        }
+    ]
+}

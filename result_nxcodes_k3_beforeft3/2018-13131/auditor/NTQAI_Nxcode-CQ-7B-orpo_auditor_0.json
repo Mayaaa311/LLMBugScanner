@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address holder, uint value) { require(msg.sender == preSale); require(value > 0); require(totalSupply + value <= TOKEN_LIMIT); balances[holder] += value; totalSupply += value; Transfer(0x0, holder, value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `mint` allows anyone to mint tokens, but it does not check if the total supply will exceed the token limit. This could lead to an integer overflow, where the total supply becomes larger than the token limit. This could be exploited by a malicious user to mint more tokens than the token limit, potentially leading to a loss of funds."
+        },
+        {
+            "function_name": "buyPreSaleTokens",
+            "code": "function buyPreSaleTokens(address buyer, uint256 tokens, uint factor, string txHash) external icoAgentOnly returns (uint) { require(buyer != address(0)); require(tokens > 0); require(preSaleState == PreSaleState.PreSaleStarted); require(!isPaused); token.mint(buyer, tokens); TokenBuy(buyer, tokens, factor, txHash); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `buyPreSaleTokens` allows anyone to buy tokens through the pre-sale, but it does not check if the total supply will exceed the token limit. This could lead to an integer overflow, where the total supply becomes larger than the token limit. This could be exploited by a malicious user to buy more tokens than the token limit, potentially leading to a loss of funds."
+        },
+        {
+            "function_name": "mint",
+            "code": "function mint(address holder, uint value) { require(msg.sender == preSale); require(value > 0); require(totalSupply + value <= TOKEN_LIMIT); balances[holder] += value; totalSupply += value; Transfer(0x0, holder, value); }",
+            "vulnerability": "Access Control",
+            "reason": "The function `mint` allows anyone to mint tokens, but it does not check if the caller is the pre-sale contract. This could be exploited by a malicious user to mint tokens on behalf of the pre-sale contract, potentially leading to a loss of funds."
+        }
+    ]
+}

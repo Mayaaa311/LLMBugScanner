@@ -1,0 +1,41 @@
+{
+    "output_list": [
+        {
+            "function_name": "TokenERC20",
+            "code": "function TokenERC20(uint256 initialSupply, string tokenName, string tokenSymbol) public {
+    totalSupply = initialSupply * 10 ** uint256(decimals);  
+    balanceOf[msg.sender] = totalSupply;                
+    name = tokenName;                                   
+    symbol = tokenSymbol;                               
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The initialSupply is multiplied by 10 ** uint256(decimals) which can cause an integer overflow if the initialSupply is too large. This can lead to the totalSupply being larger than the maximum value that can be stored in the totalSupply variable, which can cause the contract to behave unexpectedly or fail."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal {
+    require(_to != 0x0);
+    require(balanceOf[_from] >= _value);
+    require(balanceOf[_to] + _value > balanceOf[_to]);
+    uint previousBalances = balanceOf[_from] + balanceOf[_to];
+    balanceOf[_from] -= _value;
+    balanceOf[_to] += _value;
+    Transfer(_from, _to, _value);
+    assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The balanceOf[_from] -= _value; line can cause an integer overflow if the balanceOf[_from] is too large. This can lead to the balanceOf[_from] being larger than the maximum value that can be stored in the balanceOf variable, which can cause the contract to behave unexpectedly or fail."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The totalSupply += mintedAmount; line can cause an integer overflow if the totalSupply is too large. This can lead to the totalSupply being larger than the maximum value that can be stored in the totalSupply variable, which can cause the contract to behave unexpectedly or fail."
+        }
+    ]
+}

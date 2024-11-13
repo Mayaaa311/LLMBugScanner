@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferOwnership",
+            "code": "function transferOwnership(address newOwner) onlyOwner { owner = newOwner; }",
+            "vulnerability": "Access Control",
+            "reason": "The transferOwnership function allows anyone to change the owner of the contract. This can be exploited by malicious actors to take control of the contract and steal its assets."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) returns (bool success) { require (balanceOf[msg.sender] > _value); balanceOf[msg.sender] -= _value; totalSupply -= _value; Burn(msg.sender, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function does not check for integer overflow when subtracting the burned amount from the sender's balance. This can lead to a loss of funds for the sender if the amount to be burned is greater than their current balance."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) returns (bool success) { require(balanceOf[_from] >= _value); require(_value <= allowance[_from][msg.sender]); balanceOf[_from] -= _value; allowance[_from][msg.sender] -= _value; totalSupply -= _value; Burn(_from, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burnFrom function does not check for integer overflow when subtracting the burned amount from the sender's allowance. This can lead to a loss of funds for the sender if the amount to be burned is greater than their current allowance."
+        }
+    ]
+}

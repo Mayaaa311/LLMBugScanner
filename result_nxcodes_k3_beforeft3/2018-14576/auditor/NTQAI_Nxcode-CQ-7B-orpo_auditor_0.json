@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "SunContractToken",
+            "code": "contract SunContractToken is IERC20Token, owned{...}",
+            "vulnerability": "Access Control",
+            "reason": "The contract has a constructor that allows the ICO contract address to be set as a restricted address. This means that the ICO contract can bypass the transfer and approve functions and directly manipulate the token balances and allowances. This could lead to a loss of funds for the ICO contract and potentially other users."
+        },
+        {
+            "function_name": "SunContractToken",
+            "code": "function mintTokens(address _to, uint256 _amount) {...}",
+            "vulnerability": "Access Control",
+            "reason": "The mintTokens function allows the ICO contract address to mint tokens directly. This could lead to a loss of funds for the ICO contract and potentially other users."
+        },
+        {
+            "function_name": "SunContractToken",
+            "code": "function burnTokens(uint256 _amount) onlyOwner {...}",
+            "vulnerability": "Access Control",
+            "reason": "The burnTokens function is only callable by the contract owner. This means that any user can burn their own tokens, which could lead to a loss of funds for the contract owner."
+        }
+    ]
+}

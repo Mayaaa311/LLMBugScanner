@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "totalSupply",
+            "code": "function totalSupply() constant returns (uint256 totSupply) { return _totalSupply; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The totalSupply function does not check for integer overflow. If the total supply is increased beyond the maximum value that can be stored in a uint256, it will wrap around to zero. This could lead to incorrect results and potentially loss of funds."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _amount) notThisContract(_to) returns (bool success) { require(_to != 0x0); require(_amount > 0); require(balances[msg.sender] >= _amount); require(balances[_to] + _amount > balances[_to]); balances[msg.sender] -= _amount; balances[_to] += _amount; Transfer(msg.sender, _to, _amount); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not check for integer overflow when adding the transferred amount to the recipient's balance. If the recipient's balance exceeds the maximum value that can be stored in a uint256, it will wrap around to zero. This could lead to incorrect results and potentially loss of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _amount) notThisContract(_to) returns (bool success) { require(balances[_from] >= _amount); require(allowed[_from][msg.sender] >= _amount); require(_amount > 0); require(balances[_to] + _amount > balances[_to]); balances[_from] -= _amount; allowed[_from][msg.sender] -= _amount; balances[_to] += _amount; Transfer(_from, _to, _amount); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check for integer overflow when adding the transferred amount to the recipient's balance. If the recipient's balance exceeds the maximum value that can be stored in a uint256, it will wrap around to zero. This could lead to incorrect results and potentially loss of funds."
+        }
+    ]
+}
