@@ -1,0 +1,38 @@
+---------------------------------------
+Begin Slurm Prolog: Nov-11-2024 19:56:45
+Job ID:    927301
+User ID:   zyahn3
+Account:   scs
+Job name:  finetuningNxcode
+Partition: coc-gpu
+---------------------------------------
+/home/hice1/zyahn3/.conda/envs/BugScanner
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [01:18<01:18, 78.61s/it]Loading checkpoint shards: 100%|██████████| 2/2 [01:36<00:00, 43.01s/it]Loading checkpoint shards: 100%|██████████| 2/2 [01:36<00:00, 48.35s/it]
+Traceback (most recent call last):
+  File "/storage/ice1/5/9/zyahn3/LLMBugScanner/finetune/test_model.py", line 24, in <module>
+    model = AutoModelForCausalLM.from_pretrained(peft_model_id,  device_map="auto",  torch_dtype=torch.float16)
+  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/transformers/models/auto/auto_factory.py", line 564, in from_pretrained
+    return model_class.from_pretrained(
+  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/transformers/modeling_utils.py", line 4092, in from_pretrained
+    model.load_adapter(
+  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/transformers/integrations/peft.py", line 214, in load_adapter
+    incompatible_keys = set_peft_model_state_dict(self, processed_adapter_state_dict, adapter_name)
+  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/peft/utils/save_and_load.py", line 460, in set_peft_model_state_dict
+    load_result = model.load_state_dict(peft_model_state_dict, strict=False)
+  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/torch/nn/modules/module.py", line 2584, in load_state_dict
+    raise RuntimeError(
+RuntimeError: Error(s) in loading state_dict for LlamaForCausalLM:
+	size mismatch for model.embed_tokens.weight: copying a param with shape torch.Size([32018, 4096]) from checkpoint, the shape in current model is torch.Size([32016, 4096]).
+	size mismatch for lm_head.weight: copying a param with shape torch.Size([32018, 4096]) from checkpoint, the shape in current model is torch.Size([32016, 4096]).
+---------------------------------------
+Begin Slurm Epilog: Nov-11-2024 19:59:05
+Job ID:        927301
+Array Job ID:  _4294967294
+User ID:       zyahn3
+Account:       scs
+Job name:      finetuningNxcode
+Resources:     cpu=1,gres/gpu:v100=2,mem=64G,node=1
+Rsrc Used:     cput=00:02:20,vmem=0,walltime=00:02:20,mem=16057832K,energy_used=0
+Partition:     coc-gpu
+Nodes:         atl1-1-01-002-8-0
+---------------------------------------

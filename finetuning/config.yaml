@@ -1,0 +1,29 @@
+task: llm-sft
+base_model: AlfredPros/CodeLlama-7b-Instruct-Solidity
+project_name: autotrain-codellama-sft
+log: tensorboard
+backend: local
+
+data:
+  path: /home/hice1/zyahn3/scratch/LLMBugScanner/finetuning/train_data/
+  train_split: /home/hice1/zyahn3/scratch/LLMBugScanner/finetuning/train_data/train.jsonl
+  valid_split: null
+  chat_template: chatml
+  column_mapping:
+    text_column: text
+
+params:
+  block_size: -1
+  model_max_length: 8192
+  max_prompt_length: -1
+  epochs: 1
+  batch_size: 2
+  lr: 3e-5
+  peft: true
+  quantization: int4
+  target_modules: all-linear
+  padding: right
+  optimizer: adamw_torch
+  scheduler: linear
+  gradient_accumulation: 4
+  mixed_precision: fp16
