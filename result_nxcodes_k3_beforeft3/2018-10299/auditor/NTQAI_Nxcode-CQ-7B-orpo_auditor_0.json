@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) { require(_to != address(0)); require(_value > 0 && _value <= balances[msg.sender]); balances[msg.sender] = balances[msg.sender].sub(_value); balances[_to] = balances[_to].add(_value); Transfer(msg.sender, _to, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transfer() does not check if the transfer operation will cause an integer overflow. If the balance of the sender is greater than the maximum value that can be stored in a uint256, the transfer operation will fail and the transaction will revert. This vulnerability can be exploited by sending a large amount of tokens to a contract that does not have enough balance to receive the tokens. The contract will then revert the transaction and the tokens will be lost."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool) { require(_to != address(0)); require(_value > 0 && _value <= balances[_from]); require(_value <= allowed[_from][msg.sender]); balances[_from] = balances[_from].sub(_value); balances[_to] = balances[_to].add(_value); allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value); Transfer(_from, _to, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transferFrom() does not check if the transfer operation will cause an integer overflow. If the balance of the sender is greater than the maximum value that can be stored in a uint256, the transfer operation will fail and the transaction will revert. This vulnerability can be exploited by sending a large amount of tokens to a contract that does not have enough balance to receive the tokens. The contract will then revert the transaction and the tokens will be lost."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public returns (bool) { allowed[msg.sender][_spender] = _value; Approval(msg.sender, _spender, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function approve() does not check if the approval operation will cause an integer overflow. If the balance of the sender is greater than the maximum value that can be stored in a uint256, the approval operation will fail and the transaction will revert. This vulnerability can be exploited by approving a large amount of tokens to be spent by a contract that does not have enough balance to spend the tokens. The contract will then revert the transaction and the tokens will be lost."
+        }
+    ]
+}

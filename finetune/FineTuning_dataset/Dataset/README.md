@@ -22,4 +22,4 @@ Our final dataset contains a total 12,515 smart contacts that have source code a
 
 The ground truth labels (in the file `ground truth label`) of smart contracts in the dataset are confirmed based on defined vulnerability-specific patterns and further manual inspection.
 
-https://github.com/Messi-Q/Smart-Contract-Dataset?tab=readme-ov-file
+

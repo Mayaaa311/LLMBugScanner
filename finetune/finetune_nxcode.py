@@ -40,7 +40,7 @@ eval_dataset=load_dataset("json", data_files="finetune/FineTuning_dataset/Datase
 # print(dataset.column_names)  # Should show ['text']
 
 # Hugging Face model id
-checkpoint_path =None
+checkpoint_path ='finetune/model/Nxcode_outdataset1/checkpoint-18000'
 model_name = "NTQAI/Nxcode-CQ-7B-orpo"
 
 # Fine-tuned model name
@@ -129,9 +129,6 @@ training_arguments = TrainingArguments(
     logging_steps=10,
     save_strategy="steps",  # Options: "no", "epoch", "steps"
     save_steps=1000,   
-    evaluation_strategy="steps",      # Match evaluation strategy to "steps"
-    eval_steps=1000,  
-    load_best_model_at_end=True,
     fp16=fp16,
     bf16=bf16,
     learning_rate=2e-4,                     # learning rate, based on QLoRA paper
