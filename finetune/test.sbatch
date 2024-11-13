@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J finetuningNxcode1             # Job name
+#SBATCH -J finetuningNxcode             # Job name
 #SBATCH -N 1                            # Number of nodes
 #SBATCH --ntasks=1                      # Run only one task
 #SBATCH --gpus=3           # Request 2 GPUs
@@ -15,7 +15,7 @@ mkdir -p $TRITON_CACHE_DIR  # Ensure the directory exists
 
 module load anaconda3/2023.03            # Load module dependencies
 # conda activate /home/hice1/yyuan394/scratch/env
-conda activate /home/hice1/yyuan394/scratch/env
+conda activate /home/hice1/yyuan394/scratch/bugscannerenv
 
 # srun python src/bugscanner_cli.py -a AlfredPros/CodeLlama-7b-Instruct-Solidity m-a-p/OpenCodeInterpreter-DS-6.7B NTQAI/Nxcode-CQ-7B-orpo -c deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct -r NTQAI/Nxcode-CQ-7B-orpo -d data -o result_test_small -k 5 -log logs_oct1
 # srun python src/bugscanner_cli.py -a m-a-p/OpenCodeInterpreter-DS-6.7B -c m-a-p/OpenCodeInterpreter-DS-6.7B -r NTQAI/Nxcode-CQ-7B-orpo -d data -o result_parsed -k 5 -log logs_oct1

@@ -6,7 +6,7 @@ from datasets import load_dataset
 from random import randint
  
 # peft_model_id = "/home/hice1/yyuan394/scratch/LLMBugScanner/finetune/model/Nxcode_finetuned"
-peft_model_id = "NTQAI/Nxcode-CQ-7B-orpo"
+peft_model_id = "finetune/model"
 # peft_model_id = args.output_dir
  
 # Load Model with PEFT adapter

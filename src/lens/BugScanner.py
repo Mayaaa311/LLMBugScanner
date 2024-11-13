@@ -63,30 +63,38 @@ class BugScanner:
     def run_auditor(self, code, write_to):
         input_dict = {"code": code, "topk": self.topk}
         for i, auditor in enumerate(self.llm_auditors):
-            response = auditor.invoke(input_dict)
-            print("Auditor response written to : ", write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor.json")
-            write_to_file(write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor_{i}.json", response, write='w')
-
+            if not os.path.isfile(write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor.json"):
+                response = auditor.invoke(input_dict)
+                write_to_file(write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor_{i}.json", response, write='w')
+                print("Auditor response written to : ", write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor.json")
+            else:
+                print("Auditor response found: ", write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor.json")
+            
 
     def run_critic(self, vulnerabilities, write_to, code = None, idx = 0):
-       
-        if code is not None: 
-            print("using code in critic!")
-            response = self.llm_critic.invoke({"auditor_resp": vulnerabilities,"code":code})
+        if not os.path.isfile(write_to+f"/{self.llm_critic.model_id.replace('/','_')}_critic_{idx}.json"):
+            if code is not None: 
+                print("using code in critic!")
+                response = self.llm_critic.invoke({"auditor_resp": vulnerabilities,"code":code})
+            else:
+                response = self.llm_critic.invoke({"auditor_resp": vulnerabilities})
+            print("Critic response written to : ", write_to+f"/{self.llm_critic.model_id.replace('/','_')}_critic_a{idx}.json")
+            write_to_file(write_to+f"/{self.llm_critic.model_id.replace('/','_')}_critic_{idx}.json", response)
         else:
-            response = self.llm_critic.invoke({"auditor_resp": vulnerabilities})
-        print("Critic response written to : ", write_to+f"/{self.llm_critic.model_id.replace('/','_')}_critic_a{idx}.json")
-        write_to_file(write_to+f"/{self.llm_critic.model_id.replace('/','_')}_critic_{idx}.json", response)
+            print("Critic response found : ", write_to+f"/{self.llm_critic.model_id.replace('/','_')}_critic_a{idx}.json")
 
     
     def run_ranker(self, vulnerability, write_to) -> list:
-        response = self.llm_ranker.invoke({"topk": self.topk, "vulnerability": vulnerability})
-        write_to_file(write_to+f"/{self.llm_ranker.model_id.replace('/','_')}_rank.json", str(response))
+        response = None
+        if not os.path.isfile(write_to+f"/{self.llm_ranker.model_id.replace('/','_')}_rank.json", str(response)):
+            response = self.llm_ranker.invoke({"topk": self.topk, "vulnerability": vulnerability})
+            write_to_file(write_to+f"/{self.llm_ranker.model_id.replace('/','_')}_rank.json", str(response))
         return response
 
     def run_summarizer(self, content, write_to,idx = 0) -> list:
-        response = self.llm_summarizer.invoke({"content": content})
-        write_to_file(write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized.json", str(response))
+        if not os.path.isfile(write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized.json"):
+            response = self.llm_summarizer.invoke({"content": content})
+            write_to_file(write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized.json", str(response))
         return write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized_{idx}.json"
     
     def run_llm_on_dir_list(self, dir_list, func, append_name, *args, **kwargs):
@@ -95,16 +103,13 @@ class BugScanner:
             files = [f for f in os.listdir(dir)]
             name = dir.split('/')
             write_to = '/'.join(name[:-1]) + '/' + append_name
-            if os.path.isfile(write_to):
-                print('found ',write_to)
-            else:
-                print('Running ',write_to)
-                for file in files:
-                    file_path = os.path.join(dir, file)  
-                    auditor_idx =  file.split('/')[-1].split('.')[-2].split('_')[-1]
-                    with open(file_path, "r") as f:
-                        o = f.read()
-                        func(o, write_to, *args, **kwargs, idx = auditor_idx) 
+
+            for file in files:
+                file_path = os.path.join(dir, file)  
+                auditor_idx =  file.split('/')[-1].split('.')[-2].split('_')[-1]
+                with open(file_path, "r") as f:
+                    o = f.read()
+                    func(o, write_to, *args, **kwargs, idx = auditor_idx) 
 
             result.append(write_to)
         return result
@@ -120,11 +125,7 @@ class BugScanner:
                 code = f.read()
                 name = file.split('/')[-1].rsplit('.', 1)[0]
                 write_to = f"{self.result_dir}/{name}"
-                if os.path.isfile(write_to+"/auditor"):
-                    print('found ',write_to+"/auditor")
-                else:
-                    print('Running ',write_to+"/auditor")
-                    self.run_auditor(code, write_to+"/auditor")
+                self.run_auditor(code, write_to+"/auditor")
                 auditor_result_dirs.append(write_to+"/auditor")
 
         for model in self.llm_auditors:
@@ -149,18 +150,15 @@ class BugScanner:
             write_to = '/'.join(name[:-1]) + '/' + "critic"
             
             code_file_name = code_folder+'/'+name[-2]+'.sol'
-            if os.path.isfile(write_to):
-                print('found ',write_to)
-            else:
-                for file in files:
-                    file_path = os.path.join(dir, file)  
-                    auditor_idx =  file.split('/')[-1].split('.')[-2].split('_')[-1]
-                    print("FILEPATH: ", file_path)
-                    with open(file_path, "r") as f:
-                        o = f.read()
-                        with open(code_file_name, "r") as f1:
-                            code = f1.read()
-                            self.run_critic(o, write_to, code = code, idx = auditor_idx) 
+
+            file_path = os.path.join(dir, file)  
+            auditor_idx =  file.split('/')[-1].split('.')[-2].split('_')[-1]
+            print("FILEPATH: ", file_path)
+            with open(file_path, "r") as f:
+                o = f.read()
+                with open(code_file_name, "r") as f1:
+                    code = f1.read()
+                    self.run_critic(o, write_to, code = code, idx = auditor_idx) 
 
             critic_output_dir.append(write_to)
 
@@ -187,16 +185,14 @@ class BugScanner:
                 files = [f for f in os.listdir(dir)]
                 name = dir.split('/')
                 write_to = '/'.join(name[:-1])+'/ranker'
-                if os.path.isfile(write_to):
-                    print('found ',write_to)
-                else:
-                    critic_folder_data = []
-                    for file in files:
-                        file_path = os.path.join(dir, file)  
-                        with open(file_path, "r") as f:
-                            o = f.read()
-                            critic_folder_data.append(o)
-                    self.run_ranker(str(critic_folder_data), write_to) 
+                critic_folder_data = []
+                
+                for file in files:
+                    file_path = os.path.join(dir, file)  
+                    with open(file_path, "r") as f:
+                        o = f.read()
+                        critic_folder_data.append(o)
+                self.run_ranker(str(critic_folder_data), write_to) 
                 ranker_dirs.append(write_to)
         print("ranker output write to : ", ranker_dirs)
         return ranker_dirs
@@ -210,15 +206,13 @@ class BugScanner:
             files = [f for f in os.listdir(dir)]
             name = dir.split('/')
             write_to = '/'.join(name[:-1])+'/final_output'
-            if os.path.isfile(write_to):
-                print('found ',write_to)
-            else:
-                i = 0
-                for file in files:
-                    file_path = os.path.join(dir, file)  
-                    with open(file_path, "r") as f:
-                        o = f.read() 
-                        print("dataname: ",name[-2])
+
+            i = 0
+            for file in files:
+                file_path = os.path.join(dir, file)  
+                with open(file_path, "r") as f:
+                    o = f.read() 
+                    if not os.path.isfile(write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized{i}.csv"):
                         response = self.llm_summarizer.invoke({"dataname": name[-2], "inputjson":o})
                         write_to_file(write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized{i}.csv", str(response))
             sum_dirs.append(write_to)

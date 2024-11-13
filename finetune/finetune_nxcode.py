@@ -19,28 +19,18 @@ torch.set_grad_enabled(True)
 
 torch.cuda.empty_cache()
 
-if torch.cuda.is_available():
-    print("CUDA is available.")
-    print(f"CUDA device count: {torch.cuda.device_count()}")
-    print(f"Current CUDA device: {torch.cuda.current_device()}")
-    print(f"Device name: {torch.cuda.get_device_name(torch.cuda.current_device())}")
-else:
-    print("CUDA is not available.")
 # Print CUDA versions for verification
 # print(f"PyTorch CUDA Version: {torch.version.cuda}")
 # print(f"torchvision CUDA Version: {torchvision.version.cuda}")
 
 # Load dataset
-dataset = load_dataset("json", data_files="finetune/FineTuning_dataset/Dataset/train_dataset.json", split="train")
-eval_dataset=load_dataset("json", data_files="finetune/FineTuning_dataset/Dataset/test_dataset.json")
-
+dataset = load_dataset("json", data_files="finetune/FineTuning_dataset/gptlens_dataset/train_dataset.json", split="train")
 # dataset = load_dataset("philschmid/dolly-15k-oai-style", split="train")
-# print(dataset[3]["messages"])
+print(dataset[3]["messages"])
 
-# print(dataset.column_names)  # Should show ['text']
+print(dataset.column_names)  # Should show ['text']
 
 # Hugging Face model id
-checkpoint_path =None
 model_name = "NTQAI/Nxcode-CQ-7B-orpo"
 
 # Fine-tuned model name
@@ -106,13 +96,13 @@ tokenizer.padding_side = "right" # Fix weird overflow issue with fp16 training
 peft_config = LoraConfig(
     r=32, #Rank
     lora_alpha=8,
-    # target_modules=[
-    #     'q_proj',
-    #     'k_proj',
-    #     'v_proj',
-    #     'dense'
-    # ],
-    target_modules = 'all-linear',
+    target_modules=[
+        'q_proj',
+        'k_proj',
+        'v_proj',
+        'dense'
+    ],
+    # target_modules = 'all-linear',
     bias="none",
     lora_dropout=0.05,  # Conventional
     task_type="CAUSAL_LM",
@@ -121,17 +111,13 @@ model.enable_input_require_grads()
 model.gradient_checkpointing_enable()
 
 training_arguments = TrainingArguments(
-    output_dir="finetune/model/Nxcode_outdataset1",
+    output_dir="finetune/model",
     num_train_epochs=2,
     per_device_train_batch_size=4,
     gradient_accumulation_steps=2,
     optim="adamw_torch_fused",
     logging_steps=10,
-    save_strategy="steps",  # Options: "no", "epoch", "steps"
-    save_steps=1000,   
-    evaluation_strategy="steps",      # Match evaluation strategy to "steps"
-    eval_steps=1000,  
-    load_best_model_at_end=True,
+    save_strategy="epoch", 
     fp16=fp16,
     bf16=bf16,
     learning_rate=2e-4,                     # learning rate, based on QLoRA paper
@@ -146,7 +132,6 @@ training_arguments = TrainingArguments(
 trainer = SFTTrainer(
     model=model,
     train_dataset=dataset,
-    eval_dataset=eval_dataset, 
     peft_config=peft_config,
     max_seq_length=256,
     tokenizer=tokenizer,
@@ -159,6 +144,6 @@ trainer = SFTTrainer(
 )
 
 # Train model
-trainer.train(resume_from_checkpoint=checkpoint_path)
+trainer.train()
 
 trainer.save_model()

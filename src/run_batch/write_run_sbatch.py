@@ -6,27 +6,27 @@ sbatch_template = """#!/bin/bash
 #SBATCH -J testsmalldataset             # Job name
 #SBATCH -N 1                            # Number of nodes
 #SBATCH --ntasks=1                      # Run only one task
-#SBATCH --gpus=4                        # Request 4 GPUs
-#SBATCH --mem=200G                      # Increase memory
+#SBATCH --gpus=3                        # Request 4 GPUs
+#SBATCH --mem=100G                      # Increase memory
 #SBATCH -t 200                          # Duration of the job
 #SBATCH -o Report-%j.out                # Combined output and error messages file
 #SBATCH --mail-type=BEGIN,END,FAIL      # Mail preferences
-#SBATCH --mail-user=yyuan394@gatech.edu # E-mail address for notifications
+#SBATCH --mail-user=ywang4343@gatech.edu # E-mail address for notifications
 
 cd $SLURM_SUBMIT_DIR                    # Correctly change to the submit directory
 
 module load anaconda3/2023.03           # Load module dependencies
-conda activate /home/hice1/yyuan394/scratch/env
+conda activate /home/hice1/ywang4343/scratch/env
 
-python src/bugscanner_cli.py -a NTQAI/Nxcode-CQ-7B-orpo -c NTQAI/Nxcode-CQ-7B-orpo -r NTQAI/Nxcode-CQ-7B-orpo -d {data_folder} -o {result_folder} -k 3 -log logs_nov3
+python src/bugscanner_cli.py -a finetune/model -c finetune/model -r finetune/model -d {data_folder} -o {result_folder} -k 3 -log logs_nov3
 """
 
 # change this to the data directory
-data_base_path = '/home/hice1/yyuan394/scratch/LLMBugScanner/data_full/CVE_clean_organized'
+data_base_path = 'data_full/CVE_clean_organized_b5'
 # this is sbatch folder, do not change this 
-sbatch_output_path = '/home/hice1/yyuan394/scratch/LLMBugScanner/src/run_batch/sbatch_files'
+sbatch_output_path = 'src/run_batch/sbatch_files'
 
-result_folder_name = 'result_nxcodes_k3_beforeft'
+result_folder_name = 'result_nxcodes_finetuned'
 # Check if the directory exists
 if os.path.exists(sbatch_output_path):
     # Clear the directory by removing it and all its contents
