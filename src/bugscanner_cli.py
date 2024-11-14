@@ -45,13 +45,9 @@ def get_model_instance(model_name, prompt_path=None, model_params_path=None):
     model_class = MODEL_CLASS_MAP.get(model_name)
     
     if not model_class:
-        raise ValueError(f"Model {model_name} is not recognized or not supported.")
+        raise Huggingface_LLM(model_id=model_name, prompt_path=prompt_path)
     
-    # Return the instantiated model class with the necessary parameters
-    if model_params_path:
-        return model_class(model_id=model_name, prompt_path=prompt_path, model_params_path=model_params_path)
-    else:
-        return model_class(model_id=model_name, prompt_path=prompt_path)
+    return model_class(model_id=model_name, prompt_path=prompt_path)
     
 def find_earliest_missing_folder(resume_folder):
     """

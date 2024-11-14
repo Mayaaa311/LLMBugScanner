@@ -21,19 +21,20 @@ module load anaconda3/2023.03            # Load module dependencies
 conda activate /home/hice1/yyuan394/scratch/env
 
 
-python src/bugscanner_cli.py -a {model_name} -c {model_name} -r {model_name} -p {model_name} -d {data_folder} -o {result_folder} -k {k} -log logger
+python src/bugscanner_cli.py -a {model_name} -c {model_name} -r {model_name} -d {data_folder} -o {result_folder} -k {k} -log logger
 """
 
 
 # ------------------------------------------Change below definition to run and custom result folder name-------------------------------
 # change this to the model you want to test
-model_name = 'NTQAI/Nxcode-CQ-7B-orpo'
+# model_name = 'NTQAI/Nxcode-CQ-7B-orpo'
+model_name = 'finetune/model/Nxcode_outdataset1/checkpoint-10000'
 # change this to the data folder you want to run
 data_path = 'data_full/CVE_clean_organized_b5'
 # changet this to the k you want to run
 k = 5
 #change this to where you want to save your result
-result_folder_name = 'result/result_nxcodes_k5_beforeft'
+result_folder_name = 'result/result_nxcodes_k5_ft26000'
 
 # ------------------------------------------DO NOT CHANGE BELOW CODE-------------------------------
 

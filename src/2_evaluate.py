@@ -4,7 +4,7 @@ import csv
 import json
 
 # -----------------!!! Change this to the result folder you want to evaluate!!!-----------------
-result_folder = 'sandbox/result_nxcodes_k3_beforeft3'
+result_folder = 'result/result_nxcodes_k3_beforeft2'
 
 # ------------------Folder definition-------------------------------------------------------
 base_folder = result_folder
@@ -214,7 +214,7 @@ with open(output_general_csv_path, mode='a', newline='') as file:
 
 
 
-file_path = 'result_nxcodes_k3_beforeft3/general_determination.csv'
+file_path = base_folder+'/general_determination.csv'
 
 # Initialize counters
 total_hits = 0

@@ -40,8 +40,9 @@ eval_dataset=load_dataset("json", data_files="finetune/FineTuning_dataset/Datase
 # print(dataset.column_names)  # Should show ['text']
 
 # Hugging Face model id
-checkpoint_path ='finetune/model/Nxcode_outdataset1/checkpoint-18000'
+checkpoint_path ='finetune/model/Nxcode_outdataset1/checkpoint-26000'
 model_name = "NTQAI/Nxcode-CQ-7B-orpo"
+
 
 # Fine-tuned model name
 new_model = "Nxcode-CQ-7B-finetune"

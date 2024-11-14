@@ -17,4 +17,4 @@ module load anaconda3/2023.03            # Load module dependencies
 conda activate /home/hice1/yyuan394/scratch/env
 
 
-python src/bugscanner_cli.py -a NTQAI/Nxcode-CQ-7B-orpo -c NTQAI/Nxcode-CQ-7B-orpo -r NTQAI/Nxcode-CQ-7B-orpo -p NTQAI/Nxcode-CQ-7B-orpo -d data_full/CVE_clean_organized_b5/subfolder_21 -o result/result_nxcodes_k5_beforeft -k 5 -log logger
+python src/bugscanner_cli.py -a finetune/model/Nxcode_outdataset1/checkpoint-10000 -c finetune/model/Nxcode_outdataset1/checkpoint-10000 -r finetune/model/Nxcode_outdataset1/checkpoint-10000 -d data_full/CVE_clean_organized_b5/subfolder_21 -o result/result_nxcodes_k5_ft26000 -k 5 -log logger
