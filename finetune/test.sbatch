@@ -1,8 +1,9 @@
 #!/bin/bash
-#SBATCH -J finetuningNxcode1             # Job name
+#SBATCH -J finetuningNxcode-linear             # Job name
 #SBATCH -N 1                            # Number of nodes
 #SBATCH --ntasks=1                      # Run only one task
 #SBATCH --gpus=3           # Request 2 GPUs
+#SBATCH --mem=200G 
 #SBATCH -t 300                          # Duration of the job
 #SBATCH -o Report-%j.out                # Combined output and error messages file
 #SBATCH --mail-type=BEGIN,END,FAIL       # Mail preferences

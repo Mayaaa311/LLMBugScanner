@@ -59,7 +59,7 @@ class Huggingface_LLM(BaseLLM):
         )
 
         self.model = AutoModelForCausalLM.from_pretrained(self.model_id, 
-                                                            quantization_config = bnb_config, device_map="auto")
+                                                            quantization_config = bnb_config, device_map="auto", trust_remote_code=True)
 
         # # Ensure that callback_manager is a valid object
         # if isinstance(self.model_params.get("callback_manager"), str) and self.model_params["callback_manager"] == "default":

@@ -170,28 +170,57 @@ def parse_config(cfg_path, model_id):
 import json
 import subprocess
 import os
+import solcx
+import re
+
+
+def get_required_solc_version(solidity_file):
+    """
+    Reads the Solidity file and extracts the required compiler version from the pragma statement.
+    If the version is below 0.4.11, default to 0.4.11 (the minimum supported version by py-solc-x).
+    """
+    with open(solidity_file, 'r') as file:
+        content = file.read()
+        match = re.search(r"pragma solidity \^?(\d+\.\d+\.\d+);", content)
+        if match:
+            version = match.group(1)
+            # Check if the version is below 0.4.11
+            if version < "0.4.11":
+                print(f"Version {version} is not supported; defaulting to 0.4.11.")
+                return "0.4.11"
+            return version
+    return None
 
 def generate_solidity_ast(solidity_file, output_file="ast.json"):
     """
-    Run `solc` to generate an AST in JSON format for the given Solidity file.
+    Generate an AST in JSON format for the given Solidity file using solcx, with the required compiler version.
     """
+    # Get the required Solidity version from the pragma statement
+    required_version = get_required_solc_version(solidity_file)
+    if required_version is None:
+        print("Could not determine the Solidity version from the pragma statement.")
+        return
+    
+    # Ensure the required version of solc is installed
+    solcx.install_solc(required_version)
+    solcx.set_solc_version(required_version)
+    
+    # Compile Solidity file to get AST
     try:
-        # Run `solc` command to generate the AST and capture the output
-        result = subprocess.run(
-            ["solc", "--ast-json", solidity_file],
-            capture_output=True,
-            text=True,
-            check=True
+        ast_json = solcx.compile_files(
+            [solidity_file],
+            output_values=["ast"]
         )
-        
+
         # Write the AST JSON output to a file
         with open(output_file, "w") as file:
-            file.write(result.stdout)
+            json.dump(ast_json, file)
         
         print(f"AST successfully generated and saved to {output_file}")
-    except subprocess.CalledProcessError as e:
-        print("Error generating AST:", e.stderr)
+    except solcx.exceptions.SolcError as e:
+        print("Error generating AST:", e)
         raise
+
 
 def load_solidity_ast(filename):
     """
@@ -206,16 +235,31 @@ def get_function_definitions(ast_data):
     Extract function definitions from the Solidity AST.
     """
     functions = {}
-    
+    print(json.dumps(ast_data, indent=2))
     def traverse(node):
+        # Check if the current node is a function definition
         if node.get("name") == "FunctionDefinition":
             func_name = node.get("attributes", {}).get("name")
             if func_name:
-                functions[func_name] = node  # Store the function node by name
+                functions[func_name] = node
+                print(f"Found function: {func_name}")
+        
+        # Traverse children recursively
         for child in node.get("children", []):
             traverse(child)
     
-    traverse(ast_data["sourceUnit"])
+    # Start traversing from each top-level child in "children"
+    if "children" in ast_data:
+        for top_node in ast_data["children"]:
+            # Handle cases where a node has multiple layers of "children" within itself
+            if "children" in top_node:
+                for sub_node in top_node["children"]:
+                    traverse(sub_node)
+            else:
+                traverse(top_node)
+    else:
+        print("Error: No 'children' key found in AST data.")
+    
     return functions
 
 def get_called_functions(func_node):
@@ -226,7 +270,8 @@ def get_called_functions(func_node):
     
     def traverse(node):
         if node.get("name") == "FunctionCall":
-            func_name = node.get("attributes", {}).get("member_name") or node.get("attributes", {}).get("name")
+            func_name = node.get("attributes", {}).get("value") or node.get("attributes", {}).get("name")
+            print("FUNCTION NAME: ",func_name)
             if func_name:
                 calls.add(func_name)
         for child in node.get("children", []):
@@ -248,6 +293,7 @@ def find_related_functions(solidity_file, target_function_name):
     functions = get_function_definitions(ast_data)
     
     if target_function_name not in functions:
+        print(target_function_name)
         raise ValueError(f"Function '{target_function_name}' not found in the provided code.")
     
     # Get related functions by analyzing function calls within the target function

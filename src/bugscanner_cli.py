@@ -45,7 +45,7 @@ def get_model_instance(model_name, prompt_path=None, model_params_path=None):
     model_class = MODEL_CLASS_MAP.get(model_name)
     
     if not model_class:
-        raise Huggingface_LLM(model_id=model_name, prompt_path=prompt_path)
+        return Huggingface_LLM(model_id=model_name, prompt_path=prompt_path)
     
     return model_class(model_id=model_name, prompt_path=prompt_path)
     
@@ -126,7 +126,7 @@ def main():
         logging.info(f"Initializing parser model: {args.parser}")
         summarizer_model = get_model_instance(args.parser, prompt_path='templates/summarizer.txt')
     else:
-        # summarizer_model = get_model_instance("NTQAI/Nxcode-CQ-7B-orpo", prompt_path='templates/summarizer.txt')
+        summarizer_model = get_model_instance("NTQAI/Nxcode-CQ-7B-orpo", prompt_path='templates/summarizer.txt')
         logging.info("No ranker model specified.")
     logging.info("Initializing BugScanner with the given models...")
 

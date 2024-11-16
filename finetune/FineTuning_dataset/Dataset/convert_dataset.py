@@ -2,10 +2,12 @@ import json
 import os
 from datasets import Dataset, load_dataset
 import pandas as pd
+from collections import defaultdict
+
 # Paths
 code_dir = "finetune/FineTuning_dataset/Dataset/code_folder"
 label_file = "finetune/FineTuning_dataset/Dataset/combined_single_sheet.csv"
-output_file = "finetune/FineTuning_dataset/Dataset/fine_tuning_data.jsonl"
+output_file = "finetune/FineTuning_dataset/Dataset/fine_tuning_data1.jsonl"
 
 # Load labels
 labels = pd.read_csv(label_file)
@@ -20,21 +22,35 @@ def load_code_content(filepath):
         with open(filepath, 'r', encoding='ISO-8859-1') as file:
             return file.read()
 
+# Aggregate vulnerabilities by file and contract
+vulnerability_data = defaultdict(lambda: defaultdict(list))
+
+for _, row in labels.iterrows():
+    if row['ground truth'] == '0':
+        continue
+    cve_id = row['file']
+    function_name = row["contract"]
+    vulnerability_type = row['vul_type']
+    vulnerability_data[cve_id][function_name].append(vulnerability_type)
+print(vulnerability_data)
 # Generate and save JSONL data
 with open(output_file, 'w') as out_file:
-    for _, row in labels.iterrows():
-        if (row['ground truth'] == 0):
-            continue
-        vulnerability_type = row['vul_type']
-        function_name = row["contract"]
-        cve_id = row['file']
+    for cve_id, contracts in vulnerability_data.items():
         file_path = os.path.join(code_dir, f"{cve_id}.sol")
-
+        
         # Check if the file exists before reading it
         if os.path.isfile(file_path):
             code_content = load_code_content(file_path)
+            
+            output_list = []
+            for contract, vul_types in contracts.items():
+                for vul_type in vul_types:
+                    output_list.append({
+                        "contract_name": contract,
+                        "vulnerability": vul_type
+                    })
 
-            # Structure JSON entry
+            # Structure JSON entry with aggregated vulnerabilities
             entry = {
                 "messages": [
                     {"role": "system", "content": """Requirement: You are a smart contract auditor, identify 1 most severe vulnerabilities in the provided code. Make sure that they are exploitable in real world and beneficial to attackers. 
@@ -62,28 +78,19 @@ with open(output_file, 'w') as out_file:
                             {
                                 "contract_name": "<contract_name_1>",
                                 "vulnerability": "<short_vulnera_desc_1>"
-                            }
+                            },
+                            ...
                         ]
                     }"""},
 
                     {"role": "user", "content": f"Code Input: \n\n{code_content}"},
-                    {"role": "assistant", "content": """{
-                        "output_list": [
-                            {
-                                "contract_name": """+f"{function_name}"+""",
-                                "vulnerability": """+f"{vulnerability_type}"+"""
-                            }
-                        ]
-                        }"""}
-
+                    {"role": "assistant", "content": json.dumps({"output_list": output_list}, indent=4)}
                 ]
             }
-
+            
             # Write to JSONL file
             out_file.write(json.dumps(entry) + "\n")
-
-print(f"Dataset generated in {output_file}")
-
+            # print(entry)
 # Load the generated JSONL dataset
 dataset = load_dataset("json", data_files=output_file, split="train")
 
@@ -100,7 +107,7 @@ dataset = dataset.map(create_conversation)
 dataset = dataset.train_test_split(test_size=0.2)
 
 # Save the splits to disk
-dataset["train"].to_json("finetune/FineTuning_dataset/Dataset/train_dataset.json", orient="records")
-dataset["test"].to_json("finetune/FineTuning_dataset/Dataset/test_dataset.json", orient="records")
+dataset["train"].to_json("finetune/FineTuning_dataset/Dataset/train_dataset1.json", orient="records")
+dataset["test"].to_json("finetune/FineTuning_dataset/Dataset/test_dataset1.json", orient="records")
 
 print(f"Training and testing datasets saved successfully.")

@@ -31,8 +31,8 @@ else:
 # print(f"torchvision CUDA Version: {torchvision.version.cuda}")
 
 # Load dataset
-dataset = load_dataset("json", data_files="finetune/FineTuning_dataset/Dataset/train_dataset.json", split="train")
-eval_dataset=load_dataset("json", data_files="finetune/FineTuning_dataset/Dataset/test_dataset.json")
+dataset = load_dataset("json", data_files="finetune/FineTuning_dataset/gptlens_dataset/train_dataset.json", split="train")
+eval_dataset=load_dataset("json", data_files="finetune/FineTuning_dataset/gptlens_dataset/test_dataset.json")
 
 # dataset = load_dataset("philschmid/dolly-15k-oai-style", split="train")
 # print(dataset[3]["messages"])
@@ -40,12 +40,13 @@ eval_dataset=load_dataset("json", data_files="finetune/FineTuning_dataset/Datase
 # print(dataset.column_names)  # Should show ['text']
 
 # Hugging Face model id
-checkpoint_path ='finetune/model/Nxcode_outdataset1/checkpoint-26000'
-model_name = "NTQAI/Nxcode-CQ-7B-orpo"
+# checkpoint_path =''
+checkpoint_path = None
+model_name = "finetune/model/Nxcode_outdataset_new/checkpoint-2222"
 
 
 # Fine-tuned model name
-new_model = "Nxcode-CQ-7B-finetune"
+new_model = "finetune/model/Nxcode_instructional_finetuning_alllinear"
 
 
 ################################################################################
@@ -103,32 +104,44 @@ tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
 tokenizer.pad_token = tokenizer.eos_token
 tokenizer.padding_side = "right" # Fix weird overflow issue with fp16 training
 
-# Load LoRA configuration
+
+
 peft_config = LoraConfig(
-    r=32, #Rank
+    r=32,
     lora_alpha=8,
-    # target_modules=[
-    #     'q_proj',
-    #     'k_proj',
-    #     'v_proj',
-    #     'dense'
-    # ],
-    target_modules = 'all-linear',
+    # target_modules='all-linear',
+    target_modules = [
+        "self_attn.q_proj",
+        "self_attn.k_proj",
+        "self_attn.v_proj",
+        "self_attn.o_proj",
+        "mlp.gate_proj",
+        "mlp.up_proj",
+        "mlp.down_proj",
+        "lm_head"
+    ],
     bias="none",
-    lora_dropout=0.05,  # Conventional
+    lora_dropout=0.05,
     task_type="CAUSAL_LM",
 )
+
+print("--------------LORA CONFIG-----------------")
+# Print LoRA configuration
+peft_config_dict = vars(peft_config)
+for key, value in peft_config_dict.items():
+    print(f"{key}: {value}")
+
 model.enable_input_require_grads() 
 model.gradient_checkpointing_enable()
 
 training_arguments = TrainingArguments(
-    output_dir="finetune/model/Nxcode_outdataset1",
+    output_dir=new_model,
     num_train_epochs=2,
     per_device_train_batch_size=4,
     gradient_accumulation_steps=2,
     optim="adamw_torch_fused",
     logging_steps=10,
-    save_strategy="steps",  # Options: "no", "epoch", "steps"
+    save_strategy="steps",  
     save_steps=1000,   
     fp16=fp16,
     bf16=bf16,
@@ -139,6 +152,11 @@ training_arguments = TrainingArguments(
     push_to_hub=False,    
     report_to="tensorboard"
 )
+print("--------------TRAINING CONFIG-----------------")
+# Convert to dictionary and print
+args_dict = training_arguments.to_dict()
+for key, value in args_dict.items():
+    print(f"{key}: {value}")
 
 # Set supervised fine-tuning parameters
 trainer = SFTTrainer(

@@ -4,7 +4,7 @@ import csv
 import json
 
 # -----------------!!! Change this to the result folder you want to evaluate!!!-----------------
-result_folder = 'result/result_nxcodes_k3_beforeft2'
+result_folder = 'result/result_nxcodes_k5_instructional_ftlinear'
 
 # ------------------Folder definition-------------------------------------------------------
 base_folder = result_folder
