@@ -4,8 +4,10 @@ from trl import setup_chat_format
 from datasets import Dataset, load_dataset
 import sys
 
-dataset = load_dataset("json", data_files="FineTuning_dataset/train_dataset.json", split="train")
 
+dataset_file = sys.argv[4]
+
+dataset = load_dataset("json", data_files=dataset_file, split="train")
 model_id = sys.argv[1]
 finetune = float(sys.argv[3])
 
@@ -25,7 +27,8 @@ model = AutoModelForCausalLM.from_pretrained(
     device_map="auto",
 #     attn_implementation="flash_attention_2",
     torch_dtype=torch.bfloat16,
-    quantization_config=bnb_config
+    quantization_config=bnb_config,
+    trust_remote_code=True
 )
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 tokenizer.padding_side = 'right' # to prevent warnings
@@ -52,7 +55,7 @@ from transformers import TrainingArguments
 args = TrainingArguments(
     #output_dir="model/codellama_finetuned/codellama_5ep/", # directory to save and repository id
     output_dir=sys.argv[2],
-    num_train_epochs=10,                     # number of training epochs
+    num_train_epochs=10                     # number of training epochs
     per_device_train_batch_size=1,          # batch size per device during training
     gradient_accumulation_steps=2,          # number of steps before performing a backward/update pass
     gradient_checkpointing=True,            # use gradient checkpointing to save memory
@@ -61,7 +64,7 @@ args = TrainingArguments(
     #save_strategy="epoch",                  # save checkpoint every epoch
     learning_rate=2e-4,                     # learning rate, based on QLoRA paper
     bf16=True,                              # use bfloat16 precision
-    tf32=True,                              # use tf32 precision
+    #tf32=True,                              # use tf32 precision
     max_grad_norm=0.3,                      # max gradient norm based on QLoRA paper
     warmup_ratio=0.03,                      # warmup ratio based on QLoRA paper
     lr_scheduler_type="constant",           # use constant learning rate scheduler

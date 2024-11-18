@@ -13,7 +13,8 @@ import sys
 # peft_model_id = args.output_dir
 
 peft_model_id = sys.argv[1]
-finetuned = float(sys.argv[2]) 
+finetuned = float(sys.argv[2])
+dataset_file = sys.argv[3]
 #peft_config = LoraConfig(
 #        lora_alpha=128,
 #        lora_dropout=0.05,
@@ -28,10 +29,11 @@ if finetuned == 1.0:
     model = AutoPeftModelForCausalLM.from_pretrained(
         peft_model_id,
         device_map="auto",
-        torch_dtype=torch.float16
+        torch_dtype=torch.float16,
+        trust_remote_code=True
     )
 else:
-    model = AutoModelForCausalLM.from_pretrained(peft_model_id,  device_map="auto",  torch_dtype=torch.float16)
+    model = AutoModelForCausalLM.from_pretrained(peft_model_id,  device_map="auto",  torch_dtype=torch.float16, trust_remote_code=True)
 
 tokenizer = AutoTokenizer.from_pretrained(peft_model_id)
 model, tokenizer = setup_chat_format(model, tokenizer)
@@ -41,7 +43,7 @@ pipe = pipeline("text-generation", model=model, tokenizer=tokenizer)
 
  
 # Load our test dataset
-eval_dataset = load_dataset("json", data_files="FineTuning_dataset/test_dataset.json", split="train")
+eval_dataset = load_dataset("json", data_files=dataset_file, split="train")
 rand_idx = randint(0, len(eval_dataset))
  
 # Test on sample
