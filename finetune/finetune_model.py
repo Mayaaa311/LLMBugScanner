@@ -55,13 +55,13 @@ from transformers import TrainingArguments
 args = TrainingArguments(
     #output_dir="model/codellama_finetuned/codellama_5ep/", # directory to save and repository id
     output_dir=sys.argv[2],
-    num_train_epochs=10                     # number of training epochs
+    num_train_epochs=10,                     # number of training epochs
     per_device_train_batch_size=1,          # batch size per device during training
     gradient_accumulation_steps=2,          # number of steps before performing a backward/update pass
     gradient_checkpointing=True,            # use gradient checkpointing to save memory
     optim="adamw_torch_fused",              # use fused adamw optimizer
     logging_steps=10,                       # log every 10 steps
-    #save_strategy="epoch",                  # save checkpoint every epoch
+    save_strategy="no",                     # don't save checkpoints to save space
     learning_rate=2e-4,                     # learning rate, based on QLoRA paper
     bf16=True,                              # use bfloat16 precision
     #tf32=True,                              # use tf32 precision
