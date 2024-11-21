@@ -60,25 +60,25 @@ process_directory(result_folder)
 # Load JSON data
 with open(json_file_path, 'r') as jsonfile:
     json_data = json.load(jsonfile)
-
 # Function to compare vulnerabilities and functions
 def compare_vulnerabilities(csv_data, json_data, dataname):
     results = []
     dataname = "CVE-" + dataname
     true_answer_line = "N/A"  # Initialize as N/A, to be updated if a true match is found
     
-    # Deduplicate the CSV data based on 'vulnerability' and 'function_name' before processing
-    unique_csv_data = { (row['vulnerability'], row['function_name']): row for row in csv_data }.values()
+    # Deduplicate the CSV data based on 'vulnerability', 'function_name', and 'auditor_idx'
+    unique_csv_data = { (row['vulnerability'], row['function_name'], row['auditor_idx']): row for row in csv_data }.values()
     
     # Check if dataname exists in JSON
     if dataname not in json_data:
         print(f"Warning: {dataname} not found in JSON data")
-        general_determination = (dataname, "N/A", "N/A", 'False', true_answer_line)
+        general_determination = (dataname, "N/A", "N/A", 'False', true_answer_line, "N/A")
         return results, general_determination
 
     for i, csv_row in enumerate(unique_csv_data, start=1):
         vulnerability = csv_row['vulnerability']
         function_name = csv_row['function_name']
+        auditor_idx = csv_row['auditor_idx']
         
         # Get vulnerability and function name from JSON
         json_vulnerability = json_data[dataname]["vulnerability_type"]
@@ -86,7 +86,7 @@ def compare_vulnerabilities(csv_data, json_data, dataname):
         
         # Compare function name only
         match = function_name == json_function_name
-        result = (dataname, vulnerability, function_name, 'True' if match else 'False')
+        result = (dataname, vulnerability, function_name, auditor_idx, 'True' if match else 'False')
         
         if match and true_answer_line == "N/A":
             true_answer_line = i  # Update to the first true match line number
@@ -97,13 +97,12 @@ def compare_vulnerabilities(csv_data, json_data, dataname):
     results = list(set(results))
     
     # Check if there's any `True` match in the results for this file
-    any_true_match = any(result[3] == 'True' for result in results)
+    any_true_match = any(result[4] == 'True' for result in results)
     
     # Create a general determination result based on whether there's a true match, and add the line number of the first true answer
-    general_determination = (dataname, json_vulnerability, json_function_name, 'True' if any_true_match else 'False', true_answer_line)
+    general_determination = (dataname, json_vulnerability, json_function_name, 'True' if any_true_match else 'False', true_answer_line, auditor_idx)
     
     return results, general_determination
-
 # Function to extract data from the CSV-formatted text
 def extract_data_from_text_file(file_path):
     csv_data = []
@@ -194,16 +193,15 @@ total_determinations = len(all_general_determinations)
 accuracy = true_matches / total_determinations if total_determinations > 0 else 0
 print(f"Top k hit rate: {accuracy:.2f} ({true_matches}/{total_determinations})")
 
-# Save detailed results to `detailed_evaluation.csv`
 with open(output_detailed_csv_path, mode='w', newline='') as file:
     writer = csv.writer(file)
-    writer.writerow(['dataname', 'vulnerability', 'function_name', 'match'])
+    writer.writerow(['dataname', 'vulnerability', 'function_name', 'auditor_idx', 'match'])
     writer.writerows(all_comparison_results)
 
 # Save general determinations to `general_determination.csv`
 with open(output_general_csv_path, mode='w', newline='') as file:
     writer = csv.writer(file)
-    writer.writerow(['dataname', 'vulnerability', 'function_name', 'match', 'true_answer_line'])
+    writer.writerow(['dataname', 'vulnerability', 'function_name', 'match', 'true_answer_line', 'auditor_idx'])
     writer.writerows(all_general_determinations)
 
 # Output accuracy summary
@@ -211,7 +209,6 @@ with open(output_general_csv_path, mode='a', newline='') as file:
     writer = csv.writer(file)
     writer.writerow([])
     writer.writerow(['Top k hit rate:', f"{accuracy:.2f}", f"({true_matches}/{total_determinations})"])
-
 
 
 
