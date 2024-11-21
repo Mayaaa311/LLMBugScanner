@@ -1,18 +1,20 @@
 from transformers import AutoTokenizer
 from transformers import GemmaTokenizer, AutoModelForCausalLM
+from transformers import GemmaTokenizer,BitsAndBytesConfig, AutoTokenizer, AutoModelForCausalLM,  LlamaForCausalLM, AutoModel
 
+from lens.Base import BaseLLM, param1, param2
 import torch
-from lens.Base import BaseLLM
 from lens.utils import parse_config
 
 class gemma_LLM(BaseLLM):
-    def __init__(self, model_id, model_params_path=None):
+    def __init__(self, model_id, prompt_path,model_params_path=None):
         self.model_id = model_id
         self.model_params = None
         if model_params_path is not None:
             self.model_params = self.load_params(model_params_path)
         self.tokenizer = None
         self.model = None
+        self.prompt_path = prompt_path
 
 
     def load_model(self):
@@ -20,7 +22,24 @@ class gemma_LLM(BaseLLM):
         # Load model and tokenizer
         self.tokenizer = GemmaTokenizer.from_pretrained(self.model_id)
 
-        self.model =AutoModelForCausalLM.from_pretrained(self.model_id)
+        use_4bit = True
+        bnb_4bit_compute_dtype = "float16"
+        bnb_4bit_quant_type = "nf4"
+        use_double_nested_quant = True
+        compute_dtype = getattr(torch, bnb_4bit_compute_dtype)
+
+        # BitsAndBytesConfig 4-bit config
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=use_4bit,
+            bnb_4bit_use_double_quant=use_double_nested_quant,
+            bnb_4bit_quant_type=bnb_4bit_quant_type,
+            bnb_4bit_compute_dtype=compute_dtype,
+            load_in_8bit_fp32_cpu_offload=True
+        )
+        self.model = AutoModelForCausalLM.from_pretrained(self.model_id, 
+                                                            quantization_config = bnb_config, 
+                                                            # device_map="auto", 
+                                                            trust_remote_code=True)
 
     def load_params(self, model_params_path):
         if model_params_path is not None:

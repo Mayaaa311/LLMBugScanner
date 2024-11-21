@@ -34,7 +34,8 @@ with open(output_file, 'w') as out_file:
             # Structure JSON entry
             entry = {
                 "messages": [
-                    {
+                    {   
+                        "data_name":f"{cve_id}.sol",
                         "role": "system",
                         "content": """Requirement: You are a smart contract auditor. Identify 1 most severe vulnerability in the provided smart contract. Ensure it is exploitable in real world and beneficial to attackers. Restrict your identification to these vulnerability types: Integer Overflow, Wrong Logic, Bad Randomness, Access Control, Typo Constructor, Token Devalue. 
                         Output only in the following JSON format:
@@ -83,7 +84,7 @@ def create_conversation(sample):
 dataset = dataset.map(create_conversation)
 
 # Split dataset into training and test sets
-dataset = dataset.train_test_split(test_size=0.2)
+dataset = dataset.train_test_split(test_size=0.2, seed=42)
 
 # Save the splits to disk
 dataset["train"].to_json("/home/hice1/yyuan394/scratch/LLMBugScanner/finetune/FineTuning_dataset/train_dataset.json", orient="records")

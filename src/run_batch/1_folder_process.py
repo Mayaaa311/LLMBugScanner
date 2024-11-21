@@ -34,8 +34,8 @@ def main():
     args = parser.parse_args()
     
     # Source and target folders
-    source_folder = '/home/hice1/yyuan394/scratch/LLMBugScanner/data_full/CVE_clean'
-    target_folder = '/home/hice1/yyuan394/scratch/LLMBugScanner/data_full/CVE_clean_organized'
+    source_folder = 'data_full/0.8splitCVE_clean'
+    target_folder = '/home/hice1/yyuan394/scratch/LLMBugScanner/data_full/0.8CVE_clean_organized_b5'
     
     # Clear target folder if it exists
     if os.path.exists(target_folder) and os.path.isdir(target_folder):

@@ -31,8 +31,8 @@ else:
 # print(f"torchvision CUDA Version: {torchvision.version.cuda}")
 
 # Load dataset
-dataset = load_dataset("json", data_files="finetune/FineTuning_dataset/gptlens_dataset/train_dataset.json", split="train")
-eval_dataset=load_dataset("json", data_files="finetune/FineTuning_dataset/gptlens_dataset/test_dataset.json")
+dataset = load_dataset("json", data_files="finetune/FineTuning_dataset/Dataset/fine_tuning_data2.jsonl", split="train")
+# eval_dataset=load_dataset("json", data_files="finetune/FineTuning_dataset/gptlens_dataset/test_dataset.json")
 
 # dataset = load_dataset("philschmid/dolly-15k-oai-style", split="train")
 # print(dataset[3]["messages"])
@@ -40,15 +40,15 @@ eval_dataset=load_dataset("json", data_files="finetune/FineTuning_dataset/gptlen
 # print(dataset.column_names)  # Should show ['text']
 
 # Hugging Face model id
-# checkpoint_path =''
-checkpoint_path = None
-model_name = "finetune/model/Nxcode_outdataset_new/checkpoint-2222"
-
+checkpoint_path =None
+# checkpoint_path = 'finetune/model/Nxcode_finetuning_specfunc_alllinear/checkpoint-7000'
+checkpoint_path = 'finetune/model/deepseek_finetuning_specfunc_alllinear/checkpoint-2000'
+model_name = "deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct"
+# model_name = "NTQAI/Nxcode-CQ-7B-orpo"
 
 # Fine-tuned model name
-new_model = "finetune/model/Nxcode_instructional_finetuning_alllinear"
-
-
+new_model = "finetune/model/deepseek_finetuning_specfunc_alllinear"
+# new_model = "finetune/model/Nxcode_finetuning_specfunc_alllinear"
 ################################################################################
 # bitsandbytes parameters
 ################################################################################
@@ -94,7 +94,8 @@ model = AutoModelForCausalLM.from_pretrained(
     model_name,
     quantization_config=bnb_config,
     torch_dtype=torch.bfloat16,
-    device_map="auto"
+    device_map="auto",
+    trust_remote_code=True
 )
 model.config.use_cache = True
 model.config.pretraining_tp = 1
@@ -136,7 +137,7 @@ model.gradient_checkpointing_enable()
 
 training_arguments = TrainingArguments(
     output_dir=new_model,
-    num_train_epochs=2,
+    num_train_epochs=3,
     per_device_train_batch_size=4,
     gradient_accumulation_steps=2,
     optim="adamw_torch_fused",
@@ -162,7 +163,7 @@ for key, value in args_dict.items():
 trainer = SFTTrainer(
     model=model,
     train_dataset=dataset,
-    eval_dataset=eval_dataset, 
+    eval_dataset=dataset, 
     peft_config=peft_config,
     max_seq_length=256,
     tokenizer=tokenizer,

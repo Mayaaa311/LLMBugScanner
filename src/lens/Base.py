@@ -1,6 +1,18 @@
 from abc import ABC, abstractmethod
 from langchain_core.prompts import PromptTemplate
-
+param1 = {
+    "max_new_tokens": 4000,
+    "do_sample": True,
+    "temperature": 0.001,
+    "top_k": 50,
+    "top_p": 0.95,
+    "num_return_sequences": 1
+}
+param2 = {
+    "max_new_tokens": 4000
+    ,
+    "do_sample": False
+}
 def set_template(template_path, input_var):
     with open(template_path, 'r') as file:
         template = file.read()

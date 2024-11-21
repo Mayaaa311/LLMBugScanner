@@ -1,25 +1,13 @@
-from transformers import BitsAndBytesConfig, AutoTokenizer, AutoModelForCausalLM,  LlamaForCausalLM, AutoModel
+from transformers import GemmaTokenizer,BitsAndBytesConfig, AutoTokenizer, AutoModelForCausalLM,  LlamaForCausalLM, AutoModel
 import transformers
 from langchain_core.prompts import PromptTemplate
 import torch
-from lens.Base import BaseLLM
+from lens.Base import BaseLLM, param1, param2
 from lens.utils import parse_config
 from langchain_core.callbacks import CallbackManager, StreamingStdOutCallbackHandler
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-param1 = {
-    "max_new_tokens": 4000,
-    "do_sample": True,
-    "temperature": 0.001,
-    "top_k": 50,
-    "top_p": 0.95,
-    "num_return_sequences": 1
-}
-param2 = {
-    "max_new_tokens": 4000
-    ,
-    "do_sample": False
-}
+
 generation_params=param2
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class Huggingface_LLM(BaseLLM):
@@ -36,12 +24,16 @@ class Huggingface_LLM(BaseLLM):
     def load_model(self):
 
         # Load model and tokenizer
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_id,  trust_remote_code=True)
+        if self.model_id == "google/codegemma-7b":
+            self.tokenizer =GemmaTokenizer.from_pretrained(self.model_id, trust_remote_code=True)
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_id,  trust_remote_code=True)
         self.tokenizer.model_max_length = 35000
         if self.model_id == "THUDM/codegeex2-6b":
             self.model = AutoModel.from_pretrained("THUDM/codegeex2-6b", trust_remote_code=True)
             self.model = self.model.eval()
             return
+    
 
         use_4bit = True
         bnb_4bit_compute_dtype = "float16"
@@ -59,7 +51,9 @@ class Huggingface_LLM(BaseLLM):
         )
 
         self.model = AutoModelForCausalLM.from_pretrained(self.model_id, 
-                                                            quantization_config = bnb_config, device_map="auto", trust_remote_code=True)
+                                                            quantization_config = bnb_config, 
+                                                            device_map="auto", 
+                                                            trust_remote_code=True)
 
         # # Ensure that callback_manager is a valid object
         # if isinstance(self.model_params.get("callback_manager"), str) and self.model_params["callback_manager"] == "default":

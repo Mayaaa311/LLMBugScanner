@@ -52,7 +52,7 @@ class BugScanner:
         
         if critic_model:
             self.llm_critic.load_model()
-            self.llm_critic.load_template(['code', 'vulnerability'])
+            self.llm_critic.load_template(['code', 'vulnerability','idx'])
         if ranker_model:
             self.llm_ranker.load_model()
             self.llm_ranker.load_template(['vulnerability', 'topk'])
@@ -60,25 +60,25 @@ class BugScanner:
             self.llm_summarizer.load_model()
             self.llm_summarizer.load_template(['content'])
         
-    def run_auditor(self, code, write_to):
+    def run_auditor(self, code, write_to, i):
         input_dict = {"code": code, "topk": self.topk}
-        for i, auditor in enumerate(self.llm_auditors):
-            if not os.path.isfile(write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor.json"):
-                response = auditor.invoke(input_dict)
-                write_to_file(write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor_{i}.json", response, write='w')
-                print("Auditor response written to : ", write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor.json")
-            else:
-                print("Auditor response found: ", write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor.json")
-            
+
+        if not os.path.isfile(write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor.json"):
+            response = self.llm_auditors[i].invoke(input_dict)
+            write_to_file(write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor_{i}.json", response, write='w')
+            print("Auditor response written to : ", write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor_{i}.json")
+        else:
+            print("Auditor response found: ", write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor_{i}.json")
+        
 
     def run_critic(self, vulnerabilities, write_to, code = None, idx = 0):
         if not os.path.isfile(write_to+f"/{self.llm_critic.model_id.replace('/','_')}_critic_{idx}.json"):
             if code is not None: 
                 print("using code in critic!")
-                response = self.llm_critic.invoke({"auditor_resp": vulnerabilities,"code":code})
+                response = self.llm_critic.invoke({"auditor_resp": vulnerabilities,"code":code, "idx":idx})
             else:
                 response = self.llm_critic.invoke({"auditor_resp": vulnerabilities})
-            print("Critic response written to : ", write_to+f"/{self.llm_critic.model_id.replace('/','_')}_critic_a{idx}.json")
+            print("Critic response written to : ", write_to+f"/{self.llm_critic.model_id.replace('/','_')}_critic_{idx}.json")
             write_to_file(write_to+f"/{self.llm_critic.model_id.replace('/','_')}_critic_{idx}.json", response)
         else:
             print("Critic response found : ", write_to+f"/{self.llm_critic.model_id.replace('/','_')}_critic_a{idx}.json")
@@ -92,9 +92,9 @@ class BugScanner:
         return response
 
     def run_summarizer(self, content, write_to,idx = 0) -> list:
-        if not os.path.isfile(write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized.json"):
+        if not os.path.isfile(write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized_{idx}.json"):
             response = self.llm_summarizer.invoke({"content": content})
-            write_to_file(write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized.json", str(response))
+            write_to_file(write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized_{idx}.json", str(response))
         return write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized_{idx}.json"
     
     def run_llm_on_dir_list(self, dir_list, func, append_name, *args, **kwargs):
@@ -102,8 +102,8 @@ class BugScanner:
         for dir in dir_list:
             files = [f for f in os.listdir(dir)]
             name = dir.split('/')
+            
             write_to = '/'.join(name[:-1]) + '/' + append_name
-
             for file in files:
                 file_path = os.path.join(dir, file)  
                 auditor_idx =  file.split('/')[-1].split('.')[-2].split('_')[-1]
@@ -117,19 +117,23 @@ class BugScanner:
     def run_batch_auditor(self, code_folder):
         code_path = [f for f in os.listdir(code_folder) if f.endswith('.sol')]
         auditor_result_dirs = [] 
-        self.load_all_models(True, False, False, False)
-        for file in code_path:
-            # Step 1: Generate vulnerabilities using auditors
-            data_path = os.path.join(code_folder, file)
-            with open(data_path, "r") as f:
-                code = f.read()
-                name = file.split('/')[-1].rsplit('.', 1)[0]
-                write_to = f"{self.result_dir}/{name}"
-                self.run_auditor(code, write_to+"/auditor")
-                auditor_result_dirs.append(write_to+"/auditor")
+        # self.load_all_models(True, False, False, False)
+        for i, auditor in enumerate(self.llm_auditors):
+            auditor.load_model()
+            auditor.load_template(['code','topk'])
 
-        for model in self.llm_auditors:
-            del model.model  # This removes the model from memory
+            for file in code_path:
+                # Step 1: Generate vulnerabilities using auditors
+                data_path = os.path.join(code_folder, file)
+                with open(data_path, "r") as f:
+                    code = f.read()
+                    name = file.split('/')[-1].rsplit('.', 1)[0]
+                    write_to = f"{self.result_dir}/{name}"
+                    self.run_auditor(code, write_to+"/auditor", i)
+                    auditor_result_dirs.append(write_to+"/auditor")
+
+
+            del auditor.model  # This removes the model from memory
             torch.cuda.empty_cache()  
         
         print("all auditor output write to : ", auditor_result_dirs)

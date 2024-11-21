@@ -1,15 +1,16 @@
 from transformers import AutoTokenizer
 import transformers
 import torch
-from lens.Base import BaseLLM
+from lens.Base import BaseLLM, param1, param2
 from lens.utils import parse_config
-
+generation_params = param2
 class pipeline_LLM(BaseLLM):
-    def __init__(self, model_id, model_params_path=None):
+    def __init__(self, model_id, prompt_path, model_params_path=None):
         self.model_id = model_id
         self.model_params = None
         if model_params_path is not None:
             self.model_params = self.load_params(model_params_path)
+        self.prompt_path = prompt_path
         self.tokenizer = None
         self.model = None
 
@@ -19,11 +20,13 @@ class pipeline_LLM(BaseLLM):
         # Load model and tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_id,  trust_remote_code=True)
 
-        self.model =transformers.pipeline(
+        self.model = transformers.pipeline(
             "text-generation",
             model=self.model_id,
+            tokenizer=self.tokenizer,  # Pass the tokenizer explicitly
             torch_dtype=torch.float16,
             device_map="auto",
+            trust_remote_code=True
         )
 
     def load_params(self, model_params_path):
@@ -38,15 +41,7 @@ class pipeline_LLM(BaseLLM):
         prompt = str(prompt_input)[6:-1]
        
         sequences = self.model(
-            prompt,
-            do_sample=True,
-            top_k=50,
-            temperature=0.01,
-            top_p=0.95,
-            num_return_sequences=1,
-            eos_token_id=self.tokenizer.eos_token_id,
-            max_length=10000,
-        )
+            prompt,**generation_params)
 
         return sequences[0]['generated_text'][len(prompt):]
 

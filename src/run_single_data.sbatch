@@ -2,7 +2,7 @@
 #SBATCH -J testsmalldataset             # Job name
 #SBATCH -N 1                            # Number of nodes
 #SBATCH --ntasks=1                      # Run only one task
-#SBATCH --gpus=4             # Request 2 GPUs
+#SBATCH --gpus=3             # Request 2 GPUs
 #SBATCH --mem=200G                      # Increase memory 
 #SBATCH -t 200                          # Duration of the job
 #SBATCH -o Report-%j.out                # Combined output and error messages file
@@ -19,4 +19,6 @@ conda activate /home/hice1/yyuan394/scratch/env
 # python src/bugscanner_cli.py -a  AlfredPros/CodeLlama-7b-Instruct-Solidity -c m-a-p/OpenCodeInterpreter-DS-6.7B -r m-a-p/OpenCodeInterpreter-DS-6.7B -p m-a-p/OpenCodeInterpreter-DS-6.7B -d data_2 -o result_test_parser/trail3 -k 5 -log logs_oct1
 # python src/bugscanner_cli.py -a NTQAI/Nxcode-CQ-7B-orpo  -c NTQAI/Nxcode-CQ-7B-orpo -r NTQAI/Nxcode-CQ-7B-orpo -d data_2 -o result -k 5 -log logger/log_nxcode
 
-python src/bugscanner_cli.py -a NTQAI/Nxcode-CQ-7B-orpo  deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct m-a-p/OpenCodeInterpreter-DS-6.7B -c NTQAI/Nxcode-CQ-7B-orpo -r NTQAI/Nxcode-CQ-7B-orpo -d data_full/CVE_clean -k 5 -log logger/log_nxcode -o result_nxcodes_k3_beforeft
+python src/bugscanner_cli.py -a google/codegemma-7b AlfredPros/CodeLlama-7b-Instruct-Solidity -c NTQAI/Nxcode-CQ-7B-orpo -r NTQAI/Nxcode-CQ-7B-orpo -d data_full/data_2 -k 3 -log logger/log_nxcode -o result_codegemma
+
+# 

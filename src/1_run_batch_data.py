@@ -8,7 +8,7 @@ sbatch_template = """#!/bin/bash
 #SBATCH --ntasks=1                      # Run only one task
 #SBATCH --gpus=3           
 #SBATCH --mem=100G   
-#SBATCH -t 300                          # Duration of the job
+#SBATCH -t 60                          # Duration of the job
 #SBATCH -o Report-%j-{i}.out                # Combined output and error messages file
 #SBATCH --mail-type=BEGIN,END,FAIL       # Mail preferences
 #SBATCH --mail-user=yyuan394@gatech.edu  # E-mail address for notifications
@@ -19,8 +19,9 @@ mkdir -p $TRITON_CACHE_DIR  # Ensure the directory exists
 module load anaconda3/2023.03            # Load module dependencies
 conda activate /home/hice1/yyuan394/scratch/env
 
+python src/bugscanner_cli.py -a NTQAI/Nxcode-CQ-7B-orpo meta-llama/CodeLlama-7b-hf m-a-p/OpenCodeInterpreter-DS-6.7B AlfredPros/CodeLlama-7b-Instruct-Solidity -c NTQAI/Nxcode-CQ-7B-orpo -r NTQAI/Nxcode-CQ-7B-orpo  -d {data_folder} -o {result_folder} -k {k} -log logger
 
-python src/bugscanner_cli.py -a {model_name} -c {model_name} -r NTQAI/Nxcode-CQ-7B-orpo -d  {data_folder} -o {result_folder} -k {k} -log logger
+# python src/bugscanner_cli.py -a {model_name} -c {model_name} -r NTQAI/Nxcode-CQ-7B-orpo -d {data_folder} -o {result_folder} -k {k} -log logger
 # python src/bugscanner_cli.py -a {model_name} -c {model_name} -r  {model_name} -d  {data_folder} -o {result_folder} -k {k} -log logger
 
 """
@@ -31,11 +32,12 @@ python src/bugscanner_cli.py -a {model_name} -c {model_name} -r NTQAI/Nxcode-CQ-
 model_name = 'finetune/model/Nxcode_instructional_finetuning_alllinear'
 # model_name = 'finetune/model/Nxcode_outdataset1/checkpoint-25000'
 # change this to the data folder you want to run
+# data_path = 'data_full/0.8CVE_clean_organized_b5'
 data_path = 'data_full/CVE_clean_organized_b5'
 # changet this to the k you want to run
 k = 5
 #change this to where you want to save your result
-result_folder_name = 'result/result_nxcodes_k5_instructional_ftlinear_newversion'
+result_folder_name = 'result/result_nxcodes_k3_a4_beforeft'
 
 # ------------------------------------------DO NOT CHANGE BELOW CODE-------------------------------
 

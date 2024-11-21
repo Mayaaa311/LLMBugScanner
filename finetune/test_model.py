@@ -6,7 +6,7 @@ from datasets import load_dataset
 from random import randint
  
 # peft_model_id = "/home/hice1/yyuan394/scratch/LLMBugScanner/finetune/model/Nxcode_finetuned"
-peft_model_id = "NTQAI/Nxcode-CQ-7B-orpo"
+peft_model_id = "finetune/model/Nxcode_instructional_finetuning_alllinear"
 # peft_model_id = args.output_dir
  
 # Load Model with PEFT adapter
@@ -23,7 +23,7 @@ pipe = pipeline("text-generation", model=model, tokenizer=tokenizer)
 
  
 # Load our test dataset
-eval_dataset = load_dataset("jsonl", data_files="/home/hice1/yyuan394/scratch/LLMBugScanner/finetune/FineTuning_dataset/fine_tuning_data.jsonl", split="train")
+eval_dataset = load_dataset("json", data_files="finetune/FineTuning_dataset/gptlens_dataset/fine_tuning_data.jsonl", split="train")
 rand_idx = randint(0, len(eval_dataset))
  
 # Test on sample
