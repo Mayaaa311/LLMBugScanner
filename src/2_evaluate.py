@@ -4,7 +4,7 @@ import csv
 import json
 
 # -----------------!!! Change this to the result folder you want to evaluate!!!-----------------
-result_folder = 'result/result_nxcodes_k3_instructional_ftlinear_newversion_subset_instructionalft_noquant'
+result_folder = 'result/result_codegemma'
 
 # ------------------Folder definition-------------------------------------------------------
 base_folder = result_folder
@@ -114,7 +114,7 @@ def extract_data_from_text_file(file_path):
             # Skip introductory lines and locate the CSV part
             csv_start_index = 0
             for i, line in enumerate(lines):
-                if "dataname,vulnerability,function_name" in line:
+                if "dataname,auditor_idx,vulnerability,function_name" in line:
                     csv_start_index = i + 1
                     break
             
@@ -124,11 +124,12 @@ def extract_data_from_text_file(file_path):
             # Parse CSV lines
             csvreader = csv.reader(csv_lines)
             for row in csvreader:
-                if len(row) == 3:  # Ensure the row has the expected columns
+                if len(row) == 4:  # Ensure the row has the expected columns
                     csv_data.append({
                         'dataname': row[0],
-                        'vulnerability': row[1],
-                        'function_name': row[2]
+                        'auditor_idx':row[1],
+                        'vulnerability': row[2],
+                        'function_name': row[3]
                     })
     except Exception as e:
         print(f"Error reading {file_path}: {e}. Skipping this file.")
