@@ -1,0 +1,53 @@
+---------------------------------------
+Begin Slurm Prolog: Nov-20-2024 10:28:51
+Job ID:    958298
+User ID:   zyahn3
+Account:   scs
+Job name:  eval_bugscanner
+Partition: ice-gpu
+---------------------------------------
+/home/hice1/zyahn3/.conda/envs/BugScanner
+2024-11-20 10:29:06,315 - INFO - Initializing auditor models...
+2024-11-20 10:29:06,316 - INFO - Auditor models: finetune/model/codeshell/codeshell_messi_10ep/
+2024-11-20 10:29:06,316 - INFO - Initializing critic model: finetune/model/codeshell/codeshell_messi_10ep/
+2024-11-20 10:29:06,316 - INFO - Initializing ranker model: finetune/model/codeshell/codeshell_messi_10ep/
+2024-11-20 10:29:06,316 - INFO - Initializing parser model: finetune/model/codeshell/codeshell_messi_10ep/
+2024-11-20 10:29:06,316 - INFO - Initializing BugScanner with the given models...
+2024-11-20 10:29:06,317 - INFO - BugScanner initialization completed.
+2024-11-20 10:29:06,317 - INFO - Starting the bug scanning pipeline with Top-K = 5...
+2024-11-20 10:29:06,318 - INFO - Found 136 .sol files in the folder: data_full/CVE_clean
+2024-11-20 10:29:06,318 - INFO - Output will be saved in: eval_result/codeshell_10ep
+using cuda
+Attempted to get_model_instance for name finetune/model/codeshell/codeshell_messi_10ep/ and got model_class None
+Attempted to get_model_instance for name finetune/model/codeshell/codeshell_messi_10ep/ and got model_class None
+Attempted to get_model_instance for name finetune/model/codeshell/codeshell_messi_10ep/ and got model_class None
+Attempted to get_model_instance for name finetune/model/codeshell/codeshell_messi_10ep/ and got model_class None
+Traceback (most recent call last):
+  File "/storage/ice1/5/9/zyahn3/LLMBugScanner/src/bugscanner_cli.py", line 205, in <module>
+    main()
+  File "/storage/ice1/5/9/zyahn3/LLMBugScanner/src/bugscanner_cli.py", line 194, in main
+    detector.run_pipeline(
+  File "/storage/ice1/5/9/zyahn3/LLMBugScanner/src/lens/BugScanner.py", line 103, in run_pipeline
+    self.load_all_models(True, False, False, True)
+  File "/storage/ice1/5/9/zyahn3/LLMBugScanner/src/lens/BugScanner.py", line 51, in load_all_models
+    auditor.load_model()
+  File "/storage/ice1/5/9/zyahn3/LLMBugScanner/src/lens/Huggingface.py", line 39, in load_model
+    self.tokenizer = AutoTokenizer.from_pretrained(self.model_id,  trust_remote_code=True)
+  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/transformers/models/auto/tokenization_auto.py", line 864, in from_pretrained
+    config = AutoConfig.from_pretrained(
+  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/transformers/models/auto/configuration_auto.py", line 1038, in from_pretrained
+    raise ValueError(
+ValueError: Unrecognized model in finetune/model/codeshell/codeshell_messi_10ep/. Should have a `model_type` key in its config.json, or contain one of the following strings in its name: albert, align, altclip, audio-spectrogram-transformer, autoformer, bark, bart, beit, bert, bert-generation, big_bird, bigbird_pegasus, biogpt, bit, blenderbot, blenderbot-small, blip, blip-2, bloom, bridgetower, bros, camembert, canine, chameleon, chinese_clip, chinese_clip_vision_model, clap, clip, clip_text_model, clip_vision_model, clipseg, clvp, code_llama, codegen, cohere, conditional_detr, convbert, convnext, convnextv2, cpmant, ctrl, cvt, dac, data2vec-audio, data2vec-text, data2vec-vision, dbrx, deberta, deberta-v2, decision_transformer, deformable_detr, deit, depth_anything, deta, detr, dinat, dinov2, distilbert, donut-swin, dpr, dpt, efficientformer, efficientnet, electra, encodec, encoder-decoder, ernie, ernie_m, esm, falcon, falcon_mamba, fastspeech2_conformer, flaubert, flava, fnet, focalnet, fsmt, funnel, fuyu, gemma, gemma2, git, glpn, gpt-sw3, gpt2, gpt_bigcode, gpt_neo, gpt_neox, gpt_neox_japanese, gptj, gptsan-japanese, granite, granitemoe, graphormer, grounding-dino, groupvit, hiera, hubert, ibert, idefics, idefics2, imagegpt, informer, instructblip, instructblipvideo, jamba, jetmoe, jukebox, kosmos-2, layoutlm, layoutlmv2, layoutlmv3, led, levit, lilt, llama, llava, llava_next, llava_next_video, llava_onevision, longformer, longt5, luke, lxmert, m2m_100, mamba, mamba2, marian, markuplm, mask2former, maskformer, maskformer-swin, mbart, mctct, mega, megatron-bert, mgp-str, mimi, mistral, mixtral, mllama, mobilebert, mobilenet_v1, mobilenet_v2, mobilevit, mobilevitv2, mpnet, mpt, mra, mt5, musicgen, musicgen_melody, mvp, nat, nemotron, nezha, nllb-moe, nougat, nystromformer, olmo, olmoe, omdet-turbo, oneformer, open-llama, openai-gpt, opt, owlv2, owlvit, paligemma, patchtsmixer, patchtst, pegasus, pegasus_x, perceiver, persimmon, phi, phi3, pix2struct, pixtral, plbart, poolformer, pop2piano, prophetnet, pvt, pvt_v2, qdqbert, qwen2, qwen2_audio, qwen2_audio_encoder, qwen2_moe, qwen2_vl, rag, realm, recurrent_gemma, reformer, regnet, rembert, resnet, retribert, roberta, roberta-prelayernorm, roc_bert, roformer, rt_detr, rt_detr_resnet, rwkv, sam, seamless_m4t, seamless_m4t_v2, segformer, seggpt, sew, sew-d, siglip, siglip_vision_model, speech-encoder-decoder, speech_to_text, speech_to_text_2, speecht5, splinter, squeezebert, stablelm, starcoder2, superpoint, swiftformer, swin, swin2sr, swinv2, switch_transformers, t5, table-transformer, tapas, time_series_transformer, timesformer, timm_backbone, trajectory_transformer, transfo-xl, trocr, tvlt, tvp, udop, umt5, unispeech, unispeech-sat, univnet, upernet, van, video_llava, videomae, vilt, vipllava, vision-encoder-decoder, vision-text-dual-encoder, visual_bert, vit, vit_hybrid, vit_mae, vit_msn, vitdet, vitmatte, vits, vivit, wav2vec2, wav2vec2-bert, wav2vec2-conformer, wavlm, whisper, xclip, xglm, xlm, xlm-prophetnet, xlm-roberta, xlm-roberta-xl, xlnet, xmod, yolos, yoso, zoedepth
+srun: error: atl1-1-03-013-3-0: task 0: Exited with exit code 1
+---------------------------------------
+Begin Slurm Epilog: Nov-20-2024 10:29:07
+Job ID:        958298
+Array Job ID:  _4294967294
+User ID:       zyahn3
+Account:       scs
+Job name:      eval_bugscanner
+Resources:     cpu=1,gres/gpu:h100=1,mem=80G,node=1
+Rsrc Used:     cput=00:00:16,vmem=0,walltime=00:00:16,mem=708K,energy_used=0
+Partition:     ice-gpu
+Nodes:         atl1-1-03-013-3-0
+---------------------------------------

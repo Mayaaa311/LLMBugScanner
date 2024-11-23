@@ -73,14 +73,15 @@ def evaluate_acc(sample, predicted_answer):
     vul_end_loc = sample.find(" in ") - 1
     func_start_loc = sample.find("function") + 10
     func_end_loc = sample.find(".") - 1
-    vul = sample[vul_start_loc:vul_end_loc]
-    func = sample[func_start_loc:func_end_loc]
-    if predicted_answer.find(vul) > 0:
+    vul = sample[vul_start_loc:vul_end_loc].lower()
+    func = sample[func_start_loc:func_end_loc].lower()
+    if predicted_answer.lower().find(vul) > 0:
         vul_correct = 1.0
-    if predicted_answer.find(func) > 0:
+    if predicted_answer.lower().find(func) > 0:
         func_correct = 1.0
 
     print("Vul", vul, "Func", func)
+    print("Predicted Answer:", predicted_answer, "\n\n")
     return func_correct, vul_correct
     
  

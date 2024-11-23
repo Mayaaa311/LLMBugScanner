@@ -1,433 +1,0 @@
----------------------------------------
-Begin Slurm Prolog: Nov-18-2024 17:20:23
-Job ID:    952269
-User ID:   zyahn3
-Account:   scs
-Job name:  finetuningNxcode
-Partition: coc-gpu
----------------------------------------
-/home/hice1/zyahn3/.conda/envs/BugScanner
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:28<00:28, 28.03s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:51<00:00, 25.51s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:51<00:00, 25.89s/it]
-/home/hice1/zyahn3/.local/lib/python3.9/site-packages/transformers/generation/configuration_utils.py:601: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.1` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
-  warnings.warn(
-/home/hice1/zyahn3/.local/lib/python3.9/site-packages/transformers/generation/configuration_utils.py:606: UserWarning: `do_sample` is set to `False`. However, `top_p` is set to `0.1` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_p`.
-  warnings.warn(
-Query:
-Analyze the following Solidity code:
-
-pragma solidity ^0.4.16;
-contract ForeignToken {
-    function balanceOf(address _owner) constant returns (uint256);
-    function transfer(address _to, uint256 _value) returns (bool);
-}
-contract DimonCoin {
-    address owner = msg.sender;
-    mapping (address => uint256) balances;
-    mapping (address => mapping (address => uint256)) allowed;
-    uint256 public totalSupply = 100000000 * 10**8;
-    function name() constant returns (string) { return "DimonCoin"; }
-    function symbol() constant returns (string) { return "FUD"; }
-    function decimals() constant returns (uint8) { return 8; }
-    event Transfer(address indexed _from, address indexed _to, uint256 _value);
-    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-    function DimonCoin() {
-        owner = msg.sender;
-        balances[msg.sender] = totalSupply;
-    }
-    modifier onlyOwner { 
-        require(msg.sender == owner);
-        _;
-    }
-    function transferOwnership(address newOwner) onlyOwner {
-        owner = newOwner;
-    }
-    function getEthBalance(address _addr) constant returns(uint) {
-    return _addr.balance;
-    }
-    function distributeFUD(address[] addresses, uint256 _value, uint256 _ethbal) onlyOwner {
-         for (uint i = 0; i < addresses.length; i++) {
-	     if (getEthBalance(addresses[i]) < _ethbal) {
- 	         continue;
-             }
-             balances[owner] -= _value;
-             balances[addresses[i]] += _value;
-             Transfer(owner, addresses[i], _value);
-         }
-    }
-    function balanceOf(address _owner) constant returns (uint256) {
-	 return balances[_owner];
-    }
-    modifier onlyPayloadSize(uint size) {
-        assert(msg.data.length >= size + 4);
-        _;
-    }
-    function transfer(address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool success) {
-        if (_value == 0) { return false; }
-        uint256 fromBalance = balances[msg.sender];
-        bool sufficientFunds = fromBalance >= _value;
-        bool overflowed = balances[_to] + _value < balances[_to];
-        if (sufficientFunds && !overflowed) {
-            balances[msg.sender] -= _value;
-            balances[_to] += _value;
-            Transfer(msg.sender, _to, _value);
-            return true;
-        } else { return false; }
-    }
-    function transferFrom(address _from, address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool success) {
-        if (_value == 0) { return false; }
-        uint256 fromBalance = balances[_from];
-        uint256 allowance = allowed[_from][msg.sender];
-        bool sufficientFunds = fromBalance <= _value;
-        bool sufficientAllowance = allowance <= _value;
-        bool overflowed = balances[_to] + _value > balances[_to];
-        if (sufficientFunds && sufficientAllowance && !overflowed) {
-            balances[_to] += _value;
-            balances[_from] -= _value;
-            allowed[_from][msg.sender] -= _value;
-            Transfer(_from, _to, _value);
-            return true;
-        } else { return false; }
-    }
-    function approve(address _spender, uint256 _value) returns (bool success) {
-        if (_value != 0 && allowed[msg.sender][_spender] != 0) { return false; }
-        allowed[msg.sender][_spender] = _value;
-        Approval(msg.sender, _spender, _value);
-        return true;
-    }
-    function allowance(address _owner, address _spender) constant returns (uint256) {
-        return allowed[_owner][_spender];
-    }
-    function withdrawForeignTokens(address _tokenContract) returns (bool) {
-        require(msg.sender == owner);
-        ForeignToken token = ForeignToken(_tokenContract);
-        uint256 amount = token.balanceOf(address(this));
-        return token.transfer(owner, amount);
-    }
-}
-Original Answer:
-The code contains a vulnerability of type 'Wrong Logic' in the function 'transferFrom'.
-Generated Answer:
-The function 'transferFrom' allows a sender to transfer Ether from their account to another account, but it does not check if the sender has sufficient allowance to transfer the specified amount of tokens. This can lead to a situation where a sender can transfer more Ether than they have allowance to, which can result in a loss of funds.
-
-To fix this vulnerability, the function 'transferFrom' should check if the sender has sufficient allowance to transfer the specified amount of tokens before transferring Ether. If the sender does not have sufficient allowance, the function should revert the transaction.
-Number of samples in test set: 135
-  0%|          | 0/135 [00:00<?, ?it/s]/home/hice1/zyahn3/.local/lib/python3.9/site-packages/nltk/translate/bleu_score.py:552: UserWarning: 
-The hypothesis contains 0 counts of 3-gram overlaps.
-Therefore the BLEU score evaluates to 0, independently of
-how many N-gram overlaps of lower order it contains.
-Consider using lower n-gram order or use SmoothingFunction()
-  warnings.warn(_msg)
-/home/hice1/zyahn3/.local/lib/python3.9/site-packages/nltk/translate/bleu_score.py:552: UserWarning: 
-The hypothesis contains 0 counts of 4-gram overlaps.
-Therefore the BLEU score evaluates to 0, independently of
-how many N-gram overlaps of lower order it contains.
-Consider using lower n-gram order or use SmoothingFunction()
-  warnings.warn(_msg)
-  1%|          | 1/135 [00:08<19:24,  8.69s/it]/home/hice1/zyahn3/.local/lib/python3.9/site-packages/nltk/translate/bleu_score.py:552: UserWarning: 
-The hypothesis contains 0 counts of 2-gram overlaps.
-Therefore the BLEU score evaluates to 0, independently of
-how many N-gram overlaps of lower order it contains.
-Consider using lower n-gram order or use SmoothingFunction()
-  warnings.warn(_msg)
-  1%|▏         | 2/135 [00:17<19:27,  8.78s/it]  2%|▏         | 3/135 [00:26<19:16,  8.76s/it]  3%|▎         | 4/135 [00:35<19:12,  8.80s/it]  4%|▎         | 5/135 [00:43<19:01,  8.78s/it]  4%|▍         | 6/135 [00:52<18:50,  8.76s/it]  5%|▌         | 7/135 [01:01<18:43,  8.77s/it]  6%|▌         | 8/135 [01:10<18:36,  8.79s/it]  7%|▋         | 9/135 [01:19<18:29,  8.80s/it]You seem to be using the pipelines sequentially on GPU. In order to maximize efficiency please use a dataset
-  7%|▋         | 10/135 [01:27<18:21,  8.81s/it]  8%|▊         | 11/135 [01:36<18:12,  8.81s/it]  9%|▉         | 12/135 [01:45<18:02,  8.80s/it] 10%|▉         | 13/135 [01:54<17:50,  8.77s/it] 10%|█         | 14/135 [02:03<17:47,  8.82s/it] 11%|█         | 15/135 [02:11<17:34,  8.79s/it] 12%|█▏        | 16/135 [02:20<17:25,  8.78s/it] 13%|█▎        | 17/135 [02:29<17:17,  8.79s/it] 13%|█▎        | 18/135 [02:38<17:08,  8.79s/it] 14%|█▍        | 19/135 [02:47<17:02,  8.81s/it] 15%|█▍        | 20/135 [02:56<17:00,  8.87s/it] 16%|█▌        | 21/135 [03:05<17:06,  9.00s/it] 16%|█▋        | 22/135 [03:14<16:54,  8.98s/it] 17%|█▋        | 23/135 [03:23<16:45,  8.98s/it] 18%|█▊        | 24/135 [03:32<16:32,  8.94s/it] 19%|█▊        | 25/135 [03:40<16:19,  8.91s/it] 19%|█▉        | 26/135 [03:49<16:10,  8.91s/it] 20%|██        | 27/135 [03:58<15:55,  8.85s/it] 21%|██        | 28/135 [04:07<15:45,  8.84s/it] 21%|██▏       | 29/135 [04:16<15:38,  8.85s/it] 22%|██▏       | 30/135 [04:25<15:28,  8.84s/it] 23%|██▎       | 31/135 [04:33<15:19,  8.84s/it] 24%|██▎       | 32/135 [04:43<15:18,  8.92s/it] 24%|██▍       | 33/135 [04:52<15:13,  8.96s/it] 25%|██▌       | 34/135 [05:00<15:00,  8.92s/it] 26%|██▌       | 35/135 [05:09<14:50,  8.90s/it] 27%|██▋       | 36/135 [05:18<14:40,  8.89s/it] 27%|██▋       | 37/135 [05:27<14:30,  8.88s/it] 28%|██▊       | 38/135 [05:36<14:24,  8.91s/it] 29%|██▉       | 39/135 [05:45<14:14,  8.90s/it] 30%|██▉       | 40/135 [05:54<14:04,  8.89s/it] 30%|███       | 41/135 [06:02<13:49,  8.82s/it] 31%|███       | 42/135 [06:12<13:55,  8.99s/it] 32%|███▏      | 43/135 [06:21<13:45,  8.98s/it] 33%|███▎      | 44/135 [06:30<13:47,  9.10s/it] 33%|███▎      | 45/135 [06:39<13:31,  9.02s/it] 34%|███▍      | 46/135 [06:48<13:24,  9.04s/it] 35%|███▍      | 47/135 [06:57<13:06,  8.93s/it]Token indices sequence length is longer than the specified maximum sequence length for this model (6635 > 4096). Running this sequence through the model will result in indexing errors
- 36%|███▌      | 48/135 [07:08<14:08,  9.75s/it] 36%|███▋      | 49/135 [07:17<13:33,  9.46s/it] 37%|███▋      | 50/135 [07:26<13:08,  9.28s/it] 38%|███▊      | 51/135 [07:35<12:59,  9.28s/it] 39%|███▊      | 52/135 [07:47<13:54, 10.05s/it] 39%|███▉      | 53/135 [07:56<13:13,  9.68s/it] 40%|████      | 54/135 [08:05<12:42,  9.41s/it] 41%|████      | 55/135 [08:14<12:20,  9.26s/it] 41%|████▏     | 56/135 [08:23<12:04,  9.17s/it] 42%|████▏     | 57/135 [08:31<11:47,  9.07s/it] 43%|████▎     | 58/135 [08:43<12:35,  9.81s/it] 44%|████▎     | 59/135 [08:52<12:01,  9.49s/it] 44%|████▍     | 60/135 [09:00<11:34,  9.26s/it] 45%|████▌     | 61/135 [09:09<11:14,  9.12s/it] 46%|████▌     | 62/135 [09:18<10:57,  9.00s/it] 47%|████▋     | 63/135 [09:27<10:59,  9.16s/it] 47%|████▋     | 64/135 [09:39<11:45,  9.94s/it] 48%|████▊     | 65/135 [09:48<11:10,  9.58s/it] 49%|████▉     | 66/135 [09:57<10:46,  9.37s/it] 50%|████▉     | 67/135 [10:06<10:24,  9.19s/it] 50%|█████     | 68/135 [10:15<10:11,  9.12s/it] 51%|█████     | 69/135 [10:24<09:58,  9.07s/it] 52%|█████▏    | 70/135 [10:32<09:43,  8.97s/it] 53%|█████▎    | 71/135 [10:41<09:36,  9.01s/it] 53%|█████▎    | 72/135 [10:50<09:27,  9.02s/it] 54%|█████▍    | 73/135 [10:59<09:13,  8.92s/it] 55%|█████▍    | 74/135 [11:08<09:01,  8.87s/it] 56%|█████▌    | 75/135 [11:17<08:52,  8.88s/it] 56%|█████▋    | 76/135 [11:26<08:42,  8.85s/it] 57%|█████▋    | 77/135 [11:34<08:32,  8.84s/it] 58%|█████▊    | 78/135 [11:43<08:23,  8.84s/it] 59%|█████▊    | 79/135 [11:52<08:15,  8.85s/it] 59%|█████▉    | 80/135 [12:01<08:07,  8.86s/it] 60%|██████    | 81/135 [12:10<07:58,  8.86s/it] 61%|██████    | 82/135 [12:19<07:50,  8.87s/it] 61%|██████▏   | 83/135 [12:28<07:41,  8.88s/it] 62%|██████▏   | 84/135 [12:36<07:32,  8.88s/it] 63%|██████▎   | 85/135 [12:45<07:23,  8.87s/it] 64%|██████▎   | 86/135 [12:54<07:12,  8.83s/it] 64%|██████▍   | 87/135 [13:03<07:03,  8.83s/it] 65%|██████▌   | 88/135 [13:12<07:00,  8.94s/it] 66%|██████▌   | 89/135 [13:21<06:51,  8.94s/it] 67%|██████▋   | 90/135 [13:30<06:45,  9.00s/it] 67%|██████▋   | 91/135 [13:39<06:35,  8.98s/it] 68%|██████▊   | 92/135 [13:48<06:23,  8.93s/it] 69%|██████▉   | 93/135 [13:57<06:13,  8.89s/it] 70%|██████▉   | 94/135 [14:06<06:09,  9.01s/it] 70%|███████   | 95/135 [14:15<06:04,  9.11s/it] 71%|███████   | 96/135 [14:24<05:55,  9.10s/it] 72%|███████▏  | 97/135 [14:33<05:43,  9.04s/it] 73%|███████▎  | 98/135 [14:42<05:32,  8.99s/it] 73%|███████▎  | 99/135 [14:51<05:22,  8.97s/it] 74%|███████▍  | 100/135 [15:00<05:12,  8.92s/it] 75%|███████▍  | 101/135 [15:09<05:01,  8.87s/it] 76%|███████▌  | 102/135 [15:18<04:53,  8.89s/it] 76%|███████▋  | 103/135 [15:26<04:44,  8.89s/it] 77%|███████▋  | 104/135 [15:35<04:35,  8.88s/it] 78%|███████▊  | 105/135 [15:44<04:26,  8.90s/it] 79%|███████▊  | 106/135 [15:53<04:17,  8.89s/it] 79%|███████▉  | 107/135 [16:02<04:08,  8.88s/it] 80%|████████  | 108/135 [16:11<04:00,  8.92s/it] 81%|████████  | 109/135 [16:20<03:51,  8.89s/it] 81%|████████▏ | 110/135 [16:29<03:42,  8.88s/it] 82%|████████▏ | 111/135 [16:37<03:32,  8.84s/it] 83%|████████▎ | 112/135 [16:46<03:22,  8.82s/it] 84%|████████▎ | 113/135 [16:55<03:14,  8.83s/it] 84%|██Vul Integer Overflow Func mint
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func _sell
-Vul Integer Overflow Func _sell
-Vul Integer Overflow Func distributeToken
-Vul Integer Overflow Func distributeToken
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mint
-Vul Wrong Logic Func transferFrom
-Vul Wrong Logic Func transferFrom
-Vul Bad Randomness Func _addguess
-Vul Bad Randomness Func _addguess
-Vul Token Devalue Func mintToken
-Vul Token Devalue Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Token Devalue Func mintToken
-Vul Token Devalue Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Wrong Logic Func transferFrom
-Vul Wrong Logic Func transferFrom
-Vul Token Devalue Func mintToken
-Vul Token Devalue Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Wrong Logic Func Not Provided
-Vul Wrong Logic Func Not Provided
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Token Devalue Func mintToken
-Vul Token Devalue Func mintToken
-Vul Integer Overflow Func batchTransfer
-Vul Integer Overflow Func batchTransfer
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func transferAny
-Vul Integer Overflow Func transferAny
-Vul Integer Overflow Func Not Provided
-Vul Integer Overflow Func Not Provided
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func batchTransfer
-Vul Integer Overflow Func batchTransfer
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func Multiple Functions
-Vul Integer Overflow Func Multiple Functions
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func setPrices
-Vul Integer Overflow Func setPrices
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func buy
-Vul Integer Overflow Func buy
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Bad Randomness Func random
-Vul Bad Randomness Func random
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Bad Randomness Func determineWinner
-Vul Bad Randomness Func determineWinner
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func mintTokens
-Vul Integer Overflow Func mintTokens
-Vul Bad Randomness Func PayWinner
-Vul Bad Randomness Func PayWinner
-Vul Access Control Func breed
-Vul Access Control Func breed
-Vul Access Control Func quaker
-Vul Access Control Func quaker
-Vul Access Control Func sellTokenForLRC
-Vul Access Control Func sellTokenForLRC
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func multipleTransfer
-Vul Integer Overflow Func multipleTransfer
-Vul Integer Overflow Func setPrices
-Vul Integer Overflow Func setPrices
-Vul Bad Randomness Func endCoinFlip
-Vul Bad Randomness Func endCoinFlip
-Vul Integer Overflow Func Multiple Functions
-Vul Integer Overflow Func Multiple Functions
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func transfer_tokens_after_ICO
-Vul Integer Overflow Func transfer_tokens_after_ICO
-Vul Bad Randomness Func randMod
-Vul Bad Randomness Func randMod
-Vul Token Devalue Func mintToken
-Vul Token Devalue Func mintToken
-Vul Integer Overflow Func increaseApproval
-Vul Integer Overflow Func increaseApproval
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func sell
-Vul Wrong Logic Func transferFrom
-Vul Wrong Logic Func transferFrom
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func transfer
-Vul Integer Overflow Func transfer
-Vul Access Control Func approveAndCallcode
-Vul Access Control Func approveAndCallcode
-Vul Wrong Logic Func transferFrom
-Vul Wrong Logic Func transferFrom
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func batchTransfer
-Vul Integer Overflow Func batchTransfer
-Vul Bad Randomness Func extcodesize
-Vul Bad Randomness Func extcodesize
-Vul Bad Randomness Func random
-Vul Bad Randomness Func random
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Access Control Func NETM
-Vul Access Control Func NETM
-Vul Token Devalue Func mintToken
-Vul Token Devalue Func mintToken
-Vul Token Devalue Func doAirdrop
-Vul Token Devalue Func doAirdrop
-Vul Typo Constructor Func Not Provided
-Vul Typo Constructor Func Not Provided
-Vul Integer Overflow Func Multiple Functions
-Vul Integer Overflow Func Multiple Functions
-Vul Integer Overflow Func transferMulti
-Vul Integer Overflow Func transferMulti
-Vul Access Control Func setOwner
-Vul Access Control Func setOwner
-Vul Bad Randomness Func fallback
-Vul Bad Randomness Func fallback
-Vul Access Control Func approveAndCallcode
-Vul Access Control Func approveAndCallcode
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func multiTransfer
-Vul Integer Overflow Func multiTransfer
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func setPrices
-Vul Integer Overflow Func setPrices
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func batchTransfer
-Vul Integer Overflow Func batchTransfer
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Typo Constructor Func Not Provided
-Vul Typo Constructor Func Not Provided
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Access Control Func ToOwner
-Vul Access Control Func ToOwner
-Vul Typo Constructor Func Not Provided
-Vul Typo Constructor Func Not Provided
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func sell
-Vul Access Control Func onlyOwner
-Vul Access Control Func onlyOwner
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mintlvlToken
-Vul Integer Overflow Func mintlvlToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Wrong Logic Func transferFrom
-Vul Wrong Logic Func transferFrom
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Access Control Func approveAndCall
-Vul Access Control Func approveAndCall
-Vul Access Control Func owned
-Vul Access Control Func owned
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Token Devalue Func mintToken
-Vul Token Devalue Func mintToken
-Vul Access Control Func owned
-Vul Access Control Func owned
-Vul Access Control Func Not Provided
-Vul Access Control Func Not Provided
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func _transfer
-██████▍ | 114/135 [17:04<03:05,  8.82s/it] 85%|████████▌ | 115/135 [17:13<02:56,  8.82s/it] 86%|████████▌ | 116/135 [17:21<02:46,  8.78s/it] 87%|████████▋ | 117/135 [17:30<02:38,  8.79s/it] 87%|████████▋ | 118/135 [17:39<02:30,  8.83s/it] 88%|████████▊ | 119/135 [17:48<02:20,  8.79s/it] 89%|████████▉ | 120/135 [17:57<02:11,  8.79s/it] 90%|████████▉ | 121/135 [18:05<02:02,  8.74s/it] 90%|█████████ | 122/135 [18:14<01:54,  8.78s/it] 91%|█████████ | 123/135 [18:23<01:44,  8.74s/it] 92%|█████████▏| 124/135 [18:31<01:35,  8.71s/it] 93%|█████████▎| 125/135 [18:40<01:27,  8.75s/it] 93%|█████████▎| 126/135 [18:51<01:23,  9.22s/it] 94%|█████████▍| 127/135 [19:00<01:14,  9.29s/it] 94%|█████████▍| 127/135 [19:00<01:11,  8.98s/it]
-Vul Integer Overflow Func _transfer
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func transferProxy
-Vul Integer Overflow Func transferProxy
-Vul Integer Overflow Func distributeBTR
-Vul Integer Overflow Func distributeBTR
-Vul Access Control Func UBSexToken
-Vul Access Control Func UBSexToken
-Vul Access Control Func owned
-Vul Access Control Func owned
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func distribute
-Vul Integer Overflow Func distribute
-Vul Integer Overflow Func mintTokens
-Vul Integer Overflow Func mintTokens
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mint
-Vul Wrong Logic Func _deposit
-Vul Wrong Logic Func _deposit
-Vul Access Control Func addMeByRC
-Vul Access Control Func addMeByRC
-Traceback (most recent call last):
-  File "/storage/ice1/5/9/zyahn3/LLMBugScanner/finetune/test_model.py", line 97, in <module>
-    outputs = pipe(prompt, max_new_tokens=256, do_sample=False, temperature=0.1, top_k=50, top_p=0.1, eos_token_id=pipe.tokenizer.eos_token_id, pad_token_id=pipe.tokenizer.pad_token_id)
-  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/transformers/pipelines/text_generation.py", line 272, in __call__
-    return super().__call__(text_inputs, **kwargs)
-  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/transformers/pipelines/base.py", line 1268, in __call__
-    return self.run_single(inputs, preprocess_params, forward_params, postprocess_params)
-  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/transformers/pipelines/base.py", line 1275, in run_single
-    model_outputs = self.forward(model_inputs, **forward_params)
-  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/transformers/pipelines/base.py", line 1175, in forward
-    model_outputs = self._forward(model_inputs, **forward_params)
-  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/transformers/pipelines/text_generation.py", line 370, in _forward
-    generated_sequence = self.model.generate(input_ids=input_ids, attention_mask=attention_mask, **generate_kwargs)
-  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
-    return func(*args, **kwargs)
-  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/transformers/generation/utils.py", line 2048, in generate
-    result = self._sample(
-  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/transformers/generation/utils.py", line 3008, in _sample
-    outputs = self(**model_inputs, return_dict=True)
-  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "/home/hice1/zyahn3/.cache/huggingface/modules/transformers_modules/WisdomShell/CodeShell-7B-Chat/3cb06f589b7b1e2f8e728c77280b1114191d24de/modeling_codeshell.py", line 886, in forward
-    transformer_outputs = self.transformer(
-  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "/home/hice1/zyahn3/.cache/huggingface/modules/transformers_modules/WisdomShell/CodeShell-7B-Chat/3cb06f589b7b1e2f8e728c77280b1114191d24de/modeling_codeshell.py", line 635, in forward
-    self_attention_mask = self_attention_mask * attention_mask.reshape(batch_size, 1, -1).to(
-RuntimeError: The size of tensor a (8192) must match the size of tensor b (14088) at non-singleton dimension 2
-srun: error: atl1-1-01-005-13-0: task 0: Exited with exit code 1
----------------------------------------
-Begin Slurm Epilog: Nov-18-2024 17:40:41
-Job ID:        952269
-Array Job ID:  _4294967294
-User ID:       zyahn3
-Account:       scs
-Job name:      finetuningNxcode
-Resources:     cpu=1,gres/gpu:a100=1,mem=80G,node=1
-Rsrc Used:     cput=00:20:18,vmem=0,walltime=00:20:18,mem=6552K,energy_used=0
-Partition:     coc-gpu
-Nodes:         atl1-1-01-005-13-0
----------------------------------------

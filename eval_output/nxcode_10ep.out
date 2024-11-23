@@ -1,0 +1,58 @@
+---------------------------------------
+Begin Slurm Prolog: Nov-20-2024 09:16:02
+Job ID:    958144
+User ID:   zyahn3
+Account:   scs
+Job name:  eval_bugscanner
+Partition: coc-gpu
+---------------------------------------
+/home/hice1/zyahn3/.conda/envs/BugScanner
+2024-11-20 09:16:18,080 - INFO - Initializing auditor models...
+2024-11-20 09:16:18,081 - INFO - Auditor models: finetune/model/nxcode/nxcode_messi_10ep/
+2024-11-20 09:16:18,082 - INFO - Initializing critic model: finetune/model/nxcode/nxcode_messi_10ep/
+2024-11-20 09:16:18,082 - INFO - Initializing ranker model: finetune/model/nxcode/nxcode_messi_10ep/
+2024-11-20 09:16:18,082 - INFO - No ranker model specified.
+2024-11-20 09:16:18,082 - INFO - Initializing BugScanner with the given models...
+2024-11-20 09:16:18,082 - INFO - BugScanner initialization completed.
+2024-11-20 09:16:18,083 - INFO - Starting the bug scanning pipeline with Top-K = 5...
+2024-11-20 09:16:18,084 - INFO - Found 136 .sol files in the folder: data_full/CVE_clean
+2024-11-20 09:16:18,084 - INFO - Output will be saved in: eval_result/nxcode_10ep
+using cuda
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:14<00:14, 14.06s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:30<00:00, 15.31s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:30<00:00, 15.13s/it]
+Traceback (most recent call last):
+  File "/storage/ice1/5/9/zyahn3/LLMBugScanner/src/bugscanner_cli.py", line 205, in <module>
+    main()
+  File "/storage/ice1/5/9/zyahn3/LLMBugScanner/src/bugscanner_cli.py", line 194, in main
+    detector.run_pipeline(
+  File "/storage/ice1/5/9/zyahn3/LLMBugScanner/src/lens/BugScanner.py", line 102, in run_pipeline
+    self.load_all_models(True, False, False, True)
+  File "/storage/ice1/5/9/zyahn3/LLMBugScanner/src/lens/BugScanner.py", line 50, in load_all_models
+    auditor.load_model()
+  File "/storage/ice1/5/9/zyahn3/LLMBugScanner/src/lens/Huggingface.py", line 66, in load_model
+    self.model = AutoModelForCausalLM.from_pretrained(self.model_id,device_map="auto",trust_remote_code=True)
+  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/transformers/models/auto/auto_factory.py", line 564, in from_pretrained
+    return model_class.from_pretrained(
+  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/transformers/modeling_utils.py", line 4092, in from_pretrained
+    model.load_adapter(
+  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/transformers/integrations/peft.py", line 214, in load_adapter
+    incompatible_keys = set_peft_model_state_dict(self, processed_adapter_state_dict, adapter_name)
+  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/peft/utils/save_and_load.py", line 460, in set_peft_model_state_dict
+    load_result = model.load_state_dict(peft_model_state_dict, strict=False)
+  File "/home/hice1/zyahn3/.local/lib/python3.9/site-packages/torch/nn/modules/module.py", line 2584, in load_state_dict
+    raise RuntimeError(
+RuntimeError: Error(s) in loading state_dict for Qwen2ForCausalLM:
+	size mismatch for model.embed_tokens.weight: copying a param with shape torch.Size([92302, 4096]) from checkpoint, the shape in current model is torch.Size([92416, 4096]).
+	size mismatch for lm_head.weight: copying a param with shape torch.Size([92302, 4096]) from checkpoint, the shape in current model is torch.Size([92416, 4096]).
+srun: error: atl1-1-01-002-5-0: task 0: Exited with exit code 1
+---------------------------------------
+Begin Slurm Epilog: Nov-20-2024 09:17:06
+Job ID:        958144
+Array Job ID:  _4294967294
+User ID:       zyahn3
+Account:       scs
+Job name:      eval_bugscanner
+Resources:     cpu=1,gres/gpu:v100=4,mem=128G,node=1
+Rsrc Used:     cput=00:01:04,vmem=0,walltime=00:01:04,mem=6932K,energy_used=0
+Partition:     coc-gpu
+Nodes:         atl1-1-01-002-5-0
+---------------------------------------

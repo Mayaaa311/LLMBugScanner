@@ -4,8 +4,8 @@
 #SBATCH --ntasks-per-node=1             # Run only one task
 #SBATCH --gres=gpu:H100:1                    # Request 1 GPU of any type
 #SBATCH --mem-per-gpu=128G              # Increase memory 
-#SBATCH -t 4:00:00                         # Duration of the job
-#SBATCH -o output/finetune_codellama_CVE_10ep.out                # Combined output and error messages file
+#SBATCH -t 16:00:00                         # Duration of the job
+#SBATCH -o output/gemma_messi_5ep.out                # Combined output and error messages file
 
 cd $SLURM_SUBMIT_DIR                    # Correctly change to the submit directory
 
@@ -17,24 +17,29 @@ conda activate BugScanner
 echo $CONDA_PREFIX
 
 #MODEL_ID="NTQAI/Nxcode-CQ-7B-orpo"
-MODEL_ID="AlfredPros/CodeLlama-7b-Instruct-Solidity"
+#MODEL_ID="AlfredPros/CodeLlama-7b-Instruct-Solidity"
 #MODEL_ID="WisdomShell/CodeShell-7B-Chat"
 #MODEL_ID="TechxGenus/CodeGemma-7b"
-#OUTPUT_DIR="model/codellama_finetuned/codellama_10ep/"
 
-#MODEL_ID="model/nxcode/nxcode_messi_10ep/"
-#MODEL_ID="model/codellama/codellama_messi_10ep/"
-#MODEL_ID="model/codeshell/codeshell_messi_10ep/"
-#MODEL_ID="model/gemma/gemma_messi_10ep/"
+AUDITOR="finetune/model/gemma/gemma_messi_5ep"
+#AUDITOR="finetune/model/codellama/codellama_messi_5ep"
+#AUDITOR="finetune/model/gemma/gemma_CVE_10ep"
+#AUDITOR="finetune/model/codellama/codellama_CVE_10ep"
+#AUDITOR="finetune/model/gemma/gemma_messi_5ep_CVE_10ep"
+#AUDITOR="finetune/model/codellama/codellama_messi_5ep_CVE_10ep"
 
+CRITIC="NTQAI/Nxcode-CQ-7B-orpo"
+RANKER="NTQAI/Nxcode-CQ-7B-orpo"
 
-OUTPUT_DIR="model/codellama/codellama_CVE_10ep/"
+OUTPUT_DIR="eval_result/gemma_messi_5ep"
+DATASET="data_full/0.8splitCVE_clean"
 
-FINETUNE=0.0
-DATASET1="FineTuning_dataset/gptlens_dataset/0.2split_dataset.json"
-#DATASET1="MessiQ_dataset/fine_tuning_data1.jsonl"
+K=5
 
 # srun python src/bugscanner_cli.py -a AlfredPros/CodeLlama-7b-Instruct-Solidity m-a-p/OpenCodeInterpreter-DS-6.7B NTQAI/Nxcode-CQ-7B-orpo -c deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct -r NTQAI/Nxcode-CQ-7B-orpo -d data -o result_test_small -k 5 -log logs_oct1
 # srun python src/bugscanner_cli.py -a m-a-p/OpenCodeInterpreter-DS-6.7B -c m-a-p/OpenCodeInterpreter-DS-6.7B -r NTQAI/Nxcode-CQ-7B-orpo -d data -o result_parsed -k 5 -log logs_oct1
-srun python finetune_model.py $MODEL_ID $OUTPUT_DIR $FINETUNE $DATASET1 #$DATASET2
+
+srun python src/bugscanner_cli.py -a $AUDITOR -c $CRITIC -r $RANKER -d $DATASET -o $OUTPUT_DIR -k $K -log "logs"
+
+#srun python finetune_model.py $MODEL_ID $OUTPUT_DIR $FINETUNE $DATASET1 #$DATASET2
 # python3 convert_dataset.py

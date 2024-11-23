@@ -1,0 +1,2252 @@
+---------------------------------------
+Begin Slurm Prolog: Nov-23-2024 10:03:13
+Job ID:    969150
+User ID:   zyahn3
+Account:   scs
+Job name:  eval_bugscanner
+Partition: ice-gpu
+---------------------------------------
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/condabin/conda
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/bin/conda
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/bin/conda-env
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/bin/activate
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/bin/deactivate
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/etc/profile.d/conda.sh
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/etc/fish/conf.d/conda.fish
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/shell/condabin/Conda.psm1
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/shell/condabin/conda-hook.ps1
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/lib/python3.10/site-packages/xontrib/conda.xsh
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/etc/profile.d/conda.csh
+no change     /home/hice1/zyahn3/.bashrc
+No action taken.
+/home/hice1/zyahn3/.conda/envs/BugScanner
+2024-11-23 10:03:21,626 - INFO - Initializing auditor models...
+2024-11-23 10:03:21,626 - INFO - Auditor models: finetune/model/gemma/gemma_messi_CVE_10ep/
+2024-11-23 10:03:21,626 - INFO - Initializing critic model: finetune/model/gemma/gemma_messi_CVE_10ep/
+2024-11-23 10:03:21,626 - INFO - Initializing ranker model: finetune/model/gemma/gemma_messi_CVE_10ep/
+2024-11-23 10:03:21,627 - INFO - Initializing parser model: finetune/model/gemma/gemma_messi_CVE_10ep/
+2024-11-23 10:03:21,627 - INFO - Initializing BugScanner with the given models...
+2024-11-23 10:03:21,627 - INFO - BugScanner initialization completed.
+2024-11-23 10:03:21,627 - INFO - Starting the bug scanning pipeline with Top-K = 5...
+2024-11-23 10:03:21,627 - INFO - Found 109 .sol files in the folder: data_full/0.8splitCVE_clean
+2024-11-23 10:03:21,627 - INFO - Output will be saved in: eval_result/gemma_messi_CVE_10ep
+Unused kwargs: ['load_in_8bit_fp32_cpu_offload']. These kwargs are not used in <class 'transformers.utils.quantization_config.BitsAndBytesConfig'>.
+`low_cpu_mem_usage` was None, now set to True since model is quantized.
+`config.hidden_act` is ignored, you should use `config.hidden_activation` instead.
+Gemma's activation function will be set to `gelu_pytorch_tanh`. Please, use
+`config.hidden_activation` if you want to override this behaviour.
+See https://github.com/huggingface/transformers/pull/29402 for more details.
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:07,  2.43s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.35s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.28s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.88s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.91s/it]
+Unused kwargs: ['load_in_8bit_fp32_cpu_offload']. These kwargs are not used in <class 'transformers.utils.quantization_config.BitsAndBytesConfig'>.
+`low_cpu_mem_usage` was None, now set to True since model is quantized.
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:02<00:06,  2.22s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:04<00:04,  2.20s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:06<00:02,  2.18s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.81s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:07<00:00,  1.87s/it]
+  0%|          | 0/109 [00:00<?, ?it/s]Starting from v4.46, the `logits` model output will have the same type as the model (except at train time, where it will always be FP32)
+This is a friendly reminder - the current text generation call will exceed the model's predefined maximum length (8192). Depending on the model, you may observe exceptions, performance degradation, or nothing at all.
+using cuda
+Attempted to get_model_instance for name finetune/model/gemma/gemma_messi_CVE_10ep/ and got model_class None
+Attempted to get_model_instance for name finetune/model/gemma/gemma_messi_CVE_10ep/ and got model_class None
+Attempted to get_model_instance for name finetune/model/gemma/gemma_messi_CVE_10ep/ and got model_class None
+Attempted to get_model_instance for name finetune/model/gemma/gemma_messi_CVE_10ep/ and got model_class None
+About to load all models
+---- Running Auditor(s) ----
+MODEL WAS INVOKED
+Input prompt is: tensor([[256000,   1645,    108,  ..., 256000, 105776,    108]],
+       device='cuda:0') with length torch.Size([1, 1556])
+Output prompt is: tensor([[256000,   1645,    108,  ..., 195939, 195939, 195939]],
+       device='cuda:0') with shape torch.Size([1, 21556])
+Response is: The code contains a vulnerability of type 'Integer Overflow' in the function 'mintToken'.
+system
+You are a smart contract auditor, identify the top 1 severe vulnerabilities in the provided smart contract and the function it is in, provide detailed reasoning and explaination
+user
+Analyze the following Solidity code:
+
+pragma solidity ^0.4.13; contract owned { address public owner;
+  function owned() {
+      owner = msg.sender;
+  }
+  modifier onlyOwner {
+      require(msg.sender == owner);
+      _;
+  }
+  function transferOwnership(address newOwner) onlyOwner {
+      owner = newOwner;
+  }
+}
+contract tokenRecipient { function receiveApproval(address from, uint256 value, address token, bytes extraData); }
+contract token {  string public name; string public symbol; uint8 public decimals; uint256 public totalSupply;
+  mapping (address => uint256) public balanceOf;
+  mapping (address => mapping (address => uint256)) public allowance;
+  event Transfer(address indexed from, address indexed to, uint256 value);
+  event Burn(address indexed from, uint256 value);
+  function token(
+      uint256 initialSupply,
+      string tokenName,
+      uint8 decimalUnits,
+      string tokenSymbol
+      ) {
+      balanceOf[msg.sender] = initialSupply;              
+      totalSupply = initialSupply;                        
+      name = tokenName;                                   
+      symbol = tokenSymbol;                               
+      decimals = decimalUnits;                            
+  }
+  function _transfer(address _from, address _to, uint _value) internal {
+      require (_to != 0x0);                               
+      require (balanceOf[_from] > _value);                
+      require (balanceOf[_to] + _value > balanceOf[_to]); 
+      balanceOf[_from] -= _value;                         
+      balanceOf[_to] += _value;                            
+      Transfer(_from, _to, _value);
+  }
+  function transfer(address _to, uint256 _value) {
+      _transfer(msg.sender, _to, _value);
+  }
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+      require (_value < allowance[_from][msg.sender]);     
+      allowance[_from][msg.sender] -= _value;
+      _transfer(_from, _to, _value);
+      return true;
+  }
+  function approve(address _spender, uint256 _value)
+      returns (bool success) {
+      allowance[msg.sender][_spender] = _value;
+      return true;
+  }
+  function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+      returns (bool success) {
+      tokenRecipient spender = tokenRecipient(_spender);
+      if (approve(_spender, _value)) {
+          spender.receiveApproval(msg.sender, _value, this, _extraData);
+          return true;
+      }
+  }        
+  function burn(uint256 _value) returns (bool success) {
+      require (balanceOf[msg.sender] > _value);            
+      balanceOf[msg.sender] -= _value;                      
+      totalSupply -= _value;                                
+      Burn(msg.sender, _value);
+      return true;
+  }
+  function burnFrom(address _from, uint256 _value) returns (bool success) {
+      require(balanceOf[_from] >= _value);                
+      require(_value <= allowance[_from][msg.sender]);    
+      balanceOf[_from] -= _value;                         
+      allowance[_from][msg.sender] -= _value;             
+      totalSupply -= _value;                              
+      Burn(_from, _value);
+      return true;
+  }
+}
+contract StandardToken is token {
+  mapping (address => mapping (address => uint256)) public allowance;
+  function transferAndCall(address _to, uint256 _value, bytes _extraData) returns (bool success) {
+      require (balanceOf[msg.sender] >= _value);                
+      balanceOf[_to] += _value;                            
+      balanceOf[msg.sender] -= _value;                         
+      Transfer(msg.sender, _to, _value);
+      require(_extraData.length == 0);
+      return true;
+  }
+  function approve(address _spender, uint256 _value)
+      returns (bool success) {
+      allowance[msg.sender][_spender] = _value;
+      return true;
+  }
+  function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+      returns (bool success) {
+      tokenRecipient spender = tokenRecipient(_spender);
+      if (approve(_spender, _value)) {
+          spender.receiveApproval(msg.sender, _value, this, _extraData);
+          return true;
+      }
+  }
+}
+contract BAFCToken is StandardToken {
+  string public name = "Business Alliance Financial Circle";
+  string public symbol = "BAFC";
+  uint public decimals = 18;
+  function transfer(address _to, uint256 _value) {
+      require (balanceOf[msg.sender] >= _value);                
+      balanceOf[msg.sender] -= _value;                         
+      balanceOf[_to] += _value;                            
+      Transfer(msg.sender, _to, _value);
+  }
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+      require(_value < allowance[_from][msg.sender]);     
+      allowance[_from][msg.sender] -= _value;
+      transfer(_from, _to, _value);
+      return true;
+  }
+  function mintToken(address target, uint256 mintedAmount) onlyOwner {
+      balanceOf[target] += mintedAmount;
+      totalSupply += mintedAmount;
+      Transfer(0, this, mintedAmount);
+      Transfer(this, target, mintedAmount);
+  }
+  function burn(uint256 value) onlyOwner {
+      require (balanceOf[msg.sender] >= value);                
+      balanceOf[msg.sender] -= value;                         
+      totalSupply -= value;
+      Burn(msg.sender, value);
+  }
+  function burnFrom(address _from, uint256 value) onlyOwner {
+      require(_from != 0x0);
+      require(balanceOf[_from] >= value);                
+      require(allowance[_from][msg.sender] >= value);    
+      balanceOf[_from] -= value;                         
+      allowance[_from][msg.sender] -= value;             
+      totalSupply -= value;
+      Burn(_from, value);
+  }
+}
+
+You are a smart contract auditor, identify the top 1 severe vulnerabilities in the provided smart contract and the function it is in, provide detailed reasoning and explaination
+user
+Analyze the following Solidity code:
+
+pragma solidity ^0.4.13; contract owned { address public owner;
+  function owned() {
+      owner = msg.sender;
+  }
+  modifier onlyOwner {
+      require(msg.sender == owner);
+      _;
+  }
+  function transferOwnership(address newOwner) onlyOwner {
+      owner = newOwner;
+  }
+}
+contract tokenRecipient { function receiveApproval(address from, uint256 value, address token, bytes extraData); }
+contract token {  string public name; string public symbol; uint8 public decimals; uint256 public totalSupply;
+  mapping (address => uint256) public balanceOf;
+  mapping (address => mapping (address => uint256)) public allowance;
+  event Transfer(address indexed from, address indexed to, uint256 value);
+  event Burn(address indexed from, uint256 value);
+  function token(
+      uint256 initialSupply,
+      string tokenName,
+      uint8 decimalUnits,
+      string tokenSymbol
+      ) {
+      balanceOf[msg.sender] = initialSupply;              
+      totalSupply = initialSupply;                        
+      name = tokenName;                                   
+      symbol = tokenSymbol;                               
+      decimals = decimalUnits;                            
+  }
+  function _transfer(address _from, address _to, uint _value) internal {
+      require (_to != 0x0);                               
+      require (balanceOf[_from] > _value);                
+      require (balanceOf[_to] + _value > balanceOf[_to]); 
+      balanceOf[_from] -= _value;                         
+      balanceOf[_to] += _value;                            
+      Transfer(_from, _to, _value);
+  }
+  function transfer(address _to, uint256 _value) {
+      _transfer(msg.sender, _to, _value);
+  }
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+      require (_value < allowance[_from][msg.sender]);     
+      allowance[_from][msg.sender] -= _value;
+      _transfer(_from, _to, _value);
+      return true;
+  }
+  function approve(address _spender, uint256 _value)
+      returns (bool success) {
+      allowance[msg.sender][_spender] = _value;
+      return true;
+  }
+  function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+      returns (bool success) {
+      tokenRecipient spender = tokenRecipient(_spender);
+      if (approve(_spender, _value)) {
+          spender.receiveApproval(msg.sender, _value, this, _extraData);
+          return true;
+      }
+  }        
+  function burn(uint256 _value) returns (bool success) {
+      require (balanceOf[msg.sender] > _value);            
+      balanceOf[msg.sender] -= _value;                      
+      totalSupply -= _value;                                
+      Burn(msg.sender, _value);
+      return true;
+  }
+  function burnFrom(address _from, uint256 _value) returns (bool success) {
+      require(balanceOf[_from] >= _value);                
+      require(_value <= allowance[_from][msg.sender]);    
+      balanceOf[_from] -= _value;                         
+      allowance[_from][msg.sender] -= _value;             
+      totalSupply -= _value;                              
+      Burn(_from, _value);
+      return true;
+  }
+}
+contract Baisc is owned, token {
+  uint256 public sellPrice;
+  uint256 public buyPrice;
+  mapping (address => bool) public frozenAccount;
+  event FrozenFunds(address target, bool frozen);
+  function Baisc() token (10000000, "Business Alliance Financial Circle", 18, "BAFC") {}
+  function _transfer(address _from, address _to, uint _value) internal {
+      require (_to != 0x0);                               
+      require (balanceOf[_from] > _value);                
+      require (balanceOf[_to] + _value > balanceOf[_to]); 
+      balanceOf[_from] -= _value;                         
+      balanceOf[_to] += _value;                            
+      Transfer(_from, _to, _value);
+  }
+  function transfer(address _to, uint256 _value) {
+      _transfer(msg.sender, _to, _value);
+  }
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+      require (_value < allowance[_from][msg.sender]);     
+      allowance[_from][msg.sender] -= _value;
+      _transfer(_from, _to, _value);
+      return true;
+  }
+  function mintToken(address target, uint256 mintedAmount) onlyOwner {
+      balanceOf[target] += mintedAmount;
+      totalSupply += mintedAmount;
+      Transfer(0, this, mintedAmount);
+      Transfer(this, target, mintedAmount);
+  }
+  function freezeAccount(address target, bool freeze) onlyOwner {
+      frozenAccount[target] = freeze;
+      FrozenFunds(target, freeze);
+  }
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+      sellPrice = newSellPrice;
+      buyPrice = newBuyPrice;
+  }
+  function buy() payable {
+      uint amount = msg.value / buyPrice;               
+      _transfer(this, msg.sender, amount);              
+  }
+  function sell(uint256 amount) {
+      require(this.balance >= amount * sellPrice);      
+      _transfer(msg.sender, this, amount);              
+      msg.sender.transfer(amount * sellPrice);          
+  }
+}
+
+You are a smart contract auditor, identify the top 1 severe vulnerabilities in the provided smart contract and the function it is in, provide detailed reasoning and explaination
+
+Analyze the following Solidity code:
+
+pragma solidity ^0.4.13; contract owned { address public owner;
+  function owned() {
+      owner = msg.sender;
+  }
+  modifier onlyOwner {
+      require(msg.sender == owner);
+      _;
+  }
+  function transferOwnership(address newOwner) onlyOwner {
+      owner = newOwner;
+  }
+}
+contract tokenRecipient { function receiveApproval(address from, uint256 value, address token, bytes extraData); }
+contract token {  string public name; string public symbol; uint8 public decimals; uint256 public totalSupply;
+  mapping (address => uint256) public balanceOf;
+  mapping (address => mapping (address => uint256)) public allowance;
+  event Transfer(address indexed from, address indexed to, uint256 value);
+  event Burn(address indexed from, uint256 value);
+  function token(
+      uint256 initialSupply,
+      string tokenName,
+      uint8 decimalUnits,
+      string tokenSymbol
+      ) {
+      balanceOf[msg.sender] = initialSupply;              
+      totalSupply = initialSupply;                        
+      name = tokenName;                                   
+      symbol = tokenSymbol;                               
+      decimals = decimalUnits;                            
+  }
+  function _transfer(address _from, address _to, uint _value) internal {
+      require (_to != 0x0);                               
+      require (balanceOf[_from] > _value);                
+      require (balanceOf[_to] + _value > balanceOf[_to]); 
+      balanceOf[_from] -= _value;                         
+      balanceOf[_to] += _value;                            
+      Transfer(_from, _to, _value);
+  }
+  function transfer(address _to, uint256 _value) {
+      _transfer(msg.sender, _to, _value);
+  }
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+      require (_value < allowance[_from][msg.sender]);     
+      allowance[_from][msg.sender] -= _value;
+      _transfer(_from, _to, _value);
+      return true;
+  }
+  function approve(address _spender, uint256 _value)
+      returns (bool success) {
+      allowance[msg.sender][_spender] = _value;
+      return true;
+  }
+  function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+      returns (bool success) {
+      tokenRecipient spender = tokenRecipient(_spender);
+      if (approve(_spender, _value)) {
+          spender.receiveApproval(msg.sender, _value, this, _extraData);
+          return true;
+      }
+  }        
+  function burn(uint256 _value) returns (bool success) {
+      require (balanceOf[msg.sender] > _value);                
+      balanceOf[msg.sender] -= _value;                      
+      totalSupply -= _value;                                
+      Burn(msg.sender, _value);
+      return true;
+  }
+  function burnFrom(address _from, uint256 _value) returns (bool success) {
+      require(balanceOf[_from] >= _value);                
+      require(_value <= allowance[_from][msg.sender]);    
+      balanceOf[_from] -= _value;                         
+      allowance[_from][msg.sender] -= _value;             
+      totalSupply -= _value;                                
+      Burn(_from, _value);
+      return true;
+  }
+}
+contract StandardToken is token {
+  mapping (address => mapping (address => uint256)) public allowance;
+  function transferAndCall(address _to, uint256 _value, bytes _extraData) returns (bool success) {
+      require (balanceOf[msg.sender] > _value);                
+      balanceOf[_to] += _value;                            
+      balanceOf[msg.sender] -= _value;                         
+      Transfer(msg.sender, _to, _value);
+      tokenRecipient spender = tokenRecipient(_to);
+      if (spender.receiveApproval(msg.sender, _value, this, _extraData)) {
+          return true;
+      }
+  }
+  function approve(address _spender, uint256 _value)
+      returns (bool success) {
+      allowance[msg.sender][_spender] = _value;
+      return true;
+  }
+  function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+      returns (bool success) {
+      tokenRecipient spender = tokenRecipient(_spender);
+      if (approve(_spender, _value)) {
+          spender.receiveApproval(msg.sender, _value, this, _extraData);
+          return true;
+      }
+  }
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+      require(_value < allowance[_from][msg.sender]);     
+      allowance[_from][msg.sender] -= _value;
+      _transfer(_from, _to, _value);
+      return true;
+  }
+  function transfer(address _to, uint256 _value) returns (bool success) {
+      require (balanceOf[msg.sender] >= _value);                
+      balanceOf[_to] += _value;                            
+      balanceOf[msg.sender] -= _value;                         
+      Transfer(msg.sender, _to, _value);
+      return true;
+  }
+  function approve(address _spender, uint256 _value) returns (bool success) {
+      require (_value == 0 || allowance[msg.sender][_spender] == 0);                
+      allowance[msg.sender][_spender] = _value;
+      return true;
+  }
+  function burn(uint256 _value) returns (bool success) {
+      require (balanceOf[msg.sender] >= _value);                
+      balanceOf[msg.sender] -= _value;                         
+      totalSupply -= _value;                                
+      Burn(msg.sender, _value);
+      return true;
+  }
+  function burnFrom(address _from, uint256 _value) returns (bool success) {
+      require(balanceOf[_from] >= _value);                
+      require(_value <= allowance[_from][msg.sender]);    
+      balanceOf[_from] -= _value;                         
+      allowance[_from][msg.sender] -= _value;             
+      totalSupply -= _value;                                
+      Burn(_from, _value);
+      return true;
+  }
+}
+contract ATL is StandardToken {
+  string public name = "ATLANT Token";
+  string public symbol = "ATL";
+  uint8 public decimals = 18;
+  uint256 public sellPrice;
+  uint256 public buyPrice;
+  mapping (address => bool) public frozenAccount;
+  event FrozenFunds(address target, bool frozen);
+  function ATL() token (10000000, "ATLANT Token", 18, "ATL") {}
+  function mintToken(address target, uint256 mintedAmount) onlyOwner {
+      balanceOf[target] += mintedAmount;
+      totalSupply += mintedAmount;
+      Transfer(0, this, mintedAmount);
+      Transfer(this, target, mintedAmount);
+  }
+  function freezeAccount(address target, bool freeze) onlyOwner {
+      frozenAccount[target] = freeze;
+      FrozenFunds(target, freeze);
+  }
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+      sellPrice = newSellPrice;
+      buyPrice = newBuyPrice;
+  }
+  function transfer(address _to, uint256 _value) {
+      require (!frozenAccount[msg.sender]);
+      super.transfer(_to, _value);
+  }
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+      require(!frozenAccount[_from]);
+      require(!frozenAccount[_to]);
+      super.transferFrom(_from, _to, _value);
+      return true;
+  }
+  function approve(address _spender, uint256 _value) returns (bool success) {
+      require (!frozenAccount[msg.sender]);
+      return super.approve(_spender, _value);
+  }
+  function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+      require (!frozenAccount[msg.sender]);
+      tokenRecipient spender = tokenRecipient(_spender);
+      if (approve(_spender, _value)) {
+          spender.receiveApproval(msg.sender, _value, this, _extraData);
+          return true;
+      }
+  }
+  function burn(uint256 _value) returns (bool success) {
+      require(msg.sender == owner);
+      balanceOf[msg.sender] = 0;
+      totalSupply = 0;
+      Burn(msg.sender, _value);
+      return true;
+  }
+  function burnFrom(address _from, uint256 _value) returns (bool success) {
+      require(msg.sender == owner);
+      require(_from != 0x0);
+      require(balanceOf[_from] >= _value);
+      require(balanceOf[msg.sender] >= _value);
+      balanceOf[_from] -= _value;
+      balanceOf[msg.sender] -= _value;
+      totalSupply = 0;
+      Burn(_from, _value);
+      return true;
+  }
+}
+
+You are a smart contract auditor, identify the top 1 severe vulnerabilities in the provided smart contract and the function it is in, provide detailed reasoning and explaination
+
+Analyze the following Solidity code:
+
+pragma solidity ^0.4.13; contract owned { address public owner;
+  function owned() {
+      owner = msg.sender;
+  }
+  modifier onlyOwner {
+      require(msg.sender == owner);
+      _;
+  }
+  function transferOwnership(address newOwner) onlyOwner {
+      owner = newOwner;
+  }
+}
+contract tokenRecipient { function receiveApproval(address from, uint256 value, address token, bytes extraData); }
+contract token {  string public name; string public symbol; uint8 public decimals; uint256 public totalSupply;
+  mapping (address => uint256) public balanceOf;
+  mapping (address => mapping (address => uint256)) public allowance;
+  event Transfer(address indexed from, address indexed to, uint256 value);
+  event Burn(address caller, uint256 value);
+  function token(
+      uint256 initialSupply,
+      string tokenName,
+      uint8 decimalUnits,
+      string tokenSymbol
+      ) {
+      balanceOf[msg.sender] = initialSupply;              
+      totalSupply = initialSupply;                        
+      name = tokenName;                                   
+      symbol = tokenSymbol;                               
+      decimals = decimalUnits;                            
+  }
+  function _transfer(address _from, address _to, uint _value) internal {
+      require (_to != 0x0);                               
+      require (balanceOf[_from] > _value);                
+      require (balanceOf[_to] + _value > balanceOf[_to]); 
+      balanceOf[_from] -= _value;                         
+      balanceOf[_to] += _value;                            
+      Transfer(_from, _to, _value);
+  }
+  function transfer(address _to, uint256 _value) {
+      _transfer(msg.sender, _to, _value);
+  }
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+      require (_value < allowance[_from][msg.sender]);     
+      allowance[_from][msg.sender] -= _value;
+      _transfer(_from, _to, _value);
+      return true;
+  }
+  function approve(address _spender, uint256 _value)
+      returns (bool success) {
+      allowance[msg.sender][_spender] = _value;
+      return true;
+  }
+  function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+      returns (bool success) {
+      tokenRecipient spender = tokenRecipient(_spender);
+      if (approve(_spender, _value)) {
+          spender.receiveApproval(msg.sender, _value, this, _extraData);
+          return true;
+      }
+  }        
+  function burn(uint256 _value) onlyOwner {
+      require (balanceOf[msg.sender] > _value);                
+      balanceOf[msg.sender] -= _value;                      
+      totalSupply -= _value;                                
+      Burn(msg.sender, _value);
+      return true;
+  }
+  function burnFrom(address _from, uint256 _value) onlyOwner {
+      require(balanceOf[_from] >= _value);                
+      require(_value <= allowance[_from][msg.sender]);    
+      balanceOf[_from] -= _value;                         
+      allowance[_from][msg.sender] -= _value;             
+      totalSupply -= _value;                                
+      Burn(_from, _value);
+      return true;
+  }
+}
+contract BAFCToken is owned, token {
+  uint256 public sellPrice;
+  uint256 public buyPrice;
+  mapping (address => bool) public frozenAccount;
+  event FrozenFunds(address target, bool frozen);
+  function BAFCToken() token (10000000, "BAFC Token", 18, "BAFC") {}
+  function _transfer(address _from, address _to, uint _value) internal {
+      require (_to != 0x0);                               
+      require (balanceOf[_from] > _value);                
+      require (balanceOf[_to] + _value > balanceOf[_to]); 
+      balanceOf[_from] -= _value;                         
+      balanceOf[_to] += _value;                            
+      Transfer(_from, _to, _value);
+  }
+  function transfer(address _to, uint256 _value) {
+      _transfer(msg.sender, _to, _value);
+  }
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+      require (_value < allowance[_from][msg.sender]);     
+      allowance[_from][msg.sender] -= _value;
+      _transfer(_from, _to, _value);
+      return true;
+  }
+  function mintToken(address target, uint256 mintedAmount) onlyOwner {
+      balanceOf[target] += mintedAmount;
+      totalSupply += mintedAmount;
+      Transfer(0, this, mintedAmount);
+      Transfer(this, target, mintedAmount);
+  }
+  function freezeAccount(address target, bool freeze) onlyOwner {
+      frozenAccount[target] = freeze;
+      FrozenFunds(target, freeze);
+  }
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+      sellPrice = newSellPrice;
+      buyPrice = newBuyPrice;
+  }
+  function buy() payable {
+      uint amount = msg.value / buyPrice;               
+      _transfer(this, msg.sender, amount);              
+  }
+  function sell(uint256 amount) {
+      require(this.balance >= amount * sellPrice);      
+      _transfer(msg.sender, this, amount);              
+      msg.sender.transfer(amount * sellPrice);          
+  }
+}
+
+You are a smart contract auditor, identify the top 1 severe vulnerabilities in the provided smart contract and the function it is in, provide detailed reasoning and explaination
+
+Analyze the following Solidity code:
+
+pragma solidity ^0.4.13; contract owned { address public owner;
+  function owned() {
+      owner = msg.sender;
+  }
+  function transferOwnership(address newOwner) onlyOwner {
+      owner = newOwner;
+  }
+  function setPrices(uint256 newPrice) onlyOwner {
+      price = newPrice;
+  }
+  function mintToken(address target, uint256 mintedAmount) onlyOwner {
+      balanceOf[target] += mintedAmount;
+      totalSupply += mintedAmount;
+      Transfer(0, this, mintedAmount);
+      Transfer(this, target, mintedAmount);
+  }
+  function freezeAccount(address target, bool freeze) onlyOwner {
+      frozenAccount[target] = freeze;
+      FrozenFunds(target, freeze);
+  }
+  function transfer(address _to, uint256 _value) onlyOwner {
+      require(_to != 0x0);
+      balanceOf[msg.sender] -= _value;
+      balanceOf[_to] += _value;
+      Transfer(msg.sender, _to, _value);
+  }
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+      require(_to != 0x0);
+      require(_value <= allowance[_from][msg.sender]);
+      balanceOf[_from] -= _value;
+      balanceOf[_to] += _value;
+      allowance[_from][msg.sender] -= _value;
+      Transfer(_from, _to, _value);
+      return true;
+  }
+  function approve(address _spender, uint256 _value) returns (bool success) {
+      allowance[msg.sender][_spender] = _value;
+      return true;
+  }
+  function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+      tokenRecipient spender = tokenRecipient(_spender);
+      if (approve(_spender, _value)) {
+          spender.receiveApproval(msg.sender, _value, this, _extraData);
+          return true;
+      }
+  }
+  function burn(uint256 _value) onlyOwner {
+      require (_value > 0);
+      balanceOf[msg.sender] -= _value;
+      totalSupply -= _value;
+      Burn(msg.sender, _value);
+      return true;
+  }
+  function burnFrom(address _from, uint256 _value) onlyOwner {
+      require(_from != 0x0);
+      require(_value > 0);
+      balanceOf[_from] -= _value;
+      balanceOf[msg.sender] += _value;
+      Burn(_from, _value);
+      return true;
+  }
+}
+contract TokenRecipient {
+  function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public;
+  function tokenRecipient(address _from) public {
+      require(_from != 0x0);
+      receiveApproval(_from, 0, this, _extraData);
+  }
+}
+contract DYC is owned {
+  uint256 public constant TOKEN_LIMIT = 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 //// //// //// //// //// //// //// //// //// //// ////
+  
+    
+  for0000 //// //// //// //// ////
+  
+  using a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a member;
+    return 
+ //// ////
+    
+  setMember;
+
+
+    
+  
+  
+    
+    
+    
+  
+  set
+
+
+
+
+    
+    
+  set
+    
+  
+    
+    
+        
+    
+    
+  newOwner
+    
+  
+    
+
+
+    
+  new
+  
+    
+    
+```
+```
+    
+```
+```
+    return 
+```
+```
+```
+    
+```
+```
+    
+```
+```
+```
+```
+```
+```
+
+
+    
+```
+```
+
+    
+```
+```
+
+
+    
+```
+```
+```
+
+
+
+ //// //// //// ////
+
+
+```
+    
+
+```
+```
+```
+    
+
+
+```
+```
+```
+```
+```
+    
+```
+```
+    
+```
+```
+```
+```
+    
+```
+```
+```
+```
+    
+```
+```
+```
+```
+```
+```
+```
+```
+    
+```
+```
+```
+```
+```
+```
+    
+```
+
+
+```
+```
+```
+```
+```
+```
+```
+```
+```
+```
+```
+```
+    
+```
+```
+
+```
+    
+```
+```
+
+
+
+```
+    
+```
+
+
+
+
+
+```
+```
+    
+```
+```
+```
+```
+```
+```
+
+
+```
+    
+
+
+
+
+```
+```
+
+
+
+```
+    
+```
+```
+```
+    
+```
+```
+```
+```
+```
+```
+```
+    
+
+
+
+```
+```
+```
+```
+```
+```
+```
+```
+```
+```
+```
+    
+
+
+```
+```
+```
+
+    
+```
+```
+```
+```
+```
+```
+```
+```
+```
+```
+```
+```
+```
+```
+```
+```
+```
+```
+``````
+    
+```
+```
+```
+```
+
+
+```
+```
+```
+```
+`````````````````````
+```
+
+```
+```
+
+
+
+
+
+````````````
+
+```
+
+
+
+    
+`````````
+
+
+
+
+
+
+```
+    
+
+
+
+
+```
+    
+
+    
+```
+
+
+
+
+
+
+
+
+
+
+```
+
+
+
+
+
+```
+```
+
+```
+
+```
+    
+```
+```
+```
+    
+```
+    
+```
+```
+```
+    
+
+```
+```
+```
+    
+```
+```
+
+```
+```
+    
+
+
+```
+```
+
+
+
+
+
+
+```
+    
+```
+    
+``````
+```
+`````````
+
+
+```
+```
+
+    
+```
+```
+
+
+
+```
+    
+
+
+
+
+
+
+
+
+
+```
+```
+`````````
+
+```
+
+
+
+
+
+
+    
+```
+```
+```
+```
+    
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
+
+
+
+
+    
+
+
+```
+
+
+
+
+```
+    
+```
+
+
+```
+    
+
+
+
+```
+
+
+
+
+```
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+    
+```
+
+
+
+
+```
+
+
+
+    
+
+
+
+```
+
+
+
+```
+    
+```
+
+
+
+
+
+```
+
+
+
+
+
+```
+    
+
+
+```
+    
+
+
+
+
+```
+```
+
+
+
+
+
+
+
+
+```
+    
+
+
+
+
+
+
+
+
+
+
+
+```
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+```
+    
+```
+
+```
+
+
+
+
+
+    
+        
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+    
+
+
+
+
+
+
+
+
+    
+
+
+
+
+```
+
+
+
+```
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+```
+
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+```
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
+
+
+
+
+
+    
+
+
+
+
+    
+
+```
+
+
+
+    
+
+
+```
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+``` //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises di  0%|          | 0/109 [17:54<?, ?it/s]
+2024-11-23 10:21:42,115 - INFO - Bug scanning pipeline completed for all files in 1100.49 seconds.
+ses dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises dises
+Auditor response written to :  eval_result/gemma_messi_CVE_10ep/2018-12080/auditor/finetune_model_gemma_gemma_messi_CVE_10ep__auditor.json
+---------------------------------------
+Begin Slurm Epilog: Nov-23-2024 10:21:43
+Job ID:        969150
+Array Job ID:  _4294967294
+User ID:       zyahn3
+Account:       scs
+Job name:      eval_bugscanner
+Resources:     cpu=1,gres/gpu:h100=1,mem=80G,node=1
+Rsrc Used:     cput=00:18:29,vmem=0,walltime=00:18:29,mem=6600K,energy_used=0
+Partition:     ice-gpu
+Nodes:         atl1-1-03-012-18-0
+---------------------------------------

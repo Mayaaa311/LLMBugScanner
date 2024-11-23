@@ -1,0 +1,222 @@
+---------------------------------------
+Begin Slurm Prolog: Nov-23-2024 15:08:49
+Job ID:    970721
+User ID:   zyahn3
+Account:   scs
+Job name:  eval_bugscanner
+Partition: ice-gpu
+---------------------------------------
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/condabin/conda
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/bin/conda
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/bin/conda-env
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/bin/activate
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/bin/deactivate
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/etc/profile.d/conda.sh
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/etc/fish/conf.d/conda.fish
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/shell/condabin/Conda.psm1
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/shell/condabin/conda-hook.ps1
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/lib/python3.10/site-packages/xontrib/conda.xsh
+no change     /usr/local/pace-apps/manual/packages/anaconda3/2023.03/etc/profile.d/conda.csh
+no change     /home/hice1/zyahn3/.bashrc
+No action taken.
+/home/hice1/zyahn3/.conda/envs/BugScanner
+2024-11-23 15:08:58,576 - INFO - Initializing auditor models...
+2024-11-23 15:08:58,577 - INFO - Auditor models: finetune/model/gemma/gemma_CVE_10ep/
+2024-11-23 15:08:58,577 - INFO - Initializing critic model: finetune/model/gemma/gemma_CVE_10ep/
+2024-11-23 15:08:58,577 - INFO - Initializing ranker model: finetune/model/gemma/gemma_CVE_10ep/
+2024-11-23 15:08:58,577 - INFO - Initializing parser model: finetune/model/gemma/gemma_CVE_10ep/
+2024-11-23 15:08:58,577 - INFO - Initializing BugScanner with the given models...
+2024-11-23 15:08:58,577 - INFO - BugScanner initialization completed.
+2024-11-23 15:08:58,578 - INFO - Starting the bug scanning pipeline with Top-K = 5...
+2024-11-23 15:08:58,578 - INFO - Found 109 .sol files in the folder: data_full/0.8splitCVE_clean
+2024-11-23 15:08:58,578 - INFO - Output will be saved in: eval_result/gemma_CVE_10ep
+Unused kwargs: ['load_in_8bit_fp32_cpu_offload']. These kwargs are not used in <class 'transformers.utils.quantization_config.BitsAndBytesConfig'>.
+`config.hidden_act` is ignored, you should use `config.hidden_activation` instead.
+Gemma's activation function will be set to `gelu_pytorch_tanh`. Please, use
+`config.hidden_activation` if you want to override this behaviour.
+See https://github.com/huggingface/transformers/pull/29402 for more details.
+2024-11-23 15:09:00,844 - INFO - We will use 90% of the memory on device 0 for storing the model, and 10% for the buffer to avoid OOM. You can set `max_memory` in to a higher value to use more memory (at your own risk).
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:04<00:13,  4.45s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:08<00:08,  4.46s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:13<00:04,  4.45s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:15<00:00,  3.68s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:15<00:00,  3.81s/it]
+Unused kwargs: ['load_in_8bit_fp32_cpu_offload']. These kwargs are not used in <class 'transformers.utils.quantization_config.BitsAndBytesConfig'>.
+2024-11-23 15:09:20,070 - INFO - We will use 90% of the memory on device 0 for storing the model, and 10% for the buffer to avoid OOM. You can set `max_memory` in to a higher value to use more memory (at your own risk).
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:04<00:13,  4.51s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:08<00:08,  4.49s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:13<00:04,  4.47s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:15<00:00,  3.71s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:15<00:00,  3.83s/it]
+  0%|          | 0/109 [00:00<?, ?it/s]Starting from v4.46, the `logits` model output will have the same type as the model (except at train time, where it will always be FP32)
+using cuda
+Attempted to get_model_instance for name finetune/model/gemma/gemma_CVE_10ep/ and got model_class None
+Attempted to get_model_instance for name finetune/model/gemma/gemma_CVE_10ep/ and got model_class None
+Attempted to get_model_instance for name finetune/model/gemma/gemma_CVE_10ep/ and got model_class None
+Attempted to get_model_instance for name finetune/model/gemma/gemma_CVE_10ep/ and got model_class None
+About to load all models
+---- Running Auditor(s) ----
+MODEL WAS INVOKED
+Input prompt is: Requirement: You are a smart contract auditor, identify and explain 5 most severe vulnerabilities in the provided smart contract. Make sure that they are exploitable in real world and beneficial to attackers. Provide each identified vulnerability with intermediate reasoning and its associated function. Remember, you must provide the entire function code and do not use "...". Make your reasoning comprehensive and detailed. 
+
+Code Input: 
+pragma solidity ^0.4.13; contract owned { address public owner;
+  function owned() {
+      owner = msg.sender;
+  }
+  modifier onlyOwner {
+      require(msg.sender == owner);
+      _;
+  }
+  function transferOwnership(address newOwner) onlyOwner {
+      owner = newOwner;
+  }
+}
+contract tokenRecipient { function receiveApproval(address from, uint256 value, address token, bytes extraData); }
+contract token {  string public name; string public symbol; uint8 public decimals; uint256 public totalSupply;
+  mapping (address => uint256) public balanceOf;
+  mapping (address => mapping (address => uint256)) public allowance;
+  event Transfer(address indexed from, address indexed to, uint256 value);
+  event Burn(address indexed from, uint256 value);
+  function token(
+      uint256 initialSupply,
+      string tokenName,
+      uint8 decimalUnits,
+      string tokenSymbol
+      ) {
+      balanceOf[msg.sender] = initialSupply;              
+      totalSupply = initialSupply;                        
+      name = tokenName;                                   
+      symbol = tokenSymbol;                               
+      decimals = decimalUnits;                            
+  }
+  function _transfer(address _from, address _to, uint _value) internal {
+      require (_to != 0x0);                               
+      require (balanceOf[_from] > _value);                
+      require (balanceOf[_to] + _value > balanceOf[_to]); 
+      balanceOf[_from] -= _value;                         
+      balanceOf[_to] += _value;                            
+      Transfer(_from, _to, _value);
+  }
+  function transfer(address _to, uint256 _value) {
+      _transfer(msg.sender, _to, _value);
+  }
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+      require (_value < allowance[_from][msg.sender]);     
+      allowance[_from][msg.sender] -= _value;
+      _transfer(_from, _to, _value);
+      return true;
+  }
+  function approve(address _spender, uint256 _value)
+      returns (bool success) {
+      allowance[msg.sender][_spender] = _value;
+      return true;
+  }
+  function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+      returns (bool success) {
+      tokenRecipient spender = tokenRecipient(_spender);
+      if (approve(_spender, _value)) {
+          spender.receiveApproval(msg.sender, _value, this, _extraData);
+          return true;
+      }
+  }        
+  function burn(uint256 _value) returns (bool success) {
+      require (balanceOf[msg.sender] > _value);            
+      balanceOf[msg.sender] -= _value;                      
+      totalSupply -= _value;                                
+      Burn(msg.sender, _value);
+      return true;
+  }
+  function burnFrom(address _from, uint256 _value) returns (bool success) {
+      require(balanceOf[_from] >= _value);                
+      require(_value <= allowance[_from][msg.sender]);    
+      balanceOf[_from] -= _value;                         
+      allowance[_from][msg.sender] -= _value;             
+      totalSupply -= _value;                              
+      Burn(_from, _value);
+      return true;
+  }
+}
+contract INTToken is owned, token {
+  uint256 public sellPrice;
+  uint256 public buyPrice;
+  mapping (address => bool) public frozenAccount;
+  event FrozenFunds(address target, bool frozen);
+  function INTToken(
+      uint256 initialSupply,
+      string tokenName,
+      uint8 decimalUnits,
+      string tokenSymbol
+  ) token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+  function _transfer(address _from, address _to, uint _value) internal {
+      require (_to != 0x0);                               
+      require (balanceOf[_from] > _value);                
+      require (balanceOf[_to] + _value > balanceOf[_to]); 
+      require(!frozenAccount[_from]);                     
+      require(!frozenAccount[_to]);                       
+      balanceOf[_from] -= _value;                         
+      balanceOf[_to] += _value;                           
+      Transfer(_from, _to, _value);
+  }
+  function mintToken(address target, uint256 mintedAmount) onlyOwner {
+      balanceOf[target] += mintedAmount;
+      totalSupply += mintedAmount;
+      Transfer(0, this, mintedAmount);
+      Transfer(this, target, mintedAmount);
+  }
+  function freezeAccount(address target, bool freeze) onlyOwner {
+      frozenAccount[target] = freeze;
+      FrozenFunds(target, freeze);
+  }
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+      sellPrice = newSellPrice;
+      buyPrice = newBuyPrice;
+  }
+  function buy() payable {
+      uint amount = msg.value / buyPrice;               
+      _transfer(this, msg.sender, amount);              
+  }
+  function sell(uint256 amount) {
+      require(this.balance >= amount * sellPrice);      
+      _transfer(msg.sender, this, amount);              
+      msg.sender.transfer(amount * sellPrice);          
+  }
+}
+contract INT is INTToken(1000000000000000, "Internet Node Token", 6, "INT") {}
+
+Format Requirement: 
+You should ONLY output in below json format:
+{
+    "output_list": [
+        {
+            "function_name": "<function_name_1>",
+            "code": "<code of the function1>",
+            "vulnerability": "<short_vulnera_desc_1>",
+            "reason": "<reason_1>"
+        },
+        {
+            "function_name": "<function_name_2>",
+            "code": "<code of the function2>",
+            "vulnerability": "<short_vulnera_desc_2>",
+            "reason": "<reason_2>"
+        }
+    ]
+}
+
+Note: If no vulnerability is detected, you should output empty json: {"output_list": []}.
+Your Output:
+  0%|          | 0/109 [00:27<?, ?it/s]
+2024-11-23 15:10:05,831 - INFO - Bug scanning pipeline completed for all files in 67.26 seconds.
+Response is: tput:
+{"output_list": [{"function_name": "mintToken", "code": "mintToken(address target, uint256 mintedAmount)", "vulnerability": "None", "reason": "None"}, {"function_name": "buy", "code": "buy()", "vulnerability": "None", "reason": "None"}, {"function_name": "sell", "code": "sell(uint256 amount)", "vulnerability": "None", "reason": "None"}]}
+{"output_list": [{"function_name": "INT", "code": "interface {function(address _from, address _to, uint _value) public _transfer(_from, _to, _value);}", "vulnerability": "None", "reason": "None"}]}
+{"output_list": [{"function_name": "INTToken", "code": "class INTToken is owned, token {function(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) token (initialSupply, tokenName, decimalUnits, tokenSymbol);", "vulnerability": "None", "reason": "None"}]}
+{"output_list": [{"function_name": "mintToken", "code": "mintToken(address target, uint256 mintedAmount)", "vulnerability": "None", "reason": "None"}, {"function_name": "buy", "code": "buy()", "vulnerability": "None", "reason": "None"}, {"function_name": "sell", "code": "sell(uint256 amount)", "vulnerability": "None", "reason": "None"}]}
+{"output_list": [{"function_name": "INT", "code": "interface {function(address _from, address _to, uint _value) public _transfer(_from, _to, _value);}", "vulnerability": "None", "reason": "None"}]}
+{"output_list": [{"function_name": "INTToken", "code": "class INTToken is owned, token {function(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) token (initialSupply, tokenName, decimalUnits, tokenSymbol);", "vulnerability": "None", "reason": "None"}]}
+
+Auditor response written to :  eval_result/gemma_CVE_10ep/2018-12080/auditor/finetune_model_gemma_gemma_CVE_10ep__auditor.json
+---------------------------------------
+Begin Slurm Epilog: Nov-23-2024 15:10:06
+Job ID:        970721
+Array Job ID:  _4294967294
+User ID:       zyahn3
+Account:       scs
+Job name:      eval_bugscanner
+Resources:     cpu=1,gres/gpu:h100=1,mem=80G,node=1
+Rsrc Used:     cput=00:01:18,vmem=0,walltime=00:01:18,mem=6592K,energy_used=0
+Partition:     ice-gpu
+Nodes:         atl1-1-03-012-18-0
+---------------------------------------

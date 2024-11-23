@@ -1,161 +1,0 @@
----------------------------------------
-Begin Slurm Prolog: Nov-11-2024 13:41:42
-Job ID:    926156
-User ID:   zyahn3
-Account:   scs
-Job name:  finetuningNxcode
-Partition: coc-gpu
----------------------------------------
-
-CondaError: Run 'conda init' before 'conda deactivate'
-
-/home/hice1/zyahn3/.conda/envs/BugScanner
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:06<00:06,  6.34s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:11<00:00,  5.71s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:11<00:00,  5.81s/it]
-/home/hice1/zyahn3/.local/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:590: UserWarning: `do_sample` is set to `False`. However, `temperature` is set to `0.1` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `temperature`.
-  warnings.warn(
-/home/hice1/zyahn3/.local/lib/python3.10/site-packages/transformers/generation/configuration_utils.py:595: UserWarning: `do_sample` is set to `False`. However, `top_p` is set to `0.1` -- this flag is only used in sample-based generation modes. You should set `do_sample=True` or unset `top_p`.
-  warnings.warn(
-Query:
-Analyze the following Solidity code:
-
-pragma solidity ^0.4.8;
-contract Token{
-    uint256 public totalSupply;
-    function balanceOf(address _owner) constant returns (uint256 balance);
-    function transfer(address _to, uint256 _value) returns (bool success);
-    function transferFrom(address _from, address _to, uint256 _value) returns   
-    (bool success);
-    function approve(address _spender, uint256 _value) returns (bool success);
-    function allowance(address _owner, address _spender) constant returns 
-    (uint256 remaining);
-    event Transfer(address indexed _from, address indexed _to, uint256 _value);
-    event Approval(address indexed _owner, address indexed _spender, uint256 
-    _value);
-}
-contract StandardToken is Token {
-    function transfer(address _to, uint256 _value) returns (bool success) {
-        require(balances[msg.sender] >= _value);
-        balances[msg.sender] -= _value;
-        balances[_to] += _value;
-        Transfer(msg.sender, _to, _value);
-        return true;
-    }
-    function transferFrom(address _from, address _to, uint256 _value) returns 
-    (bool success) {
-        require(balances[_from] >= _value && allowed[_from][msg.sender] >= _value);
-        balances[_to] += _value;
-        balances[_from] -= _value; 
-        allowed[_from][msg.sender] -= _value;
-        Transfer(_from, _to, _value);
-        return true;
-    }
-    function balanceOf(address _owner) constant returns (uint256 balance) {
-        return balances[_owner];
-    }
-    function approve(address _spender, uint256 _value) returns (bool success)   
-    {
-        allowed[msg.sender][_spender] = _value;
-        Approval(msg.sender, _spender, _value);
-        return true;
-    }
-    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
-        return allowed[_owner][_spender];
-    }
-    mapping (address => uint256) balances;
-    mapping (address => mapping (address => uint256)) allowed;
-}
-contract HumanStandardToken is StandardToken { 
-    string public name;                   
-    uint8 public decimals;               
-    string public symbol;               
-    string public version = 'H0.1';    
-    function HumanStandardToken(uint256 _initialAmount, string _tokenName, uint8 _decimalUnits, string _tokenSymbol) {
-        balances[msg.sender] = _initialAmount; 
-        totalSupply = _initialAmount;         
-        name = _tokenName;                   
-        decimals = _decimalUnits;           
-        symbol = _tokenSymbol;             
-    }
-    function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
-        allowed[msg.sender][_spender] = _value;
-        Approval(msg.sender, _spender, _value);
-        require(_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData));
-        return true;
-    }
-}
-Original Answer:
-The code contains a vulnerability of type 'Integer Overflow' in the function 'Multiple Functions'.
-Generated Answer:
-The code contains a vulnerability of type 'Integer Overflow' in the function 'approve'.
-Number of samples in test set: 27
-  0%|          | 0/27 [00:00<?, ?it/s]  4%|▎         | 1/27 [00:01<00:30,  1.16s/it]  7%|▋         | 2/27 [00:02<00:30,  1.21s/it] 11%|█         | 3/27 [00:03<00:30,  1.29s/it] 15%|█▍        | 4/27 [00:04<00:28,  1.25s/it] 19%|█▊        | 5/27 [00:06<00:26,  1.20s/it] 22%|██▏       | 6/27 [00:07<00:25,  1.21s/it] 26%|██▌       | 7/27 [00:08<00:24,  1.22s/it] 30%|██▉       | 8/27 [00:09<00:21,  1.14s/it] 33%|███▎      | 9/27 [00:10<00:20,  1.14s/it]You seem to be using the pipelines sequentially on GPU. In order to maximize efficiency please use a dataset
- 37%|███▋      | 10/27 [00:11<00:19,  1.15s/it] 41%|████      | 11/27 [00:13<00:18,  1.16s/it] 44%|████▍     | 12/27 [00:14<00:17,  1.14s/it] 48%|████▊     | 13/27 [00:15<00:15,  1.14s/it] 52%|█████▏    | 14/27 [00:16<00:14,  1.11s/it] 56%|█████▌    | 15/27 [00:17<00:13,  1.13s/it] 59%|█████▉    | 16/27 [00:18<00:12,  1.11s/it] 63%|██████▎   | 17/27 [00:19<00:11,  1.11s/it] 67%|██████▋   | 18/27 [00:21<00:10,  1.19s/it] 70%|███████   | 19/27 [00:22<00:09,  1.19s/it] 74%|███████▍  | 20/27 [00:23<00:08,  1.27s/it] 78%|███████▊  | 21/27 [00:24<00:07,  1.24s/it] 81%|████████▏ | 22/27 [00:25<00:06,  1.20s/it] 85%|████████▌ | 23/27 [00:27<00:04,  1.19s/it] 89%|████████▉ | 24/27 [00:28<00:03,  1.18s/it] 93%|█████████▎| 25/27 [00:30<00:02,  1.40s/it] 96%|█████████▋| 26/27 [00:31<00:01,  1.33s/it]100%|██████████| 27/27 [00:32<00:00,  1.32s/it]100%|██████████| 27/27 [00:32<00:00,  1.21s/it]
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func sell
-Vul Integer Overflow Func transferMulti
-Vul Integer Overflow Func transferMulti
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Access Control Func Not Provided
-Vul Access Control Func Not Provided
-Vul Access Control Func UBSexToken
-Vul Access Control Func UBSexToken
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func _transfer
-Vul Integer Overflow Func _transfer
-Vul Wrong Logic Func transferFrom
-Vul Wrong Logic Func transferFrom
-Vul Access Control Func quaker
-Vul Access Control Func quaker
-Vul Token Devalue Func mintToken
-Vul Token Devalue Func mintToken
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func Multiple Functions
-Vul Integer Overflow Func Multiple Functions
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func buy
-Vul Integer Overflow Func buy
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func transferAny
-Vul Integer Overflow Func transferAny
-Vul Wrong Logic Func transferFrom
-Vul Wrong Logic Func transferFrom
-Vul Wrong Logic Func transferFrom
-Vul Wrong Logic Func transferFrom
-Vul Integer Overflow Func mint
-Vul Integer Overflow Func mint
-Vul Token Devalue Func mintToken
-Vul Token Devalue Func mintToken
-Vul Bad Randomness Func randMod
-Vul Bad Randomness Func randMod
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func mintToken
-Vul Integer Overflow Func transferProxy
-Vul Integer Overflow Func transferProxy
-Average BLEU Score: 75.48%
-Average Function Accuracy: 51.85
-Average Vulnerability Accuracy: 66.67
----------------------------------------
-Begin Slurm Epilog: Nov-11-2024 13:42:53
-Job ID:        926156
-Array Job ID:  _4294967294
-User ID:       zyahn3
-Account:       scs
-Job name:      finetuningNxcode
-Resources:     cpu=1,gres/gpu:a100=1,mem=80G,node=1
-Rsrc Used:     cput=00:01:12,vmem=0,walltime=00:01:12,mem=3384944K,energy_used=0
-Partition:     coc-gpu
-Nodes:         atl1-1-03-007-33-0
----------------------------------------
