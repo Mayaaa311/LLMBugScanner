@@ -1,0 +1,17 @@
+{
+    "output_list": [
+        {
+            "function_name": "distributeToken",
+            "code": "function distributeToken(address[] addresses, uint256 _value) {
+                        for (uint i = 0; i < addresses.length; i++) {
+                            balances[msg.sender] -= _value;
+                            balances[addresses[i]] += _value;
+                            Transfer(msg.sender, addresses[i], _value);
+                        }
+                    }
+                    ",
+            "vulnerability": "Token Devalue",
+            "reason": "The function distributeToken allows anyone to distribute tokens to any address. This can lead to token devalue if the distribution is not fair. The function should only be called by the contract owner or a predefined list of addresses."
+        }
+    ]
+}

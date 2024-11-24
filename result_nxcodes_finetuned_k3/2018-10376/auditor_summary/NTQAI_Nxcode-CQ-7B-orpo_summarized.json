@@ -1,0 +1,21 @@
+{
+    "output_list": [
+        {
+            "function_name": "allocateTokens",
+            "code": "function allocateTokens(address[] _owners, uint256[] _values) public onlyOwner {
+                        if(allocateEndTime < now) revert();
+                        if(_owners.length != _values.length) revert();
+                        for(uint256 i = 0; i < _owners.length ; i++){
+                            address to = _owners[i];
+                            uint256 value = _values[i];
+                            if(totalSupply + value <= totalSupply || balances[to] + value <= balances[to]) revert();
+                            totalSupply += value;
+                            balances[to] += value;
+                        }
+                    }
+                    ",
+            "vulnerability": "Token Devalue",
+            "reason": "The function allocateTokens is designed to mint tokens for specified addresses. However, the function does not check if the total supply will exceed the maximum supply. This could lead to token devalue, as the total supply of tokens will be more than the initial supply. The function should also check if the balances of the addresses to receive tokens will exceed the maximum balance. If the total supply or the balance of the addresses to receive tokens exceed the maximum supply or balance, the function should revert."
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "    function transfer(address to, uint value) returns (bool success) {
+                if (frozenAccount[msg.sender]) return false;
+                if(balances[msg.sender] < value) return false;
+                if(balances[to] + value < balances[to]) return false;
+                balances[msg.sender] -= value;
+                balances[to] += value;
+                Transfer(msg.sender, to, value);
+                return true;
+            }",
+            "vulnerability": "Transfer Failed",
+            "reason": "The transfer function does not check if the balance of the sender is enough to transfer the specified amount of tokens. If the sender does not have enough tokens to transfer, the transfer function will still return true, but no tokens will be transferred. An attacker can use this to their advantage, for example, to perform airdrop attack."
+        }
+    ]
+}

@@ -10,9 +10,9 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 param1 = {
     "max_new_tokens": 4000,
     "do_sample": True,
-    "temperature": 0.001,
-    "top_k": 50,
-    "top_p": 0.95,
+    "temperature": 0.4,
+    "top_k": 20,
+    "top_p": 0.9,
     "num_return_sequences": 1
 }
 param2 = {
@@ -20,7 +20,7 @@ param2 = {
     ,
     "do_sample": False
 }
-generation_params=param2
+generation_params=param1
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class Huggingface_LLM(BaseLLM):
     def __init__(self, model_id, prompt_path, model_params_path=None):

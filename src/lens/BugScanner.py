@@ -19,10 +19,7 @@ class BugScanner:
         self.llm_auditors = auditor_models
         self.llm_critic = critic_model
         self.llm_ranker = ranker_model
-        if summarizer_model is None:
-            self.llm_summarizer =  Huggingface_LLM(model_id = "AlfredPros/CodeLlama-7b-Instruct-Solidity", prompt_path= 'templates/summarizer.txt')
-        else:
-            self.llm_summarizer = summarizer_model
+        self.llm_summarizer = summarizer_model
         self.topk = None
         self.ranked_vulnerabilities = ""   
         
@@ -86,7 +83,7 @@ class BugScanner:
     
     def run_ranker(self, vulnerability, write_to) -> list:
         response = None
-        if not os.path.isfile(write_to+f"/{self.llm_ranker.model_id.replace('/','_')}_rank.json", str(response)):
+        if not os.path.isfile(write_to+f"/{self.llm_ranker.model_id.replace('/','_')}_rank.json"):
             response = self.llm_ranker.invoke({"topk": self.topk, "vulnerability": vulnerability})
             write_to_file(write_to+f"/{self.llm_ranker.model_id.replace('/','_')}_rank.json", str(response))
         return response
@@ -151,14 +148,15 @@ class BugScanner:
             
             code_file_name = code_folder+'/'+name[-2]+'.sol'
 
-            file_path = os.path.join(dir, file)  
-            auditor_idx =  file.split('/')[-1].split('.')[-2].split('_')[-1]
-            print("FILEPATH: ", file_path)
-            with open(file_path, "r") as f:
-                o = f.read()
-                with open(code_file_name, "r") as f1:
-                    code = f1.read()
-                    self.run_critic(o, write_to, code = code, idx = auditor_idx) 
+            for file in files:
+                file_path = os.path.join(dir, file)  
+                auditor_idx =  file.split('/')[-1].split('.')[-2].split('_')[-1]
+                print("FILEPATH: ", file_path)
+                with open(file_path, "r") as f:
+                    o = f.read()
+                    with open(code_file_name, "r") as f1:
+                        code = f1.read()
+                        self.run_critic(o, write_to, code = code, idx = auditor_idx) 
 
             critic_output_dir.append(write_to)
 

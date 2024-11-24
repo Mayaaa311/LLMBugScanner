@@ -16,9 +16,20 @@ def reformat_file_content(file_path):
         content = content[:-1]
         
     # Remove leading and trailing quotes if present
+    
     while content.startswith('"') and content.endswith('"'):
         content = content[1:-1]
-
+    if file_path.split('/')[-1] == 'NTQAI_Nxcode-CQ-7B-orpo_summarized0.csv':
+        max_attempts = len(content)  # Limit the attempts to the length of the content
+        attempts = 0
+        
+        while not content.startswith('dataname') and attempts < max_attempts:
+            content = content[1:]  # Shift content to the right by one character
+            attempts += 1
+        
+        # Check if 'dataname' was not found after all attempts
+        if not content.startswith('dataname'):
+            print("Warning: 'dataname' not found in content.")
     # Write the reformatted content back to the file
     with open(file_path, 'w') as file:
         file.write(content)

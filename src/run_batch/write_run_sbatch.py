@@ -3,7 +3,7 @@ import shutil
 
 # Paths
 sbatch_template = """#!/bin/bash
-#SBATCH -J testsmalldataset             # Job name
+#SBATCH -J test-{data_folder}           # Job name
 #SBATCH -N 1                            # Number of nodes
 #SBATCH --ntasks=1                      # Run only one task
 #SBATCH --gpus=3                        # Request 4 GPUs
@@ -18,7 +18,7 @@ cd $SLURM_SUBMIT_DIR                    # Correctly change to the submit directo
 module load anaconda3/2023.03           # Load module dependencies
 conda activate /home/hice1/ywang4343/scratch/env
 
-python src/bugscanner_cli.py -a finetune/model -c finetune/model -r finetune/model -d {data_folder} -o {result_folder} -k 3 -log logs_nov3
+python src/bugscanner_cli.py -a finetune/model -c finetune/model -r finetune/model -d {data_folder} -o {result_folder} -k 5 -log logs_nov3
 """
 
 # change this to the data directory
@@ -26,7 +26,7 @@ data_base_path = 'data_full/CVE_clean_organized_b5'
 # this is sbatch folder, do not change this 
 sbatch_output_path = 'src/run_batch/sbatch_files'
 
-result_folder_name = 'result_nxcodes_finetuned'
+result_folder_name = 'result_nxcodes_finetuned_k5_temp_04_topk20_top90'
 # Check if the directory exists
 if os.path.exists(sbatch_output_path):
     # Clear the directory by removing it and all its contents

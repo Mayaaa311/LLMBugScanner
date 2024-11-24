@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J testsmalldataset             # Job name
+#SBATCH -J test-data_full/CVE_clean_organized_b5/subfolder_11           # Job name
 #SBATCH -N 1                            # Number of nodes
 #SBATCH --ntasks=1                      # Run only one task
 #SBATCH --gpus=3                        # Request 4 GPUs
@@ -14,4 +14,4 @@ cd $SLURM_SUBMIT_DIR                    # Correctly change to the submit directo
 module load anaconda3/2023.03           # Load module dependencies
 conda activate /home/hice1/ywang4343/scratch/env
 
-python src/bugscanner_cli.py -a finetune/model -c finetune/model -r finetune/model -d data_full/CVE_clean_organized_b5/subfolder_11 -o result_nxcodes_finetuned -k 3 -log logs_nov3
+python src/bugscanner_cli.py -a finetune/model -c finetune/model -r finetune/model -d data_full/CVE_clean_organized_b5/subfolder_11 -o result_nxcodes_finetuned_k5_temp_04_topk20_top90 -k 5 -log logs_nov3

@@ -126,7 +126,8 @@ def main():
         summarizer_model = get_model_instance(args.parser, prompt_path='templates/summarizer.txt')
     else:
         # summarizer_model = get_model_instance("NTQAI/Nxcode-CQ-7B-orpo", prompt_path='templates/summarizer.txt')
-        logging.info("No ranker model specified.")
+        summarizer_model = get_model_instance("NTQAI/Nxcode-CQ-7B-orpo", prompt_path= 'templates/summarizer.txt')
+        logging.info("No ranker model specified, use default: NTQAI/Nxcode-CQ-7B-orpo")
     logging.info("Initializing BugScanner with the given models...")
 
     detector = BugScanner(
