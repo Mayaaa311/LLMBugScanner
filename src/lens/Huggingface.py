@@ -1,5 +1,6 @@
 from transformers import BitsAndBytesConfig, AutoTokenizer, AutoModelForCausalLM,  LlamaForCausalLM, AutoModel
 import transformers
+from peft import AutoPeftModelForCausalLM
 from langchain_core.prompts import PromptTemplate
 import torch
 from lens.Base import BaseLLM
@@ -16,7 +17,7 @@ param1 = {
     "num_return_sequences": 1
 }
 param2 = {
-    "max_new_tokens": 20000,
+    "max_new_tokens": 250,
     "do_sample": False
 }
 generation_params=param2
@@ -37,34 +38,34 @@ class Huggingface_LLM(BaseLLM):
         # Load model and tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_id,  trust_remote_code=True)
         self.tokenizer.model_max_length = 35000
-        if self.model_id == "THUDM/codegeex2-6b":
-            self.model = AutoModel.from_pretrained("THUDM/codegeex2-6b", trust_remote_code=True)
-            self.model = self.model.eval()
-            return
-        if self.model_params is not None and self.model_params:
-            if 'quantization_config' in self.model_params:
-                use_4bit = True
-                bnb_4bit_compute_dtype = "float16"
-                bnb_4bit_quant_type = "nf4"
-                use_double_nested_quant = True
-                compute_dtype = getattr(torch, bnb_4bit_compute_dtype)
+                
+        use_4bit = True
+        bnb_4bit_compute_dtype = "float16"
+        bnb_4bit_quant_type = "nf4"
+        use_double_nested_quant = True
+        compute_dtype = getattr(torch, bnb_4bit_compute_dtype)
 
-                # BitsAndBytesConfig 4-bit config
-                bnb_config = BitsAndBytesConfig(
-                    load_in_4bit=use_4bit,
-                    bnb_4bit_use_double_quant=use_double_nested_quant,
-                    bnb_4bit_quant_type=bnb_4bit_quant_type,
-                    bnb_4bit_compute_dtype=compute_dtype,
-                    load_in_8bit_fp32_cpu_offload=True
-                )
-                self.model_params.pop('quantization_config')
-                self.model = AutoModelForCausalLM.from_pretrained(self.model_id, 
-                                                                  quantization_config = bnb_config, device_map="auto",**self.model_params)
-            else:
-                self.model = AutoModelForCausalLM.from_pretrained(self.model_id,device_map="auto" ,**self.model_params)
-        else:
-            self.model = AutoModelForCausalLM.from_pretrained(self.model_id,device_map="auto",trust_remote_code=True)
+        # BitsAndBytesConfig 4-bit config
+        bnb_config = BitsAndBytesConfig(            
+            load_in_4bit=use_4bit,
+            bnb_4bit_use_double_quant=use_double_nested_quant,
+            bnb_4bit_quant_type=bnb_4bit_quant_type,
+            bnb_4bit_compute_dtype=compute_dtype,
+            load_in_8bit_fp32_cpu_offload=True
+            )
         
+        self.tokenizer.padding_side = 'right' # to prevent warnings
+
+        if self.model_id[:8] != "finetune":
+            self.model = AutoModelForCausalLM.from_pretrained(self.model_id,device_map="auto",trust_remote_code=True, quantization_config=bnb_config)
+        else:
+            self.model = AutoPeftModelForCausalLM.from_pretrained(self.model_id,device_map="auto",trust_remote_code=True, quantization_config=bnb_config)
+      
+        #from trl import setup_chat_format
+        #model.enable_gradient_checkpointing(gradient_checkpointing_kwargs={"use_reentrant": False})
+        #self.model, self.tokenizer = setup_chat_format(self.model, self.tokenizer)
+        #self.model.resize_token_embeddings(len(self.tokenizer))
+
         # # Ensure that callback_manager is a valid object
         # if isinstance(self.model_params.get("callback_manager"), str) and self.model_params["callback_manager"] == "default":
         #     self.model_params["callback_manager"] = CallbackManager([StreamingStdOutCallbackHandler()])
@@ -88,14 +89,17 @@ class Huggingface_LLM(BaseLLM):
                     .strip()
         )
         # print("PROMPT: ",prompt)
-        if self.model_id == "AlfredPros/CodeLlama-7b-Instruct-Solidity":
+        if self.model_id == "AlfredPros/CodeLlama-7b-Instruct-Solidity" or self.model_id == "TechxGenus/CodeGemma-7b":
             # Tokenize the input prompt
+            print("Prompt is", prompt)
             input_ids = self.tokenizer(prompt, return_tensors="pt", truncation=True).input_ids.to(device)
             print("num tokens input: ", len(input_ids))
             # Run the model to generate an output
             outputs = self.model.generate(input_ids=input_ids, **generation_params)
             # Detokenize and return the generated output
             response = self.tokenizer.batch_decode(outputs.detach().cpu().numpy(), skip_special_tokens=True)[0][len(prompt):]
+            print("input_prompt has shape", input_ids.shape, "output prompt has shape", outputs.shape)
+            print("Response is:", response)
             return response
         elif self.model_id == "WisdomShell/CodeShell-7B-Chat":
             history = []
@@ -120,12 +124,17 @@ class Huggingface_LLM(BaseLLM):
             generated_text = self.tokenizer.decode(outputs[0][len(inputs[0]):], skip_special_tokens=True)
             return generated_text
         else:
+            #inputs = self.tokenizer.apply_chat_template(messages, add_generation_prompt=True, return_tensors="pt").to(device)
             messages = [
                 {"role": "user", "content": prompt}
             ]
-            inputs = self.tokenizer.apply_chat_template(messages, add_generation_prompt=True, return_tensors="pt").to(device)
-            outputs = self.model.generate(inputs, **generation_params, eos_token_id=self.tokenizer.eos_token_id)
-            return self.tokenizer.decode(outputs[0][len(inputs[0]):], skip_special_tokens=True)
+            # was input_ids = self.tokenizer(prompt, return_tensors="pt").input_ids.to(device)
+            input_ids = self.tokenizer.apply_chat_template(messages, return_tensors="pt").to(device)
+            outputs = self.model.generate(input_ids=input_ids, **generation_params, pad_token_id=None, eos_token_id=self.tokenizer.eos_token_id)
+            #response = self.tokenizer.decode(outputs[0][len(input_ids[0]):], skip_special_tokens=True)
+            response = self.tokenizer.batch_decode(outputs.detach().cpu().numpy(), skip_special_tokens=True)[0][len(prompt):]
+            return response
+
     def handle_response(self, response) -> dict:
         # Process the response as needed
         return {"response": response}

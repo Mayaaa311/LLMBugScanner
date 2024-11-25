@@ -5,7 +5,7 @@
 #SBATCH --gres=gpu:H100:1                    # Request 1 GPU of any type
 #SBATCH --mem-per-gpu=128G              # Increase memory 
 #SBATCH -t 16:00:00                         # Duration of the job
-#SBATCH -o output/gemma_messi_5ep.out                # Combined output and error messages file
+#SBATCH -o output/codellama_messi_5ep_CVE_10ep.out                # Combined output and error messages file
 
 cd $SLURM_SUBMIT_DIR                    # Correctly change to the submit directory
 
@@ -21,17 +21,17 @@ echo $CONDA_PREFIX
 #MODEL_ID="WisdomShell/CodeShell-7B-Chat"
 #MODEL_ID="TechxGenus/CodeGemma-7b"
 
-AUDITOR="finetune/model/gemma/gemma_messi_5ep"
+#AUDITOR="finetune/model/gemma/gemma_messi_5ep"
 #AUDITOR="finetune/model/codellama/codellama_messi_5ep"
 #AUDITOR="finetune/model/gemma/gemma_CVE_10ep"
 #AUDITOR="finetune/model/codellama/codellama_CVE_10ep"
 #AUDITOR="finetune/model/gemma/gemma_messi_5ep_CVE_10ep"
-#AUDITOR="finetune/model/codellama/codellama_messi_5ep_CVE_10ep"
+AUDITOR="finetune/model/codellama/codellama_messi_5ep_CVE_10ep"
 
 CRITIC="NTQAI/Nxcode-CQ-7B-orpo"
 RANKER="NTQAI/Nxcode-CQ-7B-orpo"
 
-OUTPUT_DIR="eval_result/gemma_messi_5ep"
+OUTPUT_DIR="eval_result/codellama_messi_5ep_CVE_10ep"
 DATASET="data_full/0.8splitCVE_clean"
 
 K=5

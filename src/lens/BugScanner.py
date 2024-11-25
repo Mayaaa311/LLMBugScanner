@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from tqdm import tqdm
 from datetime import datetime
 from langchain_core.prompts import PromptTemplate
 from langchain_community.llms import LlamaCpp
@@ -99,8 +100,10 @@ class BugScanner:
 
         # -------------------------------RUN AUDITOR---------------------------------
         auditor_result_dirs = []
+        print("About to load all models")
         self.load_all_models(True, False, False, True)
-        for file in code_path:
+        print("---- Running Auditor(s) ----")
+        for file in tqdm(code_path):
             # Step 1: Generate vulnerabilities using auditors
             data_path = os.path.join(code_folder, file)
             with open(data_path, "r") as f:
@@ -109,7 +112,6 @@ class BugScanner:
                 write_to = f"{self.result_dir}/{name}"
                 self.run_auditor(code, write_to+"/auditor")
                 auditor_result_dirs.append(write_to+"/auditor")
-
         for model in self.llm_auditors:
             del model.model  # This removes the model from memory
             torch.cuda.empty_cache()  
@@ -119,7 +121,8 @@ class BugScanner:
         # -------------------------------DEFINE A FUNCTION TO HELP RUNNING LLM IN DIR---------------------------------
         def run_llm_on_dir_list(dir_list, func, append_name, *args, **kwargs):
             result = []
-            for dir in dir_list:
+            print("---- Running step:", append_name, "----")
+            for dir in tqdm(dir_list):
                 files = [f for f in os.listdir(dir)]
                 name = dir.split('/')
                 write_to = '/'.join(name[:-1]) + '/' + append_name
@@ -153,8 +156,9 @@ class BugScanner:
         self.load_all_models(False, False, True, False)
         # -------------------------------RUNNING RANKER---------------------------------
         ranker_dirs = []
+        print("---- Running Ranker ----")
         if(self.llm_ranker is not None):
-            for dir in summarized_vulnerabilities_dirs:
+            for dir in tqdm(summarized_vulnerabilities_dirs):
                 files = [f for f in os.listdir(dir)]
                 name = dir.split('/')
                 write_to = '/'.join(name[:-1])+'/ranker'
@@ -172,7 +176,8 @@ class BugScanner:
         # -------------------------------RUNNING FINAL SUMMARIZER---------------------------------
         self.llm_summarizer.load_template(['dataname','inputjson'], prompt_path = 'templates/output_formatter.txt')
         sum_dirs = []
-        for dir in ranker_dirs:
+        print("---- Running Final Summarizer ----")
+        for dir in tqdm(ranker_dirs):
             files = [f for f in os.listdir(dir)]
             name = dir.split('/')
             write_to = '/'.join(name[:-1])+'/final_output'
