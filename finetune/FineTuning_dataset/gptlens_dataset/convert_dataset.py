@@ -37,14 +37,16 @@ with open(output_file, 'w') as out_file:
                     {   
                         "data_name":f"{cve_id}.sol",
                         "role": "system",
-                        "content": """Requirement: You are a smart contract auditor. Identify 1 most severe vulnerability in the provided smart contract. Ensure it is exploitable in real world and beneficial to attackers. Restrict your identification to these vulnerability types: Integer Overflow, Wrong Logic, Bad Randomness, Access Control, Typo Constructor, Token Devalue. 
+                        "content": """Requirement: You are a smart contract auditor. Identify 1 most severe vulnerability in the provided smart contract. 
+                        Ensure it is exploitable in real world and beneficial to attackers. Restrict your identification to these vulnerability types: 
+                        Integer Overflow, Wrong Logic, Bad Randomness, Access Control, Typo Constructor, Token Devalue. 
                         Output only in the following JSON format:
                         {
                             "output_list": [
                                 {
                                     "function_name": "<function_name>",
                                     "vulnerability": "<vulnerability_type>",
-                                    "description": "<vulnerability_description>"
+                                    "reason": "<vulnerability_description>"
                                 }
                             ]
                         }"""
@@ -57,7 +59,7 @@ with open(output_file, 'w') as out_file:
                                 {
                                     "function_name": function_name,
                                     "vulnerability": vulnerability_type,
-                                    "description": vulnerability_description
+                                    "reason": vulnerability_description
                                 }
                             ]
                         })

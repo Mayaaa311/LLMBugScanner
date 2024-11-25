@@ -13,8 +13,8 @@ from transformers import (
 from peft import LoraConfig, PeftModel
 from trl import SFTTrainer
      
-os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"  
+# os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1"  
 torch.set_grad_enabled(True)
 
 torch.cuda.empty_cache()
@@ -31,7 +31,15 @@ else:
 # print(f"torchvision CUDA Version: {torchvision.version.cuda}")
 
 # Load dataset
-dataset = load_dataset("json", data_files="finetune/FineTuning_dataset/Dataset/fine_tuning_data2.jsonl", split="train")
+dataset = load_dataset("json", data_files="finetune/FineTuning_dataset/Dataset/train_dataset1.json", split="train")
+# dataset = load_dataset("json", data_files="finetune/FineTuning_dataset/gptlens_dataset/0.2split_dataset.json", split="train")
+# Select 1/10th of the data
+# subset_size = len(dataset)   # Calculate the size of 1/10th of the data
+# dataset = dataset.shuffle(seed=42).select(range(subset_size))  # Shuffle and select
+
+# Print the size of the subset to verify
+print(f"Original dataset size: {len(dataset)}")
+print(f"Subset size (1/10th): {len(dataset)}")
 # eval_dataset=load_dataset("json", data_files="finetune/FineTuning_dataset/gptlens_dataset/test_dataset.json")
 
 # dataset = load_dataset("philschmid/dolly-15k-oai-style", split="train")
@@ -40,14 +48,16 @@ dataset = load_dataset("json", data_files="finetune/FineTuning_dataset/Dataset/f
 # print(dataset.column_names)  # Should show ['text']
 
 # Hugging Face model id
-checkpoint_path =None
+checkpoint_path = 'finetune/model/deepseek_finetuning_alllinear_b32_10ep/checkpoint-1340'
+# checkpoint_path ='finetune/model/deepseek_finetuning_specfunc0.1_alllinear/checkpoint-1000'
 # checkpoint_path = 'finetune/model/Nxcode_finetuning_specfunc_alllinear/checkpoint-7000'
-checkpoint_path = 'finetune/model/deepseek_finetuning_specfunc_alllinear/checkpoint-2000'
-model_name = "deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct"
+# checkpoint_path = 'finetune/model/deepseek_finetuning_specfunc_alllinear/checkpoint-3000'
+# model_name = 'finetune/model/deepseek_finetuning_alllinear_b32_10epoch'
 # model_name = "NTQAI/Nxcode-CQ-7B-orpo"
+model_name = 'deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct'
 
 # Fine-tuned model name
-new_model = "finetune/model/deepseek_finetuning_specfunc_alllinear"
+new_model = "finetune/model/deepseek_finetuning_alllinear_b32_20ep"
 # new_model = "finetune/model/Nxcode_finetuning_specfunc_alllinear"
 ################################################################################
 # bitsandbytes parameters
@@ -137,13 +147,12 @@ model.gradient_checkpointing_enable()
 
 training_arguments = TrainingArguments(
     output_dir=new_model,
-    num_train_epochs=3,
-    per_device_train_batch_size=4,
+    num_train_epochs=20,
+    per_device_train_batch_size=32,
     gradient_accumulation_steps=2,
     optim="adamw_torch_fused",
     logging_steps=10,
-    save_strategy="steps",  
-    save_steps=1000,   
+    save_strategy="epoch",  
     fp16=fp16,
     bf16=bf16,
     learning_rate=2e-4,                     # learning rate, based on QLoRA paper
@@ -153,6 +162,34 @@ training_arguments = TrainingArguments(
     push_to_hub=False,    
     report_to="tensorboard"
 )
+
+
+
+# # Set distributed training arguments
+# training_arguments = TrainingArguments(
+#     output_dir=new_model,
+#     num_train_epochs=3,
+#     per_device_train_batch_size=4,
+#     gradient_accumulation_steps=2,
+#     optim="adamw_torch_fused",
+#     logging_steps=10,
+#     save_strategy="steps",  
+#     save_steps=1000,   
+#     fp16=fp16,
+#     bf16=bf16,
+#     learning_rate=2e-4,
+#     max_grad_norm=0.3,
+#     warmup_ratio=0.03,
+#     lr_scheduler_type="constant",
+#     push_to_hub=False,
+#     report_to="tensorboard",
+#     dataloader_num_workers=4,  # Number of workers for data loading
+#     ddp_find_unused_parameters=False,  # Enable DDP optimization
+#     save_total_limit=3,  # Limit the number of saved checkpoints
+#     evaluation_strategy="steps",  # Evaluate every few steps
+#     eval_steps=1000,
+#     load_best_model_at_end=True,  # Automatically load the best model after training
+# )
 print("--------------TRAINING CONFIG-----------------")
 # Convert to dictionary and print
 args_dict = training_arguments.to_dict()

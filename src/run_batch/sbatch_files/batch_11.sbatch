@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH -J runbatch-data_full/CVE_clean_organized_b5/subfolder_5           # Job name
-#SBATCH -N 1                            # Number of nodes
-#SBATCH --ntasks=1                      # Run only one task
-#SBATCH --gpus=3           
-#SBATCH --mem=100G   
-#SBATCH -t 60                          # Duration of the job
+#SBATCH -N1                                         # Number of nodes
+#SBATCH --ntasks-per-node=1            # Run only one task
+#SBATCH --gres=gpu:H100:1               # Request 1 H100
+#SBATCH --mem-per-gpu=128G         # Increase memory   
+#SBATCH -t 200                         # Duration of the job
 #SBATCH -o Report-%j-11.out                # Combined output and error messages file
 #SBATCH --mail-type=BEGIN,END,FAIL       # Mail preferences
 #SBATCH --mail-user=yyuan394@gatech.edu  # E-mail address for notifications
@@ -15,8 +15,9 @@ mkdir -p $TRITON_CACHE_DIR  # Ensure the directory exists
 module load anaconda3/2023.03            # Load module dependencies
 conda activate /home/hice1/yyuan394/scratch/env
 
-python src/bugscanner_cli.py -a NTQAI/Nxcode-CQ-7B-orpo meta-llama/CodeLlama-7b-hf m-a-p/OpenCodeInterpreter-DS-6.7B AlfredPros/CodeLlama-7b-Instruct-Solidity -c NTQAI/Nxcode-CQ-7B-orpo -r NTQAI/Nxcode-CQ-7B-orpo  -d data_full/CVE_clean_organized_b5/subfolder_5 -o result/result_nxcodes_k3_a4_beforeft -k 5 -log logger
+# python src/bugscanner_cli.py -a deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct NTQAI/Nxcode-CQ-7B-orpo m-a-p/OpenCodeInterpreter-DS-6.7B AlfredPros/CodeLlama-7b-Instruct-Solidity google/codegemma-7b -c deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct -r deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct  -d data_full/CVE_clean_organized_b5/subfolder_5 -o result/final_5_model_evaluation_1 -k 5 -log logger
+python src/bugscanner_cli.py -a finetune/model/final_models/deepseek_finetuning_CVE_10ep finetune/model/final_models/codellama_CVE_10ep finetune/model/final_models/gemma_messi_5ep_CVE_10ep  finetune/model/final_models/Nxcode_instructional_finetuning_alllinear finetune/model/final_models/OpenCodeInterpreter_gptLensFT_ds -c finetune/model/final_models/deepseek_finetuning_CVE_10ep -r finetune/model/final_models/deepseek_finetuning_CVE_10ep -d data_full/CVE_clean_organized_b5/subfolder_5 -o result/final_5_model_evaluation_1 -k 5 -log logger
 
-# python src/bugscanner_cli.py -a finetune/model/Nxcode_instructional_finetuning_alllinear -c finetune/model/Nxcode_instructional_finetuning_alllinear -r NTQAI/Nxcode-CQ-7B-orpo -d data_full/CVE_clean_organized_b5/subfolder_5 -o result/result_nxcodes_k3_a4_beforeft -k 5 -log logger
-# python src/bugscanner_cli.py -a finetune/model/Nxcode_instructional_finetuning_alllinear -c finetune/model/Nxcode_instructional_finetuning_alllinear -r  finetune/model/Nxcode_instructional_finetuning_alllinear -d  data_full/CVE_clean_organized_b5/subfolder_5 -o result/result_nxcodes_k3_a4_beforeft -k 5 -log logger
+# python src/bugscanner_cli.py -a finetune/model/deepseek_finetuning_specfunc0.05_alllinear_b32_10epoch_instructional -c deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct -r deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct -d data_full/CVE_clean_organized_b5/subfolder_5 -o result/final_5_model_evaluation_1 -k 5 -log logger
+# python src/bugscanner_cli.py -a finetune/model/deepseek_finetuning_specfunc0.05_alllinear_b32_10epoch_instructional -c finetune/model/deepseek_finetuning_specfunc0.05_alllinear_b32_10epoch_instructional -r  finetune/model/deepseek_finetuning_specfunc0.05_alllinear_b32_10epoch_instructional -d  data_full/CVE_clean_organized_b5/subfolder_5 -o result/final_5_model_evaluation_1 -k 5 -log logger
 

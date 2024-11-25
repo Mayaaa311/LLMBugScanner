@@ -5,7 +5,7 @@ from transformers import GemmaTokenizer,BitsAndBytesConfig, AutoTokenizer, AutoM
 from lens.Base import BaseLLM, param1, param2
 import torch
 from lens.utils import parse_config
-
+generation_params=param1
 class gemma_LLM(BaseLLM):
     def __init__(self, model_id, prompt_path,model_params_path=None):
         self.model_id = model_id
@@ -53,7 +53,7 @@ class gemma_LLM(BaseLLM):
         prompt = str(prompt_input)[6:-1]
         inputs = self.tokenizer(prompt, return_tensors="pt")
         prompt_len = inputs["input_ids"].shape[-1]
-        outputs = self.model.generate(**inputs, max_new_tokens=100)
+        outputs = self.model.generate(**inputs, **generation_params)
 
         return self.tokenizer.decode(outputs[0])
 

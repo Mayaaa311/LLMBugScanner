@@ -4,8 +4,11 @@ import csv
 import json
 
 # -----------------!!! Change this to the result folder you want to evaluate!!!-----------------
-result_folder = 'result/result_codegemma'
-
+# result_folder = 'result/result_nxcodes_k3_a5_beforeft'
+# result_folder = 'result/result_nxcodes_k5_a5_beforeft'
+# result_folder='result/result_nxcodes_k5_a5_beforeft_t0.5'
+# result_folder = 'result/result_nxcodes_k5_a5_beforeft'
+result_folder = 'result/result_deepseek_k5_instft'
 # ------------------Folder definition-------------------------------------------------------
 base_folder = result_folder
 os.makedirs(result_folder, exist_ok=True)
@@ -52,7 +55,7 @@ def process_directory(directory):
     for root, _, files in os.walk(directory):
         for file in files:
             file_path = os.path.join(root, file)
-            print(f"Processing file: {file_path}")
+            print(f"reformatting file: {file_path}")
             reformat_file_content(file_path)
 
 process_directory(result_folder)
@@ -142,14 +145,15 @@ def process_folder(folder_path, json_data):
     
     # Path to the file inside the folder
     file_path = os.path.join(folder_path, 'final_output/NTQAI_Nxcode-CQ-7B-orpo_summarized0.csv')
-    for file in os.listdir(folder_path+'/final_output/'):
-        if(file.endswith('summarized0.csv')):
-            file_path = os.path.join(folder_path+'/final_output',file)
-    
-    
+    if os.path.exists(folder_path+'/final_output/'):
+        for file in os.listdir(folder_path+'/final_output/'):
+            if(file.endswith('summarized0.csv')):
+                file_path = os.path.join(folder_path+'/final_output',file)
+        
+        
     # Check if the file exists
     if os.path.exists(file_path):
-        print(f"Processing file: {file_path}")
+        print(f"Processing output: {file_path}")
         
         # Extract data from the text-based file
         csv_data = extract_data_from_text_file(file_path)
@@ -175,6 +179,7 @@ def process_all_folders(base_folder, json_data):
         folder_path = os.path.join(base_folder, folder_name)
         
         if os.path.isdir(folder_path):
+            print("folder path: ",folder_path)
             # Process the folder and deduplicate each file's results
             folder_results, general_determination = process_folder(folder_path, json_data)
             all_results.extend(folder_results)  # Aggregate deduplicated results for detailed output

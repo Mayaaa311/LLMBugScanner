@@ -4,8 +4,8 @@ import os
 param1 = {
     "max_new_tokens": 5000,
     "do_sample": True,
-    "temperature": 0.001,
-    "top_k": 50,
+    "temperature": 0.3,
+    "top_k": 10,
     "top_p": 0.95,
     "num_return_sequences": 1
 }

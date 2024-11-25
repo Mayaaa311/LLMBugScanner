@@ -10,7 +10,7 @@ from lens.Huggingface import Huggingface_LLM
 from lens.utils import write_to_file
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print("using", device)
-
+import time
 
 class BugScanner:
     def __init__(self, auditor_models = None, critic_model = None, ranker_model = None, summarizer_model = None,
@@ -62,16 +62,21 @@ class BugScanner:
         
     def run_auditor(self, code, write_to, i):
         input_dict = {"code": code, "topk": self.topk}
-
-        if not os.path.isfile(write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor.json"):
+        start = time.time()
+        if not os.path.isfile(write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor_{i}.json"):
+            # for j in range(int(self.topk)):
             response = self.llm_auditors[i].invoke(input_dict)
             write_to_file(write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor_{i}.json", response, write='w')
             print("Auditor response written to : ", write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor_{i}.json")
         else:
             print("Auditor response found: ", write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor_{i}.json")
+        end = time.time()
+        runtime = end-start
+        print(f"auditor {i} inference time: ",runtime)
         
 
     def run_critic(self, vulnerabilities, write_to, code = None, idx = 0):
+        start = time.time()
         if not os.path.isfile(write_to+f"/{self.llm_critic.model_id.replace('/','_')}_critic_{idx}.json"):
             if code is not None: 
                 print("using code in critic!")
@@ -82,19 +87,31 @@ class BugScanner:
             write_to_file(write_to+f"/{self.llm_critic.model_id.replace('/','_')}_critic_{idx}.json", response)
         else:
             print("Critic response found : ", write_to+f"/{self.llm_critic.model_id.replace('/','_')}_critic_a{idx}.json")
+        end = time.time()
+        runtime = end-start
+        print(f"critic {idx} inference time: ",runtime)
 
     
     def run_ranker(self, vulnerability, write_to) -> list:
+        start = time.time()
         response = None
         if not os.path.isfile(write_to+f"/{self.llm_ranker.model_id.replace('/','_')}_rank.json"):
             response = self.llm_ranker.invoke({"topk": self.topk, "vulnerability": vulnerability})
             write_to_file(write_to+f"/{self.llm_ranker.model_id.replace('/','_')}_rank.json", str(response))
+        end = time.time()
+        runtime = end-start
+        print(f"ranker inference time: ",runtime)
         return response
 
     def run_summarizer(self, content, write_to,idx = 0) -> list:
+        start = time.time()
         if not os.path.isfile(write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized_{idx}.json"):
             response = self.llm_summarizer.invoke({"content": content})
             write_to_file(write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized_{idx}.json", str(response))
+        end = time.time()
+        runtime = end-start
+        print("summarizer write to : ", write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized_{idx}.json")
+        print(f"sumamrizer inference time for {idx}: ",runtime)
         return write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized_{idx}.json"
     
     def run_llm_on_dir_list(self, dir_list, func, append_name, *args, **kwargs):
@@ -102,7 +119,6 @@ class BugScanner:
         for dir in dir_list:
             files = [f for f in os.listdir(dir)]
             name = dir.split('/')
-            
             write_to = '/'.join(name[:-1]) + '/' + append_name
             for file in files:
                 file_path = os.path.join(dir, file)  
@@ -116,7 +132,7 @@ class BugScanner:
     
     def run_batch_auditor(self, code_folder):
         code_path = [f for f in os.listdir(code_folder) if f.endswith('.sol')]
-        auditor_result_dirs = [] 
+        auditor_result_dirs = set()
         # self.load_all_models(True, False, False, False)
         for i, auditor in enumerate(self.llm_auditors):
             auditor.load_model()
@@ -130,14 +146,14 @@ class BugScanner:
                     name = file.split('/')[-1].rsplit('.', 1)[0]
                     write_to = f"{self.result_dir}/{name}"
                     self.run_auditor(code, write_to+"/auditor", i)
-                    auditor_result_dirs.append(write_to+"/auditor")
+                    auditor_result_dirs.add(write_to+"/auditor")
 
 
             del auditor.model  # This removes the model from memory
             torch.cuda.empty_cache()  
         
         print("all auditor output write to : ", auditor_result_dirs)
-        return auditor_result_dirs
+        return list(auditor_result_dirs) 
     def run_batch_summarizer1(self, auditor_result_dirs):
 
         self.load_all_models(False, False, False, True)
@@ -147,7 +163,7 @@ class BugScanner:
 
     def run_batch_critic(self, summarized_vulnerabilities_dirs,code_folder):
         self.load_all_models(False, True, False, False)
-        critic_output_dir = []
+        critic_output_dir = set()
         for dir in summarized_vulnerabilities_dirs:
             files = [f for f in os.listdir(dir)]
             name = dir.split('/')
@@ -164,14 +180,14 @@ class BugScanner:
                         code = f1.read()
                         self.run_critic(o, write_to, code = code, idx = auditor_idx) 
 
-            critic_output_dir.append(write_to)
+            critic_output_dir.add(write_to)
 
         print("all critic write to : ", critic_output_dir)
         
         del self.llm_critic.model  # This removes the model from memory
         torch.cuda.empty_cache()  
 
-        return critic_output_dir
+        return list(critic_output_dir)
     def run_batch_summarizer2(self, critic_output_dir):
         if self.llm_summarizer.model is None:
             self.load_all_models(False, False, False, True)
@@ -216,9 +232,13 @@ class BugScanner:
                 file_path = os.path.join(dir, file)  
                 with open(file_path, "r") as f:
                     o = f.read() 
+                    start = time.time()
                     if not os.path.isfile(write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized{i}.csv"):
                         response = self.llm_summarizer.invoke({"dataname": name[-2], "inputjson":o})
                         write_to_file(write_to+f"/{self.llm_summarizer.model_id.replace('/','_')}_summarized{i}.csv", str(response))
+                    end = time.time()
+                    print(f"final summarizer inference time: ",end-start)
+                    print()
             sum_dirs.append(write_to)
         return sum_dirs
 
