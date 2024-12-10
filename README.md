@@ -1,8 +1,8 @@
-# GPTLens-2.0
+# LLM BugScanner
 
 ## Overview
 
-GPTLens-2.0 is an advanced tool designed to enhance the functionalities of GPTLens by automating the process of identifying and evaluating potential vulnerabilities in code. It provides more flexibility by allowing the use of different Large Language Model (LLM) agents. The tool is equipped with an auditor and a critic, which work together to find and rank vulnerabilities based on correctness and severity.
+LLM BugScanner is an advanced tool designed to enhance the functionalities of GPTLens by automating the process of identifying and evaluating potential vulnerabilities in code. It provides more flexibility by allowing the use of different Large Language Model (LLM) agents. The tool is equipped with an auditor and a critic, which work together to find and rank vulnerabilities based on correctness and severity.
 
 ## Features
 
@@ -74,8 +74,15 @@ python src/bugscanner_cli.py -a  AlfredPros/CodeLlama-7b-Instruct-Solidity -c m-
 ### multiple auditors
 python src/bugscanner_cli.py -a AlfredPros/CodeLlama-7b-Instruct-Solidity m-a-p/OpenCodeInterpreter-DS-6.7B NTQAI/Nxcode-CQ-7B-orpo -c m-a-p/OpenCodeInterpreter-DS-6.7B -r NTQAI/Nxcode-CQ-7B-orpo -d data -o result_test_parser -k 5 -log logs_oct1
 
-### single auditor(currently testing on)
+### single auditor
 python src/bugscanner_cli.py -a NTQAI/Nxcode-CQ-7B-orpo  -c m-a-p/OpenCodeInterpreter-DS-6.7B -r NTQAI/Nxcode-CQ-7B-orpo -d data -o result_test_pipe -k 5 -log logs_nov3
+
+### batch submission: 
+python src/1_run_batch_data.py
+
+### batch evaluation: 
+batch evaluation: 
+python src/2_evaluate.py
 
 
  <!-- m-a-p/OpenCodeInterpreter-DS-6.7B NTQAI/Nxcode-CQ-7B-orpo  -->
