@@ -61,14 +61,8 @@ rerun the command, make sure the result file remain the same
 | THUDM/codegeex2-6b                          | Huggingface_LLM | https://huggingface.co/THUDM/codegeex2-6b                          | 6B   |
 | google/codegemma-7b                         | gemma_LLM       | https://huggingface.co/google/codegemma-7b                         | 7B   |
 
-## Example Creating Model objects
-
 
 ## Commands for testing
-salloc --ntasks-per-node=60 --gpus=7
-module load anaconda3/2023.03
-conda activate /home/hice1/yyuan394/scratch/env
-
 python src/bugscanner_cli.py -a  AlfredPros/CodeLlama-7b-Instruct-Solidity -c m-a-p/OpenCodeInterpreter-DS-6.7B -r m-a-p/OpenCodeInterpreter-DS-6.7B -p m-a-p/OpenCodeInterpreter-DS-6.7B -d data_2 -o result_test_parser/trail3 -k 5 -log logs_oct1
 
 ### multiple auditors
@@ -77,10 +71,10 @@ python src/bugscanner_cli.py -a AlfredPros/CodeLlama-7b-Instruct-Solidity m-a-p/
 ### single auditor
 python src/bugscanner_cli.py -a NTQAI/Nxcode-CQ-7B-orpo  -c m-a-p/OpenCodeInterpreter-DS-6.7B -r NTQAI/Nxcode-CQ-7B-orpo -d data -o result_test_pipe -k 5 -log logs_nov3
 
-### batch submission: 
+### batch submission(for PACE environment only): 
 python src/1_run_batch_data.py
 
-### batch evaluation: 
+### batch evaluation(need to manually change the directory to be evaluated): 
 batch evaluation: 
 python src/2_evaluate.py
 
