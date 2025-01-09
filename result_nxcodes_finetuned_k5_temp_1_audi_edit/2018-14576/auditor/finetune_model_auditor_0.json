@@ -1,0 +1,18 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(address _to, uint256 _amount) {                  
+            if (msg.sender != icoContractAddress) throw;                                          
+            if (restrictedAddresses[_to]) throw;                                          
+            if (balances[_to] + _amount < balances[_to]) throw;                             
+            supply += _amount;                                                                
+            balances[_to] += _amount;                                                        
+            Mint(_to, _amount);                                                            
+            Transfer(0x0, _to, _amount);                                                     
+        }",
+            "vulnerability": "Token minting vulnerability",
+            "reason": "The code for token minting does not prevent the minting of more tokens than allowed. It directly adds the given amount of tokens to the balance of the given address and the total supply. This can lead to overflow of the supply and allow a large amount of tokens to be unaccessible. The mintTokens function is only callable by the icoContractAddress. This is a vulnerability in the mintTokens function"
+        }
+    ]
+}

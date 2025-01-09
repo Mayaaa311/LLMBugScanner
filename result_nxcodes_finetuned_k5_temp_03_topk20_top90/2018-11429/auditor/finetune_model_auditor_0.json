@@ -1,0 +1,10 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address _holder, uint _value) external {                require(msg.sender == ico);                require(_value != 0);                require(totalSupply + _value <= TOKEN_LIMIT);                balances[_holder] += _value;                totalSupply += _value;                Transfer(0x0, _holder, _value);            }                function unfreeze() external {                    require(msg.sender == ico);                    tokensAreFrozen = false;                }                function transfer(address _to, uint _value) public {                    require(!tokensAreFrozen);                    super.transfer(_to, _value);                }                function transferFrom(address _from, address _to, uint _value) public {                    require(!tokensAreFrozen);                    super.transferFrom(_from, _to, _value);                }                function approve(address _spender, uint _value) public {                    require(!tokensAreFrozen);                    super.approve(_spender, _value);                }            ",
+            "vulnerability": "Token Devalue",
+            "reason": "The mint function allows anyone to mint new tokens. This can lead to token devalue if the contract is hacked or maliciously used. The mint function should only be callable by the ICO contract."
+        }
+    ]
+}

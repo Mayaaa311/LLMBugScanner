@@ -1,0 +1,30 @@
+{
+    "output_list": [
+        {
+            "function_name": "PolyAi",
+            "code": "        }        
+        }
+        function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+            if (frozenAccount[_from]) revert();                        
+            if (balanceOf[_from] < _value) revert();                 
+            if (balanceOf[_to] + _value < balanceOf[_to]) revert();  
+            if (_value > allowance[_from][msg.sender]) revert();   
+        >   balanceOf[_from] -= _value;                          
+            balanceOf[_to] += _value;                            
+            allowance[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        }
+        function () {
+            revert();     
+        }
+    }
+    contract owned {
+        address public owner;
+        function owned() {
+            owner = msg.sender;
+    ",
+            "vulnerability": "transferFrom bypasses frozenAccount",
+            "reason": "the contract is vulnerable to malicious transferFrom. An attacker could freeze its own token and prevent its transfer by calling transferFrom()."
+        }
+    }

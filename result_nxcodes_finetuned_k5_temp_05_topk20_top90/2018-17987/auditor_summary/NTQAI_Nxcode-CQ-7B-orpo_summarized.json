@@ -1,0 +1,18 @@
+{
+    "output_list": [
+        {
+            "function_name": "claimTile",
+            "code": "            require(msg.value == currentGameCost);
+            currentGameBalance += msg.value;
+            tiles[xCoord][yCoord] = Tile(currentGameNumber, msg.sender);
+            TileClaimed(currentGameNumber, xCoord, yCoord, msg.sender);
+            numTilesClaimed += 1;
+            if (numTilesClaimed == NUM_TILES) {
+                determineWinner();
+            }
+        }",
+            "vulnerability": "Access Control",
+            "reason": "The function claimTile can be called by anyone, even if the game is stopped. This function can be called to claim a tile even after the game has ended. The gameStopped variable is not used in the function and it is not possible to check whether the game is still running or not."
+        }
+    ]
+}

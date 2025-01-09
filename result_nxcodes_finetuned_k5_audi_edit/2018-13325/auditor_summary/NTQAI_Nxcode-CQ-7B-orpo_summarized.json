@@ -1,0 +1,17 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "    function transfer(address _to,uint256 _value) public{
+        require(!frozenAccount[msg.sender]);
+        if(_to == address(this)){
+          _sell(msg.sender,_value);    
+        }else{
+            _transfer(msg.sender,_to,_value);
+        }
+    }",
+            "vulnerability": "Token Devalue",
+            "reason": "In the transfer function, if the _to is this contract address, the tokens will be sold at the sellPrice. This will cause the tokens to devalue. The tokens should not be sold at the sellPrice if the _to is this contract address."
+        }
+    ]
+}

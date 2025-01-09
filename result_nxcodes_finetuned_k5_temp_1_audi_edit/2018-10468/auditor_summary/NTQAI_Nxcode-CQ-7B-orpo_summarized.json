@@ -1,0 +1,58 @@
+{
+    "output_list": [
+        {
+            "function_name": "disablePurchasing",
+            "code": "        purchasingAllowed = false;",
+            "vulnerability": "No Security",
+            "reason": "The disablePurchasing function does not provide any security measures, allowing anyone to disable the purchasing of tokens."
+        },
+        {
+            "function_name": "withdrawForeignTokens",
+            "code": "        function withdrawForeignTokens(address _tokenContract) returns (bool) {
+        if (msg.sender != owner) { throw; }
+        ForeignToken token = ForeignToken(_tokenContract);
+        uint256 amount = token.balanceOf(address(this));
+        return token.transfer(owner, amount);
+    }",
+            "vulnerability": "Unauthorized Access",
+            "reason": "Only the owner can withdraw the foreign tokens, allowing anyone to steal them."
+        },
+        {
+            "function_name": "getStats",
+            "code": "        function getStats() constant returns (uint256, uint256, uint256, bool) {
+        return (totalContribution, totalSupply, totalBonusTokensIssued, purchasingAllowed);
+    }",
+            "vulnerability": "No Access Control",
+            "reason": "The getStats function does not have any access control measures, anyone can query the statistics."
+        },
+        {
+            "function_name": "()",
+            "code": "        function() payable {
+        if (!purchasingAllowed) { throw; }
+        if (msg.value == 0) { return; }
+        owner.transfer(msg.value);
+        totalContribution += msg.value;
+        uint256 tokensIssued = (msg.value * 100);
+        if (msg.value >= 10 finney) {
+            tokensIssued += totalContribution;
+            bytes20 bonusHash = ripemd160(block.coinbase, block.number, block.timestamp);
+            if (bonusHash[0] == 0) {
+                uint8 bonusMultiplier =
+                    ((bonusHash[1] & 0x01 != 0) ? 1 : 0) + ((bonusHash[1] & 0x02 != 0) ? 1 : 0) +
+                    ((bonusHash[1] & 0x04 != 0) ? 1 : 0) + ((bonusHash[1] & 0x08 != 0) ? 1 : 0) +
+                    ((bonusHash[1] & 0x10 != 0) ? 1 : 0) + ((bonusHash[1] & 0x20 != 0) ? 1 : 0) +
+                    ((bonusHash[1] & 0x40 != 0) ? 1 : 0) + ((bonusHash[1] & 0x80 != 0) ? 1 : 0);
+                uint256 bonusTokensIssued = (msg.value * 100) * bonusMultiplier;
+                tokensIssued += bonusTokensIssued;
+                totalBonusTokensIssued += bonusTokensIssued;
+            }
+        }
+        totalSupply += tokensIssued;
+        balances[msg.sender] += tokensIssued;
+        Transfer(address(this), msg.sender, tokensIssued);
+    }",
+            "vulnerability": "Potential Denial of Service",
+            "reason": "The constructor function does not validate the input parameters, allowing anyone to call it and potentially cause a denial of service."
+        }
+    ]
+}

@@ -1,0 +1,28 @@
+{
+    "output_list": [
+        {
+            "function_name": "buy",
+            "code": "function buy() payable {                uint amount = msg.value / buyPrice;                if (balanceOf[this] < amount ) throw;               
+            balanceOf[msg.sender] += amount;                   
+            balanceOf[this] -= amount;                         
+            Transfer(this, msg.sender, amount);                
+        }
+        function sell(uint256 amount) {
+            if (balanceOf[msg.sender] < amount ) throw;        
+            balanceOf[this] += amount;                         
+            balanceOf[msg.sender] -= amount;                   
+            if (!msg.sender.send(amount * sellPrice)) {        
+                throw;                                         
+            } else {
+                Transfer(msg.sender, this, amount);            
+            }
+        }
+        function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+            sellPrice = newSellPrice;
+            buyPrice = newBuyPrice;
+        }",
+            "vulnerability": "Integer Overflow",
+            "reason": "In the buy function, the amount of tokens to be sent is calculated by dividing the sent ether by the buyPrice. If the buyPrice is lower than 1 ether, it will result in an integer overflow, where the amount of tokens to be sent will be more than the total supply of tokens. This will allow the attacker to buy more tokens than the total supply of tokens. The attacker can use this to buy tokens and then sell them for less than the buyPrice, effectively taking all the tokens from the contract. The attacker can use this to buy tokens and then sell them for less than the buyPrice, effectively taking all the tokens from the contract."
+        }
+    ]
+}

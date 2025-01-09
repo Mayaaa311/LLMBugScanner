@@ -1,0 +1,10 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address holder, uint value) public {                require(msg.sender == ico);                require(value > 0);                require(totalSupply + value <= TOKEN_LIMIT);                balances[holder] += value;                totalSupply += value;                Transfer(0x0, holder, value);            }                function unfreeze() public {                    require(msg.sender == ico);                    isFrozen = false;                }                function transfer(address _to, uint _value) public returns (bool) {                    require(_to != address(0));                    require(!isFrozen);                    return super.transfer(_to, _value);                }                function transferFrom(address _from, address _to, uint _value) public returns (bool) {                    require(!isFrozen);                    return super.transferFrom(_from, _to, _value);                }                function approve(address _spender, uint _value) public returns (bool) {                    require(!isFrozen);                    return super.approve(_spender, _value);                }                function increaseApproval(address _spender, uint _addedValue) public returns (bool) {                    require(!isFrozen);                    return super.increaseApproval(_spender, _addedValue);                }                function decreaseApproval(address _spender, uint _subtractedValue) public returns (bool) {                    require(!isFrozen);                    return super.decreaseApproval(_spender, _subtractedValue);                }            ",
+            "vulnerability": "Frozen Token",
+            "reason": "Frozen token can't be used to transfer, approve, or transferFrom. This will prevent users from using the token for its intended purpose."
+        }
+    ]
+}

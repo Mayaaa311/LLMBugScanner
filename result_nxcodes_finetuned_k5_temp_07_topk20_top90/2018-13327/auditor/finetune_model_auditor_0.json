@@ -1,0 +1,14 @@
+{
+    "output_list": [
+        {
+            "function_name": "approveAndCall",
+            "code": "        allowed[msg.sender][_spender] = _value;                              
+        Approval(msg.sender, _spender, _value);                         
+        if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) { throw; }                
+        return true;                                                             
+    }",
+            "vulnerability": "Approval Then Call",
+            "reason": "In approveAndCall function, attacker can approve any amount of tokens to be transferred to any address. Then attacker can transfer all approved tokens to the attacker's own address by calling approveAndCall function. The approved amount of tokens will be transfered to the attacker's own address and the attacker's address will be the approved spender. This will allow the attacker to transfer all tokens to himself."
+        }
+    ]
+}

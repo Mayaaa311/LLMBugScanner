@@ -1,0 +1,10 @@
+{
+  "output_list": [
+    {
+      "function_name": "constructor",
+      "code": "constructor(){owner=msg.sender;vaultAddress=_vaultAddress;vaultAddress.send(this.balance);}",
+      "vulnerability": "Storage Collision",
+      "reason": "The contract stores one variable: owner of type address and vaultAddress of type address. But this contract has a constructor which sends all the balance to the value of vaultAddress. If vaultAddress is the contract address and the contract receives some ether at the deployment, the balance of the contract will be zero after sending the balance to vaultAddress. This will lead to a loss of funds for the original owner. It is recommended that all the ether received by the contract should be transferred to the contract owner."
+    }
+  ]
+}

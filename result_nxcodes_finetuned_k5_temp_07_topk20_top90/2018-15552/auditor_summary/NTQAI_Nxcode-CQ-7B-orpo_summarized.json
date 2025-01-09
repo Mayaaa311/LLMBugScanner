@@ -1,0 +1,21 @@
+{
+    "output_list": [
+        {
+            "function_name": "PayWinner",
+            "code": "uint ownerTax = 6 * totalBounty / 100;
+        uint winnerPrice = totalBounty - ownerTax;
+        LottoComplete(msg.sender, lottoIndex, winnerPrice);
+        lottoIndex += 1;
+        numtickets = 0;
+        totalBounty = 0;
+ttif(_direction == 0 && maxTickets < 20) maxTickets += 1;
+ttif(_direction == 1 && maxTickets > 10) maxTickets -= 1;
+ttif(_direction == 0 && maxTickets == 20) _direction = 1;
+ttif(_direction == 1 && maxTickets == 10) _direction = 0;
+        worldOwner.transfer(ownerTax);
+        winner.transfer(winnerPrice);",
+            "vulnerability": "Bad Randomness",
+            "reason": "The randomness generated here is not secure, could be exploited by attacker to cheat the game. The current code is using block.timestamp to generate randomness. It's vulnerable to predictability attacks. A better way would be to use oracle to generate randomness."
+        }
+    ]
+}

@@ -1,0 +1,16 @@
+{
+  "output_list": [
+    {
+      "function_name": "win",
+      "code": "    function win() public {
+        require(now > RoundTime[Round] && RoundTime[Round] != 0);
+        RoundLastGreedyMan[Round].transfer(RoundETH[Round]);
+        emit winnerEvent(RoundLastGreedyMan[Round], RoundETH[Round], Round);
+        Round++;
+      }
+      function luckyBuy() private view returns(bool)",
+      "vulnerability": "Access Control",
+      "reason": "The function 'win' allows anyone to execute its code block which transfers the pot to the greedy man of the round. The greediness of a greedy man can be determined by the function 'luckyBuy'. If it returns 'true', the greedy man will be randomly chosen for the next round. The winner is chosen by the greedy man who has the most hearts, but he cannot prevent other greedy men from buying more hearts in the round. The owner should be able to manage the rounds and the winner. The greediness of greedy man cannot be manipulated by him."
+    }
+  ]
+}

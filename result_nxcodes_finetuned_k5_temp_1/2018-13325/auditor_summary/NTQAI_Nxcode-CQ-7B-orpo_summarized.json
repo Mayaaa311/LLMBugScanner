@@ -1,0 +1,66 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "    function transfer(address _to,uint256 _value) public{
+                require(!frozenAccount[msg.sender]);
+                if(_to == address(this)){
+                  _sell(msg.sender,_value);    
+                }else{
+                    _transfer(msg.sender,_to,_value);
+                }
+            }",
+            "vulnerability": "Flexible Token",
+            "reason": "A user should be able to transfer the same number of tokens as they have, no matter if they are transferring to a contract or an external address. This flexible token allows for buggy or malicious token contracts to hold user's tokens, effectively freezing user funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "    function transferFrom(address _from,address _to,uint256 _value) public returns (bool success){
+                require(!frozenAccount[_from]&&!frozenAccount[msg.sender]);
+                require(_value<=allowance[_from][msg.sender]);
+                allowance[_from][msg.sender] -= _value;
+                if(_to == address(this)){
+                    _sell(_from,_value);
+                }else
+                {
+                    _transfer(_from,_to,_value);
+                }
+                return true;
+            }",
+            "vulnerability": "Flexible Token",
+            "reason": "Same reason as transfer."
+        },
+        {
+            "function_name": "approve",
+            "code": "    function approve(address _spender,uint256 _value) public returns (bool success){
+                require(!frozenAccount[msg.sender]);
+                allowance[msg.sender][_spender] = _value;
+                return true;
+            }",
+            "vulnerability": "Flexible Token",
+            "reason": "Same reason as transfer."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "    function approveAndCall(address _spender,uint256 _value,bytes _extraData)
+            public returns (bool success){
+                require(!frozenAccount[msg.sender]);
+                tokenRecipient spender = tokenRecipient(_spender);
+                if(approve(_spender,_value)){
+                    spender.receiveApproval(msg.sender,_value,this,_extraData);
+                    return true;
+                }
+            }",
+            "vulnerability": "Flexible Token",
+            "reason": "Same reason as transfer."
+        },
+        {
+            "function_name": "transferEth",
+            "code": "    function transferEth(uint256 amount) onlyOwner public{
+                msg.sender.transfer(amount*10**uint256(18));
+            }",
+            "vulnerability": "Flexible Token",
+            "reason": "Same reason as transfer."
+        }
+    ]
+}

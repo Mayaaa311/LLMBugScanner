@@ -1,0 +1,17 @@
+{
+    "output_list": [
+        {
+            "function_name": "burn",
+            "code": "    function burn(uint256 amount) onlyOwner returns (bool success) {
+                if (balanceOf[msg.sender] < amount) throw;  
+                balanceOf[msg.sender] -= amount;            
+                totalSupply -= amount;                        
+                Burn(msg.sender, amount);
+                return true;
+            }
+",
+            "vulnerability": "Reentrancy",
+            "reason": "Sender can call this function to transfer to themselves. If it happens, the sender loses the actual amount of tokens that were requested for transfering."
+        }
+    ]
+}

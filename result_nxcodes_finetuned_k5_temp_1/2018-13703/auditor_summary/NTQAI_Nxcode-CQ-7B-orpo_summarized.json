@@ -1,0 +1,29 @@
+Here's the structured JSON output:
+```
+{
+    "output_list": [
+        {
+            "function_name": "sellOffline",
+            "code": "        if (remaining > 0) {
+            uint finalTokens =  (token_amount  * (10 ** 18));              
+            if(finalTokens < remaining)
+                {
+                    remaining = remaining - finalTokens;
+                    _transfer(owner,rec_address, finalTokens);    
+                    TransferSell(owner, rec_address, finalTokens,'Offline');
+                }
+else
+                {
+                    revert();
+                }
+        }
+else
+            {
+                revert();
+            }",
+            "vulnerability": "Bug in Function - Remaining token is not assigned to the owner",
+            "reason": "When a token is sold through the function sellOffline, the remaining tokens is decreased. But if the token_amount exceeds the remaining tokens, there is no assignment back to the owner to recieve the tokens. This will result in the tokens not being returned to the owner. This will also result in remaining tokens not being updated, as there is no transfer back to the owner. The remaining tokens will be a negative number."
+        }
+    ]
+}
+```

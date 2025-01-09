@@ -1,0 +1,17 @@
+{
+    "output_list": [
+        {
+            "function_name": "buyChamp",
+            "code": "    function buyChamp(uint256 _id) external payable
+      whenNotPaused
+      onlyNotOwnerOfChamp(_id)
+      champIsForSale(_id)
+      isPaid(champs[_id].price)
+      distributeSaleInput(champToOwner[_id]) {
+        transferChamp(champToOwner[_id], msg.sender, _id);
+      }",
+            "vulnerability": "Bug",
+            "reason": "The buyChamp function does not check if the sender has enough balance to buy the champ. The function will fail if the sender does not have enough balance to buy the champ. The function should check if the sender has enough balance before transferring the champ."
+        }
+    ]
+}

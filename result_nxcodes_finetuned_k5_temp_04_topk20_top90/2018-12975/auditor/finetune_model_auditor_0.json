@@ -1,0 +1,23 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "        _mint(_owner, numberOfTokenIds);
+        HeroInstance memory _heroInstance = HeroInstance({
+            heroClassId: _heroClassId,
+            heroName: "",
+            currentLevel: 1,
+            currentExp: 0,
+            lastLocationId: 0,
+            availableAt: now,
+            currentStats: _initialStats,
+            ivForStats: _ivForStats
+        });
+        tokenIdToHeroInstance[numberOfTokenIds] = _heroInstance;
+        numberOfTokenIds ++;
+        _heroClassInfo.currentNumberOfInstancedHeroes ++;",
+            "vulnerability": "Integer Overflow",
+            "reason": "In the mint function, the variable numberOfTokenIds is incremented without any bound checking. It can lead to integer overflow. The value of numberOfTokenIds could reach the maximum limit, exceeding the range of uint256. As a result, the mint function could not mint any more tokens."
+        }
+    ]
+}

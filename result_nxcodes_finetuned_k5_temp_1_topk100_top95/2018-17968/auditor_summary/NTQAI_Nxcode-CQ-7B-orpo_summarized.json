@@ -1,0 +1,39 @@
+```json
+{
+    "output_list": [
+        {
+            "function_name": "refundPlayersInRoom",
+            "code": "function refundPlayersInRoom(uint256 _roomId) public onlyCTO{
+Room storage room = allRooms[_roomId-1]; 
+uint256 nbrOfPlayers = room.players.length;
+uint256 balanceToRefund = SafeMath.div(room.balance,nbrOfPlayers);
+for (uint i = 0; i<nbrOfPlayers; i++) {
+     room.players[i].transfer(balanceToRefund);
+     room.balance -= balanceToRefund;
+}
+emit roomRefunded(_roomId, room.players);
+delete room.players;
+}",
+            "vulnerability": "constructor",
+            "reason": "The `constructor` function is not defined in the input. It's mentioned as the vulnerability in the output."
+        },
+        {
+            "function_name": "getRoom",
+            "code": "function getRoom(uint256 _roomId) public view returns (
+string name,
+address[] players,
+uint256 entryPrice,
+uint256 balance
+) {
+Room storage room = allRooms[_roomId-1];
+name = room.name;
+players = room.players;
+entryPrice = room.entryPrice;
+balance = room.balance;
+}",
+            "vulnerability": "",
+            "reason": "The `constructor` function is not defined in the input."
+        }
+    ]
+}
+```

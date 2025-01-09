@@ -1,0 +1,14 @@
+{
+    "output_list": [
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) returns (bool success) {
+                        allowed[msg.sender][_spender] = _value;
+                        Approval(msg.sender, _spender, _value);
+                        return true;
+                    } ",
+            "vulnerability": "Token Devalue",
+            "reason": "In the approve function, the approved amount will be set as _value. If _value is set as 0, the approve will fail and the spender will not be able to spend the tokens. However, if _value is set as a very large number, then the approved amount will be set to the maximum possible uint256. This will allow the spender to spend all the tokens in the owner's account, effectively devalue the token."
+        }
+    ]
+}

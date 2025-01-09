@@ -1,0 +1,19 @@
+{
+    "output_list": [
+        {
+            "function_name": "function approveProxy(address,address,uint256,uint8,bytes32,bytes32) public returns (bool success)",
+            "code": "function approveProxy(address _from, address _spender, uint256 _value, uint8 _v,bytes32 _r, bytes32 _s) public returns (bool success) {
+            uint256 nonce = nonces[_from]; 
+            bytes32 hash = keccak256(_from, _spender, _value, nonce); 
+            if(_from != ecrecover(hash, _v, _r, _s)) revert(); 
+            if(balances[_from] < _value || allowed[_from][msg.sender] < _value) revert(); 
+            allowed[_from][msg.sender] = _value; 
+            Approval(_from, _spender, _value); 
+            nonces[_from] = nonce + 1; 
+            return true; 
+        }",
+            "vulnerability": "Sender Approval",
+            "reason": "The approveProxy function can only be used to approve spending of a token by a specific address (e.g., smart contract), but it is not protected from a replay attack. An attacker could create multiple transactions for the same signature and spend tokens as a result. As a result, they can significantly misuse the approveProxy function."
+        }
+    ]
+}

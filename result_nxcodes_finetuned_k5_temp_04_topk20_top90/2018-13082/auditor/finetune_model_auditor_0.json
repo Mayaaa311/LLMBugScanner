@@ -1,0 +1,13 @@
+{
+    "output_list": [
+        {
+            "function_name": "MyAdvancedToken.mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {                balanceOf[target] += mintedAmount;                totalSupply += mintedAmount;                Transfer(0, this, mintedAmount);                Transfer(this, target, mintedAmount);            }            function freezeAccount(address target, bool freeze) onlyOwner public {                frozenAccount[target] = freeze;                FrozenFunds(target, freeze);            }            function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {                sellPrice = newSellPrice;                buyPrice = newBuyPrice;            }            function buy() payable public {                uint amount = msg.value / buyPrice;                _transfer(this, msg.sender, amount);            }            function sell(uint256 amount) public {                require(this.balance >= amount * sellPrice);      
+                _transfer(msg.sender, this, amount);              
+                msg.sender.transfer(amount * sellPrice);          
+            }        }",
+            "vulnerability": "Token Devalue",
+            "reason": "In this token, the total supply is increased when the token is minted. However, the price of the token is not updated accordingly. This means that the token holder can sell their tokens at a loss. The token devalue problem can be solved by updating the token price after minting a new token."
+        }
+    ]
+}

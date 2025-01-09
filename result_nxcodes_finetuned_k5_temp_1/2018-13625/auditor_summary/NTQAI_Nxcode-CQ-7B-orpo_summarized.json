@@ -1,0 +1,43 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "            balanceOf[msg.sender] -= _value;                        
+            balanceOf[_to] += _value;                               
+            Transfer(msg.sender, _to, _value);                      ",
+            "vulnerability": "Transaction Splitting",
+            "reason": "The transfer function does not split the transaction into two transfer events, allowing an attacker to exploit the transfer function. An attacker may transfer tokens to a contract, execute arbitrary code on the contract, and then transfer the tokens back to the attacker."
+        },
+        {
+            "function_name": "lend",
+            "code": "            balanceOf[msg.sender] -= _value;                        
+            balanceOf[_to] += _value;                               
+            InterestFreeLending(msg.sender, _to, _value, _duration_in_days);    ",
+            "vulnerability": "Transaction Splitting",
+            "reason": "The lend function does not split the transaction into two transfer events, allowing an attacker to exploit the lend function. An attacker may transfer tokens to a contract, execute arbitrary code on the contract, and then transfer the tokens back to the attacker."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "            balanceOf[_from] -= _value;                              
+            balanceOf[_to] += _value;                                
+            allowance[_from][msg.sender] -= _value;                
+            Transfer(_from, _to, _value);                      ",
+            "vulnerability": "Transaction Splitting",
+            "reason": "The transferFrom function does not split the transaction into two transfer events, allowing an attacker to exploit the transferFrom function. An attacker may transfer tokens to a contract, execute arbitrary code on the contract, and then transfer the tokens back to the attacker."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "            if (_to == 0x0) revert();                                  
+            if (frozenAccount[_from]) revert();                        
+            if (balanceOf[_from] < _value) revert();                   
+            if (balanceOf[_to] + _value < balanceOf[_to]) revert();    
+            if (_value > allowance[_from][msg.sender]) revert();       
+            balanceOf[_from] -= _value;                                
+            balanceOf[_to] += _value;                                  
+            allowance[_from][msg.sender] -= _value;                
+            Transfer(_from, _to, _value);                      ",
+            "vulnerability": "Transaction Splitting",
+            "reason": "The transferFrom function does not split the transaction into two transfer events, allowing an attacker to exploit the transferFrom function. An attacker may transfer tokens to a contract, execute arbitrary code on the contract, and then transfer the tokens back to the attacker."
+        }
+    ]
+}

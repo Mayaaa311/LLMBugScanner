@@ -1,0 +1,53 @@
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "code": "        uint256 tokens = 0;        
+        require( msg.value >= minContribution );        
+        require( msg.value > 0 );        
+        tokens = tokensPerEth.mul(msg.value) / 1 ether;        
+        address investor = msg.sender;        
+        if (tokens > 0) {            
+            distr(investor, tokens);        
+        }        
+        if (totalDistributed >= totalSupply) {            
+            distributionFinished = true;        
+        }",
+            "vulnerability": "Transaction Manipulation",
+            "reason": "Contract allow the purchase of tokens if msg.value >= minContribution. Attacker can buy tokens and do transaction gas-free and then call distribute tokens in multiple transactions. This would lead to unfair distribution of tokens to the contributors."
+        },
+        {
+            "function_name": "distr",
+            "code": "        totalDistributed = totalDistributed.add(_amount);        
+        balances[_to] = balances[_to].add(_amount);        
+        emit Distr(_to, _amount);        
+        emit Transfer(address(0), _to, _amount);",
+            "vulnerability": "Token Whaling",
+            "reason": "Distribution of tokens are not limited. This could lead to huge token balance for certain users which is against the ICO concept of token distribution to the contributors only."
+        },
+        {
+            "function_name": "transfer",
+            "code": "        require(_to != address(0));        
+        require(_amount <= balances[msg.sender]);        
+        balances[msg.sender] = balances[msg.sender].sub(_amount);        
+        balances[_to] = balances[_to].add(_amount);        
+        emit Transfer(msg.sender, _to, _amount);        
+        return true;",
+            "vulnerability": "Insufficient Access Control",
+            "reason": "Function transfer allows anyone to transfer any amount of token to any address which is not controlled by any user. This could be used for malicious purpose."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "        require(_to != address(0));        
+        require(_amount <= balances[_from]);        
+        require(_amount <= allowed[_from][msg.sender]);        
+        balances[_from] = balances[_from].sub(_amount);        
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);        
+        balances[_to] = balances[_to].add(_amount);        
+        emit Transfer(_from, _to, _amount);        
+        return true;",
+            "vulnerability": "Insufficient Access Control",
+            "reason": "Function transferFrom allows anyone to transfer token from the owner's account to any address which is not controlled by any user. This could be used for malicious purpose."
+        }
+    ]
+}

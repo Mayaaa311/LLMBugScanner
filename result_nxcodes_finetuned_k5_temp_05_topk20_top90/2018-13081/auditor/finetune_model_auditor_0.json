@@ -1,0 +1,13 @@
+{
+  "output_list": [
+    {
+      "function_name": "transfer",
+      "code": "            balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }",
+      "vulnerability": "Integer Overflow",
+      "reason": "The function transfer does not contain any modifier to prevent integer overflow. It can be exploited to send more tokens than available in the contract. The attacker can exploit this vulnerability by sending tokens to a contract that has a large balance and is not intended to receive them. The contract totalSupply will be higher than it should be, making these tokens unusable. The attacker will also receive a higher percentage of the tokens from the sell. The function will be called transfer(0x0000000000000000000000000000000000000000, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) which will lead to a loss of funds for the attacker."
+    }
+  ]
+}

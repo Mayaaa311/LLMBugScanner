@@ -1,0 +1,21 @@
+{
+  "output_list": [
+    {
+      "function_name": "transfer",
+      "code": "function transfer(address _to, uint256 _value) public {
+            _transfer(msg.sender, _to, _value);
+        }",
+      "vulnerability": "Front-Door Integer Overflow",
+      "reason": "With this current implementation, an attacker can use _transfer() function to cause arbitrary value transfer. The balance can be set arbitrarily to bypass some conditions in _transfer(). It is then possible to cause integer overflow on multiple operations.
+t tConsider the following code in transfer():
+ttif(balanceOf[_from] > _value) {
+                    if(_value > balanceOf[_to] + _value) {
+                    }
+tt}
+t tFixed Benefits:
+tt1. Stronger Input Validation
+tt2. Enforced Transaction Limit
+t"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+The input provided already matches the desired structured JSON format, so there's no need for any conversion. Here is the input again for clarification:
+
+Input:
+```json
+{
+  "output_list": [
+      {
+        "function_name": "function mint(address _holder, uint _value)",
+        "code": "        balances[_holder] = balances[_holder].add(_value);
+        totalSupply = totalSupply.add(_value);
+        emit Transfer(0x0, _holder, _value);
+    }
+    function burn(uint _value) public {
+        require(msg.sender == ico);
+        super.burn(_value);
+    }",
+        "vulnerability": "Integer Overflow",
+        "reason": "Inside function mint(), balances[_holder] and totalSupply are both getting incremented by _value. If _value is very large, then totalSupply will overflows first. Then, balances[_holder] will also overflow."
+      }
+  ]
+}
+```
+
+Output:
+```json
+{
+    "output_list": [
+        {
+            "function_name": "function mint(address _holder, uint _value)",
+            "code": "        balances[_holder] = balances[_holder].add(_value);
+        totalSupply = totalSupply.add(_value);
+        emit Transfer(0x0, _holder, _value);
+    }
+    function burn(uint _value) public {
+        require(msg.sender == ico);
+        super.burn(_value);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Inside function mint(), balances[_holder] and totalSupply are both getting incremented by _value. If _value is very large, then totalSupply will overflows first. Then, balances[_holder] will also overflow."
+        }
+    ]
+}
+```

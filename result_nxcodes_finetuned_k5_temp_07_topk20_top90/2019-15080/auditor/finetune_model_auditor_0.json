@@ -1,0 +1,34 @@
+{
+  "output_list": [
+    {
+      "function_name": "transfer",
+      "code": "        require(!isblacklistedAccount[msg.sender]);                 ",
+      "vulnerability": "Bad Randomness",
+      "reason": "In the transfer function, there is no check for a blacklisted sender. This could allow a blacklisted sender to send tokens to another address and bypass the blacklist function. A blacklisted sender should not be able to send tokens."
+    },
+    {
+      "function_name": "transfer",
+      "code": "        require(balanceOf[msg.sender] > 0);                     ",
+      "vulnerability": "Bad Randomness",
+      "reason": "In the transfer function, there is no check for a balance greater than 0. This could allow a sender with no balance to send tokens to another address and bypass the blacklist function. A sender with no balance should not be able to send tokens."
+    },
+    {
+      "function_name": "transfer",
+      "code": "        require(balanceOf[msg.sender] >= _value);                   ",
+      "vulnerability": "Bad Randomness",
+      "reason": "In the transfer function, there is no check for a balance greater than or equal to the value to be sent. This could allow a sender with a smaller balance to send tokens to another address and bypass the blacklist function. A sender with a smaller balance should not be able to send tokens."
+    },
+    {
+      "function_name": "transferFrom",
+      "code": "        if (balanceOf[_from] >= _amount                              ",
+      "vulnerability": "Bad Randomness",
+      "reason": "In the transferFrom function, there is no check for a balance greater than or equal to the amount to be sent. This could allow a sender with a smaller balance to send tokens to another address and bypass the blacklist function. A sender with a smaller balance should not be able to send tokens."
+    },
+    {
+      "function_name": "transferFrom",
+      "code": "        if (allowed[_from][msg.sender] >= _amount                  ",
+      "vulnerability": "Bad Randomness",
+      "reason": "In the transferFrom function, there is no check for a sufficient allowance. This could allow a sender to send tokens from an address without the required allowance. A sender should not be able to send tokens from an address without the required allowance."
+    }
+  ]
+}

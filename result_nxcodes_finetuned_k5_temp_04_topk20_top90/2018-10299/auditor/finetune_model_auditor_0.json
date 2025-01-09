@@ -1,0 +1,12 @@
+{
+  "output_list": [
+    {
+      "function_name": "transferFrom",
+      "code": "        balances[_from] = balances[_from].sub(_value);
+        balances[_to] = balances[_to].add(_value);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);",
+      "vulnerability": "Token Devalue",
+      "reason": "In the transferFrom function, the sender's balance is reduced before the receiver's balance is increased. This means that if the sender sends tokens to multiple addresses, the sender's balance will be reduced less than the total amount of tokens sent. This can lead to the sender believing that they have a smaller balance than they actually do, and potentially prevent them from sending tokens to multiple addresses."
+    }
+  ]
+}

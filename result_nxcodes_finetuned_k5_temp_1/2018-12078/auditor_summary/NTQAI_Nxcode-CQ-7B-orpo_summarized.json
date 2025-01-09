@@ -1,0 +1,49 @@
+Your input already fits the required JSON format. The JSON provided contains an array of objects, each of which has properties for `function_name`, `code`, `vulnerability`, and `reason`. Therefore, no modifications are necessary, and your input already meets the expected JSON structure. Here's a copy of the input:
+
+```json
+{
+  "output_list": [
+    {
+      "function_name": "PolyAi",
+      "code": "function PolyAi(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}",
+      "vulnerability": "Bad Randomness",
+      "reason": "The code is vulnerable to attackers by providing them with too much of their own tokens. An attacker could use their own tokens to mint and burn tokens at will which could be used to manipulate token price, create unfair trading conditions, and ultimately gain control of the token."
+    }
+  ]
+}
+```
+
+If you want to make sure that the input adheres to a specific JSON schema, you could use a JSON schema validator. For example, here's how you might validate the input against a JSON schema that defines the structure you've specified:
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OutputList",
+  "type": "object",
+  "properties": {
+    "output_list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "function_name": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "vulnerability": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": ["function_name", "code", "vulnerability", "reason"]
+      },
+      "minItems": 1
+    }
+  },
+  "required": ["output_list"]
+}
+```

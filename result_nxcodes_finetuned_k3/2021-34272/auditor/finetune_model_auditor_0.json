@@ -1,0 +1,21 @@
+{
+    "output_list": [
+        {
+            "function_name": "buy",
+            "code": "        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        require(isOpened);
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+    function setExchange(bool istrue) onlyOwner public {
+        isOpened = istrue;
+    }",
+            "vulnerability": "Exchange Function",
+            "reason": "The exchange function is open to anyone, which means anyone can buy and sell the token at any price. This is a major vulnerability in the token exchange function."
+        }
+    ]
+}

@@ -1,0 +1,21 @@
+The given input is already in a structured JSON format. Here it is again for clarity:
+
+```json
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "code": "                            totalDistributed = totalDistributed.add(_amount);
+                            totalRemaining = totalSupply.sub(totalDistributed);
+                            balances[_to] = balances[_to].add(_amount);
+                            emit Distr(_to, _amount);
+                            emit Transfer(address(0), _to, _amount);
+                            return true;",
+            "vulnerability": "Fuzzy Control",
+            "reason": "In the getTokens() function, the contract owner can control the value of tokens that will be distributed. The value is calculated as a percentage of the total remaining tokens. If the contract owner sets the value to 100%, then the contract owner can distribute all the remaining tokens. This can be exploited by the contract owner to gain more tokens than intended."
+        }
+    ]
+}
+```
+
+This JSON structure contains an array of objects, each representing a function in the contract. Each object has four properties: `function_name`, `code`, `vulnerability`, and `reason`. The `code` property contains the actual code of the function, the `vulnerability` property contains a short description of the vulnerability, and the `reason` property contains the detailed reason for the vulnerability.

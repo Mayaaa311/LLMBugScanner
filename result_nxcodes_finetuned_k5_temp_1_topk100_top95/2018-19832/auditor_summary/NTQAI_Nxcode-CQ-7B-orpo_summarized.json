@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _amount) onlyPayloadSize(2 * 32) public returns (bool success) {",
+            "vulnerability": "Integer Overflow",
+            "reason": "The value has sufficient length to hold an additional 256 bits which can be used to perform an integer overflow. One can send tokens to oneself."
+        },
+        {
+            "function_name": "distr",
+            "code": "function distr(address _to, uint256 _amount) canDistr private returns (bool) {",
+            "vulnerability": "Ownable",
+            "reason": "In the distr function, an attacker can bypass the requirement of being the token owner and distribute tokens to themselves."
+        },
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr onlyWhitelist public {",
+            "vulnerability": "Multiple Functions in One Transaction",
+            "reason": "The function getTokens is allowing users to send ether to distribute NETM and also to check the remaining tokens, which are then sent to the sender. It will consume most of the gas during a transaction. In some environments (like Remix) this can be exploited with an additional transaction. With getTokens taking ether value, an attacker can send a gas price less than the tx cost, while using getTokens to distribute tokens to other address. This will give attacker full control over their own tokens and cannot get the tokens from other addresses."
+        }
+    ]
+}

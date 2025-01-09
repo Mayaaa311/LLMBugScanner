@@ -1,0 +1,48 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(address _to, uint256 _amount) {                                                                              |[1]|
+                if (msg.sender != icoContractAddress) throw;                                                                                            |[1]|
+                if (restrictedAddresses[_to]) throw;                                                                                                    |[1]|
+                if (balances[_to] + _amount < balances[_to]) throw;                                                                                     |[1]|
+                supply += _amount;                                                                                                                      |[1]|
+                balances[_to] += _amount;                                                                                                               |[1]|
+                Mint(_to, _amount);                                                                                                                     |[1]|
+                Transfer(0x0, _to, _amount);                                                                                                             |[1]|
+            }",
+            "vulnerability": "Reentrancy",
+            "reason": "The function `mintTokens` is vulnerable to reentrancy attacks. It allows anyone to call the function `mintTokens` from their own contract, which can lead to unexpected behavior and loss of funds."
+        },
+        {
+            "function_name": "burnTokens",
+            "code": "function burnTokens(uint256 _amount) onlyOwner {                                                                                             |[1]|
+                if(balances[msg.sender] < _amount) throw;                                                                                               |[1]|
+                if(supply < _amount) throw;                                                                                                              |[1]|
+                supply -= _amount;                                                                                                                      |[1]|
+                balances[msg.sender] -= _amount;                                                                                                        |[1]|
+                Burn(msg.sender, _amount);                                                                                                              |[1]|
+                Transfer(msg.sender, 0x0, _amount);                                                                                                     |[1]|
+            }",
+            "vulnerability": "Reentrancy",
+            "reason": "The function `burnTokens` is vulnerable to reentrancy attacks. It allows anyone to call the function `burnTokens` from their own contract, which can lead to unexpected behavior and loss of funds."
+        },
+        {
+            "function_name": "freezeTransfersUntil",
+            "code": "function freezeTransfersUntil(uint256 _frozenUntilBlock, string _reason) onlyOwner {                                                        |[1]|
+                tokenFrozenUntilBlock = _frozenUntilBlock;                                                                                               |[1]|
+                TokenFrozen(_frozenUntilBlock, _reason);                                                                                                |[1]|
+            }",
+            "vulnerability": "Reentrancy",
+            "reason": "The function `freezeTransfersUntil` is vulnerable to reentrancy attacks. It allows anyone to call the function `freezeTransfersUntil` from their own contract, which can lead to unexpected behavior and loss of funds."
+        },
+        {
+            "function_name": "isRestrictedAddress",
+            "code": "function isRestrictedAddress(address _querryAddress) constant returns (bool answer){                                                         |[1]|
+                return restrictedAddresses[_querryAddress];                                                                                             |[1]|
+            }",
+            "vulnerability": "None",
+            "reason": "This function does not contain any security vulnerabilities."
+        }
+    ]
+}

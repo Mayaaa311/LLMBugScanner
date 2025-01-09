@@ -1,0 +1,57 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+                _transfer(msg.sender, _to, _value);
+                return true;
+            }",
+            "vulnerability": "Access Control",
+            "reason": "In the provided code, function 'transfer' allows any user to transfer tokens to any address. The function does not check if the sender has enough balance to transfer. This could lead to a situation where the sender does not have enough tokens to make the transfer."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+                _transfer(msg.sender, _to, _value);
+                return true;
+            }",
+            "vulnerability": "Access Control",
+            "reason": "In the provided code, function 'transfer' allows any user to transfer tokens to any address. The function does not check if the sender has enough balance to transfer. This could lead to a situation where the sender does not have enough tokens to make the transfer."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+                require(allowance[_from][msg.sender] >= _value);
+                allowance[_from][msg.sender] -= _value;
+                _transfer(_from, _to, _value);
+                return true;
+            }",
+            "vulnerability": "Access Control",
+            "reason": "In the provided code, function 'transferFrom' allows any user to transfer tokens on behalf of another user. The function does not check if the sender has enough allowance to transfer. This could lead to a situation where the sender does not have enough tokens to make the transfer."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) {
+                require(balanceOf[msg.sender] >= _value);
+                balanceOf[msg.sender] -= _value;
+                balanceOf[0x0] += _value;
+                currentSupply -= _value;
+                Burn(msg.sender, _value);
+                return true;
+            }",
+            "vulnerability": "Access Control",
+            "reason": "In the provided code, function 'burn' allows any user to burn their own tokens. The function does not check if the sender has enough balance to burn. This could lead to a situation where the sender does not have enough tokens to make the burn."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public returns (bool success) {
+                require(_value == 0 || allowance[msg.sender][_spender] == 0);
+                allowance[msg.sender][_spender] = _value;
+                Approval(msg.sender, _spender, _value);
+                return true;
+            }",
+            "vulnerability": "Access Control",
+            "reason": "In the provided code, function 'approve' allows any user to approve a spender for a certain amount of tokens. The function does not check if the sender has enough balance to approve. This could lead to a situation where the sender does not have enough tokens to make the approval."
+        }
+    ]
+}

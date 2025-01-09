@@ -1,0 +1,24 @@
+The input you provided is already in the required JSON format. It is a list of objects, each representing a function with its corresponding vulnerability and reason. Here it is again for clarity:
+
+```json
+{
+    "output_list": [
+        {
+            "function_name": "withdrawFunds",
+            "code": "function withdrawFunds(address _token) public returns (bool success) {
+                require(msg.sender == owner);
+                if (_token == address(0)) {
+                    owner.transfer(this.balance);
+                }
+                else {
+                    Token ERC20 = Token(_token);
+                    ERC20.transfer(owner, ERC20.balanceOf(this));
+                }
+                return true;
+            }",
+            "vulnerability": "Access Control",
+            "reason": "The withdrawFunds function can be called by anyone and will transfer the whole balance of the contract to the owner. The owner can be set to any address, which could potentially be a malicious contract that will receive the funds. The owner should be set to a multi-sig wallet or a dedicated address that can be used to withdraw the funds."
+        }
+    ]
+}
+```

@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "GoodTimeCoin",
+            "code": "    function GoodTimeCoin( u003euint256 initialSupply, u003estring tokenName, u003estring tokenSymbolu003e) StandardToken(initialSupply, tokenName, tokenSymbol) public {u003eu003eu003e",
+            "vulnerability": "Bad Token Supply",
+            "reason": "In the constructor of GoodTimeCoin the total supply of tokens is set to be equal to initialSupply. If initialSupply is higher than the maximum representable uint256 (2^256 - 1), the rest of the tokens will be locked forever, because the token's balanceOf[msg.sender] is reduced by the totalSupply. This can be mitigated by setting the initialSupply to a reasonable value, e.g. 1000000000. It's also recommended that the constructor takes tokens from a whitelisted list of addresses."
+        },
+        {
+            "function_name": "StandardToken",
+            "code": "                             0x0);                                   u003eu003eu003e",
+            "vulnerability": "Unbalanced Token Supply",
+            "reason": "In the constructor of StandardToken, the totalSupply is reduced by the balance of the sender. If sender's balance is higher than the maximum representable uint256 (2^256 - 1), this will result in an overflow. The balance is checked in the function _transfer() for the transfer() function, but there is no similar check for the mintToken() function."
+        },
+        {
+            "function_name": "StandardToken",
+            "code": "    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) u003eu003eu003e",
+            "vulnerability": "Unbalanced Token Supply",
+            "reason": "The allowance mapping is not properly updated in the transferFrom() function which could result in over-withdrawal of tokens from the sender. There's no proper check in transferFrom() to prevent the transfer of more tokens than the sender's allowance. The allowance mapping is updated only in the transfer() function, not in transferFrom(). The reason is that in transferFrom(), the _value parameter is used for the transfer, not _from's balance. This would lead to the transferFrom() function failing if _from has more tokens in its balance than _value. In such a case, it is impossible for _from to transfer _value tokens to _to. If _value is set to a very high value, it is possible to bypass the transferFrom() function and take more tokens from _from than are available in the balance."
+        }
+    ]
+}

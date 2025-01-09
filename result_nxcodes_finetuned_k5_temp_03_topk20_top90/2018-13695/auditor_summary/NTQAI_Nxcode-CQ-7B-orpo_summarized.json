@@ -1,0 +1,27 @@
+{
+    "output_list": [
+        {
+            "function_name": "()",
+            "code": "                if (totalSupply < 525000 && check > 525000)
+                {
+                    revert();
+                }
+                uint256 senderBalance = (balances[msg.sender]/1 ether);
+                if ((senderBalance + tokenAmount) > 50 && totalSupply < 25000)
+                {
+                    revert();
+                }
+                totalSupply = oldSupply;
+                mint(msg.sender, tokenAmount);
+                tokenAmount = 0;
+                check = 0;
+                rate = 0;
+                Founder1.transfer((msg.value/3));
+                Founder2.transfer((msg.value/3));
+                Founder3.transfer((msg.value/3));
+            }",
+            "vulnerability": "Burn",
+            "reason": "The contract has a burn function that can be used to mint more tokens. This function is not restricted and can be called by anyone. This will lead to a situation where the total supply of tokens will be increased and new tokens will be minted at a very low price. This will benefit the attacker and make him/her wealthy in tokens. The attacker can then use these tokens to buy and trade more tokens at a very low price."
+        }
+    ]
+}

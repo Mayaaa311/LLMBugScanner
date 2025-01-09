@@ -1,0 +1,16 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool) {
+                balances[msg.sender] = balances[msg.sender].sub(_value);
+                balances[_to] = balances[_to].add(_value);
+                Transfer(msg.sender, _to, _value);
+                return true;
+            }
+            ",
+            "vulnerability": "Transfer Failed",
+            "reason": "This vulnerability allows attacker to transfer more tokens than available in their balance. This can be exploited by attacker to drain all tokens from the contract."
+        }
+    ]
+}

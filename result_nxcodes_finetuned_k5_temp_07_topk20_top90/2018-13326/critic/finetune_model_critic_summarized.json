@@ -1,0 +1,23 @@
+{
+    "output_list": [
+        {
+            "function_name": "()",
+            "vulnerability": "Bad Randomness",
+            "correctness": 0,
+            "severity": 9,
+            "profitability": 0,
+            "criticism": "The code below is a simplified version of the problematic code: 
+function() payable {
+    uint256 random = now % 100;
+    msg.sender.transfer(random * msg.value);
+}
+In the above code, the attacker can predict the random value and use it to manipulate the game, steal assets, or DDOS. The attacker can send 1 ETH and get 99 ETH, or 2 ETH and get 98 ETH. The attacker can also send 99 ETH and get 1 ETH. 
+A better approach would be to use a truly random number generation like this:
+function() payable {
+    uint256 random = uint256(keccak256(block.timestamp, msg.sender)) % 100;
+    msg.sender.transfer(random * msg.value);
+}
+This way, the attacker can't predict the random value and always get their desired amount."
+        }
+    ]
+}

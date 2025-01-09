@@ -1,0 +1,24 @@
+{
+  "output_list": [
+      {
+        "function_name": "transferFrom",
+        "code": "        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;",
+        "vulnerability": "Bad Randomness",
+        "reason": "The sender has no control over the value transfered to _to, as he/she has been allowed _value to be transfered by _from."
+      },
+      {
+        "function_name": "transfer",
+        "code": "        if (frozenAccount[msg.sender]) revert();",
+        "vulnerability": "Bad Randomness",
+        "reason": "The sender has no control over the value transfered to _to, as he/she is frozen and can not transfer tokens."
+      },
+      {
+        "function_name": "transfer",
+        "code": "        if (frozenAccount[_to]) revert();",
+        "vulnerability": "Bad Randomness",
+        "reason": "The sender has no control over the value transfered to _to, as he/she is frozen and can not transfer tokens."
+      }
+  ]
+}

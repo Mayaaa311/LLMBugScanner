@@ -1,0 +1,15 @@
+{
+  "output_list": [
+    {
+      "function_name": "buy",
+      "code": "    function buy() payable public {
+        require(msg.value == price);
+        uint amount = msg.value / price;
+        _transfer(this, msg.sender, amount);
+        price += priceInc;
+      }",
+      "vulnerability": "Access Control",
+      "reason": "In this function the user can directly buy tokens with the contract's balance only. The user can also input any amount of value to purchase tokens. This is beneficial to attackers, as they can purchase a large quantity of tokens for low price. A typical solution is to add modifier, i.e., only accept msg.value equal to the current price. "
+    }
+  ]
+}

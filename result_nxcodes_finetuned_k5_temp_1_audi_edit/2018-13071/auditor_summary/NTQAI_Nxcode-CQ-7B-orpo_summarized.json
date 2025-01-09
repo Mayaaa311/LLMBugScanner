@@ -1,0 +1,74 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) throw;           
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+        if (frozenAccount[msg.sender]) throw;                
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+        if(_value > 0){
+            if(balanceOf[msg.sender] == 0){
+                addresses[indexes[msg.sender]] = addresses[lastIndex];
+                indexes[addresses[lastIndex]] = indexes[msg.sender];
+                indexes[msg.sender] = 0;
+                delete addresses[lastIndex];
+                lastIndex--;
+            }
+            if(indexes[_to]==0){
+                lastIndex++;
+                addresses[lastIndex] = _to;
+                indexes[_to] = lastIndex;
+            }
+        }
+    }",
+            "vulnerability": "Fuzzy Token Allocation",
+            "reason": "Allocation logic depends on user balance, airdrop, etc. The token allocation is fuzzy, which can lead to user losing tokens, which may affect overall token value. Airdrop should be handled by a third party and not included in the initial distribution."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (frozenAccount[_from]) throw;                        
+        if (balanceOf[_from] < _value) throw;                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+        if (_value > allowance[_from][msg.sender]) throw;   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }",
+            "vulnerability": "Fuzzy Token Allocation",
+            "reason": "Same as the first one, but this is also the main function that users use to transfer tokens to another account, which can lead to users losing tokens. Airdrop should be handled by a third party and not included in the initial distribution."
+        },
+        {
+            "function_name": "distributeTokens",
+            "code": "function distributeTokens(uint startIndex,uint endIndex) onlyOwner returns (uint) {
+        uint distributed = 0;
+        require(startIndex < endIndex);
+        for(uint i = startIndex; i < lastIndex; i++){
+            address holder = addresses[i+1];
+            uint reward = balanceOf[holder] * 3 / 100;
+            balanceOf[holder] += reward;
+            distributed += reward;
+            Transfer(0, holder, reward);
+        }
+        totalSupply += distributed;
+        return distributed;
+    }",
+            "vulnerability": "Fuzzy Token Allocation",
+            "reason": "Airdrop should be handled by a third party and not included in the initial distribution."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }",
+            "vulnerability": "Market Manipulation",
+            "reason": "Market is manipulable with this setPrices() function, user will be able to buy cheaper/more expensive tokens, making this a market manipulation vulnerabilities."
+        }
+    ]
+}

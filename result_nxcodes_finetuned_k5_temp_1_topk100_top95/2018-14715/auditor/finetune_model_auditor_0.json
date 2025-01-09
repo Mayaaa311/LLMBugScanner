@@ -1,0 +1,16 @@
+{
+  "output_list": [
+    {
+      "function_name": "mint",
+      "code": "function mint(bytes32 _image,address _owner) public onlyOwner returns (uint){             uint256 newId = _mint(_image);             _transfer(0, _owner, newId);             Mint(items[newId].image,tokenIndexToOwner[newId],newId);             return newId;         }",
+      "vulnerability": "Minting Bias",
+      "reason": "Fix: Make the minting rate function is deterministic. If it depends on user input, it is vulnerable to a 'Minting Bias' attack."
+    },
+    {
+      "function_name": "mintBatch",
+      "code": "function mintBatch(bytes32 _image1,bytes32 _image2,bytes32 _image3,bytes32 _image4,bytes32 _image5,address _owner) public onlyOwner returns (bool){             uint256 newId = _mint(_image1);             _transfer(0, _owner, newId);             Mint(items[newId].image,tokenIndexToOwner[newId],newId);             newId=_mint(_image2);             _transfer(0, _owner, newId);             Mint(items[newId].image,tokenIndexToOwner[newId],newId);             newId=_mint(_image3);             _transfer(0, _owner, newId);             Mint(items[newId].image,tokenIndexToOwner[newId],newId);             newId=_mint(_image4);             _transfer(0, _owner, newId);             Mint(items[newId].image,tokenIndexToOwner[newId],newId);             newId=_mint(_image5);             _transfer(0, _owner, newId);             Mint(items[newId].image,tokenIndexToOwner[newId],newId);             return true;         }",
+      "vulnerability": "Minting Bias",
+      "reason": "Fix: Make the minting rate function is deterministic. If it depends on user input, it is vulnerable to a 'Minting Bias' attack."
+    }
+  ]
+}

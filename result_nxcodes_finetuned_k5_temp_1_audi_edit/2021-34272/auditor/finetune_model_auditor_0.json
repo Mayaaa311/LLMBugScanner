@@ -1,0 +1,23 @@
+{
+  "output_list": [
+    {
+      "function_name": "setExchange",
+      "code": "                function setExchange(bool istrue) onlyOwner public { 
+                    isOpened = istrue; 
+                }",
+      "vulnerability": "Access control",
+      "reason": "setExchange can be called by anyone to switch the exchange. This makes isOpened flag easily accessible to hackers and can be used to perform other malicious operations."
+    },
+    {
+      "function_name": "sell",
+      "code": "                function sell(uint256 amount) public { 
+                    require(this.balance >= amount * sellPrice); 
+                    require(isOpened); 
+                    _transfer(msg.sender, this, amount);              
+                    msg.sender.transfer(amount * sellPrice);          
+                }",
+      "vulnerability": "Token Devalue",
+      "reason": "Selling token will reduce totalSupply which could eventually make the token devalue. The current formula of calculation is sellPrice = msg.value / amount. If the contract owner decide to sell all available tokens to maximize the profit, he will actually receive more money than he actually sold."
+    }
+  ]
+}

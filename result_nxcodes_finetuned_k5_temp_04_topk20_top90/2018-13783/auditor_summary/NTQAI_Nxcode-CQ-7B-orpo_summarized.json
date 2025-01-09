@@ -1,0 +1,39 @@
+The input you provided is already in the correct JSON format. However, if you want to format it as per the given output format, you can use a JSON formatter tool or write a script in your programming language to do so. Here's an example in Python:
+
+```python
+import json
+
+input_str = "{"output_list": [{"function_name": "buy","code": "        uint amount = msg.value / price;               ","vulnerability": "Integer Overflow","reason": "In the buy function, the amount is calculated by dividing msg.value by price. If msg.value is very large, the result may be more than the maximum value for uint256. This will cause an integer overflow, leading to unexpected behavior or even loss of funds. "}]}"
+
+data = json.loads(input_str)
+
+output_list = []
+for item in data["output_list"]:
+    output_list.append({
+        "function_name": item["function_name"],
+        "code": item["code"],
+        "vulnerability": item["vulnerability"],
+        "reason": item["reason"]
+    })
+
+output_data = {
+    "output_list": output_list
+}
+
+print(json.dumps(output_data, indent=4))
+```
+
+When you run this script, it will output the formatted JSON as you described:
+
+```json
+{
+    "output_list": [
+        {
+            "function_name": "buy",
+            "code": "        uint amount = msg.value / price;               ",
+            "vulnerability": "Integer Overflow",
+            "reason": "In the buy function, the amount is calculated by dividing msg.value by price. If msg.value is very large, the result may be more than the maximum value for uint256. This will cause an integer overflow, leading to unexpected behavior or even loss of funds. "
+        }
+    ]
+}
+```

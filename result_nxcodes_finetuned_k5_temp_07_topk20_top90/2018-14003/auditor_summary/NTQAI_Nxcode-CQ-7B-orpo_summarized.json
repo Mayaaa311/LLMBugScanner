@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public {
+                    uint cnt = _receivers.length;
+                    uint256 amount = uint256(cnt) * _value;
+                    require(cnt > 0 && cnt <= 10);
+                    require(_value > 0 && balanceOf[msg.sender] >= amount);
+                    require(!frozenAccount[msg.sender]);                     
+                    balanceOf[msg.sender] -= amount;
+                    for (uint i = 0; i < cnt; i++) {
+                        balanceOf[_receivers[i]] += _value;
+                        Transfer(msg.sender, _receivers[i], _value);
+                    }
+                }
+                ",
+            "vulnerability": "Batch Transfer",
+            "reason": "The batchTransfer function will transfer tokens to multiple addresses in a single transaction. The transaction will only fail if the transfer to any of the addresses fails. However, the function does not check whether the sender has enough balance to transfer to all addresses. This will cause a situation where some addresses receive the tokens while others do not. Furthermore, if any of the addresses are also contracts, they might be programmed to revert the entire transaction if they receive tokens. This will leave the sender with the tokens and all other addresses without tokens. The batchTransfer function should be modified to require that the sender must have a sufficient balance to transfer to all addresses."
+        }
+    ]
+}

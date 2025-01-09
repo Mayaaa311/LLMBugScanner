@@ -1,0 +1,20 @@
+{
+    "output_list": [
+        {
+            "function_name": "Approval",
+            "code": "function approve(address _spender, uint256 _value) returns (bool success) {
+                    allowed[msg.sender][_spender] = _value;
+                    Approval(msg.sender, _spender, _value);
+                    return true;
+                }
+                function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+                    return allowed[_owner][_spender];
+                }
+                mapping (address => uint256) balances;
+                mapping (address => mapping (address => uint256)) allowed;
+                uint256 public totalSupply;",
+            "vulnerability": "Approve-Before-Transfer",
+            "reason": "Token transfer can be blocked in the approve function because an attacker must have both the approve and the subsequent transfer actions done, which is highly difficult to do. Also, approve function is currently allowing spender to spend more than the msg.value."
+        }
+    ]
+}

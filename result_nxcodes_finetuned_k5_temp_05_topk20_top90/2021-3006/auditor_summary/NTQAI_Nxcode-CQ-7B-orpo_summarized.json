@@ -1,0 +1,35 @@
+{
+    "output_list": [
+        {
+            "function_name": "updateSettings",
+            "code": "owner = msg.sender;                                          |[High]|
+        emit OwnershipTransferred(owner, pendingOwner);                            |[Access Control]|
+        owner = pendingOwner;                                                       |[Access Control]|
+        pendingOwner = address(0);                                                  |[Access Control]|",
+            "vulnerability": "High",
+            "reason": "The function `updateSettings` allows anyone to set the owner of the contract, which could lead to ownership takeover. This is a high-risk vulnerability."
+        },
+        {
+            "function_name": "renounceOwnership",
+            "code": "emit OwnershipTransferred(owner, address(0));                              |[Access Control]|
+        owner = address(0);                                                         |[Access Control]|",
+            "vulnerability": "Access Control",
+            "reason": "The function `renounceOwnership` allows anyone to renounce ownership, which could lead to loss of control over the contract. This is a medium-risk vulnerability."
+        },
+        {
+            "function_name": "transferOwnership",
+            "code": "require(newOwner != address(0) && newOwner != owner, "INVALID_ADDRESS");  |[Access Control]|
+        pendingOwner = newOwner;                                                    |[Access Control]|",
+            "vulnerability": "Access Control",
+            "reason": "The function `transferOwnership` does not validate the new owner address, which could lead to ownership takeover. This is a medium-risk vulnerability."
+        },
+        {
+            "function_name": "claimOwnership",
+            "code": "emit OwnershipTransferred(owner, pendingOwner);                            |[Access Control]|
+        owner = pendingOwner;                                                       |[Access Control]|
+        pendingOwner = address(0);                                                  |[Access Control]|",
+            "vulnerability": "Access Control",
+            "reason": "The function `claimOwnership` allows anyone to claim ownership, which could lead to ownership takeover. This is a high-risk vulnerability."
+        }
+    ]
+}

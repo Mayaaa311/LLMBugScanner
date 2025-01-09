@@ -1,0 +1,10 @@
+{
+  "output_list": [
+    {
+      "function_name": "allocateTokens",
+      "code": "function allocateTokens(address[] _owners, uint256[] _values) public onlyOwner {     if(allocateEndTime < now) revert();     if(_owners.length != _values.length) revert();     for(uint256 i = 0; i < _owners.length ; i++){         address to = _owners[i];         uint256 value = _values[i];         if(totalSupply + value <= totalSupply || balances[to] + value <= balances[to]) revert();         totalSupply += value;         balances[to] += value;     } }",
+      "vulnerability": "Slow attack",
+      "reason": "This function has a loop that could be run by a malicious user, causing him/her to run it in a loop until his/her transaction(s) are confirmed and consuming significant amount of gas. In reality, only necessary _owners should call this function, not the entire public. It is recommended to add modifier to only allow owner to call this function."
+    }
+  ]
+}

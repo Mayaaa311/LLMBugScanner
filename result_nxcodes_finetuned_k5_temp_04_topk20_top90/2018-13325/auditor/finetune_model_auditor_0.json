@@ -1,0 +1,17 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to,uint256 _value) public{
+                        require(!frozenAccount[msg.sender]);
+                        if(_to == address(this)){
+                          _sell(msg.sender,_value);    
+                        }else{
+                            _transfer(msg.sender,_to,_value);
+                        }
+                    }",
+            "vulnerability": "Access Control",
+            "reason": "In the transfer function, the sender can bypass the buyOpen and sellOpen conditions by transferring to the contract address. This would allow the contract to sell tokens at a loss. The buyOpen and sellOpen conditions should be checked before transferring to the contract address."
+        }
+    ]
+}

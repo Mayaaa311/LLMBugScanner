@@ -1,0 +1,324 @@
+```json
+{
+    "output_list": [
+        {
+            "function_name": "_transferTokens",
+            "code": "function _transferTokens(address sender, address recipient, uint256 amount) internal virtual;
+",
+            "vulnerability": "None",
+            "reason": "The function `_transferTokens` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "_deposit",
+            "code": "function _deposit(IERC20 token, uint amount) internal {
+    require(amount > 0, "Cannot deposit 0");
+    collateral[msg.sender][address(token)] += amount;
+    uint creditMinted = calculateCredit(token, amount);
+    _mint(msg.sender, creditMinted);
+    collateralCredit[msg.sender][address(token)] += creditMinted;
+    token.transferFrom(msg.sender, address(this), amount);
+    emit Deposit(msg.sender, address(token), creditMinted, amount, creditMinted);
+}",
+            "vulnerability": "None",
+            "reason": "The function `_deposit` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "calculateCredit",
+            "code": "function calculateCredit(IERC20 token, uint amount) internal view returns (uint) {
+    uint price = LINK.getPriceUSD(address(token));
+    uint collateralValue = amount * price / 1e18;
+    return collateralValue * BASE / FEE;
+}",
+            "vulnerability": "None",
+            "reason": "The function `calculateCredit` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "getBalanceOfCollateral",
+            "code": "function getBalanceOfCollateral(address owner, IERC20 token) public view returns (uint) {
+    return collateral[owner][address(token)];
+}",
+            "vulnerability": "None",
+            "reason": "The function `getBalanceOfCollateral` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "getCollateralCredit",
+            "code": "function getCollateralCredit(address owner, IERC20 token) public view returns (uint) {
+    return collateralCredit[owner][address(token)];
+}",
+            "vulnerability": "None",
+            "reason": "The function `getCollateralCredit` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "setFee",
+            "code": "function setFee(uint fee) public onlyOwner {
+    FEE = fee;
+}",
+            "vulnerability": "None",
+            "reason": "The function `setFee` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "setBase",
+            "code": "function setBase(uint base) public onlyOwner {
+    BASE = base;
+}",
+            "vulnerability": "None",
+            "reason": "The function `setBase` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "setMarket",
+            "code": "function setMarket(address market) public onlyOwner {
+    _addMarket(market);
+}",
+            "vulnerability": "None",
+            "reason": "The function `setMarket` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "_addMarket",
+            "code": "function _addMarket(address market) internal {
+    require(!pairs[market], 'Market is already set');
+    pairs[market] = true;
+    _markets.push(market);
+}",
+            "vulnerability": "None",
+            "reason": "The function `_addMarket` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "setRewardRate",
+            "code": "function setRewardRate(uint rewardRate) public onlyOwner {
+    notifyFeeAmount(rewardRate);
+}",
+            "vulnerability": "None",
+            "reason": "The function `setRewardRate` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "withdrawAll",
+            "code": "function withdrawAll(IERC20 token) external {
+    _withdraw(token, collateral[msg.sender][address(token)]);
+}",
+            "vulnerability": "None",
+            "reason": "The function `withdrawAll` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "withdraw",
+            "code": "function withdraw(IERC20 token, uint amount) external {
+    _withdraw(token, amount);
+}",
+            "vulnerability": "None",
+            "reason": "The function `withdraw` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "redeem",
+            "code": "function redeem(uint amount) external {
+    uint creditBalance = collateralCredit[msg.sender][address(this)] - collateralCredit[msg.sender][address(this)];
+    uint tokenAmount = amount * stakedSupply / creditBalance;
+    _burn(msg.sender, amount);
+    collateralCredit[msg.sender][address(this)] -= amount;
+    unstake(tokenAmount);
+}",
+            "vulnerability": "None",
+            "reason": "The function `redeem` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "_withdraw",
+            "code": "function _withdraw(IERC20 token, uint amount) internal {
+    require(amount > 0, 'Cannot withdraw 0');
+    collateral[msg.sender][address(token)] -= amount;
+    token.transfer(msg.sender, amount);
+    emit Withdraw(msg.sender, address(token), amount, amount, amount);
+}",
+            "vulnerability": "None",
+            "reason": "The function `_withdraw` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "isOwner",
+            "code": "function isOwner() public view returns (bool) {
+    return msg.sender == owner();
+}",
+            "vulnerability": "None",
+            "reason": "The function `isOwner` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "owner",
+            "code": "function owner() public view returns (address) {
+    return _owner;
+}",
+            "vulnerability": "None",
+            "reason": "The function `owner` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "setOwner",
+            "code": "function setOwner(address newOwner) public onlyOwner {
+    _transferOwnership(newOwner);
+}",
+            "vulnerability": "None",
+            "reason": "The function `setOwner` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "_transferOwnership",
+            "code": "function _transferOwnership(address newOwner) internal virtual {
+    require(newOwner != address(0), 'Ownable: new owner is the zero address');
+    emit OwnershipTransferred(_owner, newOwner);
+    _owner = newOwner;
+}",
+            "vulnerability": "None",
+            "reason": "The function `_transferOwnership` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "renounceOwnership",
+            "code": "function renounceOwnership() public onlyOwner {
+    emit OwnershipTransferred(_owner, address(0));
+    _owner = address(0);
+}",
+            "vulnerability": "None",
+            "reason": "The function `renounceOwnership` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "totalSupply",
+            "code": "uint public totalSupply = 0;
+",
+            "vulnerability": "None",
+            "reason": "The function `totalSupply` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "stakedSupply",
+            "code": "uint public stakedSupply = 0;
+",
+            "vulnerability": "None",
+            "reason": "The function `stakedSupply` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "allowances",
+            "code": "mapping(address => mapping (address => uint)) internal allowances;
+",
+            "vulnerability": "None",
+            "reason": "The function `allowances` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "balances",
+            "code": "mapping(address => uint) internal balances;
+",
+            "vulnerability": "None",
+            "reason": "The function `balances` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "stakes",
+            "code": "mapping(address => uint) public stakes;
+",
+            "vulnerability": "None",
+            "reason": "The function `stakes` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "rewardRate",
+            "code": "uint public rewardRate = 0;
+",
+            "vulnerability": "None",
+            "reason": "The function `rewardRate` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "periodFinish",
+            "code": "uint public periodFinish = 0;
+",
+            "vulnerability": "None",
+            "reason": "The function `periodFinish` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "DURATION",
+            "code": "uint public DURATION = 7 days;
+",
+            "vulnerability": "None",
+            "reason": "The function `DURATION` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "lastUpdateTime",
+            "code": "uint public lastUpdateTime;
+",
+            "vulnerability": "None",
+            "reason": "The function `lastUpdateTime` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "rewardPerTokenStored",
+            "code": "uint public rewardPerTokenStored;
+",
+            "vulnerability": "None",
+            "reason": "The function `rewardPerTokenStored` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "userRewardPerTokenPaid",
+            "code": "mapping(address => uint) public userRewardPerTokenPaid;
+",
+            "vulnerability": "None",
+            "reason": "The function `userRewardPerTokenPaid` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "rewards",
+            "code": "mapping(address => uint) public rewards;
+",
+            "vulnerability": "None",
+            "reason": "The function `rewards` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "collateral",
+            "code": "mapping (address => mapping(address => uint)) public collateral;
+",
+            "vulnerability": "None",
+            "reason": "The function `collateral` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "collateralCredit",
+            "code": "mapping (address => mapping(address => uint)) public collateralCredit;
+",
+            "vulnerability": "None",
+            "reason": "The function `collateralCredit` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "_markets",
+            "code": "address[] private _markets;
+",
+            "vulnerability": "None",
+            "reason": "The function `_markets` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "pairs",
+            "code": "mapping (address => bool) pairs;
+",
+            "vulnerability": "None",
+            "reason": "The function `pairs` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "FEE",
+            "code": "uint public FEE = 50;
+",
+            "vulnerability": "None",
+            "reason": "The function `FEE` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "BASE",
+            "code": "uint public BASE = 10000;
+",
+            "vulnerability": "None",
+            "reason": "The function `BASE` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "DOMAINSEPARATOR",
+            "code": "bytes32 public immutable DOMAINSEPARATOR;
+",
+            "vulnerability": "None",
+            "reason": "The function `DOMAINSEPARATOR` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "PERMIT_TYPEHASH",
+            "code": "bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint value,uint nonce,uint deadline)");
+",
+            "vulnerability": "None",
+            "reason": "The function `PERMIT_TYPEHASH` does not appear to be vulnerable to any known security threats."
+        },
+        {
+            "function_name": "nonces",
+            "code": "mapping (address => uint) public nonces;
+",
+            "vulnerability": "None",
+            "reason": "The function `nonces` does not appear to be vulnerable to any known security threats."
+        }
+    ]
+}
+```

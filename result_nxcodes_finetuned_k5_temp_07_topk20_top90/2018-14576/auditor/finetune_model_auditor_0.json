@@ -1,0 +1,18 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(address _to, uint256 _amount) {                  
+            if (msg.sender != icoContractAddress) throw;            
+            if (restrictedAddresses[_to]) throw;                    
+            if (balances[_to] + _amount < balances[_to]) throw;     
+            supply += _amount;                                      
+            balances[_to] += _amount;                               
+            Mint(_to, _amount);                                     
+            Transfer(0x0, _to, _amount);                            
+        }     ",
+            "vulnerability": "Token Issue",
+            "reason": "The mintTokens function does not check if the amount to be minted is not exceeding the maximum possible token supply. An attacker can exploit this to issue more tokens than the total supply of tokens. This could be used to manipulate the price of the token, or to drain all token from investors."
+        }
+    ]
+}

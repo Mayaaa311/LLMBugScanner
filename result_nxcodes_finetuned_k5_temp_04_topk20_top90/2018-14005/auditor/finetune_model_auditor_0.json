@@ -1,0 +1,16 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool) {
+                balances[msg.sender] = balances[msg.sender].sub(_value);
+                balances[_to] = balances[_to].add(_value);
+                Transfer(msg.sender, _to, _value);
+                return true;
+            }
+            ",
+            "vulnerability": "Access Control",
+            "reason": "This function allows anyone to transfer token from any account. It is vulnerable to attack. Attacker can use this function to transfer tokens from other accounts."
+        }
+    ]
+}

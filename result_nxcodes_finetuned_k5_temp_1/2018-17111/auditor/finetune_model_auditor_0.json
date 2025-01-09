@@ -1,0 +1,23 @@
+{
+   "output_list": [
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _amount) returns (bool success) {
+       if (balances[_from] >= _amount 
+          && allowed[_from][msg.sender] >= _amount
+          && _amount > 0
+          && balances[_to] + _amount > balances[_to]) {
+           balances[_from] -= _amount;
+           allowed[_from][msg.sender] -= _amount;
+            balances[_to] += _amount;
+             Transfer(_from, _to, _amount);
+             return true;
+        } else {
+            return false;
+         }
+     }",
+            "vulnerability": "Unsafety Transfer",
+            "reason": "In the provided smart contract, the transferFrom function is vulnerable to a 'transferFrom self-transfer' attack, where the contract owner can bypass the approval and transferFrom function, thereby leading to loss of tokens. This can be fixed by adding a check to prevent the _from address and _to address from being the same in the transferFrom function."
+        }
+    ]
+}

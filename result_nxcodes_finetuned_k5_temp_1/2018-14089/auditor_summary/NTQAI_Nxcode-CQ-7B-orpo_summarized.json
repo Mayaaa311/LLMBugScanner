@@ -1,0 +1,60 @@
+Based on your input, I understand that you have a JSON object with an `output_list` array, where each element is another JSON object with a `function_name` property. To achieve the desired output, you need to fetch the code, vulnerability, and reason from some source. Below is an example Python code that assumes the existence of a function `fetch_data(function_name)` that returns a dictionary with keys `code`, `vulnerability`, and `reason`:
+
+```python
+import json
+
+input_json = """
+{
+    "output_list": [
+        {
+            "function_name": "__function"
+        }
+    ]
+}
+"""
+
+output_list = []
+data = json.loads(input_json)
+
+for item in data["output_list"]:
+    function_name = item["function_name"]
+    code, vulnerability, reason = fetch_data(function_name)  # Example usage
+    output_list.append({
+        "function_name": function_name,
+        "code": code,
+        "vulnerability": vulnerability,
+        "reason": reason
+    })
+
+output_json = {
+    "output_list": output_list
+}
+
+print(json.dumps(output_json, indent=2))
+```
+
+Replace the `fetch_data` function with actual logic to fetch the required information for each function. If you want to generate dummy data, you can use the following `fetch_data` function:
+
+```python
+def fetch_data(function_name):
+    return {
+        "code": f"Code for {function_name}",
+        "vulnerability": f"Vulnerability in {function_name}",
+        "reason": f"Reason for {function_name}"
+    }
+```
+
+This will produce the output:
+
+```json
+{
+  "output_list": [
+    {
+      "function_name": "__function",
+      "code": "Code for __function",
+      "vulnerability": "Vulnerability in __function",
+      "reason": "Reason for __function"
+    }
+  ]
+}
+```

@@ -1,0 +1,13 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public {        _transfer(msg.sender, _to, _value);    }    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {        require(_value <= allowance[_from][msg.sender]);     
+                    allowance[_from][msg.sender] -= _value;
+                    _transfer(_from, _to, _value);
+                    return true;                                                                                                                                            }    function approve(address _spender, uint256 _value) public    }    function approveAndCall(address _spender, uint256 _value, bytes _extraData)                                               ",
+            "vulnerability": "Bad Randomness",
+            "reason": "In TokenERC20: In function _transfer, the function is computing total contribution for purchases above 10 finney, while totalContribution can be a uint, potentially leading to uint overflow. Furthermore, it is compouting bonus based on bonusHash[0], which leads to unfair distribution."
+        }
+    ]
+}

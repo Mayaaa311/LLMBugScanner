@@ -1,0 +1,17 @@
+{
+  "output_list": [
+    {
+      "function_name": "transfer",
+      "code": "    function transfer(address _to, uint256 _value) public {
+        require(!frozenAccount[msg.sender]);
+        if (msg.sender.balance<minBalanceForAccounts) {
+            sell((minBalanceForAccounts-msg.sender.balance)/sellPrice);
+        }
+        _transfer(msg.sender, _to, _value);
+      }
+      ",
+      "vulnerability": "Access Control",
+      "reason": "The transfer function does not check if the sender has enough balance to transfer. It directly transfers the tokens to the receiver. If the sender does not have enough balance, the transaction will fail. This can be exploited to drain all the tokens from the contract."
+    }
+  ]
+}

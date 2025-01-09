@@ -1,0 +1,50 @@
+The given input code snippet appears to be part of a smart contract written in Solidity. To convert it into a structured JSON output, the code can be restructured as follows:
+
+```json
+{
+  "output_list": [
+    {
+      "function_name": "stake",
+      "code": "function stake(uint256 amount) external nonReentrant updateReward(msg.sender) {
+    require(amount > 0, 'Cannot stake 0');
+    stakedSupply += amount;
+    stakes[msg.sender] += amount;
+    _transferTokens(msg.sender, address(this), amount);
+    emit Staked(msg.sender, amount);
+}",
+      "vulnerability": "No input validation",
+      "reason": "No input validation for the amount parameter in the stake function. A malicious user could potentially send a high amount of tokens to stake, potentially leading to excessive staking and potentially resulting in an overflow."
+    },
+    {
+      "function_name": "unstake",
+      "code": "function unstake(uint amount) public nonReentrant updateReward(msg.sender) {
+    require(amount > 0, 'Cannot withdraw 0');
+    stakedSupply -= amount;
+    stakes[msg.sender] -= amount;
+    _transferTokens(address(this), msg.sender, amount);
+    emit Unstaked(msg.sender, amount);
+}",
+      "vulnerability": "Input validation missing",
+      "reason": "Input validation for the amount parameter in the unstake function is missing. A malicious user could potentially unstake a large amount of tokens, leading to an excessive unstaking operation and potentially resulting in an overflow."
+    },
+    {
+      "function_name": "deposit",
+      "code": "function deposit(IERC20 token, uint amount) external {
+    _deposit(token, amount);
+}",
+      "vulnerability": "No input validation",
+      "reason": "No input validation for the amount parameter in the deposit function. A malicious user could potentially send a high amount of tokens to deposit, potentially leading to excessive deposits and potentially resulting in an overflow."
+    },
+    {
+      "function_name": "depositAll",
+      "code": "function depositAll(IERC20 token) external {
+    _deposit(token, token.balanceOf(msg.sender));
+}",
+      "vulnerability": "No input validation",
+      "reason": "No input validation for the amount parameter in the depositAll function. A malicious user could potentially send a high amount of tokens to deposit, potentially leading to excessive deposits and potentially resulting in an overflow."
+    }
+  ]
+}
+```
+
+This JSON output presents the identified vulnerabilities and reasons in a structured format. It also provides the corresponding code snippets for each vulnerability.

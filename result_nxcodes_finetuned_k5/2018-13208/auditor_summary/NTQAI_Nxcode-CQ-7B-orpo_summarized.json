@@ -1,0 +1,28 @@
+{
+    "output_list": [
+        {
+            "function_name": "buy",
+            "code": "function buy() payable {                uint amount = msg.value / buyPrice;                if (balanceOf[this] < amount ) throw;               
+            balanceOf[msg.sender] += amount;                   
+            balanceOf[this] -= amount;                         
+            Transfer(this, msg.sender, amount);                
+        }
+        function sell(uint256 amount) {
+            if (balanceOf[msg.sender] < amount ) throw;        
+            balanceOf[this] += amount;                         
+            balanceOf[msg.sender] -= amount;                   
+            if (!msg.sender.send(amount * sellPrice)) {        
+                throw;                                         
+            } else {
+                Transfer(msg.sender, this, amount);            
+            }
+        }
+        function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+            sellPrice = newSellPrice;
+            buyPrice = newBuyPrice;
+        }",
+            "vulnerability": "Integer Overflow",
+            "reason": "In the buy function, the amount of tokens to be sold is calculated by dividing the sent value by the buyPrice. If the buyPrice is lower than 1, then the amount of tokens to be sold can be more than the available tokens in the contract. This will cause an integer overflow and result in loss of tokens for the contract owner."
+        }
+    ]
+}

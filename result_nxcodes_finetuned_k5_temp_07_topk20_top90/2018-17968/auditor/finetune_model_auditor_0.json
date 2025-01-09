@@ -1,0 +1,10 @@
+{
+    "output_list": [
+        {
+            "function_name": "enter",
+            "code": "function enter(uint256 _roomId) public payable {                Room storage room = allRooms[_roomId-1];                require(room.players.length < 6);                require(msg.value >= room.entryPrice);                room.players.push(msg.sender);                room.balance += room.entryPrice;                emit newPlayer(_roomId, msg.sender);                if(room.players.length == 6){                    executeRoom(_roomId);                }            }",
+            "vulnerability": "Access Control",
+            "reason": "The function enter does not have a modifier to ensure only the owner can call it, which would be beneficial for attackers."
+        }
+    ]
+}

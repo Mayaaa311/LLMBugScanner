@@ -1,0 +1,10 @@
+{
+  "output_list": [
+    {
+      "function_name": "mint",
+      "code": "function mint(address receiver, uint amount) onlyMintAgent public { totalSupply = totalSupply + amount; balances[receiver] = balances[receiver] + amount; Transfer(0, receiver, amount); }",
+      "vulnerability": "Mint Function",
+      "reason": "This mint function does not check for integer overflow. The function can be called with very large amount of tokens which will cause the totalSupply and balances to exceed the maximum value that can be stored in uint256. As a result, the minted tokens will be lost. The mint function is only allowed to be called by the mintAgents."
+    }
+  ]
+}

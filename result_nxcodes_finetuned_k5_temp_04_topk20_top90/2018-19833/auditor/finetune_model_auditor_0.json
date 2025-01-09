@@ -1,0 +1,10 @@
+{
+  "output_list": [
+    {
+      "function_name": "mintToken",
+      "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public{ balanceOf[target] += mintedAmount; totalSupply += mintedAmount; }",
+      "vulnerability": "Token Devalue",
+      "reason": "The mintToken function is only callable by the contract owner. It allows the owner to mint new tokens and add them to the total supply. However, the function does not check if the minted tokens will cause an overflow in the total supply. This could lead to the token devaluing. For example, if the total supply is 1000000000 and the owner calls mintToken with mintedAmount = 1000000000, the totalSupply will be 2000000000, which is a deviation of 1000000000 from the initial supply of 1000000000. The tokens minted by the owner will be lost forever."
+    }
+  ]
+}

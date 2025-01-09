@@ -1,0 +1,17 @@
+{
+    "output_list": [
+        {
+            "function_name": "buyChamp",
+            "code": "    function buyChamp(uint256 _id) external payable
+      whenNotPaused
+      onlyNotOwnerOfChamp(_id)
+      champIsForSale(_id)
+      isPaid(champs[_id].price)
+      distributeSaleInput(champToOwner[_id]) {
+        transferChamp(champToOwner[_id], msg.sender, _id);
+      }",
+            "vulnerability": "Champ Attack",
+            "reason": "The buyChamp function allows the transfer of champs for sale. The price of the champs is set by the seller and is transferred to the buyer. However, the price is not checked for validity. The price can be set to 0, which means the champ can be bought for free. This can lead to a loss of funds for the seller and the buyer."
+        }
+    ]
+}

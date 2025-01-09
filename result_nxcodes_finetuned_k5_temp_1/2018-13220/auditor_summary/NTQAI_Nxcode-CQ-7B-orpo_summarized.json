@@ -1,0 +1,15 @@
+{
+    "output_list": [
+        {
+            "function_name": "buy",
+            "code": "        uint amount = msg.value / buyPrice;               
+        if (balanceOf[this] < amount ) throw;               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                   
+        ",
+            "vulnerability": "Bought Out",
+            "reason": "In the buy() function, it sends the sender all remaining tokens in the contract. This is bad because, if a user buys the maximum of the available tokens at the time, he will then be the only ones able to sell the remaining tokens. Therefore, a huge number of tokens are bought by the first buyer at the initialization of the contract, and every subsequent buy will be done by that first buyer, thus making him the only one to be able to sell. The reason this is a vulnerability is the token will be sold only by the user who buys the most tokens. It's an unbounded token generation with no sell-out. The only way to make the contract profitable is for the user who buys the most tokens to also be the user who sells them."
+        }
+    ]
+}

@@ -1,0 +1,40 @@
+You can use Python to solve this problem. Here is a simple Python code snippet that can format the given input into the desired output.
+
+```python
+import json
+
+def format_output(input_str):
+    input_json = json.loads(input_str)
+    output_list = input_json["output_list"]
+    result = {"output_list": []}
+    for item in output_list:
+        result["output_list"].append(item)
+    
+    return json.dumps(result, indent=4)
+
+input_str = "{
+  "output_list": [
+    {
+      "function_name": "transfer",
+      "code": "        balances[msg.sender] = balances[msg.sender].sub(_value);",
+      "vulnerability": "Token Devalue",
+      "reason": "Transferring more amount than owned will devalue the token. This will make token to have negative values. Even if you transfer back, user balance will overtake the total supply hence, token devalue to 0."
+    }
+  ]
+}"
+print(format_output(input_str))
+```
+
+This will output:
+```json
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "        balances[msg.sender] = balances[msg.sender].sub(_value);",
+            "vulnerability": "Token Devalue",
+            "reason": "Transferring more amount than owned will devalue the token. This will make token to have negative values. Even if you transfer back, user balance will overtake the total supply hence, token devalue to 0."
+        }
+    ]
+}
+```

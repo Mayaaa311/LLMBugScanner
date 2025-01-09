@@ -1,0 +1,14 @@
+Given the input, the output should be:
+
+```json
+{
+  "output_list": [
+    {
+      "function_name": "buy",
+      "code": "function buy() payable returns (uint256 amount){ require(!ico); require(usersCanTrade || canTrade[msg.sender]); amount = msg.value * buyPrice; require(balanceOf[this] >= amount); balanceOf[msg.sender] += amount; balanceOf[this] -= amount; Transfer(this, msg.sender, amount); return amount; }",
+      "vulnerability": "Unlimited token sell",
+      "reason": "If msg.value is large and buyPrice is also large, a buyer can easily buy all tokens by buying them at a discounted price."
+    }
+  ]
+}
+```

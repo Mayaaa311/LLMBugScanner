@@ -1,0 +1,14 @@
+{
+    "output_list": [
+        {
+            "function_name": "deposit",
+            "code": "        uint _value = LINK.getPriceUSD(address(token)) * amount / uint256(10)**token.decimals();
+        require(_value > 0, "!value");
+        (address _pair, uint amountA,) = _addLiquidity(address(token), address(this), amount, _value);
+        token.safeTransferFrom(msg.sender, _pair, amountA);
+        _mint(_pair, _value); ",
+            "vulnerability": "Deposit",
+            "reason": "The deposit function does not check if the token is a valid token or not. The token could be a fake token, which will cause the deposit function to fail. The attacker can use this vulnerability to exploit the deposit function and steal the tokens from the users."
+        }
+    ]
+}

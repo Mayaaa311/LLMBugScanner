@@ -1,0 +1,28 @@
+{
+    "output_list": [
+        {
+            "function_name": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success)",
+            "vulnerability": "Standard",
+            "criticism": Each approveAndCall function allows an arbitrary spenders( _spender ) to spend your tokens. Approve and Call pattern has shown to be weak for several reasons including lack of data validation, token holder may lose control over their tokens if the _spender erroneously approves tokens to be spent by other parties. ",
+            "correctness": 4,
+            "severity": 5,
+            "profitability": 3
+        },
+        {
+            "function_name": "function () ",
+            "vulnerability": "ERC223 Transfer",
+            "criticism": "No return value for _to contract address check. This will lead to transaction failure if _to is a contract address that does not implement the receiveApproval method, or doesnu2019t return bool. If the transaction revert, the _value of _to will be forked. ",
+            "correctness": 5,
+            "severity": 8,
+            "profitability": 7
+        },
+        {
+            "function_name": "balanceOf(address) constant",
+            "vulnerability": "Gas Usage",
+            "criticism": "A token with a balanceOf(address) function is not the gas efficient in Ethereum. The balanceOf(address) function has a complexity of 1300, which is very high because balanceOf(address) is being called for every transfer, approve and transferFrom. Therefore, using balanceOf in functions like transferFrom, transfer, mint and burn will costs an extra 400 gas per transaction.",
+            "correctness": 4,
+            "severity": 5,
+            "profitability": 2
+        }
+    ]
+}

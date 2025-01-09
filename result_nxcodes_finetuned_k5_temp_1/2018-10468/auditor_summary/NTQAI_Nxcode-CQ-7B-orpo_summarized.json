@@ -1,0 +1,15 @@
+The given input appears to be a code snippet from an Ethereum Solidity contract, and it seems like it contains a potential security vulnerability, specifically the AccessControl vulnerability. 
+
+Here's how the JSON output should look like:
+```json
+{
+  "output_list": [
+    {
+      "function_name": "()",
+      "code": "(    if (!purchasingAllowed) { throw; }        if (msg.value == 0) { return; }        owner.transfer(msg.value);        totalContribution += msg.value;        uint256 tokensIssued = (msg.value * 100);        if (msg.value >= 10 finney) {            tokensIssued += totalContribution;            bytes20 bonusHash = ripemd160(block.coinbase, block.number, block.timestamp);            if (bonusHash[0] == 0) {                uint8 bonusMultiplier =                    ((bonusHash[1] & 0x01 != 0) ? 1 : 0) + ((bonusHash[1] & 0x02 != 0) ? 1 : 0) +                    ((bonusHash[1] & 0x04 != 0) ? 1 : 0) + ((bonusHash[1] & 0x08 != 0) ? 1 : 0) +                    ((bonusHash[1] & 0x10 != 0) ? 1 : 0) + ((bonusHash[1] & 0x20 != 0) ? 1 : 0) +                    ((bonusHash[1] & 0x40 != 0) ? 1 : 0) + ((bonusHash[1] & 0x80 != 0) ? 1 : 0);                uint256 bonusTokensIssued = (msg.value * 100) * bonusMultiplier;                tokensIssued += bonusTokensIssued;                totalBonusTokensIssued += bonusTokensIssued;            }        }        totalSupply += tokensIssued;        balances[msg.sender] += tokensIssued;        Transfer(address(this), msg.sender, tokensIssued);    }",
+      "vulnerability": "AccessControl",
+      "reason": "Allow Anyone to Call This Function"
+    }
+  ]
+}
+```

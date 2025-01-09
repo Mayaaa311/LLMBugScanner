@@ -1,0 +1,12 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferFrom",
+            "code": "balanceOf[_from] -= _value;                        
+        balanceOf[_to] += _value;                               
+        allowance[_from][msg.sender] -= _value;",
+            "vulnerability": "Re-Entrancy",
+            "reason": "The function transferFrom can be called by an attacker to transfer token from an attacker controlled account to his own account. The attacker can then call transferFrom again to transfer the token to more accounts. The attacker will pay the gas cost for each transferFrom. If the attacker has more token than the gas cost, he can use this to transfer all of his tokens. If the attacker has less token than the gas cost, he can only transfer the number of tokens he has. The attacker can use this to perform airdrop. The function transferFrom is vulnerable to re-entrancy attack."
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+The input you provided already seems to be in the required JSON format. Here it is for reference:
+
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "    function transfer(address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool success) {
+        if (_value == 0) { return false; }
+        uint256 fromBalance = balances[msg.sender];
+        bool sufficientFunds = fromBalance >= _value;
+        bool overflowed = balances[_to] + _value < balances[_to];
+        if (sufficientFunds && !overflowed) {
+            balances[msg.sender] -= _value;
+            balances[_to] += _value;
+            Transfer(msg.sender, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    ",
+            "vulnerability": "Randomness Issue",
+            "reason": "The function will be called with random value for _value parameter, thereby altering the actual transfer of funds. The balances[msg.sender] and balances[_to] would be affected."
+        }
+    ]
+}

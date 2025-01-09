@@ -1,0 +1,13 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "balanceOf[msg.sender] -= _value;                        
+        balanceOf[_to] += _value;                               
+        Transfer(msg.sender, _to, _value);                      
+    }",
+            "vulnerability": "Token Devalue",
+            "reason": "In the transfer function, the sender's balance is reduced by _value but the recipient's balance is increased by _value. If the sender's balance is less than _value, the transaction will fail. This means that the sender can only transfer the amount of tokens they have in their balance. This can be exploited by the sender to transfer all tokens to a malicious contract, effectively devaluing the tokens. The tokens should be transferable to any address."
+        }
+    ]
+}

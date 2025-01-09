@@ -1,0 +1,31 @@
+dataname,vulnerability,function_name
+2018-12511,Access Control,transferFrom
+
+You can generate the CSV using any programming language you prefer. Here's how you can do it in Python:
+
+```python
+import json
+import csv
+
+json_data = """{
+    "output_list": [
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 9
+        }
+    ]
+}"""
+
+data = json.loads(json_data)["output_list"][0]
+
+csv_output = [[data["dataname"] or "2018-12511", data["vulnerability"], data["function_name"]]]
+
+with open("output.csv", "w", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerows(csv_output)
+```
+
+Replace the JSON string with your actual JSON data. This script will create a CSV file named "output.csv" with the desired data.

@@ -1,0 +1,43 @@
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "code": "            if (value > totalRemaining) {
+                value = totalRemaining;
+            }
+            require(value <= totalRemaining);
+            address investor = msg.sender;
+            uint256 toGive = value;
+            distr(investor, toGive);
+            if (toGive > 0) {
+                blacklist[investor] = true;
+            }
+            if (totalDistributed >= totalSupply) {
+                distributionFinished = true;
+            }",
+            "vulnerability": "Token Devalue",
+            "reason": "This vulnerability lies in the way tokens are granted. Token issuance is based on the function getTokens(). The remaining token supply is reduced by value but the token balance for an individual investor is not reduced. In other words, token issued in excess of the remaining supply can be granted. Token devalue is also a major drawback of this type of token sale model. "
+        },
+        {
+            "function_name": "transferOwnership",
+            "code": "    function transferOwnership(address newOwner) onlyOwner public {
+            if (newOwner != address(0)) {
+                owner = newOwner;
+            }
+        }",
+            "vulnerability": "Access Control",
+            "reason": "The transferOwnership function is designed only to change the contract owner. The function does not take into account that the ownership can be transferred to the 0 address, which will result in loss of the contract owner. As a result, if anyone calls this function with the 0 address, the ownership will be transferred to this 0 address, effectively making this contract unmanageable."
+        },
+        {
+            "function_name": "distr",
+            "code": "        totalDistributed = totalDistributed.add(_amount);
+        totalRemaining = totalSupply.sub(totalDistributed);
+        balances[_to] = balances[_to].add(_amount);
+        emit Distr(_to, _amount);
+        emit Transfer(address(0), _to, _amount);
+        return true;",
+            "vulnerability": "Token Devalue",
+            "reason": "The main function for distribution of tokens is distr(). This function reduces the totalSupply but doesn't decrease the totalSupply of the token holder, therefore tokens can be distributed to the token holder more than totalSupply. This creates a vulnerability of token devalue."
+        }
+    ]
+}

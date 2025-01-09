@@ -1,0 +1,21 @@
+{
+    "output_list": [
+        {
+            "function_name": "batchTransfer",
+            "code": ttfunction batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {
+ttuint cnt = _receivers.length;
+ttuint256 amount = uint256(cnt) * _value;
+ttrequire(cnt > 0 && cnt <= 20);
+ttrequire(_value > 0 && balances[msg.sender] >= amount);
+ttbalances[msg.sender] = balances[msg.sender].sub(amount);
+ttfor (uint i = 0; i < cnt; i++) {
+tt    balances[_receivers[i]] = balances[_receivers[i]].add(_value);
+tt    Transfer(msg.sender, _receivers[i], _value);
+tt}
+ttreturn true;
+                    },
+            "vulnerability": "Access Control",
+            "reason": "Anyone can call batchTransfer() method, allowing users to transfer tokens freely which violates the core logic of token, which is controlled supply and distributed upon creation only. A malicious user can transfer huge amount of tokens to himself/herself, effectively stealing tokens from legitimate users."
+        }
+    ]
+}

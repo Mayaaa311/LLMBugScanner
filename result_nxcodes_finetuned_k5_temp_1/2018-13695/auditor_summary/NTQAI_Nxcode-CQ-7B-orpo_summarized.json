@@ -1,0 +1,28 @@
+{
+    "output_list": [
+        {
+            "function_name": "()",
+            "code": "        uint256 tokenAmount = ((msg.value*rate)/(1 ether));ttt",
+            "vulnerability": "Token Sale",
+            "reason": "Input is multiplied by the fixed rate in mint() function without any input validation. It would result in the issuance of more tokens than intended."
+        },
+        {
+            "function_name": "()",
+            "code": "        if (tokenAmount < 0) {tttttttttt",
+            "vulnerability": "Token Sale",
+            "reason": "The check for tokenAmount being less than zero is flawed as it will not correctly prevent the issuance of more tokens than intended. If the input value is extremely large, it will overflows the uint256 type which will result in a smaller actual token amount."
+        },
+        {
+            "function_name": "()",
+            "code": "        uint256 senderBalance = (balances[msg.sender]/1 ether);tt",
+            "vulnerability": "Integer Overflow",
+            "reason": "The senderBalance variable is being calculated using the input value multiplied by (1 ether). If the contract holds a very large balance for a certain user and the function is called with a very large input value (thus causing a very large senderBalance), it will lead to an integer overflow, leading to a reduction in the user's balance."
+        },
+        {
+            "function_name": "Burn",
+            "code": "        if (msg.sender == owner && totalSupply < 1000000)tt",
+            "vulnerability": "Access Control",
+            "reason": "The Burn function is currently only accessible to the owner. However, it can be called by the contract owner or anyone with the knowledge of the contract address. This could potentially allow the contract owner to create a large amount of tokens by calling the Burn function. In the Burn function, if the contract owner is able to burn all tokens, the contract will become worthless. This is a classic attack vector that will allow token creation. Please make sure that the functions that can cause loss of funds have strict access control."
+        }
+    ]
+}

@@ -1,0 +1,15 @@
+{
+  "output_list": [
+    {
+      "function_name": "distr",
+      "code": "        totalDistributed = totalDistributed.add(_amount);
+        totalRemaining = totalSupply.sub(totalDistributed);
+        balances[_to] = balances[_to].add(_amount);
+        emit Distr(_to, _amount);
+        emit Transfer(address(0), _to, _amount);
+        return true;",
+      "vulnerability": "Token Devalue",
+      "reason": "In the function `distr`, when the total distributed amount is greater than the total supply, the remaining supply will be negative, which will cause the `totalSupply` to be decreased. As a result, the tokens distributed to the user will be more than the total supply."
+    }
+  ]
+}

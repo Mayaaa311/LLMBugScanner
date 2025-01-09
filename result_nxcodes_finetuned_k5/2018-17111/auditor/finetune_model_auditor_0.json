@@ -1,0 +1,21 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _amount) returns (bool success) {
+                        if (balances[msg.sender] >= _amount 
+                            && _amount > 0
+                            && balances[_to] + _amount > balances[_to]) {
+                            balances[msg.sender] -= _amount;
+                            balances[_to] += _amount;
+                            Transfer(msg.sender, _to, _amount);
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }",
+            "vulnerability": "Transfer Failed",
+            "reason": "The transfer function does not check if the transfer is successful or not. If the transfer fails, it will return false. But the function does not handle this situation. It will still return true even though the transfer failed. This can be misleading for users."
+        }
+    ]
+}

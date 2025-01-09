@@ -1,0 +1,10 @@
+{
+  "output_list": [
+    {
+      "function_name": "buyHeart",
+      "code": "        uint256 _hearts = (RoundETH[Round]).keysRec(msg.value);",
+      "vulnerability": "Integer Overflow",
+      "reason": "In the function buyHeart, the parameter _hearts is calculated as (RoundETH[Round]).keysRec(msg.value). The function keysRec is defined as function keysRec(uint256 _eth) public view returns(uint256) { return (((((_eth).mul(1000000000000000000)).mul(312500000000000000000000000)).add(5624988281256103515625000000000000000000000000000000000000000000)).sqrt()).sub(74999921875000000000000000000000)) / (156250000); } In this function, the return value is calculated as ((_eth).mul(1000000000000000000)).mul(312500000000000000000000000).add(5624988281256103515625000000000000000000000000000000000000000000).sqrt()).sub(74999921875000000000000000000000)) / (156250000); The return value is then subtracted from 74999921875000000000000000000000 / 156250000. The subtraction operation may cause an integer underflow, leading to incorrect result."
+    }
+  ]
+}

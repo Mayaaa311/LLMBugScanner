@@ -1,0 +1,10 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address holder, uint value) {                require(msg.sender == preSale);                require(value > 0);                require(totalSupply + value <= TOKEN_LIMIT);                balances[holder] += value;                totalSupply += value;                Transfer(0x0, holder, value);            }                function unfreeze() external {                    require(msg.sender == team);                    isFrozen = false;                }                function transfer(address _to, uint _value) public returns (bool) {                    require(!isFrozen);                    return super.transfer(_to, _value);                }                function transferFrom(address _from, address _to, uint _value) public returns (bool) {                    require(!isFrozen);                    return super.transferFrom(_from, _to, _value);                }                function approve(address _spender, uint _value) public returns (bool) {                    require(!isFrozen);                    return super.approve(_spender, _value);                }",
+            "vulnerability": "Token Devalue",
+            "reason": "The mint function allows the preSale contract to mint tokens to any address. This can be used to devalue the token. The mint function is only callable by the preSale contract. The preSale contract is set in the constructor and can be changed. The token is minted to any address, which can be used to devalue the token."
+        }
+    ]
+}

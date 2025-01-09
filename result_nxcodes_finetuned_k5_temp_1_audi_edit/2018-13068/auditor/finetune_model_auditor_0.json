@@ -1,0 +1,16 @@
+{
+  "output_list": [
+    {
+      "function_name": "transferFrom",
+      "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) { require(_value <= allowance[_from][msg.sender]);     allowance[_from][msg.sender] -= _value;_transfer(_from, _to, _value); return true; }",
+      "vulnerability": "Token_Bomb",
+      "reason": "Transfer function of the token with allowances, will be executed as many times as the number of tokens a user approved, which would result in totalSupply being extremely high and potentially leading to a Token_Bomb attack."
+    },
+    {
+      "function_name": "mintToken",
+      "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public { balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0, owner, mintedAmount); Transfer(owner, target, mintedAmount); }",
+      "vulnerability": "Token_Bomb",
+      "reason": "mintToken function can be executed to mint an arbitrarily large number of tokens. In the worst case, this could potentially lead to token inflation. The mintToken function would need to be modified to prevent this from happening."
+    }
+  ]
+}

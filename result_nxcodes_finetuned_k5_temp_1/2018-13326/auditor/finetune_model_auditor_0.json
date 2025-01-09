@@ -1,0 +1,32 @@
+{
+  "output_list": [
+    {
+      "function_name": "transferFrom",
+      "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) { 
+        if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) { 
+            balances[_to] += _value; 
+            balances[_from] -= _value; 
+            allowed[_from][msg.sender] -= _value; 
+            Transfer(_from, _to, _value); 
+            return true; 
+        } else { return false; } 
+    }",
+      "vulnerability": "Bad Randomness",
+      "reason": "The provided transferFrom function doesn't check if a random entity would have approved a very high value transfer for a low value from a low balance. The approver could be an attacker and the token holder with low balance, he can get a lot of tokens. This is a vulnerability because attackers can use the provided token as a means of monetary exchange. The solution would involve changing the transferFrom function to only allow a transaction if the allowed amount is less than or equal to the available tokens from the from address and deduct the approved amount from the allowed mapping."
+    },
+    {
+      "function_name": "<unknown_function_1>",
+      "code": "<code of the unknown_function_1>",
+      "vulnerability": "Bad Randomness",
+      "reason": "There exist a function in the smart contract that could lead to bad randomness vulnerability. Your task is to identify the function with the lowest number of false positives. Make sure your identified vulnerability is directly linked to a security issue in the blockchain. Your output should be limited to the following vulnerability types: Integer Overflow, Wrong Logic, Bad Randomness, Access Control, Typo Constructor, Token Devalue. Make sure that each identified vulnerability is exploitable in real world and beneficial to attackers. Your output should strictly be limited to the following vulnerability types: Integer Overflow, Wrong Logic, Bad Randomness, Access Control, Typo Constructor, Token Devalue. 
+      You should ONLY output in below json format:
+      {
+        "output_list": [
+          {
+            "function_name": "<function_name_1>",
+            "code": "<code of the function1>",
+            "vulnerability": "<short_vulnera_desc_1>",
+            "reason": "<reason_1>"
+          }
+        ]
+      }

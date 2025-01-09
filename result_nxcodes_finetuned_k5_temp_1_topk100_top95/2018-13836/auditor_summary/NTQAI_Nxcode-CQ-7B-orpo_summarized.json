@@ -1,0 +1,17 @@
+Your input already matches the structured JSON format that you have provided. As a result, no further conversion is needed. However, here's the JSON version of your input:
+{
+    "output_list": [
+        {
+            "function_name": "setupAirDrop",
+            "code": "function setupAirDrop(bool _status, uint _amount, uint _Gwei) public returns (bool success) {
+    require(msg.sender == owner);
+    airDropStatus = _status;
+    airDropAmount = _amount * 10 ** decimals;
+    airDropGasPrice = _Gwei * 10 ** 9;
+    return true;
+}",
+            "vulnerability": "Reentrancy",
+            "reason": "This function allows owner to call multiTransfer with user inputted addresses and amount. User can call this function and then approve the contract to transfer funds, execute this contract's multiTransfer function (thus doing a recursive multiTransfer) effectively enabling unlimited loss of funds"
+        }
+    ]
+}

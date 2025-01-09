@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "approveAndCall",
+            "code": "                    return true;
+                }
+                function balanceOf(address _owner) constant returns (uint256 balance) {
+                    return balances[_owner];
+                }
+                function approve(address _spender, uint256 _value) returns (bool success) {
+                    if (balances[msg.sender] >= _value && allowed[msg.sender][_spender] >= _value) {
+                        allowed[msg.sender][_spender] -= _value;
+                        Transfer(msg.sender, _spender, _value);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }",
+            "vulnerability": "Reentrancy",
+            "reason": "This contract can call a function of spender after approve. In such a case, the spender can transfer tokens from msg.sender even if msg.sender has set the spender as a malicious contract and the malicious contract is not able to verify the transaction. This will let msg.sender effectively spend all of msg.senderu2019s tokens to spend on the malicious contract, effectively gaining a lot of tokens. The fix is to remove approveAndCall"
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "                balances[_to] += _value;
+                    balances[_from] -= _value; 
+                    allowed[_from][msg.sender] -= _value;
+                    Transfer(_from, _to, _value);
+                    return true;
+                }",
+            "vulnerability": "Reentrancy",
+            "reason": "This contract can call a function of spender after approve. In such a case, the spender can transfer tokens from _from even if _from has set the spender as a malicious contract and the malicious contract is not able to verify the transaction. This will let _from effectively spend all of _fromu2019s tokens to spend on the malicious contract, effectively gaining a lot of tokens. The fix is to remove approve"
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+  "output_list": [
+    {
+      "function_name": "buy",
+      "code": "function buy() payable {     uint amount = msg.value / buyPrice;                if (balanceOf[this] < amount ) throw;               balanceOf[msg.sender] += amount;                                 balanceOf[this] -= amount;                                         Transfer(this, msg.sender, amount);                }     ",
+      "vulnerability": "Token Sell",
+      "reason": "If msg.sender sends more value than what available in the contract, then it will buy all the tokens and send change to the sender. If contract balance of token is smaller than the amount that the sender will buy from the contract. Then the sender will be buying more tokens than the contract has. A malicious sender can use this to sell for cheap, then buy at a high price to profit."
+    }
+  ]
+}

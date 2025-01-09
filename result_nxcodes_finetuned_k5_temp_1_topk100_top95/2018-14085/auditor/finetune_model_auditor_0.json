@@ -1,0 +1,13 @@
+{
+    "output_list": [
+        {
+            "function_name": "makeWallet",
+            "code": "    function makeWallet() onlyAdmins returns (address wallet)  {
+        wallet = address(new UserWallet(this));
+        LogNewWallet(wallet);
+    }",
+            "vulnerability": "Dependency Injection",
+            "reason": "AuthorizedCaller can change the defaultSweeper address during the construction time via makeWallet() , which causes unauthorized token sweeping if AuthorizedCaller is an attacker"
+        }
+    ]
+}

@@ -1,0 +1,31 @@
+{
+  "output_list": [
+    {
+      "function_name": "mintTokens",
+      "code": "
+mintTokens(address _to, uint256 _amount)
+{
+    if (msg.sender != icoContractAddress) throw;
+    if (restrictedAddresses[_to]) throw;
+    if (balances[_to] + _amount < balances[_to]) throw;
+    supply += _amount;
+    balances[_to] += _amount;
+    Mint(_to, _amount);
+    Transfer(0x0, _to, _amount);
+  }",
+      "vulnerability": "Ownership Transfer, Market Maker Dissuade.",
+      "reason": "This token, designed to be for ico, will allow ico contract to bypass all transfer restriction and mint a substantial amount of token, and also issue token to market maker. Both potentially benefit attackers."
+    },
+    {
+      "function_name": "freezeTransfersUntil",
+      "code": "
+freezeTransfersUntil(uint256 _frozenUntilBlock, string _reason)
+{
+    tokenFrozenUntilBlock = _frozenUntilBlock;
+    TokenFrozen(_frozenUntilBlock, _reason);
+  }",
+      "vulnerability": "Time-based Token Frozen",
+      "reason": "The contract author sets an arbitrary time for the token to freeze, allowing attackers to bypass existing transfer restriction and manipulate them."
+    }
+  ]
+}

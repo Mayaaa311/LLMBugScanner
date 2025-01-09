@@ -1,0 +1,24 @@
+
+Here is the JSON output:
+```json
+{
+    "output_list": [
+        {
+            "function_name": "Transfer",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    require(_value <= allowance[_from][msg.sender]);     
+    allowance[_from][msg.sender] -= _value;
+    _transfer(_from, _to, _value);
+    return true;
+}
+function approve(address _spender, uint256 _value) public
+    returns (bool success) {
+    allowance[msg.sender][_spender] = _value;
+    return true;
+}",
+            "vulnerability": "Access Control",
+            "reason": "This vulnerability is triggered because a user has full control over the amount of tokens a third party can spend on behalf of the user. A malicious user could set up a token contract that acts as an interface between the user and the real token contract, and make the user approve the maximum possible amount of tokens to be spent on behalf of the user. The user would then send the tokens to the malicious contract, believing they are from the real token contract. The malicious contract would then transfer the tokens from the user's account to its own. The user would then receive the tokens from the malicious contract, believing they are from the real token contract. This could be exploited to e.g. gain control over the staking pool of a token or rug the token."
+        }
+    ]
+}
+```

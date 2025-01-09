@@ -1,0 +1,10 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address _holder, uint _value) external { require(msg.sender == presale); require(_value > 0); require(totalSupply + _value <= TOKEN_LIMIT); balances[_holder] += _value; totalSupply += _value; Transfer(0x0, _holder, _value); }",
+            "vulnerability": "Mint for Zero Address",
+            "reason": "In this mint function, the msg.sender must be the presale address, else it is invalid to mint tokens and the function will not work. The vulnerability here is that a user can potentially mint for free. This could be mitigated by adding a condition that the sender must be the presale address."
+        }
+    ]
+}

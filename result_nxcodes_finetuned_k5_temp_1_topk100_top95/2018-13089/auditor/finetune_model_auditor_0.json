@@ -1,0 +1,11 @@
+{
+  "output_list": [
+    {
+      "function_name": "fallback",
+      "code": "    function() payable { buy(); }                               
+",
+      "vulnerability": "Cyclic Receive",
+      "reason": "Functon fallback don't check for receiver's if they are valid contracts or not. They are just called with msg.value as argument, any error in them will be reverted. If the receiver are contracts, but the function fails, the revert transaction will still be done. They will be able to mint tokens for free on this. Any other contract's which are using this function to send back ETHs will also be affected."
+    }
+  ]
+}

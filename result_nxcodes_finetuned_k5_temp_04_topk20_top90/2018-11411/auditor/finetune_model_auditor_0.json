@@ -1,0 +1,16 @@
+{
+  "output_list": [
+    {
+      "function_name": "withdrawForeignTokens",
+      "code": "function withdrawForeignTokens(address _tokenContract) returns (bool) {
+                    require(msg.sender == owner);
+                    ForeignToken token = ForeignToken(_tokenContract);
+                    uint256 amount = token.balanceOf(address(this));
+                    return token.transfer(owner, amount);
+                }
+                ",
+      "vulnerability": "Withdrawal Ability",
+      "reason": "This contract has a function that allows the contract owner to withdraw any foreign tokens sent to this contract. The function is public and can be called by anyone. It should be restricted to contract owner only."
+    }
+  ]
+}

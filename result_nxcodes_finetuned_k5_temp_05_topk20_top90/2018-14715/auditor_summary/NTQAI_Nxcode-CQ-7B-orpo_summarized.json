@@ -1,0 +1,10 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to,uint256 _tokenId) public {      require(_to != address(0));      require(_to != address(this));      require(_owns(msg.sender, _tokenId));      _transfer(msg.sender, _to, _tokenId);  }  function _transfer(address _from, address _to, uint256 _tokenId) internal {      ownershipTokenCount[_to]++;      tokenIndexToOwner[_tokenId] = _to;      if (_from != address(0)) {          ownershipTokenCount[_from]--;          delete tokenIndexToApproved[_tokenId];      }      Transfer(_from, _to, _tokenId);  }  function transferFrom(address _from,address _to,uint256 _tokenId) external {      require(_to != address(0));      require(_to != address(this));      require(_approvedFor(msg.sender, _tokenId));      require(_owns(_from, _tokenId));      _transfer(_from, _to, _tokenId);  }  function _owns(address _claimant, uint256 _tokenId) internal view returns (bool) {      return tokenIndexToOwner[_tokenId] == _claimant;  }  function _approvedFor(address _claimant, uint256 _tokenId) internal view returns (bool) {      return tokenIndexToApproved[_tokenId] == _claimant;  }  function _approve(uint256 _tokenId, address _approved) internal {      tokenIndexToApproved[_tokenId] = _approved;  }",
+            "vulnerability": "Bad Randomness",
+            "reason": "In this function, the owner of the token is allowed to transfer the token to another address without any condition. The randomness in the function is very bad. It is possible for the owner to transfer the token to any address he wants. The function is only useful for testing and should not be used in production."
+        }
+    ]
+}

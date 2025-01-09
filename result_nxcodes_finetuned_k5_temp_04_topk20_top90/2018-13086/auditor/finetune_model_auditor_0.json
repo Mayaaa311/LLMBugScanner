@@ -1,0 +1,16 @@
+{
+    "output_list": [
+        {
+            "function_name": "buy",
+            "code": "function buy() payable public {                uint amount = msg.value / buyPrice;                _transfer(this, msg.sender, amount);              }                function sell(uint256 amount) public {                require(this.balance >= amount * sellPrice);      
+                _transfer(msg.sender, this, amount);              
+                msg.sender.transfer(amount * sellPrice);          
+            }                function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {                    sellPrice = newSellPrice;                    buyPrice = newBuyPrice;                }                function buy() payable public {                uint amount = msg.value / buyPrice;                _transfer(this, msg.sender, amount);              }                function sell(uint256 amount) public {                require(this.balance >= amount * sellPrice);      
+                _transfer(msg.sender, this, amount);              
+                msg.sender.transfer(amount * sellPrice);          
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "In the function buy(), the function transfer() is called with the argument amount = msg.value / buyPrice. The argument amount is calculated as msg.value * 1 / buyPrice, which could result in an integer overflow if buyPrice is very small. The maximum possible value of amount is 2^256 / buyPrice. If buyPrice is 1, then amount will be 2^256. This could lead to the transfer of more tokens than an account owns, or even more than the total supply of tokens. "
+        }
+    ]
+}

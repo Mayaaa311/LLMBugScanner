@@ -1,0 +1,20 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _amount) notThisContract(_to) returns (bool success) {
+                        require(_to != 0x0);
+                        require(_amount > 0);
+                        require(balances[msg.sender] >= _amount);
+                        require(balances[_to] + _amount > balances[_to]);
+                        balances[msg.sender] -= _amount;
+                        balances[_to] += _amount;
+                        Transfer(msg.sender, _to, _amount);
+                        return true;
+                    }
+                    ",
+            "vulnerability": "Token Devalue",
+            "reason": "The transfer function allows the transfer of tokens to any address. However, the transfer function does not check if the recipient address is a contract. If the recipient address is a contract, the contract may not be able to handle the incoming tokens and may cause a loss of tokens. This vulnerability can be exploited by malicious users to transfer tokens to a contract address, and the contract address may not be able to handle the incoming tokens. The recommended solution is to add a check for whether the recipient address is a contract. If the recipient address is a contract, the contract should implement a fallback function to handle the incoming tokens. If the contract does not implement a fallback function, the tokens should be reverted."
+        }
+    ]
+}

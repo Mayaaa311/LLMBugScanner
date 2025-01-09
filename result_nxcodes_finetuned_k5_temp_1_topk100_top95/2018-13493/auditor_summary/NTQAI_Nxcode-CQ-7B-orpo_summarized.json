@@ -1,0 +1,24 @@
+```json
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public {
+tt_transfer(msg.sender, _to, _value);
+t}
+tfunction transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+ttrequire(_value <= allowance[_from][msg.sender]);
+ttallowance[_from][msg.sender] -= _value;
+tt_transfer(_from, _to, _value);
+ttreturn true;
+t}
+tfunction approve(address _spender, uint256 _value) public {
+t}
+tfunction approveAndCall(address _spender, uint256 _value, bytes _extraData)
+",
+            "vulnerability": "Bad Randomness",
+            "reason": "In TokenERC20: In function _transfer, the function is computing total contribution for purchases above 10 finney, while totalContribution can be a uint, potentially leading to uint overflow. Furthermore, it is compouting bonus based on bonusHash[0], which leads to unfair distribution."
+        }
+    ]
+}
+```

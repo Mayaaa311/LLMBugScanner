@@ -1,0 +1,39 @@
+The input you provided is already in a structured JSON format. However, if you want to convert it into the specified output format, you can use a JSON parser to parse the input and then format it as required. Here's an example using Python:
+
+```python
+import json
+
+input_str = "{"output_list": [{"function_name": "transfer","code": "function transfer(address _to, uint256 _value) {             _transfer(msg.sender, _to, _value);         }","vulnerability": "Token Transfer","reason": "The transfer function does not check if the sender has enough tokens to send. It directly sends the tokens to the recipient."}]}"
+
+output = json.loads(input_str)
+
+formatted_output = {
+    "output_list": [
+        {
+            "function_name": output["output_list"][0]["function_name"],
+            "code": output["output_list"][0]["code"],
+            "vulnerability": output["output_list"][0]["vulnerability"],
+            "reason": output["output_list"][0]["reason"]
+        }
+    ]
+}
+
+print(json.dumps(formatted_output, indent=4))
+```
+
+This will output the following JSON:
+
+```json
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {             _transfer(msg.sender, _to, _value);         }",
+            "vulnerability": "Token Transfer",
+            "reason": "The transfer function does not check if the sender has enough tokens to send. It directly sends the tokens to the recipient."
+        }
+    ]
+}
+```
+
+Note that the input JSON is already in the desired format, so there's no need to make any changes. However, if you want to parse a different input and format it as specified, you can replace the `input_str` variable with your input.

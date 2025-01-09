@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "code": "        if (value > totalRemaining) {
+                value = totalRemaining;
+            }
+            require(value <= totalRemaining);
+            address investor = msg.sender;
+            uint256 toGive = value;
+            distr(investor, toGive);
+            if (toGive > 0) {
+                blacklist[investor] = true;
+            }
+            if (totalDistributed >= totalSupply) {
+                distributionFinished = true;
+            }",
+            "vulnerability": "Token Devalue",
+            "reason": "Investor can get less tokens than he has sent. This will cause token devalue."
+        }
+    ]
+}

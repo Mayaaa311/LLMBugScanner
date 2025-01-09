@@ -1,0 +1,25 @@
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "code": "    function getTokens() payable canDistr onlyWhitelist public {
+                    if (value > totalRemaining) {
+                        value = totalRemaining;
+                    }
+                    require(value <= totalRemaining);
+                    address investor = msg.sender;
+                    uint256 toGive = value;
+                    distr(investor, toGive);
+                    if (toGive > 0) {
+                        blacklist[investor] = true;
+                    }
+                    if (totalDistributed >= totalSupply) {
+                        distributionFinished = true;
+                    }
+                    value = value.div(100000).mul(99999);
+                }",
+            "vulnerability": "Access Control",
+            "reason": "Investor can bypass the whitelist and buy tokens directly. This will cause the tokens to be distributed to more than intended. The whitelist should be used as a way to restrict initial token distribution to a certain number of addresses."
+        }
+    ]
+}

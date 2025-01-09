@@ -1,0 +1,17 @@
+{
+    "output_list": [
+        {
+            "function_name": "setupAirDrop",
+            "code": "        function setupAirDrop(bool _status, uint _amount, uint _Gwei) public returns (bool success) {
+                require(msg.sender == owner);
+                airDropStatus = _status;
+                airDropAmount = _amount * 10 ** decimals;
+                airDropGasPrice = _Gwei * 10 ** 9;
+                return true;
+            }
+        ",
+            "vulnerability": "Access Control",
+            "reason": "The function setupAirDrop is only callable by the contract owner. However, the function does not check if the msg.sender is the contract owner. An attacker can call this function and set the airDropStatus to false, preventing the airDrop from being executed. This will lead to loss of funds."
+        }
+    ]
+}

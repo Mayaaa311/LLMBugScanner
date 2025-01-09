@@ -1,0 +1,25 @@
+{
+    "output_list": [
+        {
+            "function_name": "updateSettings",
+            "code": "    function updateSettings(
+        address _userStakingPoolAddress,
+        address _tokenSellerAddress,
+        address _daoAddress
+        ) 
+        external
+        nonReentrant
+        onlyOwner
+    {
+        require(userStakingPoolAddress != _userStakingPoolAddress || tokenSellerAddress != _tokenSellerAddress || daoAddress != _daoAddress, "SAME_ADDRESSES");
+        userStakingPoolAddress = _userStakingPoolAddress;
+        tokenSellerAddress = _tokenSellerAddress;
+        daoAddress = _daoAddress;
+        emit SettingsUpdated(now);
+    }
+    ",
+            "vulnerability": "User Input",
+            "reason": "In this function, the input parameters are directly used to set the state variables. If an attacker is able to input malicious values, these could be used to manipulate the smart contract's internal state, benefiting them at the expense of the contract owner or users. The most severe exploits involve taking control of the contract, leading to loss of funds or complete control over the contract."
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address holder, uint value) {                require(msg.sender == preSale);                require(value > 0);                require(totalSupply + value <= TOKEN_LIMIT);                balances[holder] += value;                totalSupply += value;                Transfer(0x0, holder, value);            }                function unfreeze() external {                    require(msg.sender == team);                    isFrozen = false;                }                function transfer(address _to, uint _value) public returns (bool) {                    require(!isFrozen);                    return super.transfer(_to, _value);                }                function transferFrom(address _from, address _to, uint _value) public returns (bool) {                    require(!isFrozen);                    return super.transferFrom(_from, _to, _value);                }                function approve(address _spender, uint _value) public returns (bool) {                    require(!isFrozen);                    return super.approve(_spender, _value);                }            ",
+            "vulnerability": "Token Devalue",
+            "reason": "The mint function allows anyone to mint tokens, which can lead to token devalue if the mint function is called by malicious actors. The mint function should only be called by the preSale address."
+        }
+    ]
+}

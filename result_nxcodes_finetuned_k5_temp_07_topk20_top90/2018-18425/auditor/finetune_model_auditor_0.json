@@ -1,0 +1,23 @@
+{
+  "output_list": [
+    {
+      "function_name": "transferFrom",
+      "code": "    function transferFrom(address _from, address _to, uint256 _amount) onlyPayloadSize(3 * 32) public returns (bool success) {
+            require(_to != address(0));
+            require(_amount <= balances[_from]);
+            require(_amount <= allowed[_from][msg.sender]);
+            balances[_from] = balances[_from].sub(_amount);
+            allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+            balances[_to] = balances[_to].add(_amount);
+            emit Transfer(_from, _to, _amount);
+            return true;
+        }
+      ",
+      "vulnerability": "Bad Randomness",
+      "reason": "The function transferFrom allows a user to transfer a specified number of tokens to another user. The user must specify the address of the recipient and the amount of tokens to transfer. However, the current implementation does not verify that the sender has sufficient tokens to transfer. The transferFrom function should also check that the sender has approved the recipient to spend the specified amount of tokens. This can be done by checking that the sender's allowance for the recipient is greater than or equal to the amount of tokens to be transferred. This can be achieved by changing the function signature to transferFrom(address _from, address _to, uint256 _amount, uint256 _allowance) and adding the following lines of code:
+            require(_allowance >= _amount);
+            allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+      "
+    }
+  ]
+}

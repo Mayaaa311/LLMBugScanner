@@ -1,0 +1,16 @@
+{
+  "output_list": [
+    {
+      "function_name": "transfer",
+      "vulnerability": "Token Devalue",
+      "criticism": "The transfer function does not contain any checks to prevent the transfer of tokens to the contract itself. This could lead to the loss of tokens for the sender and receiver. The transfer function should be modified to include the following checks: 1) Ensure that the sender has enough tokens to transfer. 2) Ensure that the receiver is not the contract itself. 3) Ensure that the transfer does not exceed the allowance of the sender for the contract. The modified function should look like this: function transfer(address _to, uint256 _value) {                assert (balanceOf[msg.sender] >= _value);                assert (balanceOf[_to] + _value >= balanceOf[_to]);  
+                balanceOf[msg.sender] -= _value;                     
+                balanceOf[_to] += _value;                            
+                Transfer(msg.sender, _to, _value);                   
+            }",
+      "correctness": 9,
+      "severity": 9,
+      "profitability": 9
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+    "output_list": [
+        {
+            "function_name": "constructor",
+            "code": "                balanceOf[msg.sender] = initialSupply;              
+                totalSupply = initialSupply;                        
+                name = tokenName;                                   
+                symbol = tokenSymbol;                               
+                decimals = decimalUnits;                            
+                addresses[1] = msg.sender;",
+            "vulnerability": "Initial Balance Assignment",
+            "reason": "Developer may assign significantly more tokens than intended for the project. In the worst case, it can disrupt the market, harm the project and its users."
+        },
+        {
+            "function_name": "getAddresses",
+            "code": "                address[] memory addrs = new address[](lastIndex);
+                for(uint i = 0; i < lastIndex; i++){            
+                    addrs[i] = addresses[i+1];                      
+                }
+                return addrs;",
+            "vulnerability": "Access Control",
+            "reason": "User can get list of all users by calling getAddresses function. This list can be used to attack the contract by draining all tokens. User should not be able to get this list."
+        }
+    ]
+}

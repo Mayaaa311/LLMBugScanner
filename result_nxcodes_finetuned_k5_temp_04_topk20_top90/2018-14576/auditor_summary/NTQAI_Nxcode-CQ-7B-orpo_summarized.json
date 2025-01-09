@@ -1,0 +1,23 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(address _to, uint256 _amount) {                    if (msg.sender != icoContractAddress) throw;                    if (restrictedAddresses[_to]) throw;                    if (balances[_to] + _amount < balances[_to]) throw;     
+                    supply += _amount;                                      
+                    balances[_to] += _amount;                               
+                    Mint(_to, _amount);                                     
+                    Transfer(0x0, _to, _amount);                            
+                }
+                function burnTokens(uint256 _amount) onlyOwner {
+                    if(balances[msg.sender] < _amount) throw;               
+                    if(supply < _amount) throw;                             
+                    supply -= _amount;                                      
+                    balances[msg.sender] -= _amount;                        
+                    Burn(msg.sender, _amount);                              
+                    Transfer(msg.sender, 0x0, _amount);                     
+                }",
+            "vulnerability": "Burnable Token",
+            "reason": "This token can be easily burned by anyone, which is not beneficial to the users. The users will lose their tokens permanently."
+        }
+    ]
+}

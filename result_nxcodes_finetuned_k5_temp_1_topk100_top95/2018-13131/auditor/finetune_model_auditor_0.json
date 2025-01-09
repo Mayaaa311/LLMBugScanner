@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "   function mint(address holder, uint value) ",
+            "vulnerability": "Access Control",
+            "reason": "While in preSaleState PreSaleStarted, PreSaleFinished, any unauthorized address can mint(transfer value of tokens to the given account)."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "    function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {",
+            "vulnerability": "Integer Overflow",
+            "reason": "In transferFrom , While isFrozen == true, the balances of _from address get reduced by _value amount but in the same time increaseApproval() function increaseApproval[_from][msg.sender] += _value amount which then increases the balances[_to] amount by _value which could lead to the _from having overmuch tokens and also this could break the normal flow of transferFrom() function in any token contract, for instance If ERC223 Token, balanceof() function would return wrong balances. This is a very common problem for developers. The first point of attack in real world scenario is User Lose their tokens.Second point of attack is attacker steal token from contract while they have no use for it."
+        },
+        {
+            "function_name": "mint",
+            "code": "   function mint(address holder, uint value) ",
+            "vulnerability": "Constructor Exploitable",
+            "reason": "The mint function is called from constructor, which means that the token will be minted at the deployment of the contract. If the totalSupply value is too high, it could cause an overflow in the balances mapping and possibly other problems, therefore, mint can be a constructor exploitable vulnerability."
+        }
+    ]
+}

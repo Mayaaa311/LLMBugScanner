@@ -1,0 +1,25 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "    function transfer(address _to,uint256 _tokenId) public {
+          require(_to != address(0));
+          require(_to != address(this));
+          require(_owns(msg.sender, _tokenId));
+          _transfer(msg.sender, _to, _tokenId);
+      }
+      function _transfer(address _from, address _to, uint256 _tokenId) internal {
+          ownershipTokenCount[_to]++;
+          tokenIndexToOwner[_tokenId] = _to;
+          if (_from != address(0)) {
+              ownershipTokenCount[_from]--;
+              delete tokenIndexToApproved[_tokenId];
+          }
+          Transfer(_from, _to, _tokenId);
+      }
+      event Transfer(address from, address to, uint256 tokenId);",
+            "vulnerability": "Token Transfer",
+            "reason": "This is a basic token transfer function. It does not contain any checks for transferring to the 0 address, nor does it contain any checks for transferring to a contract. It also does not contain any checks for transferring to the owner. This function can be exploited to transfer tokens to a contract, contract should have proper fallback function to handle received tokens properly."
+        }
+    ]
+}

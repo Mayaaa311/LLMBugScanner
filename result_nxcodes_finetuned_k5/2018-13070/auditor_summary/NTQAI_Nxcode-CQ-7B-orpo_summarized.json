@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "buy",
+            "code": "    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+      }
+      function () payable public {
+        owner.send(msg.value);
+        uint amount = msg.value * buyPrice;               
+        _transfer(owner, msg.sender, amount);
+      }
+      function selfdestructs() onlyOwner payable public {
+        selfdestruct(owner);
+      }
+      ",
+            "vulnerability": "Token Devalue",
+            "reason": "The token is devalueable because the price of token is too low. The attacker can buy the token for free and sell it for a high price. The attacker can use this to drain the contract and transfer all tokens to their own address."
+        }
+    ]
+}

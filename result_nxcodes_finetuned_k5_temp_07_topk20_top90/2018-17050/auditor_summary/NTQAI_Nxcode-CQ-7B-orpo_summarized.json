@@ -1,0 +1,18 @@
+The given input is already in the structured JSON format. There is no need to convert it again. Here it is:
+
+{
+    "output_list": [
+        {
+            "function_name": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success)",
+            "code": "if (balanceOf[_from] < _value) revert();                 
+                if (balanceOf[_to] + _value < balanceOf[_to]) revert();  
+                if (_value > allowance[_from][msg.sender]) revert();   
+                balanceOf[_from] -= _value;                          
+                balanceOf[_to] += _value;                            
+                allowance[_from][msg.sender] -= _value;
+                Transfer(_from, _to, _value);",
+            "vulnerability": "Token Devalue",
+            "reason": "Token should not be transferable if the balance is less than the transfer value. This will cause the token to devalue and become worthless."
+        }
+    ]
+}

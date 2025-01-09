@@ -1,0 +1,17 @@
+{
+    "output_list": [
+        {
+            "function_name": "buy",
+            "code": "        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }",
+            "vulnerability": "Token Devalue",
+            "reason": "The token is devalue if the sell price is higher than the buy price. The attacker can sell the token at a higher price and then buy it back at the original price. The attacker will lose the money from the devalue."
+        }
+    ]
+}

@@ -1,0 +1,15 @@
+{
+    "output_list": [
+        {
+            "function_name": "buy",
+            "code": "        uint amount = msg.value / buyPrice;                
+        if (balanceOf[this] < amount ) throw;               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+        ",
+            "vulnerability": "Buy Function",
+            "reason": "Buy function allows users to buy tokens at a fixed price. However, the price is set to be 1 ETH = 1 MCN. This means that a user can buy more tokens than he actually sent to the contract. This can be exploited by a malicious contract that sends more ETH than it should. The user will receive more tokens than he actually sent to the contract. The contract will also lose the difference in ETH sent. The user will also lose the difference in ETH sent."
+        }
+    ]
+}

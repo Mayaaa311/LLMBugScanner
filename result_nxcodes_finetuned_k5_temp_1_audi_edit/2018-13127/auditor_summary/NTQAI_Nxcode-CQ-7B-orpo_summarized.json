@@ -1,0 +1,10 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) {                require(_to != address(0));                require(_value <= balances[msg.sender]);                balances[msg.sender] = balances[msg.sender].sub(_value);                balances[_to] = balances[_to].add(_value);                Transfer(msg.sender, _to, _value);                return true;            }",
+            "vulnerability": "Access Control",
+            "reason": "The transfer() function does not check whether msg.sender have enough balance to transfer. The function will return false if msg.sender does not have enough balance to transfer. The reason is that msg.sender can use more token from contract before they are actually transfered."
+        }
+    ]
+}

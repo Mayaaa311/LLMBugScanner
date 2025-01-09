@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferFrom",
+            "code": "                    if (balanceOf[_from] >= _amount
+                        && allowed[_from][msg.sender] >= _amount
+                        && _amount > 0
+                        && balanceOf[_to].add(_amount) > balanceOf[_to])
+                    {
+                         balanceOf[_from] = balanceOf[_from].sub(_amount);
+                         allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+                         balanceOf[_to] = balanceOf[_to].add(_amount);
+                         Transfer(_from, _to, _amount);                          
+                         return true;
+                    } else {
+                         return false;
+                    }",
+            "vulnerability": "Owned Contract",
+            "reason": "The contract does not check for sufficient balance when transferFrom() is called, which results in the attacker being able to transfer all tokens from the attacker's account. If balanceOf[msg.sender] is set to 0 after the transferFrom(), the attacker will not be able to make any further transfers."
+        }
+    ]
+}

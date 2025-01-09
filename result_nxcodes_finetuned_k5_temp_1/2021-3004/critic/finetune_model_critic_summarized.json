@@ -1,0 +1,64 @@
+{
+    "output_list": [
+        {
+            "function_name": "stake",
+            "vulnerability": "No input validation",
+            "criticism": Input validation for the amount parameter in the stake function is missing. A malicious user could potentially send a high amount of tokens to stake, potentially leading to excessive staking and potentially resulting in an overflow.
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~ [MEDIUM SEVERITY]
+                             12           require(amount > 0, 'Cannot stake 0');
+                             13           stakedSupply += amount;
+           >                 14           stakes[msg.sender] += amount;
+                             15           _transferTokens(msg.sender, address(this), amount);
+           <                 16           emit Staked(msg.sender, amount);
+           ",
+            "correctness": 5,
+            "severity": 5,
+            "profitability": 5
+        },
+        {
+            "function_name": "unstake",
+            "vulnerability": "No input validation",
+            "criticism": Input validation for the amount parameter in the unstake function is missing. A malicious user could potentially unstake a large amount of tokens, leading to an excessive unstaking operation and potentially resulting in an overflow.
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~ [MEDIUM SEVERITY]
+                             21           require(amount > 0, 'Cannot withdraw 0');
+                             22           stakedSupply -= amount;
+           >                 23           stakes[msg.sender] -= amount;
+                             24           _transferTokens(address(this), msg.sender, amount);
+                             25           emit Unstaked(msg.sender, amount);
+           ",
+            "correctness": 5,
+            "severity": 5,
+            "profitability": 5
+        },
+        {
+            "function_name": "deposit",
+            "vulnerability": "No input validation",
+            "criticism": Input validation for the amount parameter in the deposit function is missing. A malicious user could potentially send a high amount of tokens to deposit, potentially leading to excessive deposits and potentially resulting in an overflow.
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~ [MEDIUM SEVERITY]
+                             30           _deposit(token, amount);
+                             31       }
+           >                 32       function depositAll(IERC20 token) external {
+                             33           _deposit(token, token.balanceOf(msg.sender));
+           <                 34       }
+           ",
+            "correctness": 5,
+            "severity": 5,
+            "profitability": 5
+        },
+        {
+            "function_name": "depositAll",
+            "vulnerability": "No input validation",
+            "criticism": Input validation for the amount parameter in the depositAll function is missing. A malicious user could potentially send a high amount of tokens to deposit, potentially leading to excessive deposits and potentially resulting in an overflow.
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~ [MEDIUM SEVERITY]
+                             30           _deposit(token, amount);
+                             31       }
+           >                 32       function depositAll(IERC20 token) external {
+                             33           _deposit(token, token.balanceOf(msg.sender));
+           <                 34       }
+           ",
+            "correctness": 5,
+            "severity": 5,
+            "profitability": 5
+        }
+    ]
+}

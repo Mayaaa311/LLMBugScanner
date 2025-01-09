@@ -1,0 +1,20 @@
+{
+    "output_list": [
+        {
+            "function_name": "enter",
+            "code": "function enter(uint256 _roomId) public payable {
+                        Room storage room = allRooms[_roomId-1]; 
+                        require(room.players.length < 6);
+                        require(msg.value >= room.entryPrice);
+                        room.players.push(msg.sender);
+                        room.balance += room.entryPrice;
+                        emit newPlayer(_roomId, msg.sender);
+                        if(room.players.length == 6){
+                            executeRoom(_roomId);
+                        }
+                    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function enter() allows the msg.sender to enter a room for a certain price. The price is stored in the room.balance variable. If a room has 6 players, the function executeRoom() is called. This function then distributes the room.balance among the players. The room.balance is divided by 5 and sent to each player. If the room.balance is very high, this operation could cause an integer overflow, leading to a loss of funds for the players. "
+        }
+    ]
+}

@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+            if (isContract(_to)) {
+                bytes memory empty;
+                return transferToContract(_to, _value, empty);
+            } else {
+                require(_to != address(0x0));
+                require(balances[msg.sender] >= _value);
+                balances[msg.sender] -= _value;
+                balances[_to] += _value;
+                Transfer(msg.sender, _to, _value);
+            }
+            return true;
+        }",
+            "vulnerability": "Access Control",
+            "reason": "The transfer function allows anyone to transfer tokens to any address. This could be exploited to transfer tokens to a malicious contract, thereby gaining control over that contract. The transfer function should only be callable by the contract owner."
+        }
+    ]
+}

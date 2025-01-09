@@ -1,0 +1,49 @@
+dataname,vulnerability,function_name
+2018-13089,Cyclic Receive,fallback
+```
+
+However, since the data structure of the JSON provided seems incomplete, it would be unclear as to how it fits into the format mentioned above.
+
+If the given JSON data were to be used to generate the CSV, it might look something like this:
+
+```
+dataname,vulnerability,function_name
+2018-13089,Extract the vulnerability name,Extract the function name
+```
+
+Here's an example of how this might be implemented using Python:
+
+```python
+import json
+import csv
+
+# Input JSON data
+json_data = '{"Output json format: 
+{
+   "output_list": [
+      {
+         "function_name": "fallback",
+         "vulnerability": "Cyclic Receive"
+      }
+   ]
+}'
+
+# Parsing JSON data
+parsed_json = json.loads(json_data)
+
+# Opening the CSV file for writing
+with open('output.csv', 'w', newline='') as csvfile:
+    # Creating a CSV writer object
+    csvwriter = csv.writer(csvfile)
+
+    # Writing headers
+    csvwriter.writerow(['dataname', 'vulnerability', 'function_name'])
+
+    # Writing data
+    for item in parsed_json['Output json format: ']['output_list']:
+        csvwriter.writerow(['2018-13089', item['vulnerability'], item['function_name']])
+```
+
+This script will write the CSV file `output.csv` with the required columns and data.
+
+Note: Please check with the actual JSON data structure and modify the parsing part accordingly.

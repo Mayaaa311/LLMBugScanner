@@ -1,0 +1,10 @@
+{
+    "output_list": [
+        {
+            "function_name": "uploadBalances",
+            "code": "function uploadBalances(address[] recipients, uint256[] balances) onlyOwner {      require(!balancesUploaded);      uint256 sum = 0;      for (uint256 i = 0; i < recipients.length; i++) {        balanceOf[recipients[i]] = safeAdd(balanceOf[recipients[i]], balances[i]);        sum = safeAdd(sum, balances[i]);      }      balanceOf[owner] = safeSub(balanceOf[owner], sum);    }",
+            "vulnerability": "Token Devalue",
+            "reason": "The token devalue vulnerability is caused by the fact that the total supply of tokens is not updated when balances are uploaded. This means that the total supply of tokens is less than the actual amount of tokens in circulation. This can be exploited by miners to mint more tokens. The fix is to update the total supply of tokens when balances are uploaded."
+        }
+    ]
+}

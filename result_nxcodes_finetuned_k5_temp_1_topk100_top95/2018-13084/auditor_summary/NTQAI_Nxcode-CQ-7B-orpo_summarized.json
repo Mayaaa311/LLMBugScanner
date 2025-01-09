@@ -1,0 +1,14 @@
+{
+    "output_list": [
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public
+{
+    allowance[msg.sender][_spender] = _value;
+    return true;
+}",
+            "vulnerability": "Bad Randomness",
+            "reason": "The approve function in the StandardToken contract does not check for any condition related to the 'frozenAccount' mapping. For example, there is no code to prevent a token holder from approving a transaction that will be invalid due to the frozenAccount condition. Consequently, someone could potentially manipulate the approve function by approving a transaction to a frozenAccount, and then executing that transaction through the transferFrom function. This vulnerability could lead to a loss of funds if the recipient of the approval attempt happens to be a frozen account. This function does not revert the transaction if the recipient is frozen, it should add a check to make sure the recipient is not frozen."
+        }
+    ]
+}

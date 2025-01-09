@@ -1,0 +1,21 @@
+{
+    "output_list": [
+        {
+            "function_name": "createChamp",
+            "code": "function createChamp(address _affiliateAddress) external payable
+        whenNotPaused
+        isPaid(createChampFee)
+        distributeInput(_affiliateAddress)
+        {
+            uint256 id = champs.push(Champ(0, 2 + randMod(4), 1 + randMod(4), uint256(1 days)  - uint256(randMod(9) * 1 hours), 0, 0, 0, leaderboard.length + 1, 0, uint256(block.timestamp), 0,0,0, false)) - 1;
+            champs[id].id = id; 
+            leaderboard.push(id); 
+            champToOwner[id] = msg.sender; 
+            addressInfo[msg.sender].champsCount++;
+            emit NewChamp(id, msg.sender);
+        }",
+            "vulnerability": "Randomness",
+            "reason": "The current implementation has a predictable randomness in createChamp function, making the game predictable."
+        }
+    ]
+}

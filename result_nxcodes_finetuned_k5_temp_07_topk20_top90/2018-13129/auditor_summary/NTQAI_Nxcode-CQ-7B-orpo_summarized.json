@@ -1,0 +1,17 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address holder, uint value) public {
+                    require(msg.sender == ico);
+                    require(value > 0);
+                    require(totalSupply + value <= TOKEN_LIMIT);
+                    balances[holder] += value;
+                    totalSupply += value;
+                    Transfer(0x0, holder, value);
+                }",
+            "vulnerability": "Token minting vulnerability",
+            "reason": "Contract mints more tokens than specified, allowing the minter to mint more tokens than the specified token limit. The minting function is open to public and can be called by anyone. The minting limit should be enforced at the contract level, not the function level. The function should be limited to the ICO address."
+        }
+    ]
+}

@@ -1,0 +1,17 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+                    if (balanceOf[msg.sender] < _value) throw;           
+                    if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+                    balanceOf[msg.sender] -= _value;                     
+                    balanceOf[_to] += _value;                            
+                    Transfer(msg.sender, _to, _value);                   
+                }
+                ",
+            "vulnerability": "Re-entry Attack",
+            "reason": "The transfer() function has a transfer() call which is made inside the function itself. A re-entry attack can be launched from an attacker who first sends tokens to the contract, then calls the transfer() function to transfer tokens back to the attacker, allowing him to get more tokens than he initially gave to the contract. This is the known Re-entry Attack and should be considered as a vulnerability."
+        }
+    ]
+}

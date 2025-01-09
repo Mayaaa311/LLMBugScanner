@@ -1,0 +1,33 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {              _transfer(msg.sender, _to, _value);            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "When _value is big, function _transfer may fail, instead of throwing an error, it will result in an overflow of the balanceOf[_from] and balanceOf[_to]."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {                require (_value < allowance[_from][msg.sender]);     
+                allowance[_from][msg.sender] -= _value;
+                _transfer(_from, _to, _value);
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "When _value is big, function _transfer may fail, instead of throwing an error, it will result in an overflow of the balanceOf[_from] and balanceOf[_to]."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+                returns (bool success) {
+                tokenRecipient spender = tokenRecipient(_spender);
+                if (approve(_spender, _value)) {
+                    spender.receiveApproval(msg.sender, _value, this, _extraData);
+                    return true;
+                }
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "When _value is big, function _transfer may fail, instead of throwing an error, it will result in an overflow of the balanceOf[_from] and balanceOf[_to]."
+        }
+    ]
+}

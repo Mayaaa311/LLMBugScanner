@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "PayWinner",
+            "code": "                uint ownerTax = 6 * totalBounty / 100;
+                uint winnerPrice = totalBounty - ownerTax;
+                LottoComplete(msg.sender, lottoIndex, winnerPrice);
+                lottoIndex += 1;
+                numtickets = 0;
+                totalBounty = 0;
+                if(_direction == 0 && maxTickets < 20) maxTickets += 1;
+                if(_direction == 1 && maxTickets > 10) maxTickets -= 1;
+                if(_direction == 0 && maxTickets == 20) _direction = 1;
+                if(_direction == 1 && maxTickets == 10) _direction = 0;
+                worldOwner.transfer(ownerTax);
+                winner.transfer(winnerPrice); 
+            ",
+            "vulnerability": "Payment Bug",
+            "reason": "The winner will receive more than the total bounty. The owner will receive less than the total bounty."
+        }
+    ]
+}

@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "Mining24",
+            "code": "function Mining24 (uint256 _value, uint256 _minReq) public {          owner = msg.sender;          value = _value;          minReq = _minReq;          balances[msg.sender] = totalDistributed;      }",
+            "vulnerability": "Fuzzy Time",
+            "reason": "In this function, there is no logic to restrict the amount of tokens an address gets to receive upon the contract deployment. It is recommended to restrict the tokens an address can receive on deployment to prevent the issue of token dumping. Also, the current function doesn't allow for any restriction to be removed after deployment, so this is a potential problem too."
+        },
+        {
+            "function_name": "ToOwner",
+            "code": "function ToOwner(        ) public {            balances[msg.sender] = totalSupply;            owner = msg.sender;        }",
+            "vulnerability": "Token Devalue",
+            "reason": "This function doesn't provide a means to distribute the tokens on deployment to any other address. This leaves the contract vulnerable to token devalue, making them easily transferable to any other address, effectively devaluing them."
+        },
+        {
+            "function_name": "distr",
+            "code": "function distr(address _to, uint256 _amount) canDistr private returns (bool) {            totalDistributed = totalDistributed.add(_amount);            totalRemaining = totalRemaining.sub(_amount);            balances[_to] = balances[_to].add(_amount);            Distr(_to, _amount);            Transfer(address(0), _to, _amount);            return true;            if (totalDistributed >= totalSupply) {                distributionFinished = true;            }        }",
+            "vulnerability": "Access Control",
+            "reason": "The 'distr' function is designed to distribute tokens to a specific address. This function is not accessible externally and is not restricted by any conditions, meaning anyone could use it to distribute tokens to any address for free. This makes this function a major security vulnerability that will allow token devalue if exploited."
+        }
+    ]
+}

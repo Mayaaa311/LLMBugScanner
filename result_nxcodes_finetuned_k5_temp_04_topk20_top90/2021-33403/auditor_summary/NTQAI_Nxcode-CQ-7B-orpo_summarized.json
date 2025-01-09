@@ -1,0 +1,32 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "    function transfer(address _to, uint256 _value) returns (bool success) {
+            if(funding) throw;
+            if(!allowTransfer)throw;
+            var senderBalance = balances[msg.sender];
+            if (senderBalance >= _value && _value > 0) {
+                senderBalance -= _value;
+                balances[msg.sender] = senderBalance;
+                balances[_to] += _value;
+                lastTransferred[msg.sender]=block.timestamp;
+                Transfer(msg.sender, _to, _value);
+                return true;
+            }
+            return false;
+        }",
+            "vulnerability": "Transfer Function",
+            "reason": "The transfer function does not check if the sender has enough balance to transfer. This could allow for unauthorized transfers. The transfer function should be modified to include the following:
+            if (balances[msg.sender] >= _value) {
+                balances[msg.sender] -= _value;
+                balances[_to] += _value;
+                Transfer(msg.sender, _to, _value);
+                return true;
+            } else {
+                return false;
+            }
+            "
+        }
+    ]
+}

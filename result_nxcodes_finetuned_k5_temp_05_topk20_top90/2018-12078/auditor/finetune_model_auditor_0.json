@@ -1,0 +1,17 @@
+{
+  "output_list": [
+    {
+      "function_name": "transfer",
+      "code": "    function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) revert();           
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert(); 
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+      }
+      ",
+      "vulnerability": "Fuzzy Token",
+      "reason": "The transfer function is currently implemented in such a way that it does not prevent any overflow of the balanceOf[_to]. The balanceOf[_to] += _value; line can overflow the balanceOf[_to] and the balance of the contract will be incorrect. The same vulnerability is present in the transferFrom function. The reason is that the balanceOf[_to] += _value; line can overflow the balanceOf[_to] and the balance of the contract will be incorrect."
+    }
+  ]
+}

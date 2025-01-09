@@ -1,0 +1,10 @@
+{
+  "output_list": [
+      {
+          "function_name": "balanceOf",
+          "code": "    function balanceOf(address _owner) public view returns (uint256 balance) {        return balances[_owner];    }",
+          "vulnerability": "Storage Clearing",
+          "reason": "The code is vulnerable because the function balances[_owner] is used as a reference to _owner's balances, however the modifier returns also a uint256 balance argument which will store the output of this function. If the _owner sends more assets than initially held by _owner before this function is called, then any function calling balanceOf() will result in wrong output."
+      }
+  ]
+}

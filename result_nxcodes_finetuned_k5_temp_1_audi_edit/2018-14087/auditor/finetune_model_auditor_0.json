@@ -1,0 +1,38 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken(address,uint256)",
+            "code": "                balanceOf[target] += mintedAmount;
+                tttotalSupply += mintedAmount;
+                ttTransfer(0, this, mintedAmount);
+                ttTransfer(this, target, mintedAmount);
+                t}
+                ",
+            "vulnerability": "Token Devalue",
+            "reason": "Token should not be mintable forever, devalue the token"
+        },
+        {
+            "function_name": "buy() payable",
+            "code": "                    balanceOf[msg.sender] += amount;                         
+                ttTransfer(this, msg.sender, amount);
+                ",
+            "vulnerability": "Mint Token on Buy",
+            "reason": "Token should not be minted for buying. This will devalue the token"
+        },
+        {
+            "function_name": "selfdestructs()",
+            "code": "                    selfdestruct(owner);
+                t}
+                ",
+            "vulnerability": "SelfDestruct",
+            "reason": "Self destruct is dangerous. It would kill your contract and give everything to the contract owner"
+        },
+        {
+            "function_name": "selfdestructs()",
+            "code": "                ttowner.send(msg.value);
+                ",
+            "vulnerability": "Exploitable Function",
+            "reason": "This function can be called to transfer funds back to the contract owner, leading to loss of funds for the contract"
+        }
+    ]
+}

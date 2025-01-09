@@ -1,0 +1,24 @@
+{
+  "output_list": [
+    {
+      "function_name": "buy",
+      "code": "                balanceOf[this] -= amount;                         
+                totalSupply -= amount;                      
+                Burn(msg.sender, amount);
+                return true;
+            }
+            function burnFrom(address _from, uint256 _value)  returns (bool success) {
+                require(balanceOf[_from] >= _value);                
+                require(_value <= allowance[_from][msg.sender]);    
+                balanceOf[_from] -= _value;                         
+                allowance[_from][msg.sender] -= _value;             
+                totalSupply -= _value;                              
+                Burn(_from, _value);
+                return true;
+            }
+      ",
+      "vulnerability": "Burnable Token",
+      "reason": "Burnable Token is a type of token that can be destroyed. This function allows the token holders to burn their tokens. Incorrect implementation of this function can lead to loss of funds for the token holders. A common mistake is not to prevent the burning of the tokens by other users. This can be exploited to drain all the tokens from the contract. The recommended solution is to make burn() and burnFrom() functions private and accessible only to owner. Also, it is recommended to add a condition that burns the tokens only if the contract is not in ICO state."
+    }
+  ]
+}

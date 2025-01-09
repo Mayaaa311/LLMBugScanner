@@ -1,0 +1,17 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) {
+                        if (balances[msg.sender] >= _value && _value > 0) {
+                            balances[msg.sender] -= _value;
+                            balances[_to] += _value;
+                            Transfer(msg.sender, _to, _value);
+                            return true;
+                        } else { return false; }
+                    }",
+            "vulnerability": "Token Devalue",
+            "reason": "The transfer function allows the transfer of tokens to an arbitrary address. This could be used to transfer tokens to a contract address, effectively 'burning' tokens from the sender's balance and making them unrecoverable. This is a major vulnerability in token design."
+        }
+    ]
+}

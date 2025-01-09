@@ -1,0 +1,10 @@
+{
+  "output_list": [
+    {
+      "function_name": "mintToken",
+      "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0, this, mintedAmount); Transfer(this, target, mintedAmount); }",
+      "vulnerability": "Buggy Code, mintToken",
+      "reason": "This function is used to mint tokens which will add more tokens to the balanceOf[_target] and totalSupply. However, no checks are performed to ensure the target has already minted any tokens before. This would allow a new token holder to mint tokens which are not allocated to the contract. "
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "output_list": [
+    {
+      "function_name": "transfer",
+      "code": "    function transfer(address _to,uint256 _value) public{
+        require(!frozenAccount[msg.sender]);
+        if(_to == address(this)){
+          _sell(msg.sender,_value);    
+        }else{
+            _transfer(msg.sender,_to,_value);
+        }
+    }
+    ",
+      "vulnerability": "Token Devalue",
+      "reason": "In this function, the token is transfered to the contract address. The contract is the token itself, so the token holder can transfer the token to the contract address and sell it at a lower price. This will cause the token value to devalue."
+    }
+  ]
+}

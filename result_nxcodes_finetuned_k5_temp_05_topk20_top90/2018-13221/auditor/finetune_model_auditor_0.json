@@ -1,0 +1,10 @@
+{
+    "output_list": [
+        {
+            "function_name": "buy",
+            "code": "function buy() payable returns (uint amount) {                amount = msg.value / buyPrice;                if (balances[this] < amount ) throw;                balances[msg.sender] += amount;                balances[this] -= amount;                Transfer(this, msg.sender, amount);            }",
+            "vulnerability": "Denial of Service",
+            "reason": "The buy function allows anyone to buy tokens for free. This can be exploited by a malicious buyer to buy in large quantities at a low price, then sell them for a premium to cover gas costs. This will cause the contract to run out of tokens and halt trading."
+        }
+    ]
+}

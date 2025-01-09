@@ -1,0 +1,13 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "balances[msg.sender] = balances[msg.sender].sub(_value);
+            balances[_to] = balances[_to].add(_value);
+            Transfer(msg.sender, _to, _value);
+            return true;",
+            "vulnerability": "Token Devalue",
+            "reason": "In the transfer function, the token holder can transfer the token to any address. However, the transfer function does not check whether the recipient address is a contract. If the recipient address is a contract, the contract will not be able to receive the token, which will cause the token to be lost. The token holder can transfer the token to a contract, which will cause the token to be lost. The token holder can also transfer the token to a contract, which will cause the token to be lost."
+        }
+    ]
+}

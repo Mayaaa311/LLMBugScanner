@@ -1,0 +1,22 @@
+{
+  "output_list": [
+    {
+      "function_name": "transfer",
+      "code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+            if (isContract(_to)) {
+                bytes memory empty;
+                return transferToContract(_to, _value, empty);
+            } else {
+                require(_to != address(0x0));
+                require(balances[msg.sender] >= _value);
+                balances[msg.sender] -= _value;
+                balances[_to] += _value;
+                Transfer(msg.sender, _to, _value);
+            }
+            return true;
+        }",
+      "vulnerability": "Token Devalue",
+      "reason": "The transfer function does not check if the recipient is a contract. If the recipient is a contract, it will be able to receive the tokens and then be able to transfer them back to the sender. This will cause the token to devalue."
+    }
+  ]
+}

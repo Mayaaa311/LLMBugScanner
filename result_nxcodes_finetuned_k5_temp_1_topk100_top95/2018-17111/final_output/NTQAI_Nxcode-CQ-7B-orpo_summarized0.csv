@@ -1,0 +1,38 @@
+dataname": "2018-17111",
+            "vulnerability": "None Found",
+            "function_name": "fallback"
+        },
+        {
+            "dataname": "2018-17112",
+            "vulnerability": "Vulnerability1",
+            "function_name": "function1"
+        },
+        {
+            "dataname": "2018-17113",
+            "vulnerability": "Vulnerability2",
+            "function_name": "function2"
+        }
+    ]
+}
+```
+
+When the JSON data is correctly formatted, you can write a Python script to extract the data and write it to CSV.
+
+Here's an example Python script:
+
+```python
+import json
+import csv
+
+json_data = '{"data": [{"dataname": "2018-17111","vulnerability": "None Found","function_name": "fallback"},{"dataname": "2018-17112","vulnerability": "Vulnerability1","function_name": "function1"},{"dataname": "2018-17113","vulnerability": "Vulnerability2","function_name": "function2"}]}'
+
+data = json.loads(json_data)['data']
+
+with open('output.csv', 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(['dataname', 'vulnerability', 'function_name'])
+    for item in data:
+        writer.writerow([item['dataname'], item['vulnerability'], item['function_name']])
+```
+
+This script loads the JSON data, extracts the 'data' array, and writes it to a CSV file with three columns: 'dataname', 'vulnerability', and 'function_name'. The CSV file is named 'output.csv'.

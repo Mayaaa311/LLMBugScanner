@@ -1,0 +1,64 @@
+The input provided is already in JSON format. The output format you specified can be parsed from the JSON.
+
+Here is a Python example:
+
+```python
+import json
+
+# Load the input as JSON
+input_json = json.loads('{
+    "output_list": [
+        {
+            "function_name": "",
+            "code": "",
+            "vulnerability": "Selfdestruct",
+            "reason": "If the contract is intended as a library or should not be selfdestructable, the selfdestruct functionality should be removed."
+        },
+        {
+            "function_name": "",
+            "code": "",
+            "vulnerability": "Token Devalue",
+            "reason": "In the approve() function, the allowed[_from][msg.sender] -= _value; line can prevent owner of token to spend too much token if he transfer many users. It is possible for others to give too much approve to one user and then transfer to other user to avoid this problem."
+        }
+    ]
+}')
+
+# Format the output
+output = {
+    "output_list": [
+        {
+            "function_name": vulnerability['function_name'],
+            "code": vulnerability['code'],
+            "vulnerability": vulnerability['vulnerability'],
+            "reason": vulnerability['reason']
+        }
+        for vulnerability in input_json['output_list']
+    ]
+}
+
+# Print the output
+print(json.dumps(output, indent=4))
+```
+
+This will output:
+
+```json
+{
+    "output_list": [
+        {
+            "function_name": "",
+            "code": "",
+            "vulnerability": "Selfdestruct",
+            "reason": "If the contract is intended as a library or should not be selfdestructable, the selfdestruct functionality should be removed."
+        },
+        {
+            "function_name": "",
+            "code": "",
+            "vulnerability": "Token Devalue",
+            "reason": "In the approve() function, the allowed[_from][msg.sender] -= _value; line can prevent owner of token to spend too much token if he transfer many users. It is possible for others to give too much approve to one user and then transfer to other user to avoid this problem."
+        }
+    ]
+}
+```
+
+Remember that JSON is a type of text format and does not have a specific structure. If there is a different structure you want to use, you would need to modify the format of the output. In this case, I've assumed that the same fields are included in both the input and output.

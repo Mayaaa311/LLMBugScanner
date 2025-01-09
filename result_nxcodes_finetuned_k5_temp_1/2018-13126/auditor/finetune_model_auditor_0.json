@@ -1,0 +1,16 @@
+{
+  "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address _holder, uint _value) external {require(msg.sender == presale);require(_value > 0);require(totalSupply + _value <= TOKEN_LIMIT);balances[_holder] += _value;totalSupply += _value;Transfer(0x0, _holder, _value);}",
+            "vulnerability": "Integer Overflow",
+            "reason": "In mint function, the variable totalSupply will be increased by _value, but it doesn't get checked if it will overflow. In this case it can be fixed by checking if totalSupply + _value will not be bigger than totalSupply."
+        },
+        {
+            "function_name": "mint",
+            "code": "function mint(address _holder, uint _value) external {require(msg.sender == presale);require(_value > 0);require(totalSupply + _value <= TOKEN_LIMIT);balances[_holder] += _value;totalSupply += _value;Transfer(0x0, _holder, _value);}",
+            "vulnerability": "Access Control",
+            "reason": "The mint function can be called from anyone, which leads to the minting of tokens by unauthorized users. This can be fixed by adding a modifier that only allows minting by the presale contract."
+        }
+    ]
+}

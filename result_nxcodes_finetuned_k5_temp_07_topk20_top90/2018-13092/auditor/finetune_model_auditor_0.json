@@ -1,0 +1,28 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "            _transfer(msg.sender, _to, _value);
+        }",
+            "vulnerability": "Access Control",
+            "reason": "The transfer function does not check if the sender has enough balance to send. This allows a user to send more tokens than they have in their balance. Also, the sender is not allowed to send to 0x0 address, it will cause transaction fail. The function does not check the sender's balance. The function does not check if the sender has enough balance to send. The function does not check if the sender is allowed to send the requested amount."
+        },
+        {
+            "function_name": "approve",
+            "code": "        return true;
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The approve function does not check if the sender has enough balance to approve. This allows a user to approve more tokens than they have in their balance. The function does not check if the sender is allowed to approve the requested amount. Also, the spender is not allowed to send to 0x0 address, it will cause transaction fail. The function does not check the sender's balance. The function does not check if the sender has enough balance to approve. The function does not check if the sender is allowed to approve the requested amount."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }",
+            "vulnerability": "Access Control",
+            "reason": "The approveAndCall function does not check if the sender has enough balance to approve. This allows a user to approve more tokens than they have in their balance. The function does not check if the sender is allowed to approve the requested amount. Also, the spender is not allowed to send to 0x0 address, it will cause transaction fail. The function does not check the sender's balance. The function does not check if the sender has enough balance to approve. The function does not check if the sender is allowed to approve the requested amount."
+        }
+    ]
+}

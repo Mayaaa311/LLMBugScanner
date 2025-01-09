@@ -1,0 +1,19 @@
+The input provided is already in JSON format. However, it does not follow the given format strictly because it does not have curly braces at the beginning and end of the JSON object, and it is not indented properly. It also doesn't have a top-level key like "output_list". Here is the corrected JSON format:
+
+```
+{
+  "output_list": [
+    {
+      "function_name": "buy",
+      "code": "    function buy() payable public {
+        require(msg.value == price);
+        uint amount = msg.value / price;
+        _transfer(this, msg.sender, amount);
+        price += priceInc;
+      }",
+      "vulnerability": "Access Control",
+      "reason": "In this function the user can directly buy tokens with the contract's balance only. The user can also input any amount of value to purchase tokens. This is beneficial to attackers, as they can purchase a large quantity of tokens for low price. A typical solution is to add modifier, i.e., only accept msg.value equal to the current price. "
+    }
+  ]
+}
+```

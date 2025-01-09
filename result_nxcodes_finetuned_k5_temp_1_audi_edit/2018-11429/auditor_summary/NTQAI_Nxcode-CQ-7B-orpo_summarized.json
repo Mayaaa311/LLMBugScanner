@@ -1,0 +1,12 @@
+```json
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address _holder, uint _value) external {             require(msg.sender == ico);             require(_value != 0);             require(totalSupply + _value <= TOKEN_LIMIT);             balances[_holder] += _value;             totalSupply += _value;             Transfer(0x0, _holder, _value);         }",
+            "vulnerability": "Bad Randomness",
+            "reason": "This function can be called by any one directly. If someone wants to mint token for himself, mint(msg.sender, _value) should be used instead of this. Otherwise anyone can mint the tokens, making this function a bad randomness. This could be a critical vulnerability."
+        }
+    ]
+}
+```

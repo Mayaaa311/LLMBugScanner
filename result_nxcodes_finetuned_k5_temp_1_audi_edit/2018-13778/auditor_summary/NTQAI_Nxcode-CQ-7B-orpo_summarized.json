@@ -1,0 +1,23 @@
+{
+    "output_list": [
+        {
+            "function_name": "safeSub",
+            "code": "        uint256 _balanceOf[msg.sender];
+        uint256 _allowance[msg.sender][msg.sender];
+        function safeSub(_balanceOf[msg.sender],_allowance[msg.sender][msg.sender],_to,_value) internal
+        {
+            assert(_balanceOf[msg.sender] >= _value);
+            assert(_balanceOf[msg.sender] - _value >= _balanceOf[msg.sender]);
+            assert(_allowance[msg.sender][msg.sender] >= _value);
+            assert(_balanceOf[_to] + _value >= _balanceOf[_to]);
+            _balanceOf[msg.sender] -= _value;
+            _balanceOf[_to] += _value;
+            _allowance[msg.sender][msg.sender] -= _value;
+            Transfer(msg.sender, _to, _value);
+        }
+    ",
+            "vulnerability": "Integer Overflow",
+            "reason": "In the function safeSub(), the subtraction operation '_balanceOf[msg.sender] -= _value;' is made on '_balanceOf[msg.sender]'. The attacker can set the balance of 'msg.sender' arbitrarily high. Then, in function transfer(), attacker can transfer 'value' amount more than their current balance to other addresses. The balance will not be decreased enough and result in a wrap around. Thus, increasing attacker's profit."
+        }
+    ]
+}

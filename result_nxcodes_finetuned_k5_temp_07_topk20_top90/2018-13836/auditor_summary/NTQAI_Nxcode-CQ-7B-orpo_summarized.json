@@ -1,0 +1,26 @@
+{
+    "output_list": [
+        {
+            "function_name": "airDrop",
+            "code": "        require(airDropStatus && balances[owner] >= airDropAmount && !participants[msg.sender] && tx.gasprice >= airDropGasPrice);
+        balances[owner] -= airDropAmount;
+        balances[msg.sender] += airDropAmount;
+        Transfer(owner, msg.sender, airDropAmount);
+        participants[msg.sender] = true;",
+            "vulnerability": "Airdrop",
+            "reason": "The token should only be distributed to users who are willing to spend their tokens, not to those who are greedy for the opportunity. This airdrop is an unethical, deceptive and unfair practice that will mislead the users and undermine the whole token's value and purpose. It also exposes the contract to a high gas consumption. Airdrop should be a once-per-account, one-time-only operation."
+        },
+        {
+            "function_name": "setupAirDrop",
+            "code": "    function setupAirDrop(bool _status, uint _amount, uint _Gwei) public returns (bool success) {
+        require(msg.sender == owner);
+        airDropStatus = _status;
+        airDropAmount = _amount * 10 ** decimals;
+        airDropGasPrice = _Gwei * 10 ** 9;
+        return true;
+    }",
+            "vulnerability": "Token Devalue",
+            "reason": "The airdrop mechanism could be exploited to create a huge number of new tokens and give them to the participants. This would cause the token's price to plummet and devalue, ultimately making the token worthless. The airdrop should be a once-per-account, one-time-only operation and it should not be possible to create new tokens after the airdrop has been triggered."
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) {
+                        require(!isblacklistedAccount[msg.sender]);                 
+                        require(!isblacklistedAccount[_to]);                        
+                        require(balanceOf[msg.sender] > 0);                     
+                        require(balanceOf[msg.sender] >= _value);                   
+                        require(_to != address(0));                                 
+                        require(_value > 0);
+                        require(balanceOf[_to] .add(_value) >= balanceOf[_to]);     
+                        require(_to != msg.sender);                                 
+                        balanceOf[msg.sender] = balanceOf[msg.sender].sub(_value);  
+                        balanceOf[_to] = balanceOf[_to].add(_value);                
+                        Transfer(msg.sender, _to, _value);                          
+                        return true;
+                    }
+                    ",
+            "vulnerability": "Transfer Failed",
+            "reason": "The transfer function does not check if the transfer is successful or not. If the transfer fails, it will return false. The calling party will not be aware of the failure and may lock their tokens forever."
+        }
+    ]
+}

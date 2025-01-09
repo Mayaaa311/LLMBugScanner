@@ -1,0 +1,24 @@
+{
+    "output_list": [
+        {
+            "function_name": "BitAseanToken",
+            "code": "    function BitAseanToken( 
+        uint256 initialSupply, 
+        string tokenName, 
+        uint8 decimalUnits, 
+        string tokenSymbol 
+    ) token (initialSupply, tokenName, decimalUnits, tokenSymbol) {  
+    } 
+    function transfer(address _to, uint256 _value) { 
+        if (balanceOf[msg.sender] < _value) revert();           
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert(); 
+        if (frozenAccount[msg.sender]) revert();                
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }",
+            "vulnerability": "Token Issue",
+            "reason": "In the provided smart contract, BitAseanToken, the transfer function allows the transfer of tokens from one account to another. However, no condition is enforced to prevent the transfer of tokens to the zero address, which would lead to loss of tokens for the transferer. Also, no condition is enforced to prevent the transfer of tokens to the contract address, which would lead to loss of tokens for the contract. Hence, anyone can transfer tokens to the zero address or contract address, thereby creating a vulnerability for token issue."
+        }
+    ]
+}

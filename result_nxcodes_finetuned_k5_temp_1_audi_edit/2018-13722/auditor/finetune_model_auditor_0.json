@@ -1,0 +1,12 @@
+{
+    "output_list": [
+        {
+            "function_name": "upgrade",
+            "code": "                uint oldValue = allowed[msg.sender][_spender];
+                allowed[msg.sender][_spender] = safeSub(oldValue, _subtractedValue);
+                Approval(msg.sender, _spender, allowed[msg.sender][_spender]);",
+            "vulnerability": "Unprotected Upgrade",
+            "reason": "The upgrade function does not verify whether the new upgradeAgent address has a valid implementation of the UpgradeAgent interface. An attacker could use this functionality to upgrade his token to a malicious token. This new upgraded token could be more valueable or have more features than the original token, leading to loss of value to users who had locked up their tokens. The upgrade function should be updated to verify that the new upgradeAgent address implements the UpgradeAgent interface."
+        }
+    ]
+}

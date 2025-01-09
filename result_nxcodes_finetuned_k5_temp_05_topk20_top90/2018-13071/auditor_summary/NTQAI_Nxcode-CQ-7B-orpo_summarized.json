@@ -1,0 +1,10 @@
+{
+    "output_list": [
+        {
+            "function_name": "distributeTokens",
+            "code": "function distributeTokens(uint startIndex,uint endIndex) onlyOwner returns (uint) {        uint distributed = 0;        require(startIndex < endIndex);        for(uint i = startIndex; i < lastIndex; i++){            address holder = addresses[i+1];            uint reward = balanceOf[holder] * 3 / 100;            balanceOf[holder] += reward;            distributed += reward;            Transfer(0, holder, reward);        }        totalSupply += distributed;        return distributed;    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "This function will be called by the owner, and it will distribute tokens to all users. The distribution is based on their balance. A potential attacker could exploit this by creating a large number of users, and then calling this function. The attacker will receive more tokens than they should, because the distribution is based on the number of users, not their balance. This will increase their perceived wealth, and potentially allow them to sell tokens at a higher price."
+        }
+    ]
+}

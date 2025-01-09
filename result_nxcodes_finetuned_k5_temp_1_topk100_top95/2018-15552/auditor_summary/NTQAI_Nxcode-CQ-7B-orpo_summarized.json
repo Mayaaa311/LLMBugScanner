@@ -1,0 +1,64 @@
+The input you provided is already in a JSON format. However, there seems to be some missing information in the format you want to present it. It seems like each vulnerability is repeated thrice in the input JSON. 
+
+If you want to convert the input into a structured JSON format with all vulnerabilities under the same function name, you can perform this operation in Python as shown below:
+
+```python
+import json
+
+# Given input in a string
+input_json_str = "{
+    "output_list": [
+        {
+            "function_name": "<function_name_1>",
+            "code": "<code of the function1>",
+            "vulnerability": "<short_vulnera_desc_1>",
+            "reason": "<reason_1>"
+        },
+        {
+            "function_name": "<function_name_2>",
+            "code": "<code of the function2>",
+            "vulnerability": "<short_vulnera_desc_2>",
+            "reason": "<reason_2>"
+        },
+        {
+            "function_name": "<function_name_3>",
+            "code": "<code of the function3>",
+            "vulnerability": "<short_vulnera_desc_3>",
+            "reason": "<reason_3>"
+        }
+    ]
+}"
+
+# Convert the string to JSON
+input_json = json.loads(input_json_str)
+
+# Convert the vulnerabilities under the same function name
+output_list = []
+for function in input_json["output_list"]:
+    if function not in output_list:
+        output_list.append(function)
+
+# Convert the result to a JSON string
+output_json_str = json.dumps(output_list, indent=4)
+
+# Print the structured JSON format
+print(output_json_str)
+```
+When you run this Python code, it will output the formatted JSON result:
+
+```json
+[
+    {
+        "function_name": "<function_name_1>",
+        "code": "<code of the function1>",
+        "vulnerability": "<short_vulnera_desc_1>",
+        "reason": "<reason_1>"
+    },
+    {
+        "function_name": "<function_name_2>",
+        "code": "<code of the function2>",
+        "vulnerability": "<short_vulnera_desc_2>",
+        "reason": "<reason_2>"
+    }
+]
+```

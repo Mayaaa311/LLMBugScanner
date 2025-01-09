@@ -1,0 +1,17 @@
+{
+  "output_list": [
+    {
+      "function_name": "sell",
+      "code": "    function sell(uint256 amount) {
+        assert (balanceOf[msg.sender] >= amount );         
+        balanceOf[this] += amount;                         
+        balanceOf[msg.sender] -= amount;                   
+        assert (msg.sender.send(amount * sellPrice));      
+        Transfer(msg.sender, this, amount);                
+      }
+      ",
+      "vulnerability": "Transaction Re-entrancy",
+      "reason": "When this function is called by other contracts with a call to this contract, the sell() function will transfer all the tokens of the caller to this contract, and transfer them to the caller's address using the send() method. The problem lies in the fact that the send() method can revert if this contract's balance of tokens is smaller than the amount being sent, this can be exploited by a malicious contract to drain all tokens from this contract. If this method is called by other contracts and not by users directly, reentrancy could be harmful."
+    }
+  ]
+}

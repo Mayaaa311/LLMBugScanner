@@ -1,0 +1,12 @@
+{
+  "output_list": [
+    {
+      "function_name": "function transfer(address _to, uint _value) onlyPayloadSize(2 * 32) returns (bool success)",
+      "code": "            balances[msg.sender] = safeSub(balances[msg.sender], _value);
+            balances[_to] = safeAdd(balances[_to], _value);
+            Transfer(msg.sender, _to, _value);",
+      "vulnerability": "Function does not check if _to is contract",
+      "reason": "This contract can be taken over by a malicious contract. The balances of this contract will be stolen. The users who call this contract will lose their tokens. The contract deployer will also lose their tokens. The most severe problem is that the contract owner can lose all his tokens through a call to this function."
+    }
+  ]
+}

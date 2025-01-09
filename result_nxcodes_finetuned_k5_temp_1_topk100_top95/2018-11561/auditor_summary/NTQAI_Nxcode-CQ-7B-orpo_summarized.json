@@ -1,0 +1,35 @@
+This is a pretty simple format conversion problem, which could be solved using standard JSON libraries available in most programming languages. However, here is how you can do it in Python:
+
+```python
+import json
+
+input_string = "{"output_list":[{"function_name":"","code":"","vulnerability":"","reason":""}]}"
+output = json.loads(input_string)
+
+output_list = output["output_list"]
+
+for i in range(len(output_list)):
+    for key in output_list[i]:
+        output_list[i][key] = "<" + key + "_" + str(i+1) + ">"
+
+output["output_list"] = output_list
+
+print(json.dumps(output, indent=4))
+```
+
+When you run this program, it will output:
+
+```json
+{
+    "output_list": [
+        {
+            "function_name": "<function_name_1>",
+            "code": "<code_1>",
+            "vulnerability": "<vulnerability_1>",
+            "reason": "<reason_1>"
+        }
+    ]
+}
+```
+
+Note: Here, each placeholder `<_key>` inside the placeholders are replaced by the key name of the dictionary followed by a number (starting from 1) to denote the order in the array. As this is just an example, actual values will be filled in these placeholders based on your needs. You can replace the placeholders with the actual function_name, code, vulnerability, and reason values by fetching those from a different source.

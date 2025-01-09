@@ -1,0 +1,22 @@
+{"output_list": [
+        {
+            "function_name": "batchTransfer",
+            "vulnerability": "Token Devalue",
+            "correctness": 0,
+            "severity": 9,
+            "profitability": 9,
+            "criticism": "batchTransfer function allows anyone to send multiple tokens at once to multiple addresses, this will decrease the total supply of tokens, which will devalue the tokens. The tokens sent to multiple addresses can be less than the total sent. The reason for this vulnerability is that the function does not check if the total sent is greater than the balance of the sender. It should also not allow the transfer of tokens to the contract itself. The function should be modified as follows: 
+                function batchTransfer(address[] _receivers, uint256 _value) public returns (bool) { 
+                    uint256 cnt = _receivers.length;
+                    uint256 amount = cnt * _value;
+                    if(amount == 0 || amount > balanceOf[msg.sender]) return false;
+                    balanceOf[msg.sender] -= amount;
+                    for (uint i = 0; i < cnt; i++) {
+                        balanceOf[_receivers[i]] += _value;
+                        Transfer(msg.sender, _receivers[i], _value);
+                    }
+                    return true;
+                }"
+        }
+    ]
+}

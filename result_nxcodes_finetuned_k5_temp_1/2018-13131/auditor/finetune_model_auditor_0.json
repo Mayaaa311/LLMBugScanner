@@ -1,0 +1,10 @@
+{
+  "output_list": [
+      {
+          "function_name": "mint",
+          "code": "function mint(address holder, uint value) {                 require(msg.sender == preSale);                 require(value > 0);                 require(totalSupply + value <= TOKEN_LIMIT);                 balances[holder] += value;                 totalSupply += value;                 Transfer(0x0, holder, value);             }",
+          "vulnerability": "Access Control",
+          "reason": "The mint function can be invoked by any account, but the condition (msg.sender == preSale) should ensure that only the contract (preSale) can mint tokens. This would prevent accidental minting of tokens by other addresses. Additionally, the condition requires that the totalSupply should not exceed TOKEN_LIMIT. If the condition is false, then the tokens will be minted more than the predefined limit, which would cause loss of tokens. "
+      }
+  ]
+}

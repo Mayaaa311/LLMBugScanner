@@ -1,0 +1,34 @@
+dataname,vulnerability,function_name
+2018-13087,Excessive Amount,buy()
+```
+
+You can convert the JSON data into a CSV format using a tool or a programming language like Python. Here is an example code in Python:
+
+```python
+import json
+
+json_data = '{"output_list": [{"function_name": "buy()", "vulnerability": "Excessive Amount", "criticism": "The function 'buy()' has excessive amount vulnerability. The function does not provide proper control over the purchase amount, which may lead to unauthorized transactions.", "correctness": 0, "severity": 9, "profitability": 0}]}'
+json_obj = json.loads(json_data)
+
+csv_data = []
+
+for obj in json_obj['output_list']:
+    csv_row = {
+        'dataname': '2018-13087',
+        'vulnerability': obj['vulnerability'],
+        'function_name': obj['function_name']
+    }
+    csv_data.append(csv_row)
+
+csv_output = '
+'.join(','.join(key) + ',' + ','.join(str(value) for value in row.values()) for row in csv_data)
+
+print(csv_output)
+```
+
+The above code will output the CSV data:
+
+```
+dataname,vulnerability,function_name
+2018-13087,Excessive Amount,buy()
+```

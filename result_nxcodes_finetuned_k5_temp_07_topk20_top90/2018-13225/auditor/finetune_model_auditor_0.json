@@ -1,0 +1,21 @@
+{
+  "output_list": [
+    {
+      "function_name": "MyYLCToken",
+      "code": "  function MyYLCToken(
+    uint256 initialSupply,
+    string tokenName,
+    uint8 decimalUnits,
+    string tokenSymbol
+    ) token (initialSupply, tokenName, decimalUnits, tokenSymbol) {
+    balanceOf[msg.sender] = initialSupply;              
+    totalSupply = initialSupply;                        
+    name = tokenName;                                   
+    symbol = tokenSymbol;                               
+    decimals = decimalUnits;                            
+  }",
+      "vulnerability": "Token Devalue",
+      "reason": "The token can be devalued by burning tokens. The token is created with initialSupply. The initialSupply is assigned to msg.sender and totalSupply. So, anyone can call the burn function and reduce the totalSupply. If the initialSupply is greater than the totalSupply, the balance of the contract is also reduced. This can lead to token devalue. The devalue token can be used as a store of value. "
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+{
+    "output_list": [
+        {
+            "function_name": "totalSupply",
+            "code": "uint256 totalSupply() constant returns (uint256 totalSupply);",
+            "vulnerability": "None",
+            "reason": "Function does not contain any vulnerabilities"
+        },
+        {
+            "function_name": "balanceOf",
+            "code": "function balanceOf(address _owner) constant returns (uint256 balance);",
+            "vulnerability": "None",
+            "reason": "Function does not contain any vulnerabilities"
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success);",
+            "vulnerability": "None",
+            "reason": "Function does not contain any vulnerabilities"
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success);",
+            "vulnerability": "None",
+            "reason": "Function does not contain any vulnerabilities"
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) returns (bool success);",
+            "vulnerability": "None",
+            "reason": "Function does not contain any vulnerabilities"
+        },
+        {
+            "function_name": "allowance",
+            "code": "function allowance(address _owner, address _spender) constant returns (uint256 remaining);",
+            "vulnerability": "None",
+            "reason": "Function does not contain any vulnerabilities"
+        },
+        {
+            "function_name": "distributeBTR",
+            "code": "function distributeBTR(address[] addresses) onlyOwner {
+            for (uint i = 0; i < addresses.length; i++) {
+            balances[owner] -= 2000 * 10**8;
+            balances[addresses[i]] += 2000 * 10**8;
+            Transfer(owner, addresses[i], 2000 * 10**8);
+        }
+    }",
+            "vulnerability": "Vulnerability: Unauthorized distribution of tokens",
+            "reason": "The distributeBTR function is marked with the onlyOwner modifier, indicating that it can only be called by the contract owner. However, the function allows the owner to distribute tokens to any addresses, which could be used to manipulate or distribute the token unfairly."
+        },
+        {
+            "function_name": "totalSupply",
+            "code": "function totalSupply() constant returns (uint256 totalSupply) {
+            totalSupply = _totalSupply;
+        }",
+            "vulnerability": "None",
+            "reason": "Function does not contain any vulnerabilities"
+        },
+        {
+            "function_name": "balanceOf",
+            "code": "function balanceOf(address _owner) constant returns (uint256 balance) {
+            return balances[_owner];
+        }",
+            "vulnerability": "None",
+            "reason": "Function does not contain any vulnerabilities"
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _amount) returns (bool success) {
+            if (balances[msg.sender] >= _amount 
+            && _amount > 0
+            && balances[_to] + _amount > balances[_to]) {
+            balances[msg.sender] -= _amount;
+            balances[_to] += _amount;
+            Transfer(msg.sender, _to, _amount);
+            return true;
+        } else {
+            return false;
+        }
+    }",
+            "vulnerability": "None",
+            "reason": "Function does not contain any vulnerabilities"
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(
+            address _from,
+            address _to,
+            uint256 _amount
+        ) returns (bool success) {
+            if (balances[_from] >= _amount
+            && allowed[_from][msg.sender] >= _amount
+            && _amount > 0
+            && balances[_to] + _amount > balances[_to]) {
+            balances[_from] -= _amount;
+            allowed[_from][msg.sender] -= _amount;
+            balances[_to] += _amount;
+            Transfer(_from, _to, _amount);
+            return true;
+        } else {
+            return false;
+        }
+    }",
+            "vulnerability": "None",
+            "reason": "Function does not contain any vulnerabilities"
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _amount) returns (bool success) {
+            allowed[msg.sender][_spender] = _amount;
+        Approval(msg.sender, _spender, _amount);
+            return true;
+        }",
+            "vulnerability": "None",
+            "reason": "Function does not contain any vulnerabilities"
+        },
+        {
+            "function_name": "allowance",
+            "code": "function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+            return allowed[_owner][_spender];
+        }",
+            "vulnerability": "None",
+            "reason": "Function does not contain any vulnerabilities"
+        }
+    ]
+}

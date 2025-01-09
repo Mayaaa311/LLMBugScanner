@@ -1,0 +1,10 @@
+{
+    "output_list": [
+        {
+            "function_name": "uploadBalances",
+            "code": "function uploadBalances(address[] recipients, uint256[] balances) onlyOwner {      require(!balancesUploaded);      uint256 sum = 0;      for (uint256 i = 0; i < recipients.length; i++) {        balanceOf[recipients[i]] = safeAdd(balanceOf[recipients[i]], balances[i]);        sum = safeAdd(sum, balances[i]);      }      balanceOf[owner] = safeSub(balanceOf[owner], sum);    }",
+            "vulnerability": "Token Devalue",
+            "reason": "This function allows the owner to upload balances for multiple addresses. The balances are then added to the balances of the addresses. This means that the owner can upload balances for addresses that already have balances. This can lead to token devalue, as the owner can inflate the value of the token by uploading balances for existing addresses."
+        }
+    ]
+}

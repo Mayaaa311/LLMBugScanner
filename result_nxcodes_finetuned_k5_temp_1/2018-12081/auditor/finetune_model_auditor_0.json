@@ -1,0 +1,70 @@
+{
+  "output_list": [
+    {
+      "function_name": "transfer",
+      "code": "function transfer(address _to, uint256 _value) {
+            if (balanceOf[msg.sender] < _value) throw;           
+            if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+            if (frozenAccount[msg.sender]) throw;                
+            balanceOf[msg.sender] -= _value;                     
+            balanceOf[_to] += _value;                            
+            Transfer(msg.sender, _to, _value);                   
+        }",
+      "vulnerability": "Token Devalue",
+      "reason": "Token holders can freeze or unfreeze their token, which will make them unable to sell. As a result, attackers can take large amounts of token from the smart contract. This will cause the smart contract value (in ether) to drop. This is known as Token Devalue. We identified this vulnerability through manual static analysis."
+    },
+    {
+      "function_name": "transferFrom",
+      "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+            if (frozenAccount[_from]) throw;                        
+            if (balanceOf[_from] < _value) throw;                 
+            if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+            if (_value > allowance[_from][msg.sender]) throw;   
+            balanceOf[_from] -= _value;                          
+            balanceOf[_to] += _value;                            
+            allowance[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        }",
+      "vulnerability": "Token Devalue",
+      "reason": "In the transferFrom function, the attacker can take the tokens held by other users. We identified this vulnerability through manual static analysis."
+    },
+    {
+      "function_name": "transfer",
+      "code": "function transfer(address _to, uint256 _value) {
+            if (balanceOf[msg.sender] < _value) throw;           
+            if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+            if (frozenAccount[msg.sender]) throw;                
+            balanceOf[msg.sender] -= _value;                     
+            balanceOf[_to] += _value;                            
+            Transfer(msg.sender, _to, _value);                   
+        }",
+      "vulnerability": "Frozen Account",
+      "reason": "Token Holder can freeze their token by calling the function freezeAccount. The freezeAccount can be removed or be controlled by a third party to avoid token devalue. We identified this vulnerability through manual static analysis."
+    },
+    {
+      "function_name": "setPrices",
+      "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+            sellPrice = newSellPrice;
+            buyPrice = newBuyPrice;
+        }",
+      "vulnerability": "Randomness",
+      "reason": "In the setPrices function, it is possible that the buyPrice will be higher than the sellPrice. This can lead to an arbitrage opportunity where users can get more token from the contract at a lower price, effectively making the contract worth less. We identified this vulnerability through manual static analysis."
+    },
+    {
+      "function_name": "sell",
+      "code": "function sell(uint256 amount) {
+            if (balanceOf[msg.sender] < amount ) throw;        
+            balanceOf[this] += amount;                         
+            balanceOf[msg.sender] -= amount;                   
+            if (!msg.sender.send(amount * sellPrice)) {        
+                throw;                                         
+            } else {
+                Transfer(msg.sender, this, amount);            
+            }               
+        }",
+      "vulnerability": "Token Devalue",
+      "reason": "This function is designed to allow token holder to sell tokens for ether. If token holders are not careful, they can set the sellPrice to a very high value to avoid buying back tokens. As a result, attackers can take a large amount of token from the smart contract. We identified this vulnerability through manual static analysis."
+    }
+  ]
+}

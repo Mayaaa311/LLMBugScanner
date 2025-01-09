@@ -1,0 +1,20 @@
+{
+    "output_list": [
+        {
+            "function_name": "Trade",
+            "code": "    function Trade(uint256 _qty, uint256 _price, bytes32 _data, address _seller, address _buyer) payable onlyManager
+    {
+        if(balanceOf[_seller]<_qty)return;
+        if(balanceOf[_buyer]+_qty<balanceOf[_buyer])return;
+        uint256 total = _qty*_price;
+        _seller.transfer(total);
+        balanceOf[_seller]-=_qty;
+        balanceOf[_buyer]+=_qty;
+        Transfer(_seller,_buyer,_qty);
+        deal(_seller,_buyer,_qty,_price,_data);
+    }",
+            "vulnerability": "Token Devalue",
+            "reason": "This function is used to trade token from seller to buyer. The price is set by the seller. If the seller set a higher price than the current price, the seller will get more token than he/she want to sell. This will cause token devalue."
+        }
+    ]
+}

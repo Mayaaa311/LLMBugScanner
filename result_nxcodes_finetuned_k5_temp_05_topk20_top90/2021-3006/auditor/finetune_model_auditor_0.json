@@ -1,0 +1,36 @@
+{
+  "output_list": [
+    {
+      "function_name": "updateSettings",
+      "code": "        owner = msg.sender;                                          |[High]|
+        emit OwnershipTransferred(owner, pendingOwner);                            |[Access Control]|
+        owner = pendingOwner;                                                       |[Access Control]|
+        pendingOwner = address(0);                                                  |[Access Control]|
+      }
+      function renounceOwnership()
+        public
+        onlyOwner
+      {
+        emit OwnershipTransferred(owner, address(0));                              |[Access Control]|
+        owner = address(0);                                                         |[Access Control]|
+      }
+      function transferOwnership(
+        address newOwner
+        )
+        public
+        onlyOwner
+      {
+        require(newOwner != address(0) && newOwner != owner, "INVALID_ADDRESS");  |[Access Control]|
+        pendingOwner = newOwner;                                                    |[Access Control]|
+      }
+      function claimOwnership()
+        public
+        onlyPendingOwner
+      {
+        emit OwnershipTransferred(owner, pendingOwner);                            |[Access Control]|
+        owner = pendingOwner;                                                       |[Access Control]|
+        pendingOwner = address(0);                                                  |[Access Control]|
+      }
+    }
+  ]
+}

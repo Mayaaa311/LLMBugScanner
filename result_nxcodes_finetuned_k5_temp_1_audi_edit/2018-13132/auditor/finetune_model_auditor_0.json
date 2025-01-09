@@ -1,0 +1,45 @@
+{
+  "output_list": [
+    {
+      "function_name": "transferFrom",
+      "code": "        require(_to != address(0));
+        require(_value <= balances[_from]);
+        require(_value <= allowed[_from][msg.sender]);
+        balances[_from] = balances[_from].sub(_value);
+        balances[_to] = balances[_to].add(_value);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+        Transfer(_from, _to, _value);
+        return true;
+      }
+      function approve(address spender, uint256 value) public returns (bool) {
+        allowed[msg.sender][spender] = value;
+        Approval(msg.sender, spender, value);
+        return true;
+      }
+      function allowance(address owner, address spender) public view returns (uint256) {
+        return allowed[owner][spender];
+      }
+      function increaseApproval(address spender, uint _addedValue) public returns (bool) {
+        allowed[msg.sender][spender] = allowed[msg.sender][spender].add(_addedValue);
+        Approval(msg.sender, spender, allowed[msg.sender][spender]);
+        return true;
+      }
+      function decreaseApproval(address spender, uint _subtractedValue) public returns (bool) {
+        uint oldValue = allowed[msg.sender][spender];
+        if (_subtractedValue > oldValue) {
+          allowed[msg.sender][spender] = 0;
+        } else {
+          allowed[msg.sender][spender] = oldValue.sub(_subtractedValue);
+        }
+        Approval(msg.sender, spender, allowed[msg.sender][spender]);
+        return true;
+      }
+    },
+    {
+      "function_name": "<function_name_2>",
+      "code": "<code of the function2>",
+      "vulnerability": "<short_vulnera_desc_2>",
+      "reason": "<reason_2>"
+    }
+  ]
+}

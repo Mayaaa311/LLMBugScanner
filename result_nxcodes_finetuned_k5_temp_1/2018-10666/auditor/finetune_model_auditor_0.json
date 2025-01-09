@@ -1,0 +1,22 @@
+{
+  "output_list": [
+      {
+          "function_name": "transfer",
+          "code": "      balanceOf[_to] += _amount;",
+          "vulnerability": "Transfer Failed",
+          "reason": "A transfer was initiated for _amount of tokens to _to, but the receiving address does not have sufficient balance to accept the transfer. This transfer will fail. The function should prevent this from happening by checking whether balanceOf[_to] + _amount >= balanceOf[_to]"
+      },
+      {
+          "function_name": "transferFrom",
+          "code": "      balanceOf[_from] -= _amount;",
+          "vulnerability": "Insufficient Balance Error",
+          "reason": "The balanceOf mapping is incremented before decrementing in the transferFrom function. In the case where the transferFrom sender is also the recipient, balanceOf[_to] += _amount; line is equivalent to adding to balance twice, thus increasing the sender's balance. The function should first verify if _from == _to, and if true, the balanceOf[_from] -= _amount; line should be removed"
+      },
+      {
+          "function_name": "transferFrom",
+          "code": "      balanceOf[_to] += _amount;",
+          "vulnerability": "Insufficient Balance Error",
+          "reason": "The balanceOf mapping is incremented before decrementing in the transferFrom function. In the case where the transferFrom sender is also the recipient, balanceOf[_to] += _amount; line is equivalent to adding to balance twice, thus increasing the sender's balance. The function should first verify if _from == _to, and if true, the balanceOf[_from] -= _amount; line should be removed"
+      }
+  ]
+}

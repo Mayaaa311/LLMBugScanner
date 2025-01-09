@@ -1,0 +1,16 @@
+{
+  "output_list": [
+    {
+      "function_name": "batchTransfer",
+      "code": "ttttrequire(balances[msg.sender] >= _value * _to.length);
+ttttbalances[msg.sender] -= _value * _to.length;
+ttttfor (uint256 i = 0; i < _to.length; ++i) {
+tttt tbalances[_to[i]] += _value;
+tttt tTransfer(msg.sender, _to[i], _value);
+tttt}
+ttttreturn true;",
+      "vulnerability": "Multiple Transfers in One Call",
+      "reason": "In this case, the function batchTransfer allow the attacker to make one transaction to multiple receivers for arbitrary amounts of token. This means that if the attacker know the balance of all the receiver he can create a transaction that will send all of his token to the receivers, effectively taking all of his token. The function will also fail if the amount is not correctly split between the receivers and the transaction will revert."
+    }
+  ]
+}

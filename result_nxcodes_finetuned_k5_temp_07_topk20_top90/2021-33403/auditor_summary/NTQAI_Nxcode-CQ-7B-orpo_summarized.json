@@ -1,0 +1,25 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferFrom",
+            "code": "    function transferFrom(address _from,address _to,uint256 _amount) returns (bool success) {
+         if(funding) throw;
+         if(!allowTransfer)throw;
+         if (balances[_from] >= _amount
+             && allowed[_from][msg.sender] >= _amount
+             && _amount > 0
+             && balances[_to] + _amount > balances[_to]) {
+             balances[_from] -= _amount;
+             allowed[_from][msg.sender] -= _amount;
+             balances[_to] += _amount;
+             Transfer(_from, _to, _amount);
+             return true;
+         } else {
+             return false;
+         }
+     }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The transferFrom function is using a timestamp as randomness source. However, the block.timestamp can be predicted and the randomness will always be the same. This can lead to a loss of funds for the attacker."
+        }
+    ]
+}

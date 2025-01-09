@@ -1,0 +1,17 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) {        
+            if (balances[msg.sender] >= _value && _value > 0) { 
+                balances[msg.sender] -= _value; 
+                balances[_to] += _value; 
+                Transfer(msg.sender, _to, _value); 
+                return true; 
+            } else { return false; } 
+        }",
+            "vulnerability": "Token Devalue",
+            "reason": "The transfer function is designed to transfer the tokens from one address to another. However, the function does not check if the sender has enough balance to transfer. If the sender has less balance than the transfer amount, the transaction will still be successful. This will cause the tokens to be devalue."
+        }
+    ]
+}

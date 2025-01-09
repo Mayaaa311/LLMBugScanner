@@ -1,0 +1,36 @@
+```json
+{
+  "output_list": [
+    {
+      "function_name": "function MyToken(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol, address centralMinter)",
+      "code": "balanceOf[msg.sender] = initialSupply;",
+      "vulnerability": "Bad Randomness",
+      "reason": "In the constructor, initialSupply is set to the balance of the msg.sender directly which would allow them to mint an arbitrary amount of tokens to themselves. Furthermore, they can also use this to mint an arbitrary number of tokens to others. The initialSupply should be a function parameter instead to make it clear to the user of the function how much tokens will be minted."
+    },
+    {
+      "function_name": "function buy()",
+      "code": "amount = msg.value / buyPrice;",
+      "vulnerability": "Wrong Logic",
+      "reason": "The function buys tokens if sent ether is not enough to buy at least one token. This function is intended for people to buy tokens. People who send less than 1 ETH will be stuck with no tokens. We can prevent this by implementing a buy function where user needs to send at least one ether to buy at least one token."
+    },
+    {
+      "function_name": "function buy()",
+      "code": "msg.sender.send(sell((minBalanceForAccounts-msg.sender.balance)/sellPrice));",
+      "vulnerability": "Access Control",
+      "reason": "The function buy does not verify whether the user is allowed to perform this action. This function can be called by any users and should be restricted to the owner or only the contract's users can call it. As is, the owner can potentially drain the contract and make users unable to use their tokens."
+    },
+    {
+      "function_name": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice)",
+      "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {",
+      "vulnerability": "Token Devalue",
+      "reason": "The function can be misused by an attacker by setting a high newSellPrice. This could lead to the token depreciating against the ether, making the user lose more tokens than they wanted. A good approach would be to ensure that the buyPrice and sellPrice cannot be set to below 1 ether (the minimum value a user should be able to get in return for their tokens)."
+    },
+    {
+      "function_name": "function sell(uint amount)",
+      "code": "revenue = amount * sellPrice;",
+      "vulnerability": "Token Devalue",
+      "reason": "If sell price is set lower than buyPrice, then tokens should be sold for less, which means the user will lose more tokens than intended. The sell function currently doesn't have a mechanism to prevent that. It should be set such that only users who have more than sellPrice * amount will be able to sell. The user will need to sell only the maximum possible amount that would still keep them in profit."
+    }
+  ]
+}
+```

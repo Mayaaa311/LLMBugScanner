@@ -1,0 +1,17 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) {
+                        if (balances[msg.sender] >= _value && _value > 0) {
+                            balances[msg.sender] -= _value;
+                            balances[_to] += _value;
+                            Transfer(msg.sender, _to, _value);
+                            return true;
+                        } else { return false; }
+                    }",
+            "vulnerability": "Access Control",
+            "reason": "The transfer function does not check if the sender has enough balance to transfer. The transfer function can be called by anyone, even if the sender does not have enough balance. This can lead to loss of funds."
+        }
+    ]
+}

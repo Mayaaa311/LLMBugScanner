@@ -1,0 +1,26 @@
+{
+  "output_list": [
+    {
+      "function_name": "transfer",
+      "code": "    function transfer(address _to, uint256 _value) returns (bool success) {
+        if(msg.data.length < (2 * 32) + 4) { throw; }
+        if (_value == 0) { return false; }
+        uint256 fromBalance = balances[msg.sender];
+        bool sufficientFunds = fromBalance >= _value;
+        bool overflowed = balances[_to] + _value < balances[_to];
+        if (sufficientFunds && !overflowed) {
+            balances[msg.sender] -= _value;
+            balances[_to] += _value;
+            Transfer(msg.sender, _to, _value);
+            return true;
+        } else { return false; }
+    }",
+      "vulnerability": "Bad Randomness",
+      "reason": "In the transfer function, the bonus tokens issued to the sender are calculated based 
+      on the hash of the coinbase address, block number and timestamp. The hash function used is 
+      ripemd160 which is vulnerable to hash collisions. The same hash can result in different outputs, 
+      leading to the sender being unable to predict the exact amount of bonus tokens they will receive. 
+      This vulnerability can be exploited to manipulate the token distribution and increase the value of the token."
+    }
+  ]
+}

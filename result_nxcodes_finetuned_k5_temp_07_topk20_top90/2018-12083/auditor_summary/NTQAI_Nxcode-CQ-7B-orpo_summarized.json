@@ -1,0 +1,10 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {                balanceOf[target] += mintedAmount;                totalSupply += mintedAmount;                Transfer(this, target, mintedAmount);            }                function burn(uint256 _value) returns (bool success) {                    require (balanceOf[msg.sender] > _value);                    balanceOf[msg.sender] -= _value;                    totalSupply -= _value;                    Burn(msg.sender, _value);                    return true;                }                function burnFrom(address _from, uint256 _value) returns (bool success) {                    require(balanceOf[_from] >= _value);                    require(_value <= allowance[_from][msg.sender]);    ",
+            "vulnerability": "Burnable Token",
+            "reason": "A user can burn arbitrary amount of tokens. It will reduce the totalSupply of the token, making the value of the token decrease. This can be used as a form of decentralized insurance against price volatility. Attacker can mint a large amount of tokens and sell them in a centralized exchange, then buy back the tokens at a lower price, effectively giving them more tokens than they actually own."
+        }
+    ]
+}

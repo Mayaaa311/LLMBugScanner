@@ -1,0 +1,12 @@
+```json
+{
+    "output_list": [
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint256 _tokenId) internal {      ownershipTokenCount[_to]++;      tokenIndexToOwner[_tokenId] = _to;      if (_from != address(0)) {          ownershipTokenCount[_from]--;          delete tokenIndexToApproved[_tokenId];      }      Transfer(_from, _to, _tokenId);  }",
+            "vulnerability": "Reentrancy",
+            "reason": "The _transfer() function is called by mint() with _from set to 0 (0x000...0000). The _transfer() function first increases the ownershipTokenCount of _to, then assigns ownership of tokenIndexToOwner[_tokenId]. If a user, A, is calling this function they will be able to call _transfer() recursively with the same parameters. The _to argument will be the address of A. The code for this function should be executed by A, and then execute _transfer() with the same parameters. This can lead to reentrancy, a user being able to execute arbitrary code with your contract's context. The contract's state will be changed as a result of these calls."
+        }
+    ]
+}
+```

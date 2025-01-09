@@ -1,0 +1,44 @@
+{
+    "output_list": [
+        {
+            "function_name": "approveAndCall",
+            "code": "                tokenRecipient spender = tokenRecipient(_spender);
+                if (approve(_spender, _value)) {
+                  spender.receiveApproval(msg.sender, _value, this, _extraData);
+                  return true;
+                }
+        ",
+            "vulnerability": "Bad Approval",
+            "reason": "If spender does not accept tokens, approve will be stuck. The approveAndCall function does not check if spender contract has receiveApproval function and is capable to handle the tokens. Also, spender can't handle the tokens as per ERC20, tokens should be sent by transferFrom."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }",
+            "vulnerability": "Bad Token Minting",
+            "reason": "This token minting mechanism is flawed, if the contract has no funds, or if the token transfer fails to the target. A malicious user can mint unlimited tokens and hold them forever, without them ever being transferred out."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "                sellPrice = newSellPrice;
+                buyPrice = newBuyPrice;
+            }
+        }",
+            "vulnerability": "Bad Price Settings",
+            "reason": "The function setPrices can be used to adjust the price of tokens in the future. This is dangerous because the prices can be changed to be advantageous for the attacker. For example, if a user sends in 1 ether and buys 0.00000000001 token, he will get 1 token. If the price is set to 100, he will get 100 tokens. This function allows an attacker to manipulate the prices and give himself a significant advantage."
+        },
+        {
+            "function_name": "transfer",
+            "code": "            assert (!frozenAccount[msg.sender]);                
+            balanceOf[msg.sender] -= _value;                     
+            balanceOf[_to] += _value;                            
+            Transfer(msg.sender, _to, _value);                   
+        }",
+            "vulnerability": "Access Control",
+            "reason": "The function transfer only accepts _from as the sender when transferring tokens from another account. This can be bypassed, for instance, if _from has a balance of 10,000 tokens and the contract has a balance of 100 tokens. The contract could then transfer 10,000 tokens from the attacker's account to itself, effectively burning 10,000 tokens from the attacker's balance, leaving him with only 10 tokens to use. A malicious attacker could also create many fake account addresses and create an infinite number of fake accounts. In a smart contract, you should always ensure that only authorized users have the ability to send and receive funds or perform other critical operations."
+        }
+    ]
+}

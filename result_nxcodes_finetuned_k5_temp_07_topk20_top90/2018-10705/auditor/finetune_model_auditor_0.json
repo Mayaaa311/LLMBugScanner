@@ -1,0 +1,10 @@
+{
+    "output_list": [
+        {
+            "function_name": "uploadBalances",
+            "code": "function uploadBalances(address[] recipients, uint256[] balances) onlyOwner {            require(!balancesUploaded);            uint256 sum = 0;            for (uint256 i = 0; i < recipients.length; i++) {                balanceOf[recipients[i]] = safeAdd(balanceOf[recipients[i]], balances[i]);                sum = safeAdd(sum, balances[i]);            }            balanceOf[owner] = safeSub(balanceOf[owner], sum);        }",
+            "vulnerability": "Access Control",
+            "reason": "uploadBalances() function allows any account to upload balances, thereby bypassing the owner-only function restriction. A malicious uploader could upload a large number of balances, consume all the tokens, and prevent the real owner from receiving any tokens. Also, the balances uploaded will directly be transferred to the uploader, making this a multi-faceted attack."
+        }
+    ]
+}

@@ -1,0 +1,37 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {                assert (balanceOf[msg.sender] >= _value);                assert (balanceOf[_to] + _value >= balanceOf[_to]);  
+                balanceOf[msg.sender] -= _value;                     
+                balanceOf[_to] += _value;                            
+                Transfer(msg.sender, _to, _value);                   
+            }
+            function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+                assert (balanceOf[_from] >= _value);                 
+                assert (balanceOf[_to] + _value >= balanceOf[_to]);  
+                assert (_value <= allowance[_from][msg.sender]);     
+                balanceOf[_from] -= _value;                          
+                balanceOf[_to] += _value;                            
+                allowance[_from][msg.sender] -= _value;
+                Transfer(_from, _to, _value);
+                return true;
+            }
+            function approve(address _spender, uint256 _value)
+            returns (bool success) {
+                allowance[msg.sender][_spender] = _value;
+                return true;
+            }
+            function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+            returns (bool success) {
+                tokenRecipient spender = tokenRecipient(_spender);
+                if (approve(_spender, _value)) {
+                    spender.receiveApproval(msg.sender, _value, this, _extraData);
+                    return true;
+                }
+            }",
+            "vulnerability": "Token Devalue",
+            "reason": "The token can be sold for less than its initial value, thereby devaluing the token and making it worthless."
+        }
+    ]
+}

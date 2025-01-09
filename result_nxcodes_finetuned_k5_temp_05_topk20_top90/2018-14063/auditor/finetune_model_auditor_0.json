@@ -1,0 +1,20 @@
+{
+  "output_list": [
+    {
+      "function_name": "transfer",
+      "code": "function transfer(address _to, uint256 _amount) notThisContract(_to) returns (bool success) {
+            require(_to != 0x0);
+            require(_amount > 0);
+            require(balances[msg.sender] >= _amount);
+            require(balances[_to] + _amount > balances[_to]);
+            balances[msg.sender] -= _amount;
+            balances[_to] += _amount;
+            Transfer(msg.sender, _to, _amount);
+            return true;
+        }
+      ",
+      "vulnerability": "Integer Overflow",
+      "reason": "In the transfer function, the balance of the sender is decreased by _amount, and the balance of the receiver is increased by _amount. However, this operation can cause an integer overflow if _amount is large enough. For example, if the sender has a balance of 2^256-1 and tries to transfer 2^256, the balance of the sender will be 2^256 and the balance of the receiver will be 2^256-1. After the transfer, the balance of the sender will be 2^256-1 and the balance of the receiver will be 2^256, which is incorrect."
+    }
+  ]
+}

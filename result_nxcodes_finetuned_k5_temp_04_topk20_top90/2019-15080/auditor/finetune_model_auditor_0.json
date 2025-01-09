@@ -1,0 +1,31 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) {
+                require(!isblacklistedAccount[msg.sender]);                 
+                require(!isblacklistedAccount[_to]);                        
+                require(balanceOf[msg.sender] > 0);                     
+                require(balanceOf[msg.sender] >= _value);                   
+                require(_to != address(0));                                 
+                require(_value > 0);
+                require(balanceOf[_to] .add(_value) >= balanceOf[_to]);     
+                require(_to != msg.sender);                                 
+                balanceOf[msg.sender] = balanceOf[msg.sender].sub(_value);  
+                balanceOf[_to] = balanceOf[_to].add(_value);                
+                Transfer(msg.sender, _to, _value);                          
+                return true;
+            }
+            ",
+            "vulnerability": "Token Devalue",
+            "reason": "The token devalue vulnerability is caused by the transfer function. The function allows anyone to transfer any amount of tokens to any address. This could be exploited by malicious users to transfer large amount of tokens to a single address, effectively devaluing the token. The users will lose the tokens in the address they transferred them to. The devalue vulnerability can be exploited by the following:
+            1. User A: 
+                - User A buys 100 tokens
+                - User A transfers 50 tokens to User B
+                - User A transfers 50 tokens to User C
+            2. User B and User C will have 0 tokens each after the above transfer.
+            3. User A will have 100 tokens.
+            "
+        }
+    ]
+}

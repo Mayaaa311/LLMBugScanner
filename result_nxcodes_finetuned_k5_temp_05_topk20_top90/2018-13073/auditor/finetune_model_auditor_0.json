@@ -1,0 +1,19 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+                    if (balanceOf[_from] < _value) throw;                 
+                    if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+                    if (_value > allowance[_from][msg.sender]) throw;   
+                    balanceOf[_from] -= _value;                          
+                    balanceOf[_to] += _value;                            
+                    allowance[_from][msg.sender] -= _value;
+                    Transfer(_from, _to, _value);
+                    return true;
+                }",
+            "vulnerability": "ERC20 Token Shortage",
+            "reason": "The transferFrom function allows users to transfer tokens from an account that has been approved by the sender. However, if the approved amount is less than the amount to be transferred, the transaction will fail. This will cause the approved amount to be lost for the sender and the tokens will be stuck in the contract. A better approach would be to reduce the approved amount by the amount being transferred."
+        }
+    ]
+}

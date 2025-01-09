@@ -1,0 +1,16 @@
+{
+  "output_list": [
+    {
+      "function_name": "()",
+      "code": "            }
+                if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) { revert(); }
+                return true;
+            }
+            function approveAndCallcode(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+                allowed[msg.sender][_spender] = _value;
+      ",
+      "vulnerability": "Access Control",
+      "reason": "The approveAndCall and approveAndCallcode functions do not properly verify if the msg.sender is the founder. The approveAndCall functions could be called by anyone and would result in the approval of an unlimited amount of tokens for the spender. The approveAndCallcode functions would require the spender to call a fallback function that would approve the tokens. However, the fallback function is missing. This would result in the approveAndCallcode function having no use."
+    }
+  ]
+}

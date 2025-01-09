@@ -1,0 +1,16 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "    function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) throw;           
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "A function transfer has been declared to send _value tokens from sender's account to another account, but without checking the amount of sender's tokens is smaller than _value. This could allow an attacker to send more tokens than intended. "
+        }
+    ]
+}

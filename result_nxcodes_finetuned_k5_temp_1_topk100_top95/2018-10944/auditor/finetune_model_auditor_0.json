@@ -1,0 +1,22 @@
+{
+  "output_list": [
+        {
+            "function_name": "constructor",
+            "code": "        ether_profit = msg.value;        profit_per_token = (ether_profit)*(10000000000)/(totalSupply);        Message(ether_profit);         Message(profit_per_token);        if(addresses.length >0)        {             for (uint i = 0; i < addresses.length; i++) {                if(addresses[i] !=owner)                {                    request_dividend(addresses[i]);                }               }                }        }",
+            "vulnerability": "Constant Function ",
+            "reason": "There is no input parameters for this function, the result will always be the same (it always gives profits to already-existing token holders). The function should be made non-constant, and may return error code or failure message."
+        },
+        {
+            "function_name": "withdraw",
+            "code": "tttttelse if(msg.sender ==owner){                  ether_profit = msg.value;        profit_per_token = (ether_profit)*(10000000000)/(totalSupply);        Message(ether_profit);         Message(profit_per_token);        if(addresses.length >0)        {             for (uint i = 0; i < addresses.length; i++) {                if(addresses[i] !=owner)                {                    request_dividend(addresses[i]);                }               }                }            }        ",
+            "vulnerability": "Bad Randomness",
+            "reason": "In Function withdraw, it sends ethers from owner address to token holders. The block.timestamp is used as entropy, but it is not hard to predict, attacker can call withdraw at the same blocktime for more profits to the same token holders. It may lead to attacker stealing more than planned and loss of money. This attack does not require any external funds (only the token itself)."
+        },
+        {
+            "function_name": "set_price",
+            "code": "            one_ether_usd_price = stringToUint(result);        valuee(one_ether_usd_price);        if(one_ether_usd_price<1000)        {         one_ether_usd_price = one_ether_usd_price*100;        }        else if(one_ether_usd_price<10000)        {         one_ether_usd_price = one_ether_usd_price*10;        }        valuee(one_ether_usd_price);                uint no_of_token = (one_ether_usd_price*uservalue[userAddress[myid]])/(275*10000000000000000*100);            balances[owner] -= (no_of_token*10000000000);            balances[userAddress[myid]] += (no_of_token*10000000000);             Transfer(owner, userAddress[myid] , no_of_token);              check_array_add(userAddress[myid]);                }        ",
+            "vulnerability": "DApp Hacks / Token Devalue",
+            "reason": "The function set_price relies on the honesty of the result of oraclize.query call. It seems that the input "
+        }
+  ]
+}

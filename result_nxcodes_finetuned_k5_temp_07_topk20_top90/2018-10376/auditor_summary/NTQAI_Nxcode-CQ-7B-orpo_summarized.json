@@ -1,0 +1,23 @@
+The input is already in the desired JSON format. It seems like you're looking for an output that is identical to the input. Here it is again for clarity:
+
+```json
+{
+    "output_list": [
+        {
+            "function_name": "approveProxy",
+            "code": "function approveProxy(address _from, address _spender, uint256 _value,uint8 _v,bytes32 _r, bytes32 _s) public returns (bool success) {
+                        uint256 nonce = nonces[_from];
+                        bytes32 hash = keccak256(_from,_spender,_value,nonce);
+                        if(_from != ecrecover(hash,_v,_r,_s)) revert();
+                        allowed[_from][_spender] = _value;
+                        Approval(_from, _spender, _value);
+                        nonces[_from] = nonce + 1;
+                        return true;
+                    }
+                    ",
+            "vulnerability": "Bad Randomness",
+            "reason": "The approveProxy function uses the ecrecover function to verify a signature. However, the function does not use the timestamp to prevent replay attacks. The nonce is only incremented if the signature is valid, so an attacker can reuse a valid signature to approve the same spending multiple times. This could lead to unauthorized spending of the funds."
+        }
+    ]
+}
+```

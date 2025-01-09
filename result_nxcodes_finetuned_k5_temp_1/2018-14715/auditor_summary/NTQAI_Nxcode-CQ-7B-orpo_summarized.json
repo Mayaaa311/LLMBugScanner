@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "buyPack",
+            "code": "
+    function buyPack(uint256 packId) public payable returns (bool) {
+        require( packs[packId].price > 0 );
+        require( msg.value >= packs[packId].price );
+        packs[packId].price=0;
+        for(uint8 i=0;i<10;i++){
+            tokenIndexToOwner[packs[packId].tokens[i]]=msg.sender;
+            _transfer(0, msg.sender, packs[packId].tokens[i]);
+        }
+        delete packs[packId];
+        BuyPack(msg.sender,packId,msg.value);
+    }
+",
+            "vulnerability": "Fuzzer",
+            "reason": "This function allows the creation of a pack by paying for it. However it does not check whether the msg.value is higher than the price. Therefore, a buyer could potentially pay less than the price of a pack and buy the pack with a profit. This could be exploited to mint free items or even for other buys. This function also does not check the owner of the pack before actually buying. The pack can also be purchased if the msg.value is equal to the price. If the owner is address(0), he would not receive the Ether. Therefore, it is advisable to implement the following: 1. Add a check to prevent buyers from paying less than the price; 2. Check the owner before buying."
+        }
+    ]
+}

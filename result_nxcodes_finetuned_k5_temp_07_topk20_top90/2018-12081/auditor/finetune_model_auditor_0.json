@@ -1,0 +1,14 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "        balanceOf[target] += mintedAmount;                          
+        totalSupply += mintedAmount;                        
+        Transfer(0, this, mintedAmount);                      
+        Transfer(this, target, mintedAmount);                  
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The mintToken function can be called by any address, it allows the minting of new tokens. However, this function does not verify if the target address is a valid address or not. If a invalid address is passed, it will cause an error. This will allow minters to mint tokens to invalid addresses, thereby devalueing the token. This can be mitigated by adding a require statement to check if the target is a valid address."
+        }
+    ]
+}

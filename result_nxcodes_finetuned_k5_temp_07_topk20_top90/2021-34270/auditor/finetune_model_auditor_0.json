@@ -1,0 +1,20 @@
+{
+    "output_list": [
+        {
+            "function_name": "mine",
+            "code": "function mine(address _target, uint256 _minedAmount) onlyDoftManager {
+trequire (_minedAmount > 0);
+        require (_target != 0x0);
+        require (miningStorage - _minedAmount >= 0);
+        require (balanceOf[doftManager] >= _minedAmount);                
+        require (balanceOf[_target] + _minedAmount > balanceOf[_target]); 
+t    balanceOf[doftManager] -= _minedAmount;
+t    balanceOf[_target] += _minedAmount;
+t    miningStorage -= _minedAmount;
+t    Mine(_target, _minedAmount);
+    } ",
+            "vulnerability": "Mining Function",
+            "reason": "This mining function is a very simple one. It takes the miningStorage amount, deducts it from the target's balance and transfers it to the target. This means that anyone can mint tokens to anyone for free. The miningStorage should be kept in a separate contract, which should be owned by the mining contract, and only the mining contract should be able to mint tokens."
+        }
+    ]
+}

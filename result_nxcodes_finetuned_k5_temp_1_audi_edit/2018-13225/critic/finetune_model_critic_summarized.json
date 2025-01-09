@@ -1,0 +1,40 @@
+{
+    "output_list": [
+        {
+            "function_name": "approveAndCall",
+            "vulnerability": "Bad Approval",
+            "reason": "If spender does not accept tokens, approve will be stuck. The approveAndCall function does not check if spender contract has receiveApproval function and is capable to handle the tokens. Also, spender can't handle the tokens as per ERC20, tokens should be sent by transferFrom.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 0,
+            "criticism": "The approveAndCall mechanism is bad because it does not perform basic error checks. It sends tokens directly to a contract that does not accept tokens, leaving the tokens forever. The function is also vulnerable because it does not check for approveAndCall success and it does not revert if approve failed. A malicious user can approve tokens to a malicious contract that will then transfer tokens from that user. This attack is called Token Swap Attack. The function also does not follow standard ERC20 behavior. Instead of transferring tokens to _spender, it transfers them to _to. It should be followed by a call to spender.receiveApproval."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Bad Token Minting",
+            "reason": "This token minting mechanism is flawed, if the contract has no funds, or if the token transfer fails to the target. A malicious user can mint unlimited tokens and hold them forever, without them ever being transferred out.",
+            "correctness": 4,
+            "severity": 4,
+            "profitability": 3,
+            "criticism": "This function has a flaw because it doesn't check whether the contract has enough tokens to mint to the target address. If the contract doesn't have enough tokens, the transferFrom will fail. Similarly, it does not check if the transfer to the target address succeeds. A malicious user could use this function to mint tokens without receiving them. This attack can be performed if the contract does not have enough tokens to mint to the target. The function is also not following standard ERC20 behavior. It should transfer the tokens from the contract to the target and not the sender of the transaction."
+        },
+        {
+            "function_name": "setPrices",
+            "vulnerability": "Bad Price Settings",
+            "reason": "The function setPrices can be used to adjust the price of tokens in the future. This is dangerous because the prices can be changed to be advantageous for the attacker. For example, if a user sends in 1 ether and buys 0.00000000001 token, he will get 1 token. If the price is set to 100, he will get 100 tokens. This function allows an attacker to manipulate the prices and give himself a significant advantage.",
+            "correctness": 2,
+            "severity": 6,
+            "profitability": 0,
+            "criticism": "This function is misdesignated as a utility function. It doesn't provide any financial value to the token holder. The function can be used maliciously to manipulate the token prices and give the attacker a significant advantage. If the token is intended to be used as a stable coin, it's crucial that the token price cannot be manipulated. The function is also following standard ERC20 behavior. However, the function can be optimized as follow: 1. Remove the 'require' for the msg.sender to be a contract. 2. Remove the 'require' for the _value to be greater than 0. 3. Remove the 'require' for the _value to be smaller than max_supply. 4. Remove the 'require' for the _extraData to be 20 bytes. 5. Use a single assert statement to validate the parameters. "
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "reason": "The function transfer only accepts _from as the sender when transferring tokens from another account. This can be bypassed, for instance, if _from has a balance of 10,000 tokens and the contract has a balance of 100 tokens. The contract could then transfer 10,000 tokens from the attacker's account to itself, effectively burning 10,000 tokens from the attacker's balance, leaving him with only 10 tokens to use. A malicious attacker could also create many fake account addresses and create an infinite number of fake accounts. In a smart contract, you should always ensure that only authorized users have the ability to send and receive funds or perform other critical operations.",
+            "correctness": 1,
+            "severity": 4,
+            "profitability": 0,
+            "criticism": "This function is following standard ERC20 behavior. However, it does not properly handle the transfer. If the attacker sends tokens to _to, then the attacker can bypass the contract-side transfer, effectively sending tokens to themselves instead. Similarly, the transfer function does not perform any checks for _from being a contract or _value to be larger than zero, which allows an attacker to bypass the contract-side transfer. This function is vulnerable to a bypass attack. The function is also following standard ERC20 behavior. The transfer function is also not following standard ERC20 behavior. It should transfer the tokens from the contract to the target and not the sender of the transaction. "
+        }
+    ]
+}

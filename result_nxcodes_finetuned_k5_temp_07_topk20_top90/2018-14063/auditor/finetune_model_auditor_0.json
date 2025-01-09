@@ -1,0 +1,20 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _amount) notThisContract(_to) returns (bool success) {
+                    require(_to != 0x0);
+                    require(_amount > 0);
+                    require(balances[msg.sender] >= _amount);
+                    require(balances[_to] + _amount > balances[_to]);
+                    balances[msg.sender] -= _amount;
+                    balances[_to] += _amount;
+                    Transfer(msg.sender, _to, _amount);
+                    return true;
+                }
+                ",
+            "vulnerability": "Uncontrolled Token Transfer",
+            "reason": "In this contract, function transfer, anyone can transfer token to any address. There is no restriction on who can send tokens. This could lead to loss of funds for users of the contract."
+        }
+    ]
+}

@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "buy",
+            "code": "        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }",
+            "vulnerability": "Token Devalue",
+            "reason": "The token devalue vulnerability is caused by the sell function. If the token price is set too low, the token can be sold for less than its intrinsic value, thereby devaluing the token. The attacker can use this vulnerability to sell the token at a loss and take all the tokens from the contract."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }",
+            "vulnerability": "Token Devalue",
+            "reason": "The token devalue vulnerability is caused by the sell function. If the token price is set too low, the token can be sold for less than its intrinsic value, thereby devaluing the token. The attacker can use this vulnerability to sell the token at a loss and take all the tokens from the contract."
+        }
+    ]
+}

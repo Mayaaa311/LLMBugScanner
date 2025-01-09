@@ -1,0 +1,15 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferFrom",
+            "code": "            balances[_to] += _value;                                         
+            balances[_from] -= _value;                                         
+            allowed[_from][msg.sender] -= _value;                             
+            Transfer(_from, _to, _value);                                       
+            return true;                                                          
+        }",
+            "vulnerability": "Access Control",
+            "reason": "In transferFrom function, contract owner can bypass the transferFrom function by setting _from to the contract owner. It will transfer tokens directly from the contract owner to _to. This is a high risk vulnerability. The recommended approach is to add a check that the _from is not the contract address in the transferFrom function."
+        }
+    ]
+}

@@ -1,0 +1,54 @@
+This can be achieved using the `json` module in Python. Here is how you can do it:
+
+```python
+import json
+
+input_data = """
+{
+    "output_list": [
+        {
+            "function_name": "burn",
+            "code": "    function burn(uint256 amount) onlyOwner returns (bool success) {
+                if (balanceOf[msg.sender] < amount) throw;  
+                balanceOf[msg.sender] -= amount;            
+                totalSupply -= amount;                        
+                Burn(msg.sender, amount);
+                return true;
+            }
+",
+            "vulnerability": "Reentrancy",
+            "reason": "Sender can call this function to transfer to themselves. If it happens, the sender loses the actual amount of tokens that were requested for transfering."
+        }
+    ]
+}
+"""
+
+output = json.loads(input_data)
+
+# Output the structured JSON
+print(json.dumps(output, indent=4))
+```
+
+This will output:
+
+```json
+{
+    "output_list": [
+        {
+            "function_name": "burn",
+            "code": "    function burn(uint256 amount) onlyOwner returns (bool success) {
+                if (balanceOf[msg.sender] < amount) throw;  
+                balanceOf[msg.sender] -= amount;            
+                totalSupply -= amount;                        
+                Burn(msg.sender, amount);
+                return true;
+            }
+",
+            "vulnerability": "Reentrancy",
+            "reason": "Sender can call this function to transfer to themselves. If it happens, the sender loses the actual amount of tokens that were requested for transfering."
+        }
+    ]
+}
+```
+
+Notice that the `input_data` string contains a single line `<code of the function>`, which might be difficult to read and interpret. This string has been fixed by removing the newline character.

@@ -1,0 +1,15 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) onlyPayloadSize(2 * 32) {
+                balances[msg.sender] = balances[msg.sender].sub(_value);
+                balances[_to] = balances[_to].add(_value);
+                Transfer(msg.sender, _to, _value);
+            }
+            ",
+            "vulnerability": "Token Devalue",
+            "reason": "The transfer function does not check if the sender has enough balance to transfer. The transfer function will allow the transfer of more tokens than the sender has. This can be exploited to devalue the token."
+        }
+    ]
+}

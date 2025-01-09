@@ -1,0 +1,30 @@
+{
+    "output_list": [
+        {
+            "function_name": "sellOffline",
+            "code":         function sellOffline(address rec_address,uint256 token_amount) public onlyOwner                                               {
+                                if (remaining > 0)
+                                {
+                                    uint finalTokens =  (token_amount  * (10 ** 18));              
+                                    if(finalTokens < remaining)
+                                        {
+                                            remaining = remaining - finalTokens;
+                                            _transfer(owner,rec_address, finalTokens);    
+                                            TransferSell(owner, rec_address, finalTokens,'Offline');
+                                        }
+                                    else
+                                        {
+                                            revert();
+                                        }
+                                }
+                                else
+                                {
+                                    revert();
+                                }        
+                            }
+                            ,               
+            "vulnerability": "Token Devalue",
+            "reason": "Seller can sell all the remaining tokens by calling sellOffline function with remaining tokens amount as input. After token selling, remaining tokens will reduce. But, if the remaining tokens amount is less than 1, it will be impossible to buy those tokens back and they will be lost. In real world, seller should not sell such low value tokens."
+        }
+    ]
+}

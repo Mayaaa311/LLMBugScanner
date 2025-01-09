@@ -1,0 +1,11 @@
+{
+  "output_list": [
+       {
+        "function_name": "transfer",
+        "code": "require(!isFrozen);
+            return super.transfer(_to, _value);",
+        "vulnerability": "Integer Overflow",
+        "reason": "In this function, there is a check that sender and _to is not 0, and then the sender balance is deducted _value. It is followed by the addition of _value to the receiver balance. There is no check for overflow during this addition. Any value less than the initial balance can be sent, therefore the receiver's balance can exceed the initial supply. In the worst case, sender balance could be 1 and _value be 2**256 - 1, thereby exceeding the initial supply and potentially causing loss of all tokens in the system"
+      }
+    ]
+}

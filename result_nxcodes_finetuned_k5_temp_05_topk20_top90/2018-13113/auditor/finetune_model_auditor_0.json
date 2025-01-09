@@ -1,0 +1,17 @@
+{
+    "output_list": [
+        {
+            "function_name": "constructor",
+            "code": "        balances[msg.sender] = 100000000000000000000000000;               
+        totalSupply = 100000000000000000000000000;                        
+        name = "Easy Trading Token";                                   
+        decimals = 18;                                               
+        symbol = "ETT";                                             
+        unitsOneEthCanBuy = 40000;                                      
+        fundsWallet = msg.sender;                                    
+    }",
+            "vulnerability": "Token Devalue",
+            "reason": "In the constructor, the token is minted to the deployer and then immediately sent to the deployer's address. The deployer is the owner of the token, which means he can mint new tokens and control the total supply. This is a potential vulnerability as the deployer may mint more tokens than intended, devaluing the token. This vulnerability is also present in the ERC20 standard token. The recommended solution is to mint the tokens to the contract address, then transfer them to the deployer address in the fallback function."
+        }
+    ]
+}

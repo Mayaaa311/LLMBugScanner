@@ -1,0 +1,21 @@
+The input is already in the structured JSON format. It is a list of objects, each containing the function name, code, vulnerability, and reason. The output is the same as the input. Here is the input again:
+
+```json
+{
+    "output_list": [
+        {
+            "function_name": "distributeToken",
+            "code": "function distributeToken(address[] addresses, uint256 _value) {
+                        for (uint i = 0; i < addresses.length; i++) {
+                            balances[msg.sender] -= _value;
+                            balances[addresses[i]] += _value;
+                            Transfer(msg.sender, addresses[i], _value);
+                        }
+                    }
+                    ",
+            "vulnerability": "Token Devalue",
+            "reason": "This function allows the sender to distribute tokens to multiple addresses. The sender's balance will be reduced by the _value for each address, but the total supply will remain the same. This will cause the token price to devalue, which is harmful to the token holder."
+        }
+    ]
+}
+```

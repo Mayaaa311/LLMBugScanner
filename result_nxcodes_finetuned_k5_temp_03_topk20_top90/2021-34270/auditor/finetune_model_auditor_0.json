@@ -1,0 +1,18 @@
+{
+    "output_list": [
+        {
+            "function_name": "mine",
+            "code": "        require (_minedAmount > 0);
+        require (_target != 0x0);
+        require (miningStorage - _minedAmount >= 0);
+        require (balanceOf[doftManager] >= _minedAmount);                
+        require (balanceOf[_target] + _minedAmount > balanceOf[_target]); 
+        balanceOf[doftManager] -= _minedAmount;
+        balanceOf[_target] += _minedAmount;
+        miningStorage -= _minedAmount;
+        Mine(_target, _minedAmount);",
+            "vulnerability": "Mining",
+            "reason": "The mining function does not have any restriction on the mining amount. It can be used to mint more tokens than the total supply. This will cause the total supply to exceed the initial supply and potentially lead to a loss of tokens."
+        }
+    ]
+}

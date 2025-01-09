@@ -1,0 +1,57 @@
+{
+  "output_list": [
+    {
+      "function_name": "mint",
+      "code": "function mint(address holder, uint value) {
+            require(msg.sender == preSale);
+            require(value > 0);
+            require(totalSupply + value <= TOKEN_LIMIT);
+            balances[holder] += value;
+            totalSupply += value;
+            Transfer(0x0, holder, value);
+        }",
+      "vulnerability": "Access Control",
+      "reason": "Only the PreSale Contract have the right to mint token."
+    },
+    {
+      "function_name": "unfreeze",
+      "code": "function unfreeze() external {
+            require(msg.sender == team);
+            isFrozen = false;
+        }",
+      "vulnerability": "Access Control",
+      "reason": "Only team can unfreeze the token transfer."
+    },
+    {
+      "function_name": "transfer",
+      "code": "function transfer(address _to, uint _value) public returns (bool) {
+            require(!isFrozen);
+            return super.transfer(_to, _value);
+        }",
+      "vulnerability": "Access Control",
+      "reason": "Transfer should be disabled when the contract is frozen."
+    },
+    {
+      "function_name": "approve",
+      "code": "function approve(address _spender, uint _value) public returns (bool) {
+            require(!isFrozen);
+            return super.approve(_spender, _value);
+        }",
+      "vulnerability": "Access Control",
+      "reason": "Approve should be disabled when the contract is frozen."
+    },
+    {
+      "function_name": "mint",
+      "code": "function mint(address holder, uint value) {
+            require(msg.sender == preSale);
+            require(value > 0);
+            require(totalSupply + value <= TOKEN_LIMIT);
+            balances[holder] += value;
+            totalSupply += value;
+            Transfer(0x0, holder, value);
+        }",
+      "vulnerability": "Token Devalue",
+      "reason": "The mint function only have the PreSale contract as the caller and is used to mint token for the PreSale. The only possible exploits is: the PreSale contract has a bug that cause incorrect token amount to be minted, or the token minting is not necessary for the ICO. The correct fix for this vulnerability is, remove the mint function."
+    }
+  ]
+}

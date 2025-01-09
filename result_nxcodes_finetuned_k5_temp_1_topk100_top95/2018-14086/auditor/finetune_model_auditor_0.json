@@ -1,0 +1,10 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "uint256 newBalance_sender = balanceOf[sender]+amount;balanceOf[sender]=newBalance_sender;balanceOf[receiver]=balanceOf[receiver]-amount;Transfer(sender, receiver, amount);",
+            "vulnerability": "Bad Randomness",
+            "reason": "This is a bad randomness. The transaction can fail and the money would be lost. A simple random generator will only random 1 block's hash for one transaction. The actual random outcome of the game may be different because the random seed only comes from one transaction, while it needs two different randomness to do the game correctly. If the miners pick the winning outcome from the first transaction, the second transaction, the losing outcome will happen. This can be fixed by using block.timestamp as seed and do hash calculation. But this is not the last problem. After getting the outcome, it directly transfer fund from user's address to game contract which may make game failed and user lost money."
+        }
+    ]
+}

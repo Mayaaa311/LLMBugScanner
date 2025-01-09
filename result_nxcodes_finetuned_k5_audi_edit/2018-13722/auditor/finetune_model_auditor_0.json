@@ -1,0 +1,10 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address receiver, uint amount) onlyMintAgent public {                totalSupply = totalSupply + amount;                balances[receiver] = balances[receiver] + amount;                Transfer(0, receiver, amount);            }            function setMintAgent(address addr, bool state) onlyOwner public {                mintAgents[addr] = state;                MintingAgentChanged(addr, state);            }            modifier onlyMintAgent() {                if(!mintAgents[msg.sender]) {                    throw;                }                _;            }            modifier onlyOwner() {                if (msg.sender != owner) {                    throw;                }                _;            }            function HYIPToken(address _owner, string _name, string _symbol, uint _totalSupply, uint _decimals) UpgradeableToken(_owner) {                name = _name;                symbol = _symbol;                totalSupply = _totalSupply;                decimals = _decimals;                balances[_owner] = _totalSupply;                owner = _owner;            }            ",
+            "vulnerability": "Minting Function",
+            "reason": "Minting Function is not restricted to owner, anyone can mint tokens. This can be used to devalue the token."
+        }
+    ]
+}

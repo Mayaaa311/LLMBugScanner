@@ -1,0 +1,19 @@
+{
+    "output_list": [
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) returns (bool success) {
+                            allowed[msg.sender][_spender] = _value;
+                            Approval(msg.sender, _spender, _value);
+                            return true;
+                        }
+                        function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+                            return allowed[_owner][_spender];
+                        }
+                        mapping (address => uint256) balances;
+                        mapping (address => mapping (address => uint256)) allowed;",
+            "vulnerability": "Access Control",
+            "reason": "In approve function, the spender can set the allowance to a very high value, which will cause the spender to spend more than what he has. The approve function should be called only by the owner of the tokens, i.e., the msg.sender should be the owner of the tokens. The approve function should return false if the spender is already approved for spending the tokens."
+        }
+    ]
+}

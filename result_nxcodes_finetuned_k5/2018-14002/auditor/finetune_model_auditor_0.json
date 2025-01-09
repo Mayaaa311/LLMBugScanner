@@ -1,0 +1,17 @@
+{
+  "output_list": [
+    {
+      "function_name": "transfer",
+      "code": "function transfer(address _to, uint _amount) public returns (bool success) {
+            require(_amount > 0 && balances[msg.sender] >= _amount);
+            balances[msg.sender] -= _amount;
+            balances[_to] += _amount;
+            Transfer(msg.sender, _to, _amount);
+            return true;
+        }
+      ",
+      "vulnerability": "Token Devalue",
+      "reason": "The transfer function allows the transfer of all tokens from the sender to the receiver. However, the transfer function does not check if the sender has enough tokens to transfer. This could lead to the sender having more tokens than they actually have. This could be exploited by the receiver to get more tokens than intended. The receiver could then sell those tokens at a higher price than intended. This could lead to token devalue."
+    }
+  ]
+}

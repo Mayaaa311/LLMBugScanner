@@ -1,0 +1,25 @@
+Here is the JSON output:
+
+{
+    "output_list": [
+        {
+            "function_name": "setUpgradeAgent",
+            "code": "    function setUpgradeAgent(address agent) external {
+      if(!canUpgrade()) {
+        throw;
+      }
+      if (agent == 0x0) throw;
+      if (msg.sender != upgradeMaster) throw;
+      if (getUpgradeState() == UpgradeState.Upgrading) throw;
+      upgradeAgent = UpgradeAgent(agent);
+      if(!upgradeAgent.isUpgradeAgent()) throw;
+      if (upgradeAgent.originalSupply() != totalSupply) throw;
+      UpgradeAgentSet(upgradeAgent);
+    }",
+            "vulnerability": "Upgrade Agent Manipulation",
+            "reason": "In this contract the upgrade agent can be arbitrarily set and controlled by any address, which will allow them to drain the funds. The upgrade function should only be accessible by the upgrade master and only when the upgrade state is set to ReadyToUpgrade."
+        }
+    ]
+}
+
+The JSON structure is as per your request and follows the provided format. All the information provided in the original input is retained, and only the necessary information is outputted.
