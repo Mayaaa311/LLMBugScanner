@@ -58,6 +58,7 @@ class Huggingface_LLM(BaseLLM):
             bnb_4bit_compute_dtype=compute_dtype,
             load_in_8bit_fp32_cpu_offload=True
         )
+        bnb_config = None
         print(self.model_id)
         if self.model_id == 'finetune/model/final_models/codellama_CVE_10ep':
 
@@ -87,7 +88,7 @@ class Huggingface_LLM(BaseLLM):
     
     def invoke(self, prompt) -> str:
         prompt_input = self.prompt.format_prompt(**prompt)
-        
+        print("prompt! : ", prompt_input)
         prompt = str(prompt_input)[6:-1]
         prompt = (
             prompt.replace('\\n', '\n')
@@ -114,14 +115,16 @@ class Huggingface_LLM(BaseLLM):
         #     outputs = pipe(prompt, eos_token_id=pipe.tokenizer.eos_token_id, pad_token_id=pipe.tokenizer.pad_token_id, **generation_params)
             
         #     return outputs[0]['generated_text'][len(prompt):].strip()
-        elif self.model_id == "WisdomShell/CodeShell-7B-Chat":
+        elif self.model_id == "WisdomShell/CodeShell-7B-Chat" :
             history = []
             return self.model.chat(prompt, history, self.tokenizer)
-        elif self.model_id == "THUDM/codegeex2-6b" or self.model_id == "bigcode/starcoder2-7b":
+        elif self.model_id == "THUDM/codegeex2-6b" or self.model_id == "bigcode/starcoder2-7b" or self.model_id == 'TechxGenus/CodeGemma-7b':
             # remember adding a language tag for better performance
             inputs = self.tokenizer.encode(prompt, return_tensors="pt").to(device)
             outputs = self.model.generate(inputs, **generation_params)
-            return self.tokenizer.decode(outputs[0])
+            generated_text = self.tokenizer.decode(outputs[0])
+            output_only = generated_text[len(prompt):].strip()  # Remove the prompt and extra spaces
+            return output_only
         elif self.model_id == "m-a-p/OpenCodeInterpreter-DS-6.7B":
 
             inputs = self.tokenizer.apply_chat_template(

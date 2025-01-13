@@ -64,6 +64,7 @@ class BugScanner:
         context = ''
         with open('templates/context.txt', 'r') as file:
             context =  file.read()
+        context = ''
         input_dict = {"code": code, "topk": self.topk, 'context': context}
         start = time.time()
         if not os.path.isfile(write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor_{i}.json"):

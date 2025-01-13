@@ -8,7 +8,8 @@ import json
 # result_folder = 'result/result_nxcodes_k5_a5_beforeft'
 # result_folder='result/result_nxcodes_k5_a5_beforeft_t0.5'
 # result_folder = 'result/result_nxcodes_k5_a5_beforeft'
-result_folder = 'result/multimodel/deepseek_nxcode_gemma_k5_origionalcritic_wcontext'
+result_folder = 'result/multimodel/final_5_model_evaluation3'
+test_only = True
 # ------------------Folder definition-------------------------------------------------------
 base_folder = result_folder
 os.makedirs(result_folder, exist_ok=True)
@@ -19,6 +20,7 @@ output_general_csv_path = os.path.join(result_folder, 'general_determination.csv
 
 json_file_path = 'data_full/CVE_label/CVElabel3_full.json'
 # -------------------------------------------Result Reformatting-------------------------------------------------
+
 def reformat_file_content(file_path):
     with open(file_path, 'r') as file:
         content = file.read()
@@ -59,6 +61,22 @@ def process_directory(directory):
             reformat_file_content(file_path)
 
 process_directory(result_folder)
+#----------------------------------------OPTIONAL: eval on only test set---------------------------------
+# Define the directory containing .sol files
+directory = "data_full/0.8splitCVE_clean"
+
+# Initialize an empty list to store the formatted names
+formatted_names = []
+
+# Iterate through all files in the directory
+for filename in os.listdir(directory):
+    # Check if the file has a .sol extension
+    if filename.endswith(".sol"):
+        # Remove the .sol extension and add "CVE-" prefix
+        formatted_name = "CVE-" + filename.replace(".sol", "")
+        # Add the formatted name to the list
+        formatted_names.append(formatted_name)
+print(formatted_names)
 # -------------------------------------------GENERATE EVALUATION-------------------------------------------------
 # Load JSON data
 with open(json_file_path, 'r') as jsonfile:
@@ -191,6 +209,9 @@ def process_all_folders(base_folder, json_data):
 
 # Run the comparison for all folders
 all_comparison_results, all_general_determinations = process_all_folders(base_folder, json_data)
+if test_only:
+    all_comparison_results = [result for result in all_comparison_results if result[0] in formatted_names]
+    all_general_determinations = [determination for determination in all_general_determinations if determination[0] in formatted_names]
 
 # Calculate accuracy based on general determinations
 true_matches = sum(1 for determination in all_general_determinations if determination[3] == 'True')
@@ -209,19 +230,12 @@ with open(output_general_csv_path, mode='w', newline='') as file:
     writer.writerow(['dataname', 'vulnerability', 'function_name', 'match', 'true_answer_line', 'auditor_idx'])
     writer.writerows(all_general_determinations)
 
-# Output accuracy summary
-with open(output_general_csv_path, mode='a', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerow([])
-    writer.writerow(['Top k hit rate:', f"{accuracy:.2f}", f"({true_matches}/{total_determinations})"])
 
-
-
-file_path = base_folder+'/general_determination.csv'
 
 # Initialize counters
 total_hits = 0
 rank_1_hits = 0
+file_path = base_folder+'/general_determination.csv'
 
 # Open and read the CSV file
 with open(file_path, 'r') as file:
@@ -238,3 +252,14 @@ with open(file_path, 'r') as file:
 
 # Calculate and print the hit rate
 print("Top 1 hit rate:",rank_1_hits / total_determinations if total_determinations else 0,  f'({rank_1_hits}/{total_determinations})')
+
+
+
+# Output accuracy summary
+with open(output_general_csv_path, mode='a', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow([])
+    writer.writerow(['Top k hit rate:', f"{accuracy:.2f}", f"({true_matches}/{total_determinations})"])
+    writer.writerow(['Top 1 hit rate:', f"{accuracy:.2f}", rank_1_hits / total_determinations if total_determinations else 0,  f'({rank_1_hits}/{total_determinations})'])
+
+
