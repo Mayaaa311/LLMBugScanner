@@ -58,6 +58,7 @@ class Huggingface_LLM(BaseLLM):
             bnb_4bit_compute_dtype=compute_dtype,
             load_in_8bit_fp32_cpu_offload=True
         )
+        print(self.model_id)
         if self.model_id == 'finetune/model/final_models/codellama_CVE_10ep':
 
             self.model = AutoPeftModelForCausalLM.from_pretrained(self.model_id, quantization_config = bnb_config, device_map="auto",  trust_remote_code=True)

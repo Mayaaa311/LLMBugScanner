@@ -3,6 +3,7 @@
 #SBATCH -N 1                            # Number of nodes
 #SBATCH --ntasks=1                      # Run only one task
 #SBATCH --gpus=3             # Request 2 GPUs
+# SBATCH --gres=gpu:A100:1               # Request 1 H100
 #SBATCH --mem=100G                      # Increase memory 
 #SBATCH -t 100                          # Duration of the job
 #SBATCH -o Report-%j.out                # Combined output and error messages file
@@ -21,4 +22,4 @@ conda activate /home/hice1/yyuan394/scratch/env
 
 # python src/bugscanner_cli.py -a google/codegemma-7b AlfredPros/CodeLlama-7b-Instruct-Solidity -c NTQAI/Nxcode-CQ-7B-orpo -r NTQAI/Nxcode-CQ-7B-orpo -d data_full/data_2 -k 3 -log logger/log_nxcode -o result/record_inference_time
 
-python src/bugscanner_cli.py -a NTQAI/Nxcode-CQ-7B-orpo m-a-p/OpenCodeInterpreter-DS-6.7B AlfredPros/CodeLlama-7b-Instruct-Solidity deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct google/codegemma-7b -c NTQAI/Nxcode-CQ-7B-orpo -r NTQAI/Nxcode-CQ-7B-orpo  -d data_full/data_2 -k 5 -log logger/log_nxcode -o result/new_inf_time
+python src/bugscanner_cli.py -a finetune/model/Deepseek_finetuning_MessiQ_20ep_GPTLens40_byfunc_new/checkpoint-80 -c finetune/model/Deepseek_finetuning_MessiQ_critic -r NTQAI/Nxcode-CQ-7B-orpo  -d data_full/data_2 -k 5 -log logger/log_nxcode -o result/testenvironment

@@ -8,7 +8,7 @@ import json
 # result_folder = 'result/result_nxcodes_k5_a5_beforeft'
 # result_folder='result/result_nxcodes_k5_a5_beforeft_t0.5'
 # result_folder = 'result/result_nxcodes_k5_a5_beforeft'
-result_folder = 'result/result_deepseek_k5_instft'
+result_folder = 'result/multimodel/deepseek_nxcode_gemma_k5_origionalcritic_wcontext'
 # ------------------Folder definition-------------------------------------------------------
 base_folder = result_folder
 os.makedirs(result_folder, exist_ok=True)
@@ -26,7 +26,7 @@ def reformat_file_content(file_path):
     # Replace escaped newlines with actual newlines
     content = content.replace('\\n', '\n')
     
-    # Remove all backslashes
+    # Remove all backslashesq  1                             
     content = content.replace('\\', '')
 
     while content.startswith('\n'):
@@ -88,7 +88,7 @@ def compare_vulnerabilities(csv_data, json_data, dataname):
         json_function_name = json_data[dataname]["vulnerable_function_name"]
         
         # Compare function name only
-        match = function_name == json_function_name
+        match = (function_name == json_function_name) & (vulnerability == json_vulnerability)
         result = (dataname, vulnerability, function_name, auditor_idx, 'True' if match else 'False')
         
         if match and true_answer_line == "N/A":

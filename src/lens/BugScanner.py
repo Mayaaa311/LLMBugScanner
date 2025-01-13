@@ -48,7 +48,7 @@ class BugScanner:
             # Load the models
             for auditor in self.llm_auditors:
                 auditor.load_model()
-                auditor.load_template(['code','topk'])
+                auditor.load_template(['code','topk', 'context'])
         
         if critic_model:
             self.llm_critic.load_model()
@@ -61,9 +61,13 @@ class BugScanner:
             self.llm_summarizer.load_template(['content'])
         
     def run_auditor(self, code, write_to, i):
-        input_dict = {"code": code, "topk": self.topk}
+        context = ''
+        with open('templates/context.txt', 'r') as file:
+            context =  file.read()
+        input_dict = {"code": code, "topk": self.topk, 'context': context}
         start = time.time()
         if not os.path.isfile(write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor_{i}.json"):
+            print("generating for: ", write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor_{i}.json")
             # for j in range(int(self.topk)):
             response = self.llm_auditors[i].invoke(input_dict)
             write_to_file(write_to+f"/{self.llm_auditors[i].model_id.replace('/','_')}_auditor_{i}.json", response, write='w')
@@ -78,6 +82,7 @@ class BugScanner:
     def run_critic(self, vulnerabilities, write_to, code = None, idx = 0):
         start = time.time()
         if not os.path.isfile(write_to+f"/{self.llm_critic.model_id.replace('/','_')}_critic_{idx}.json"):
+            print("generating for: ", write_to+f"/{self.llm_critic.model_id.replace('/','_')}_critic_{idx}.json")
             if code is not None: 
                 print("using code in critic!")
                 response = self.llm_critic.invoke({"auditor_resp": vulnerabilities,"code":code, "idx":idx})
@@ -96,8 +101,73 @@ class BugScanner:
         start = time.time()
         response = None
         if not os.path.isfile(write_to+f"/{self.llm_ranker.model_id.replace('/','_')}_rank.json"):
-            response = self.llm_ranker.invoke({"topk": self.topk, "vulnerability": vulnerability})
-            write_to_file(write_to+f"/{self.llm_ranker.model_id.replace('/','_')}_rank.json", str(response))
+            try:
+                for vul in vulnerability:
+                    content = vul
+                        # Replace escaped newlines with actual newlines
+                    content = content.replace('\\n', '\n')
+                    
+                    # Remove all backslashes
+                    content = content.replace('\\', '')
+
+                    while content.startswith('\n'):
+                        content = content[1:] 
+                    while content.endswith('\n'):
+                        content = content[:-1]
+                        
+                    # Remove leading and trailing quotes if present
+                    while content.startswith('"'):
+                        content = content[1:]
+                    while content.endswith('"'):
+                        content = content[:-1]
+                    vul = content
+                vulnerabilities = []
+                # Assuming `vulnerability` is a list of JSON strings
+                for vuln_str in vulnerability:
+                    data = json.loads(vuln_str)
+                    print("Parsed data type:", type(data))
+                    print("Parsed data content:", data)
+                    # If the result is still a string, parse it again
+                    if isinstance(data, str):
+                        data = json.loads(data)  # Parse the nested JSON string
+                        print("Nested parsed data type:", type(data))
+                    # Verify 'output_list' key and extract its content
+                    if isinstance(data, dict) and "output_list" in data:
+                        vulnerabilities.append(data["output_list"])
+
+                        # print("Vulnerabilities extracted:", vulnerabilities)
+                    else:
+                        print("Key 'output_list' not found or data is not a dictionary.")
+
+                print("Content is valid JSON.")
+                for v in vulnerabilities:
+                    print("vulnerablity 's corecthess parsed: ", int(v.get("correctness", 0)))
+                # Filter vulnerabilities based on conditions
+                filtered_vulnerabilities = [
+                    v for v in vulnerabilities
+                    if int(v.get("correctness", 0))> 0 
+                ]
+                print("filtered VUlnerability: ",filtered_vulnerabilities)
+                # Sort the filtered vulnerabilities by severity in descending order
+                sorted_vulnerabilities = sorted(filtered_vulnerabilities, key=lambda x: x.get("severity", 0), reverse=True)
+
+                # Keep only the top k vulnerabilities
+                k = 5  # Adjust the value of k as needed
+                top_k_vulnerabilities = sorted_vulnerabilities[:k]
+
+                # Print the top-k vulnerabilities
+                print(f"Top {k} Vulnerabilities by Severity:")
+                for idx, vulnerability in enumerate(top_k_vulnerabilities, 1):
+                    print(f"{idx}: {vulnerability}")
+
+                write_to_file(write_to+f"/{self.llm_ranker.model_id.replace('/','_')}_rank.json", str(top_k_vulnerabilities))
+            except Exception as e:
+                print(f"Content is not valid JSON: {e}")
+                
+                response = self.llm_ranker.invoke({"topk": self.topk, "vulnerability": str(vulnerability)})
+                write_to_file(write_to+f"/{self.llm_ranker.model_id.replace('/','_')}_rank.json", str(response))
+                
+
         end = time.time()
         runtime = end-start
         print(f"ranker inference time: ",runtime)
@@ -212,7 +282,7 @@ class BugScanner:
                     with open(file_path, "r") as f:
                         o = f.read()
                         critic_folder_data.append(o)
-                self.run_ranker(str(critic_folder_data), write_to) 
+                self.run_ranker(critic_folder_data, write_to) 
                 ranker_dirs.append(write_to)
         print("ranker output write to : ", ranker_dirs)
         return ranker_dirs

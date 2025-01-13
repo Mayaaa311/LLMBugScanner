@@ -2,16 +2,19 @@ import json
 import os
 
 param1 = {
-    "max_new_tokens": 5000,
+    "max_new_tokens": 400,
     "do_sample": True,
-    "temperature": 0.3,
+    "temperature": 0.6,
     "top_k": 10,
     "top_p": 0.95,
-    "num_return_sequences": 1
+    "num_return_sequences": 1,
+    "repetition_penalty":1.5
 }
 param2 = {
-    "max_new_tokens": 8000,
-    "do_sample": False
+    "max_new_tokens": 400,
+    "do_sample": False,
+    "num_return_sequences": 1,
+    "repetition_penalty":1.5
 }
 
 auditor_prompt = {
@@ -167,145 +170,145 @@ def parse_config(cfg_path, model_id):
     return model_params
 
 
-import json
-import subprocess
-import os
-import solcx
-import re
+# import json
+# import subprocess
+# import os
+# import solcx
+# import re
 
 
-def get_required_solc_version(solidity_file):
-    """
-    Reads the Solidity file and extracts the required compiler version from the pragma statement.
-    If the version is below 0.4.11, default to 0.4.11 (the minimum supported version by py-solc-x).
-    """
-    with open(solidity_file, 'r') as file:
-        content = file.read()
-        match = re.search(r"pragma solidity \^?(\d+\.\d+\.\d+);", content)
-        if match:
-            version = match.group(1)
-            # Check if the version is below 0.4.11
-            if version < "0.4.11":
-                print(f"Version {version} is not supported; defaulting to 0.4.11.")
-                return "0.4.11"
-            return version
-    return None
+# def get_required_solc_version(solidity_file):
+#     """
+#     Reads the Solidity file and extracts the required compiler version from the pragma statement.
+#     If the version is below 0.4.11, default to 0.4.11 (the minimum supported version by py-solc-x).
+#     """
+#     with open(solidity_file, 'r') as file:
+#         content = file.read()
+#         match = re.search(r"pragma solidity \^?(\d+\.\d+\.\d+);", content)
+#         if match:
+#             version = match.group(1)
+#             # Check if the version is below 0.4.11
+#             if version < "0.4.11":
+#                 print(f"Version {version} is not supported; defaulting to 0.4.11.")
+#                 return "0.4.11"
+#             return version
+#     return None
 
-def generate_solidity_ast(solidity_file, output_file="ast.json"):
-    """
-    Generate an AST in JSON format for the given Solidity file using solcx, with the required compiler version.
-    """
-    # Get the required Solidity version from the pragma statement
-    required_version = get_required_solc_version(solidity_file)
-    if required_version is None:
-        print("Could not determine the Solidity version from the pragma statement.")
-        return
+# def generate_solidity_ast(solidity_file, output_file="ast.json"):
+#     """
+#     Generate an AST in JSON format for the given Solidity file using solcx, with the required compiler version.
+#     """
+#     # Get the required Solidity version from the pragma statement
+#     required_version = get_required_solc_version(solidity_file)
+#     if required_version is None:
+#         print("Could not determine the Solidity version from the pragma statement.")
+#         return
     
-    # Ensure the required version of solc is installed
-    solcx.install_solc(required_version)
-    solcx.set_solc_version(required_version)
+#     # Ensure the required version of solc is installed
+#     solcx.install_solc(required_version)
+#     solcx.set_solc_version(required_version)
     
-    # Compile Solidity file to get AST
-    try:
-        ast_json = solcx.compile_files(
-            [solidity_file],
-            output_values=["ast"]
-        )
+#     # Compile Solidity file to get AST
+#     try:
+#         ast_json = solcx.compile_files(
+#             [solidity_file],
+#             output_values=["ast"]
+#         )
 
-        # Write the AST JSON output to a file
-        with open(output_file, "w") as file:
-            json.dump(ast_json, file)
+#         # Write the AST JSON output to a file
+#         with open(output_file, "w") as file:
+#             json.dump(ast_json, file)
         
-        print(f"AST successfully generated and saved to {output_file}")
-    except solcx.exceptions.SolcError as e:
-        print("Error generating AST:", e)
-        raise
+#         print(f"AST successfully generated and saved to {output_file}")
+#     except solcx.exceptions.SolcError as e:
+#         print("Error generating AST:", e)
+#         raise
 
 
-def load_solidity_ast(filename):
-    """
-    Load the generated AST JSON file into a Python dictionary.
-    """
-    with open(filename, 'r') as file:
-        ast_data = json.load(file)
-    return ast_data
+# def load_solidity_ast(filename):
+#     """
+#     Load the generated AST JSON file into a Python dictionary.
+#     """
+#     with open(filename, 'r') as file:
+#         ast_data = json.load(file)
+#     return ast_data
 
-def get_function_definitions(ast_data):
-    """
-    Extract function definitions from the Solidity AST.
-    """
-    functions = {}
-    print(json.dumps(ast_data, indent=2))
-    def traverse(node):
-        # Check if the current node is a function definition
-        if node.get("name") == "FunctionDefinition":
-            func_name = node.get("attributes", {}).get("name")
-            if func_name:
-                functions[func_name] = node
-                print(f"Found function: {func_name}")
+# def get_function_definitions(ast_data):
+#     """
+#     Extract function definitions from the Solidity AST.
+#     """
+#     functions = {}
+#     print(json.dumps(ast_data, indent=2))
+#     def traverse(node):
+#         # Check if the current node is a function definition
+#         if node.get("name") == "FunctionDefinition":
+#             func_name = node.get("attributes", {}).get("name")
+#             if func_name:
+#                 functions[func_name] = node
+#                 print(f"Found function: {func_name}")
         
-        # Traverse children recursively
-        for child in node.get("children", []):
-            traverse(child)
+#         # Traverse children recursively
+#         for child in node.get("children", []):
+#             traverse(child)
     
-    # Start traversing from each top-level child in "children"
-    if "children" in ast_data:
-        for top_node in ast_data["children"]:
-            # Handle cases where a node has multiple layers of "children" within itself
-            if "children" in top_node:
-                for sub_node in top_node["children"]:
-                    traverse(sub_node)
-            else:
-                traverse(top_node)
-    else:
-        print("Error: No 'children' key found in AST data.")
+#     # Start traversing from each top-level child in "children"
+#     if "children" in ast_data:
+#         for top_node in ast_data["children"]:
+#             # Handle cases where a node has multiple layers of "children" within itself
+#             if "children" in top_node:
+#                 for sub_node in top_node["children"]:
+#                     traverse(sub_node)
+#             else:
+#                 traverse(top_node)
+#     else:
+#         print("Error: No 'children' key found in AST data.")
     
-    return functions
+#     return functions
 
-def get_called_functions(func_node):
-    """
-    Extract called functions from a function definition node in the AST.
-    """
-    calls = set()
+# def get_called_functions(func_node):
+#     """
+#     Extract called functions from a function definition node in the AST.
+#     """
+#     calls = set()
     
-    def traverse(node):
-        if node.get("name") == "FunctionCall":
-            func_name = node.get("attributes", {}).get("value") or node.get("attributes", {}).get("name")
-            print("FUNCTION NAME: ",func_name)
-            if func_name:
-                calls.add(func_name)
-        for child in node.get("children", []):
-            traverse(child)
+#     def traverse(node):
+#         if node.get("name") == "FunctionCall":
+#             func_name = node.get("attributes", {}).get("value") or node.get("attributes", {}).get("name")
+#             print("FUNCTION NAME: ",func_name)
+#             if func_name:
+#                 calls.add(func_name)
+#         for child in node.get("children", []):
+#             traverse(child)
     
-    traverse(func_node)
-    return calls
+#     traverse(func_node)
+#     return calls
 
-def find_related_functions(solidity_file, target_function_name):
-    """
-    Generate AST, load it, and find the target function and all related functions in the Solidity code.
-    """
-    # Generate AST file from Solidity code
-    ast_file = "ast.json"
-    generate_solidity_ast(solidity_file, ast_file)
+# def find_related_functions(solidity_file, target_function_name):
+#     """
+#     Generate AST, load it, and find the target function and all related functions in the Solidity code.
+#     """
+#     # Generate AST file from Solidity code
+#     ast_file = "ast.json"
+#     generate_solidity_ast(solidity_file, ast_file)
     
-    # Load the AST data
-    ast_data = load_solidity_ast(ast_file)
-    functions = get_function_definitions(ast_data)
+#     # Load the AST data
+#     ast_data = load_solidity_ast(ast_file)
+#     functions = get_function_definitions(ast_data)
     
-    if target_function_name not in functions:
-        print(target_function_name)
-        raise ValueError(f"Function '{target_function_name}' not found in the provided code.")
+#     if target_function_name not in functions:
+#         print(target_function_name)
+#         raise ValueError(f"Function '{target_function_name}' not found in the provided code.")
     
-    # Get related functions by analyzing function calls within the target function
-    related_function_names = get_called_functions(functions[target_function_name])
+#     # Get related functions by analyzing function calls within the target function
+#     related_function_names = get_called_functions(functions[target_function_name])
     
-    # Include the target function in the output
-    related_functions = {target_function_name: functions[target_function_name]}
+#     # Include the target function in the output
+#     related_functions = {target_function_name: functions[target_function_name]}
     
-    # Add all related functions to the output
-    for func_name in related_function_names:
-        if func_name in functions:
-            related_functions[func_name] = functions[func_name]
+#     # Add all related functions to the output
+#     for func_name in related_function_names:
+#         if func_name in functions:
+#             related_functions[func_name] = functions[func_name]
     
-    return related_functions
+#     return related_functions
 

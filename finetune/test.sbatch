@@ -2,9 +2,9 @@
 #SBATCH -J finetuningNxcode-linear             # Job name
 #SBATCH -N1                                         # Number of nodes
 #SBATCH --ntasks-per-node=1            # Run only one task
-#SBATCH --gres=gpu:H100:1               # Request 1 H100
-#SBATCH --mem-per-gpu=128G         # Increase memory  
-#SBATCH -t 300                          # Duration of the job
+#SBATCH --gres=gpu:A100:1              # Request 1 H100
+#SBATCH --mem-per-gpu=200G         # Increase memory  
+#SBATCH -t 360                          # Duration of the job
 #SBATCH -o Report-%j.out                # Combined output and error messages file
 #SBATCH --mail-type=END,FAIL       # Mail preferences
 #SBATCH --mail-user=yyuan394@gatech.edu  # E-mail address for notifications
@@ -18,11 +18,14 @@ module load anaconda3/2023.03            # Load module dependencies
 # conda activate /home/hice1/yyuan394/scratch/env
 conda activate /home/hice1/yyuan394/scratch/env
 
+
 # srun python src/bugscanner_cli.py -a AlfredPros/CodeLlama-7b-Instruct-Solidity m-a-p/OpenCodeInterpreter-DS-6.7B NTQAI/Nxcode-CQ-7B-orpo -c deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct -r NTQAI/Nxcode-CQ-7B-orpo -d data -o result_test_small -k 5 -log logs_oct1
 # srun python src/bugscanner_cli.py -a m-a-p/OpenCodeInterpreter-DS-6.7B -c m-a-p/OpenCodeInterpreter-DS-6.7B -r NTQAI/Nxcode-CQ-7B-orpo -d data -o result_parsed -k 5 -log logs_oct1
 # python3 finetune/finetune_nxcode.py
-python3 finetune/finetune_nxcode.py
+# python3 CDSS_Maya/Finetuning/finetune.py
 # python3 finetune/parallel_finetune.py
 
 # python3 finetune/test_model.py
 # python3 finetune/FineTuning_dataset/Dataset/label_process.py
+
+python3 finetune/finetune_auditor.py

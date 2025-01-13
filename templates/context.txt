@@ -1,0 +1,507 @@
+
+
+{context} Here's some context about some common solidity vulnerabilities:
+
+Access Control:
+    Access Control issues are common in all programs, not just smart contracts. In fact, it's number 5 on the OWASP top 10. One usually accesses a contract's functionality through its public or external functions. While insecure visibility settings give attackers straightforward ways to access a contract's private values or logic, access control bypasses are sometimes more subtle. These vulnerabilities can occur when contracts use the deprecated tx.origin to validate callers, handle large authorization logic with lengthy require and make reckless use of delegatecall in proxy libraries or proxy contracts.
+
+    Loss: estimated at 150,000 ETH (~30M USD at the time)
+
+    Attack Scenario
+    A smart contract designates the address which initializes it as the contract's owner. This is a common pattern for granting special privileges such as the ability to withdraw the contract's funds. Unfortunately, the initialization function can be called by anyone — even after it has already been called. Allowing anyone to become the owner of the contract and take its funds.
+
+    Examples
+    In the following example, the contract's initialization function sets the caller of the function as its owner. However, the logic is detached from the contract's constructor, and it does not keep track of the fact that it has already been called.
+
+    function initContract() public {
+        owner = msg.sender;
+    }
+    In the Parity multi-sig wallet, this initialization function was detached from the wallets themselves and defined in a "library" contract. Users were expected to initialize their own wallet by calling the library's function via a delegateCall. Unfortunately, as in our example, the function did not check if the wallet had already been initialized. Worse, since the library was a smart contract, anyone could initialize the library itself and call for its destruction.
+
+Arithmetic: 
+    Also known as integer overflow and integer underflow.
+
+    Integer overflows and underflows are not a new class of vulnerability, but they are especially dangerous in smart contracts, where unsigned integers are prevalent and most developers are used to simple int types (which are often just signed integers). If overflows occur, many benign-seeming codepaths become vectors for theft or denial of service.
+
+    Attack Scenario
+    A smart contract's withdraw() function allows you to retrieve ether donated to the contract as long as your balance remains positive after the operation. An attacker attempts to withdraw more than his or her current balance. The withdraw() function check's result is always a positive amount, allowing the attacker to withdraw more than allowed. The resulting balance underflows and becomes an order of magnitude larger than it should be.
+
+    Examples
+    The most straightforward example is a function that does not check for integer underflow, allowing you to withdraw an infinite amount of tokens:
+
+    function withdraw(uint _amount) {
+        require(balances[msg.sender] - _amount > 0);
+        msg.sender.transfer(_amount);
+        balances[msg.sender] -= _amount;
+    }
+    The second example (spotted during the Underhanded Solidity Coding Contest) is an off-by-one error facilitated by the fact that an array's length is represented by an unsigned integer:
+
+    function popArrayOfThings() {
+        require(arrayOfThings.length >= 0);
+        arrayOfThings.length--; 
+    }
+    The third example is a variant of the first example, where the result of arithmetic on two unsigned integers is an unsigned integer:
+
+    function votes(uint postId, uint upvote, uint downvotes) {
+        if (upvote - downvote < 0) {
+            deletePost(postId)
+        }
+    }
+    The fourth example features the soon-to-be-deprecated var keyword. Because var will change itself to the smallest type needed to contain the assigned value, it will become an uint8 to hold the value 0. If the loop is meant to iterate more than 255 times, it will never reach that number and will stop when the execution runs out of gas:
+
+    for (var i = 0; i < somethingLarge; i ++) {
+        // ...
+    }
+
+
+Bad Randomness:
+    Also known as nothing is secret.
+
+    Randomness is hard to get right in Ethereum. While Solidity offers functions and variables that can access apparently hard-to-predict values, they are generally either more public than they seem or subject to miners' influence. Because these sources of randomness are to an extent predictable, malicious users can generally replicate it and attack the function relying on its unpredictablility.
+
+    Loss: more than 400 ETH
+
+    Attack Scenario
+    A smart contract uses the block number as a source of randomness for a game. An attacker creates a malicious contract that checks if the current block number is a winner. If so, it calls the first smart contract in order to win; since the call will be part of the same transaction, the block number will remain the same on both contracts. The attacker only has to call her malicious contract until it wins.
+
+    Examples
+    In this first example, a private seed is used in combination with an iteration number and the keccak256 hash function to determine if the caller wins. Even though the seed is private, it must have been set via a transaction at some point in time and thus is visible on the blockchain.
+
+    uint256 private seed;
+
+    function play() public payable {
+        require(msg.value >= 1 ether);
+        iteration++;
+        uint randomNumber = uint(keccak256(seed + iteration));
+        if (randomNumber % 2 == 0) {
+            msg.sender.transfer(this.balance);
+        }
+    }
+    In this second example, block.blockhash is being used to generate a random number. This hash is unknown if the blockNumber is set to the current block.number (for obvious reasons), and is thus set to 0. In the case where the blockNumber is set to more than 256 blocks in the past, it will always be zero. Finally, if it is set to a previous block number that is not too old, another smart contract can access the same number and call the game contract as part of the same transaction.
+
+    function play() public payable {
+        require(msg.value >= 1 ether);
+        if (block.blockhash(blockNumber) % 2 == 0) {
+            msg.sender.transfer(this.balance);
+        }
+    }
+
+
+Denial Of Service:
+    Including gas limit reached, unexpected throw, unexpected kill, access control breached.
+
+    Denial of service is deadly in the world of Ethereum: while other types of applications can eventually recover, smart contracts can be taken offline forever by just one of these attacks. Many ways lead to denials of service, including maliciously behaving when being the recipient of a transaction, artificially increasing the gas necessary to compute a function, abusing access controls to access private components of smart contracts, taking advantage of mixups and negligence, etc. This class of attack includes many different variants and will probably see a lot of development in the years to come.
+
+    Loss: estimated at 514,874 ETH (~300M USD at the time)
+
+    Attack Scenario
+    An auction contract allows its users to bid on different assets. To bid, a user must call a bid(uint object) function with the desired amount of ether. The auction contract will store the ether in escrow until the object's owner accepts the bid or the initial bidder cancels it. This means that the auction contract must hold the full value of any unresolved bid in its balance. The auction contract also contains a withdraw(uint amount) function which allows admins to retrieve funds from the contract. As the function sends the amount to a hardcoded address, the developers have decided to make the function public. An attacker sees a potential attack and calls the function, directing all the contract's funds to its admins. This destroys the promise of escrow and blocks all the pending bids. While the admins might return the escrowed money to the contract, the attacker can continue the attack by simply withdrawing the funds again.
+
+    Examples
+    In the following example (inspired by King of the Ether) a function of a game contract allows you to become the president if you publicly bribe the previous one. Unfortunately, if the previous president is a smart contract and causes reversion on payment, the transfer of power will fail and the malicious smart contract will remain president forever. Sounds like a dictatorship to me:
+
+    function becomePresident() payable {
+        require(msg.value >= price); // must pay the price to become president
+        president.transfer(price);   // we pay the previous president
+        president = msg.sender;      // we crown the new president
+        price = price * 2;           // we double the price to become president
+    }
+    In this second example, a caller can decide who the next function call will reward. Because of the expensive instructions in the for loop, an attacker can introduce a number too large to iterate on (due to gas block limitations in Ethereum) which will effectively block the function from functioning.
+
+    function selectNextWinners(uint256 _largestWinner) {
+        for(uint256 i = 0; i < largestWinner, i++) {
+            // heavy code
+        }
+        largestWinner = _largestWinner;
+    }
+
+
+Reentrancy:
+    Also known as or related to race to empty, recursive call vulnerability, call to the unknown.
+
+    The Reentrancy attack, probably the most famous Ethereum vulnerability,surprised everyone when discovered for the first time. It was first unveiled during a multimillion dollar heist which led to a hard fork of Ethereum. Reentrancy occurs when external contract calls are allowed to make new calls to the calling contract before the initial execution is complete. For a function, this means that the contract state may change in the middle of its execution as a result of a call to an untrusted contract or the use of a low level function with an external address.
+
+    Loss: estimated at 3.5M ETH (~50M USD at the time)
+
+    Attack Scenario
+    A smart contract tracks the balance of a number of external addresses and allows users to retrieve funds with its public withdraw() function. A malicious smart contract uses the withdraw() function to retrieve its entire balance. The victim contract executes the call.value(amount)() low level function to send the ether to the malicious contract before updating the balance of the malicious contract. The malicious contract has a payable fallback() function that accepts the funds and then calls back into the victim contract's withdraw() function. This second execution triggers a transfer of funds: remember, the balance of the malicious contract still hasn't been updated from the first withdrawal. As a result, the malicious contract successfully withdraws its entire balance a second time.
+
+    Examples
+    The following function contains a function vulnerable to a reentrancy attack. When the low level call() function sends ether to the msg.sender address, it becomes vulnerable; if the address is a smart contract, the payment will trigger its fallback function with what's left of the transaction gas:
+
+    function withdraw(uint _amount) {
+        require(balances[msg.sender] >= _amount);
+        msg.sender.call.value(_amount)();
+        balances[msg.sender] -= _amount;
+    }
+
+
+Front Running:
+    Also known as time-of-check vs time-of-use (TOCTOU), race condition, transaction ordering dependence (TOD).
+
+    Since miners always get rewarded via gas fees for running code on behalf of externally owned addresses (EOA), users can specify higher fees to have their transactions mined more quickly. Since the Ethereum blockchain is public, everyone can see the contents of others' pending transactions. This means if a given user is revealing the solution to a puzzle or other valuable secret, a malicious user can steal the solution and copy their transaction with higher fees to preempt the original solution. If developers of smart contracts are not careful, this situation can lead to practical and devastating front-running attacks.
+
+    Attack Scenario
+    A smart contract publishes an RSA number (N = prime1 x prime2). A call to its submitSolution() public function with the right prime1 and prime2 rewards the caller. Alice successfuly factors the RSA number and submits a solution. Someone on the network sees Alice's transaction (containing the solution) waiting to be mined and submits it with a higher gas price. The second transaction gets picked up first by miners due to the higher paid fee. The attacker wins the prize.
+
+Reentrancy:
+    Also known as or related to race to empty, recursive call vulnerability, call to the unknown.
+
+    The Reentrancy attack, probably the most famous Ethereum vulnerability,surprised everyone when discovered for the first time. It was first unveiled during a multimillion dollar heist which led to a hard fork of Ethereum. Reentrancy occurs when external contract calls are allowed to make new calls to the calling contract before the initial execution is complete. For a function, this means that the contract state may change in the middle of its execution as a result of a call to an untrusted contract or the use of a low level function with an external address.
+
+    Loss: estimated at 3.5M ETH (~50M USD at the time)
+
+    Attack Scenario
+    A smart contract tracks the balance of a number of external addresses and allows users to retrieve funds with its public withdraw() function. A malicious smart contract uses the withdraw() function to retrieve its entire balance. The victim contract executes the call.value(amount)() low level function to send the ether to the malicious contract before updating the balance of the malicious contract. The malicious contract has a payable fallback() function that accepts the funds and then calls back into the victim contract's withdraw() function. This second execution triggers a transfer of funds: remember, the balance of the malicious contract still hasn't been updated from the first withdrawal. As a result, the malicious contract successfully withdraws its entire balance a second time.
+
+    Examples
+    The following function contains a function vulnerable to a reentrancy attack. When the low level call() function sends ether to the msg.sender address, it becomes vulnerable; if the address is a smart contract, the payment will trigger its fallback function with what's left of the transaction gas:
+
+    function withdraw(uint _amount) {
+        require(balances[msg.sender] >= _amount);
+        msg.sender.call.value(_amount)();
+        balances[msg.sender] -= _amount;
+    }
+
+Short Addresses:
+    Also known as or related to off-chain issues, client vulnerabilities.
+
+    Short address attacks are a side-effect of the EVM itself accepting incorrectly padded arguments. Attackers can exploit this by using specially-crafted addresses to make poorly coded clients encode arguments incorrectly before including them in transactions. Is this an EVM issue or a client issue? Should it be fixed in smart contracts instead? While everyone has a different opinion, the fact is that a great deal of ether could be directly impacted by this issue. While this vulnerability has yet to be exploited in the wild, it is a good demonstration of problems arising from the interaction between clients and the Ethereum blockchain. Other off-chain issues exist: an important one is the Ethereum ecosystem's deep trust in specific Javascript front ends, browser plugins and public nodes. An infamous off-chain exploit was used in the hack of the Coindash ICO that modified the company's Ethereum address on their webpage to trick participants into sending ethers to the attacker's address.
+
+    Attack Scenario
+    An exchange API has a trading function that takes a recipient address and an amount. The API then interacts with the smart contract transfer(address _to, uint256 _amount) function with padded arguments: it prepends the address (of an expected 20-byte length) with 12 zero bytes to make it 32-byte long Bob (0x3bdde1e9fbaef2579dd63e2abbf0be445ab93f00) asks Alice to transfer him 20 tokens. He maliciously gives her his address truncated to remove the trailing zeroes. Alice uses the exchange API with the shorter 19-byte address of Bob (0x3bdde1e9fbaef2579dd63e2abbf0be445ab93f). The API pads the address with 12 zero bytes, making it 31 bytes instead of the 32 bytes. Effectively stealing one byte from the following _amount argument. Eventually, the EVM executing the smart contract's code will remark that the data is not properly padded and will add the missing byte at the end of the _amount argument. Effectively transfering 256 times more tokens than thought.
+
+Time Manipulation:
+    Also known as timestamp dependence.
+
+    From locking a token sale to unlocking funds at a specific time for a game, contracts sometimes need to rely on the current time. This is usually done via block.timestamp or its alias now in Solidity. But where does that value come from? From the miners! Because a transaction's miner has leeway in reporting the time at which the mining occurred, good smart contracts will avoid relying strongly on the time advertised. Note that block.timestamp is also sometimes (mis)used in the generation of random numbers as is discussed in #6. Bad Randomness.
+
+    Attack Scenario
+    A game pays out the very first player at midnight today. A malicious miner includes his or her attempt to win the game and sets the timestamp to midnight. A bit before midnight the miner ends up mining the block. The real current time is "close enough" to midnight (the currently set timestamp for the block), other nodes on the network decide to accept the block.
+
+    Examples
+    The following function only accepts calls that come after a specific date. Since miners can influence their block's timestamp (to a certain extent), they can attempt to mine a block containing their transaction with a block timestamp set in the future. If it is close enough, it will be accepted on the network and the transaction will give the miner ether before any other player could have attempted to win the game:
+
+    function play() public {
+        require(now > 1521763200 && neverPlayed == true);
+        neverPlayed = false;
+        msg.sender.transfer(1500 ether);
+    }
+
+Unchecked Low Level Calls:
+    Also known as or related to silent failing sends, unchecked-send.
+
+    One of the deeper features of Solidity are the low level functions call(), callcode(), delegatecall() and send(). Their behavior in accounting for errors is quite different from other Solidity functions, as they will not propagate (or bubble up) and will not lead to a total reversion of the current execution. Instead, they will return a boolean value set to false, and the code will continue to run. This can surprise developers and, if the return value of such low-level calls are not checked, can lead to fail-opens and other unwanted outcomes. Remember, send can fail!
+
+    Examples
+    The following code is an example of what can go wrong when one forgets to check the return value of send(). If the call is used to send ether to a smart contract that does not accept them (e.g. because it does not have a payable fallback function), the EVM will replace its return value with false. Since the return value is not checked in our example, the function's changes to the contract state will not be reverted, and the etherLeft variable will end up tracking an incorrect value:
+
+    function withdraw(uint256 _amount) public {
+        require(balances[msg.sender] >= _amount);
+        balances[msg.sender] -= _amount;
+        etherLeft -= _amount;
+        msg.sender.send(_amount);
+    }
+
+
+Here's some general context about smart contract: 
+Introduction to Smart Contracts
+A Simple Smart Contract
+Let us begin with a basic example that sets the value of a variable and exposes it for other contracts to access. It is fine if you do not understand everything right now, we will go into more details later.
+
+Storage Example
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.4.16 <0.9.0;
+
+contract SimpleStorage {
+    uint storedData;
+
+    function set(uint x) public {
+        storedData = x;
+    }
+
+    function get() public view returns (uint) {
+        return storedData;
+    }
+}
+The first line tells you that the source code is licensed under the GPL version 3.0. Machine-readable license specifiers are important in a setting where publishing the source code is the default.
+
+The next line specifies that the source code is written for Solidity version 0.4.16, or a newer version of the language up to, but not including version 0.9.0. This is to ensure that the contract is not compilable with a new (breaking) compiler version, where it could behave differently. :ref:`Pragmas<pragma>` are common instructions for compilers about how to treat the source code (e.g. pragma once).
+
+A contract in the sense of Solidity is a collection of code (its functions) and data (its state) that resides at a specific address on the Ethereum blockchain. The line uint storedData; declares a state variable called storedData of type uint (unsigned integer of 256 bits). You can think of it as a single slot in a database that you can query and alter by calling functions of the code that manages the database. In this example, the contract defines the functions set and get that can be used to modify or retrieve the value of the variable.
+
+To access a member (like a state variable) of the current contract, you do not typically add the this. prefix, you just access it directly via its name. Unlike in some other languages, omitting it is not just a matter of style, it results in a completely different way to access the member, but more on this later.
+
+This contract does not do much yet apart from (due to the infrastructure built by Ethereum) allowing anyone to store a single number that is accessible by anyone in the world without a (feasible) way to prevent you from publishing this number. Anyone could call set again with a different value and overwrite your number, but the number is still stored in the history of the blockchain. Later, you will see how you can impose access restrictions so that only you can alter the number.
+
+Warning
+
+Be careful with using Unicode text, as similar looking (or even identical) characters can have different code points and as such are encoded as a different byte array.
+
+Note
+
+All identifiers (contract names, function names and variable names) are restricted to the ASCII character set. It is possible to store UTF-8 encoded data in string variables.
+
+.. index:: ! subcurrency
+
+Subcurrency Example
+The following contract implements the simplest form of a cryptocurrency. The contract allows only its creator to create new coins (different issuance schemes are possible). Anyone can send coins to each other without a need for registering with a username and password, all you need is an Ethereum keypair.
+
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.26;
+
+// This will only compile via IR
+contract Coin {
+    // The keyword "public" makes variables
+    // accessible from other contracts
+    address public minter;
+    mapping(address => uint) public balances;
+
+    // Events allow clients to react to specific
+    // contract changes you declare
+    event Sent(address from, address to, uint amount);
+
+    // Constructor code is only run when the contract
+    // is created
+    constructor() {
+        minter = msg.sender;
+    }
+
+    // Sends an amount of newly created coins to an address
+    // Can only be called by the contract creator
+    function mint(address receiver, uint amount) public {
+        require(msg.sender == minter);
+        balances[receiver] += amount;
+    }
+
+    // Errors allow you to provide information about
+    // why an operation failed. They are returned
+    // to the caller of the function.
+    error InsufficientBalance(uint requested, uint available);
+
+    // Sends an amount of existing coins
+    // from any caller to an address
+    function send(address receiver, uint amount) public {
+        require(amount <= balances[msg.sender], InsufficientBalance(amount, balances[msg.sender]));
+        balances[msg.sender] -= amount;
+        balances[receiver] += amount;
+        emit Sent(msg.sender, receiver, amount);
+    }
+}
+This contract introduces some new concepts, let us go through them one by one.
+
+The line address public minter; declares a state variable of type :ref:`address<address>`. The address type is a 160-bit value that does not allow any arithmetic operations. It is suitable for storing addresses of contracts, or a hash of the public half of a keypair belonging to :ref:`external accounts<accounts>`.
+
+The keyword public automatically generates a function that allows you to access the current value of the state variable from outside of the contract. Without this keyword, other contracts have no way to access the variable. The code of the function generated by the compiler is equivalent to the following (ignore external and view for now):
+
+function minter() external view returns (address) { return minter; }
+You could add a function like the above yourself, but you would have a function and state variable with the same name. You do not need to do this, the compiler figures it out for you.
+
+.. index:: mapping
+
+The next line, mapping(address => uint) public balances; also creates a public state variable, but it is a more complex datatype. The :ref:`mapping <mapping-types>` type maps addresses to :ref:`unsigned integers <integers>`.
+
+Mappings can be seen as hash tables which are virtually initialized such that every possible key exists from the start and is mapped to a value whose byte-representation is all zeros. However, it is neither possible to obtain a list of all keys of a mapping, nor a list of all values. Record what you added to the mapping, or use it in a context where this is not needed. Or even better, keep a list, or use a more suitable data type.
+
+The :ref:`getter function<getter-functions>` created by the public keyword is more complex in the case of a mapping. It looks like the following:
+
+function balances(address account) external view returns (uint) {
+    return balances[account];
+}
+You can use this function to query the balance of a single account.
+
+.. index:: event
+
+The line event Sent(address from, address to, uint amount); declares an :ref:`"event" <events>`, which is emitted in the last line of the function send. Ethereum clients such as web applications can listen for these events emitted on the blockchain without much cost. As soon as it is emitted, the listener receives the arguments from, to and amount, which makes it possible to track transactions.
+
+To listen for this event, you could use the following JavaScript code, which uses web3.js to create the Coin contract object, and any user interface calls the automatically generated balances function from above:
+
+Coin.Sent().watch({}, '', function(error, result) {
+    if (!error) {
+        console.log("Coin transfer: " + result.args.amount +
+            " coins were sent from " + result.args.from +
+            " to " + result.args.to + ".");
+        console.log("Balances now:\n" +
+            "Sender: " + Coin.balances.call(result.args.from) +
+            "Receiver: " + Coin.balances.call(result.args.to));
+    }
+})
+.. index:: coin
+
+The :ref:`constructor<constructor>` is a special function that is executed during the creation of the contract and cannot be called afterwards. In this case, it permanently stores the address of the person creating the contract. The msg variable (together with tx and block) is a :ref:`special global variable <special-variables-functions>` that contains properties which allow access to the blockchain. msg.sender is always the address where the current (external) function call came from.
+
+The functions that make up the contract, and that users and contracts can call are mint and send.
+
+The mint function sends an amount of newly created coins to another address. The :ref:`require <assert-and-require>` function call defines conditions that reverts all changes if not met. In this example, require(msg.sender == minter); ensures that only the creator of the contract can call mint. In general, the creator can mint as many tokens as they like, but at some point, this will lead to a phenomenon called "overflow". Note that because of the default :ref:`Checked arithmetic <unchecked>`, the transaction would revert if the expression balances[receiver] += amount; overflows, i.e., when balances[receiver] + amount in arbitrary precision arithmetic is larger than the maximum value of uint (2**256 - 1). This is also true for the statement balances[receiver] += amount; in the function send.
+
+:ref:`Errors <errors>` allow you to provide more information to the caller about why a condition or operation failed. Errors are used together with the :ref:`revert statement <revert-statement>`. The revert statement unconditionally aborts and reverts all changes, much like the :ref:`require function <assert-and-require-statements>`. Both approaches allow you to provide the name of an error and additional data which will be supplied to the caller (and eventually to the front-end application or block explorer) so that a failure can more easily be debugged or reacted upon.
+
+The send function can be used by anyone (who already has some of these coins) to send coins to anyone else. If the sender does not have enough coins to send, the if condition evaluates to true. As a result, the revert will cause the operation to fail while providing the sender with error details using the InsufficientBalance error.
+
+Note
+
+If you use this contract to send coins to an address, you will not see anything when you look at that address on a blockchain explorer, because the record that you sent coins and the changed balances are only stored in the data storage of this particular coin contract. By using events, you can create a "blockchain explorer" that tracks transactions and balances of your new coin, but you have to inspect the coin contract address and not the addresses of the coin owners.
+
+Blockchain Basics
+Blockchains as a concept are not too hard to understand for programmers. The reason is that most of the complications (mining, hashing, elliptic-curve cryptography, peer-to-peer networks, etc.) are just there to provide a certain set of features and promises for the platform. Once you accept these features as given, you do not have to worry about the underlying technology - or do you have to know how Amazon's AWS works internally in order to use it?
+
+.. index:: transaction
+
+Transactions
+A blockchain is a globally shared, transactional database. This means that everyone can read entries in the database just by participating in the network. If you want to change something in the database, you have to create a so-called transaction which has to be accepted by all others. The word transaction implies that the change you want to make (assume you want to change two values at the same time) is either not done at all or completely applied. Furthermore, while your transaction is being applied to the database, no other transaction can alter it.
+
+As an example, imagine a table that lists the balances of all accounts in an electronic currency. If a transfer from one account to another is requested, the transactional nature of the database ensures that if the amount is subtracted from one account, it is always added to the other account. If due to whatever reason, adding the amount to the target account is not possible, the source account is also not modified.
+
+Furthermore, a transaction is always cryptographically signed by the sender (creator). This makes it straightforward to guard access to specific modifications of the database. In the example of the electronic currency, a simple check ensures that only the person holding the keys to the account can transfer some compensation, e.g. Ether, from it.
+
+.. index:: ! block
+
+Blocks
+One major obstacle to overcome is what (in Bitcoin terms) is called a "double-spend attack": What happens if two transactions exist in the network that both want to empty an account? Only one of the transactions can be valid, typically the one that is accepted first. The problem is that "first" is not an objective term in a peer-to-peer network.
+
+The abstract answer to this is that you do not have to care. A globally accepted order of the transactions will be selected for you, solving the conflict. The transactions will be bundled into what is called a "block" and then they will be executed and distributed among all participating nodes. If two transactions contradict each other, the one that ends up being second will be rejected and not become part of the block.
+
+These blocks form a linear sequence in time, and that is where the word "blockchain" derives from. Blocks are added to the chain at regular intervals, although these intervals may be subject to change in the future. For the most up-to-date information, it is recommended to monitor the network, for example, on Etherscan.
+
+As part of the "order selection mechanism", which is called attestation, it may happen that blocks are reverted from time to time, but only at the "tip" of the chain. The more blocks are added on top of a particular block, the less likely this block will be reverted. So it might be that your transactions are reverted and even removed from the blockchain, but the longer you wait, the less likely it will be.
+
+Note
+
+Transactions are not guaranteed to be included in the next block or any specific future block, since it is not up to the submitter of a transaction, but up to the miners to determine in which block the transaction is included.
+
+If you want to schedule future calls of your contract, you can use a smart contract automation tool or an oracle service.
+
+.. index:: !evm, ! ethereum virtual machine
+
+The Ethereum Virtual Machine
+Overview
+The Ethereum Virtual Machine or EVM is the runtime environment for smart contracts in Ethereum. It is not only sandboxed but actually completely isolated, which means that code running inside the EVM has no access to network, filesystem or other processes. Smart contracts even have limited access to other smart contracts.
+
+.. index:: ! account, address, storage, balance
+
+Accounts
+There are two kinds of accounts in Ethereum which share the same address space: External accounts that are controlled by public-private key pairs (i.e. humans) and contract accounts which are controlled by the code stored together with the account.
+
+The address of an external account is determined from the public key while the address of a contract is determined at the time the contract is created (it is derived from the creator address and the number of transactions sent from that address, the so-called "nonce").
+
+Regardless of whether or not the account stores code, the two types are treated equally by the EVM.
+
+Every account has a persistent key-value store mapping 256-bit words to 256-bit words called storage.
+
+Furthermore, every account has a balance in Ether (in "Wei" to be exact, 1 ether is 10**18 wei) which can be modified by sending transactions that include Ether.
+
+.. index:: ! transaction
+
+Transactions
+A transaction is a message that is sent from one account to another account (which might be the same or empty, see below). It can include binary data (which is called "payload") and Ether.
+
+If the target account contains code, that code is executed and the payload is provided as input data.
+
+If the target account is not set (the transaction does not have a recipient or the recipient is set to null), the transaction creates a new contract. As already mentioned, the address of that contract is not the zero address but an address derived from the sender and its number of transactions sent (the "nonce"). The payload of such a contract creation transaction is taken to be EVM bytecode and executed. The output data of this execution is permanently stored as the code of the contract. This means that in order to create a contract, you do not send the actual code of the contract, but in fact code that returns that code when executed.
+
+Note
+
+While a contract is being created, its code is still empty. Because of that, you should not call back into the contract under construction until its constructor has finished executing.
+
+.. index:: ! gas, ! gas price
+
+Gas
+Upon creation, each transaction is charged with a certain amount of gas that has to be paid for by the originator of the transaction (tx.origin). While the EVM executes the transaction, the gas is gradually depleted according to specific rules. If the gas is used up at any point (i.e. it would be negative), an out-of-gas exception is triggered, which ends execution and reverts all modifications made to the state in the current call frame.
+
+This mechanism incentivizes economical use of EVM execution time and also compensates EVM executors (i.e. miners / stakers) for their work. Since each block has a maximum amount of gas, it also limits the amount of work needed to validate a block.
+
+The gas price is a value set by the originator of the transaction, who has to pay gas_price * gas up front to the EVM executor. If some gas is left after execution, it is refunded to the transaction originator. In case of an exception that reverts changes, already used up gas is not refunded.
+
+Since EVM executors can choose to include a transaction or not, transaction senders cannot abuse the system by setting a low gas price.
+
+.. index:: ! storage, ! memory, ! stack, ! transient storage
+
+Storage, Transient Storage, Memory and the Stack
+The Ethereum Virtual Machine has different areas where it can store data with the most prominent being storage, transient storage, memory and the stack.
+
+Each account has a data area called storage, which is persistent between function calls and transactions. Storage is a key-value store that maps 256-bit words to 256-bit words. It is not possible to enumerate storage from within a contract, it is comparatively costly to read, and even more to initialise and modify storage. Because of this cost, you should minimize what you store in persistent storage to what the contract needs to run. Store data like derived calculations, caching, and aggregates outside of the contract. A contract can neither read nor write to any storage apart from its own.
+
+Similar to storage, there is another data area called transient storage, where the main difference is that it is reset at the end of each transaction. The values stored in this data location persist only across function calls originating from the first call of the transaction. When the transaction ends, the transient storage is reset and the values stored there become unavailable to calls in subsequent transactions. Despite this, the cost of reading and writing to transient storage is significantly lower than for storage.
+
+The third data area is called memory, of which a contract obtains a freshly cleared instance for each message call. Memory is linear and can be addressed at byte level, but reads are limited to a width of 256 bits, while writes can be either 8 bits or 256 bits wide. Memory is expanded by a word (256-bit), when accessing (either reading or writing) a previously untouched memory word (i.e. any offset within a word). At the time of expansion, the cost in gas must be paid. Memory is more costly the larger it grows (it scales quadratically).
+
+The EVM is not a register machine but a stack machine, so all computations are performed on a data area called the stack. It has a maximum size of 1024 elements and contains words of 256 bits. Access to the stack is limited to the top end in the following way: It is possible to copy one of the topmost 16 elements to the top of the stack or swap the topmost element with one of the 16 elements below it. All other operations take the topmost two (or one, or more, depending on the operation) elements from the stack and push the result onto the stack. Of course it is possible to move stack elements to storage or memory in order to get deeper access to the stack, but it is not possible to just access arbitrary elements deeper in the stack without first removing the top of the stack.
+
+Calldata, Returndata and Code
+There are also other data areas which are not as apparent as those discussed previously. However, they are routinely used during the execution of smart contract transactions.
+
+The calldata region is the data sent to a transaction as part of a smart contract transaction. For example, when creating a contract, calldata would be the constructor code of the new contract. The parameters of external functions are always initially stored in calldata in an ABI-encoded form and only then decoded into the location specified in their declaration. If declared as memory, the compiler will eagerly decode them into memory at the beginning of the function, while marking them as calldata means that this will be done lazily, only when accessed. Value types and storage pointers are decoded directly onto the stack.
+
+The returndata is the way a smart contract can return a value after a call. In general, external Solidity functions use the return keyword to ABI-encode values into the returndata area.
+
+The code is the region where the EVM instructions of a smart contract are stored. Code is the bytes read, interpreted, and executed by the EVM during smart contract execution. Instruction data stored in the code is persistent as part of a contract account state field. Immutable and constant variables are stored in the code region. All references to immutables are replaced with the values assigned to them. A similar process is performed for constants which have their expressions inlined in the places where they are referenced in the smart contract code.
+
+.. index:: ! instruction
+
+Instruction Set
+The instruction set of the EVM is kept minimal in order to avoid incorrect or inconsistent implementations which could cause consensus problems. All instructions operate on the basic data type, 256-bit words or on slices of memory (or other byte arrays). The usual arithmetic, bit, logical and comparison operations are present. Conditional and unconditional jumps are possible. Furthermore, contracts can access relevant properties of the current block like its number and timestamp.
+
+For a complete list, please see the :ref:`list of opcodes <opcodes>` as part of the inline assembly documentation.
+
+.. index:: ! message call, function;call
+
+Message Calls
+Contracts can call other contracts or send Ether to non-contract accounts by the means of message calls. Message calls are similar to transactions, in that they have a source, a target, data payload, Ether, gas and return data. In fact, every transaction consists of a top-level message call which in turn can create further message calls.
+
+A contract can decide how much of its remaining gas should be sent with the inner message call and how much it wants to retain. If an out-of-gas exception happens in the inner call (or any other exception), this will be signaled by an error value put onto the stack. In this case, only the gas sent together with the call is used up. In Solidity, the calling contract causes a manual exception by default in such situations, so that exceptions "bubble up" the call stack.
+
+As already said, the called contract (which can be the same as the caller) will receive a freshly cleared instance of memory and has access to the call payload - which will be provided in a separate area called the calldata. After it has finished execution, it can return data which will be stored at a location in the caller's memory preallocated by the caller. All such calls are fully synchronous.
+
+Calls are limited to a depth of 1024, which means that for more complex operations, loops should be preferred over recursive calls. Furthermore, only 63/64th of the gas can be forwarded in a message call, which causes a depth limit of a little less than 1000 in practice.
+
+.. index:: delegatecall, library
+
+Delegatecall and Libraries
+There exists a special variant of a message call, named delegatecall which is identical to a message call apart from the fact that the code at the target address is executed in the context (i.e. at the address) of the calling contract and msg.sender and msg.value do not change their values.
+
+This means that a contract can dynamically load code from a different address at runtime. Storage, current address and balance still refer to the calling contract, only the code is taken from the called address.
+
+This makes it possible to implement the "library" feature in Solidity: Reusable library code that can be applied to a contract's storage, e.g. in order to implement a complex data structure.
+
+.. index:: log
+
+Logs
+It is possible to store data in a specially indexed data structure that maps all the way up to the block level. This feature called logs is used by Solidity in order to implement :ref:`events <events>`. Contracts cannot access log data after it has been created, but they can be efficiently accessed from outside the blockchain. Since some part of the log data is stored in bloom filters, it is possible to search for this data in an efficient and cryptographically secure way, so network peers that do not download the whole blockchain (so-called "light clients") can still find these logs.
+
+.. index:: contract creation
+
+Create
+Contracts can even create other contracts using a special opcode (i.e. they do not simply call the zero address as a transaction would). The only difference between these create calls and normal message calls is that the payload data is executed and the result stored as code and the caller / creator receives the address of the new contract on the stack.
+
+.. index:: ! selfdestruct, deactivate
+
+Deactivate and Self-destruct
+The only way to remove code from the blockchain is when a contract at that address performs the selfdestruct operation. The remaining Ether stored at that address is sent to a designated target and then the storage and code is removed from the state. Removing the contract in theory sounds like a good idea, but it is potentially dangerous, as if someone sends Ether to removed contracts, the Ether is forever lost.
+
+Warning
+
+From EVM >= Cancun onwards, selfdestruct will only send all Ether in the account to the given recipient and not destroy the contract. However, when selfdestruct is called in the same transaction that creates the contract calling it, the behaviour of selfdestruct before Cancun hardfork (i.e., EVM <= Shanghai) is preserved and will destroy the current contract, deleting any data, including storage keys, code and the account itself. See EIP-6780 for more details.
+
+The new behaviour is the result of a network-wide change that affects all contracts present on the Ethereum mainnet and testnets. It is important to note that this change is dependent on the EVM version of the chain on which the contract is deployed. The --evm-version setting used when compiling the contract has no bearing on it.
+
+Also, note that the selfdestruct opcode has been deprecated in Solidity version 0.8.18, as recommended by EIP-6049. The deprecation is still in effect and the compiler will still emit warnings on its use. Any use in newly deployed contracts is strongly discouraged even if the new behavior is taken into account. Future changes to the EVM might further reduce the functionality of the opcode.
+
+Warning
+
+Even if a contract is removed by selfdestruct, it is still part of the history of the blockchain and probably retained by most Ethereum nodes. So using selfdestruct is not the same as deleting data from a hard disk.
+
+Note
+
+Even if a contract's code does not contain a call to selfdestruct, it can still perform that operation using delegatecall or callcode.
+
+If you want to deactivate your contracts, you should instead disable them by changing some internal state which causes all functions to revert. This makes it impossible to use the contract, as it returns Ether immediately.
+
+.. index:: ! precompiled contracts, ! precompiles, ! contract;precompiled
+
+Precompiled Contracts
+There is a small set of contract addresses that are special: The address range between 1 and (including) 0x0a contains "precompiled contracts" that can be called as any other contract but their behavior (and their gas consumption) is not defined by EVM code stored at that address (they do not contain code) but instead is implemented in the EVM execution environment itself.
+
+Different EVM-compatible chains might use a different set of precompiled contracts. It might also be possible that new precompiled contracts are added to the Ethereum main chain in the future, but you can reasonably expect them to always be in the range between 1 and 0xffff (inclusive).
+
+
+{/context}

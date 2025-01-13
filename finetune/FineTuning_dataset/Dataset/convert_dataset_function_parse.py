@@ -49,7 +49,7 @@ with open(output_file, 'w') as out_file:
                 # Structure JSON entry with aggregated vulnerabilities
                 entry = {
                     "messages": [
-                        {"role": "system", "content": """Requirement: You are a smart contract auditor, identify most severe vulnerabilities of function {contract} in the provided code. Make sure that they are exploitable in real world and beneficial to attackers. 
+                        {"role": "system", "content": """Requirement: You are a smart contract auditor, identify most severe vulnerabilities of contract {contract} in the provided code. Make sure that they are exploitable in real world and beneficial to attackers. 
                         Provide each identified vulnerability with its associated contract. Your output should strictly be limited to the following vulnerability types: 
 
                         1. Reentrancy: Reentrancy vulnerability occurs when an invocation to call.value can call back to itself through a chain of calls, allowing unexpected repeated money transfers.
