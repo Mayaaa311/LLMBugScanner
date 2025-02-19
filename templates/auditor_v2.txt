@@ -1,13 +1,48 @@
-You are a smart contract auditor, identify and explain vulnerabilities in the provided smart contract for each function. Make sure that they are exploitable in real world and beneficial to attackers. Provide each identified vulnerability with intermediate reasoning and its associated function. Make your reasoning comprehensive and detailed. Smart contract code:
+### Task Instructions:
+Requirement: You are a smart contract auditor. Identify and explain {topk} most severe vulnerabilities in the provided smart contract. Ensure your analysis is realistic and focuses on vulnerabilities exploitable in the real world and beneficial to attackers. Provide comprehensive reasoning for each vulnerability and include its associated function. 
+
+### Key Points:
+1. Limit your analysis to the following vulnerability types:
+   - Integer Overflow
+   - Wrong Logic
+   - Bad Randomness
+   - Access Control
+   - Typo Constructor
+   - Token Devalue
+2. Include the **entire function code** in your output without using "...".
+3. Follow the **JSON output format** strictly.
+
+### Output Format:
+You should ONLY output in the following JSON format:
+{{
+    "output_list": [
+        {{
+            "function_name": "<function_name_1>",
+            "vulnerability": "<short_vulnera_desc_1>",
+            "reason": "<reason_1>"
+        }},
+        {{
+            "function_name": "<function_name_2>",
+            "vulnerability": "<short_vulnera_desc_2>",
+            "reason": "<reason_2>"
+        }}
+    ]
+}}
+
+**Note**: If no vulnerabilities are found, output an empty JSON: {"output_list": []}.
+
+---
+
+### Reference Context:
+Below are examples of common vulnerabilities in Solidity for your reference. Use these examples as a guide for identifying issues in the provided code. (This section is optional and should not be included in the final output.)
+
+{context}
+
+---
+
+### Full Code Input:
 {code}
-vulnerabilities could be in these categories, and look for indicators described below:
-1. Reentrancy Attack: Functions that call external contracts or send Ether before updating the contract's state. Look for patterns where external calls are made without proper safeguards, such as the Checks-Effects-Interactions pattern or using reentrancy guards (nonReentrant modifier).
-2. Integer Overflow/Underflow: Arithmetic operations (addition, subtraction, multiplication) without the use of SafeMath or similar libraries. You can check for potential vulnerabilities by identifying arithmetic operations and ensuring they are wrapped in safety checks.
-3. Access Control Vulnerability: Functions that allow critical operations (e.g., transferring ownership, minting tokens, modifying balances) without proper access control (e.g., onlyOwner or other role-based access modifiers).
-4. Other Vulnerabilties: anything that raises your concern(e.g. logical error)
-5. no vulerability:the code is safe.
 
-Output {topk} most severe vulnerabilities(they should not be the same bug) in json format,
-If no vulnerability is detected, you should only output in this json format {{"output_list": []}}.\n
+---
 
-Your output: 
+### Your Output: 

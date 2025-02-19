@@ -18,7 +18,7 @@ os.makedirs(result_folder, exist_ok=True)
 output_detailed_csv_path = os.path.join(result_folder, 'detailed_evaluation_auditor.csv')
 output_general_csv_path = os.path.join(result_folder, 'general_determination_auditor.csv')
 
-json_file_path = 'data_full/CVE_label/CVE2label_with_description_final.json'
+json_file_path = 'data_full/CVE_label/CVElabel3_full.json'
 # -------------------------------------------Result Reformatting-------------------------------------------------
 
 def reformat_file_content(file_path):
@@ -97,9 +97,9 @@ def compare_vulnerabilities(csv_data, json_data, dataname):
         return results, general_determination
 
     for i, csv_row in enumerate(unique_csv_data, start=1):
-        vulnerability = csv_row['vulnerability_type']
-        function_name = csv_row['vulnerable_function_name']
-        description = csv_row['description']
+        vulnerability = csv_row['vulnerability']
+        function_name = csv_row['function_name']
+        auditor_idx = csv_row['auditor_idx']
         
         # Get vulnerability and function name from JSON
         json_vulnerability = json_data[dataname]["vulnerability_type"]
@@ -135,9 +135,9 @@ def extract_data_from_text_file(file_path):
                 for entry in data["output_list"]:
                     csv_data.append({
                         'dataname': os.path.splitext(os.path.basename(file_path))[0],  # Extract dataname from filename
+                        'auditor_idx': 'N/A',  # No direct equivalent in JSON, set as 'N/A'
                         'vulnerability': entry['vulnerability'],
-                        'function_name': entry['function_name'],
-                        'description: ': entry['description']
+                        'function_name': entry['function_name']
                     })
     except Exception as e:
         print(f"Error reading {file_path}: {e}. Skipping this file.")
@@ -151,11 +151,11 @@ def process_folder(folder_path, json_data):
     dataname = os.path.basename(folder_path)
     
     # Path to the file inside the folder
-    file_path = os.path.join(folder_path, 'ranker/NTQAI_Nxcode-CQ-7B-orpo_rank.json')
-    if os.path.exists(folder_path+'/ranker/'):
-        for file in os.listdir(folder_path+'/ranker/'):
-            if(file.endswith('_rank.json')):
-                file_path = os.path.join(folder_path+'/ranker',file)
+    file_path = os.path.join(folder_path, 'auditor_summary/NTQAI_Nxcode-CQ-7B-orpo_summarized_0.json')
+    if os.path.exists(folder_path+'/auditor_summary/'):
+        for file in os.listdir(folder_path+'/auditor_summary/'):
+            if(file.endswith('summarized0.csv')):
+                file_path = os.path.join(folder_path+'/auditor_summary',file)
         
         
     # Check if the file exists

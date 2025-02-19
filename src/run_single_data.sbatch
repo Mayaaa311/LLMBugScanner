@@ -22,4 +22,6 @@ conda activate /home/hice1/yyuan394/scratch/env
 
 # python src/bugscanner_cli.py -a google/codegemma-7b AlfredPros/CodeLlama-7b-Instruct-Solidity -c NTQAI/Nxcode-CQ-7B-orpo -r NTQAI/Nxcode-CQ-7B-orpo -d data_full/data_2 -k 3 -log logger/log_nxcode -o result/record_inference_time
 
-python src/bugscanner_cli.py -a finetune/model/Deepseek_finetuning_MessiQ_20ep_GPTLens40_byfunc_new/checkpoint-80 -c finetune/model/Deepseek_finetuning_MessiQ_critic -r NTQAI/Nxcode-CQ-7B-orpo  -d data_full/data_2 -k 5 -log logger/log_nxcode -o result/testenvironment
+# python src/bugscanner_cli.py -a finetune/model/Deepseek_finetuning_MessiQ_20ep_GPTLens40_byfunc_new/checkpoint-80 -c finetune/model/Deepseek_finetuning_MessiQ_critic -r NTQAI/Nxcode-CQ-7B-orpo  -d data_full/data_2 -k 5 -log logger/log_nxcode -o result/testenvironment
+
+python src/2_evaluate_similarity.py

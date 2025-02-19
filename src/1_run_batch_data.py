@@ -6,7 +6,7 @@ sbatch_template = """#!/bin/bash
 #SBATCH -J run_batch-{data_folder}           # Job name
 #SBATCH -N1                                         # Number of nodes
 #SBATCH --ntasks-per-node=1            # Run only one task
-#SBATCH --gpus=3            # Request 2 GPUs
+#SBATCH --gres=gpu:A100:2            # Request 2 GPUs
 #SBATCH --mem-per-gpu=128G         # Increase memory   
 #SBATCH -t 200                         # Duration of the job
 #SBATCH -o Report-{taskname}%j-{i}.out                # Combined output and error messages file
@@ -54,26 +54,28 @@ data_path = 'data_full/CVE_clean_organized_b5'
 # result_folder_name = 'result/baseline/alfredpros_codellama_2'
 
 
-result_fol = 'result/finetuned_both/'
-model_name = 'finetune/model/Deepseek_finetuning_MessiQ_20ep_GPTLens40_byfunc_new/checkpoint-80'
-model_name2 = 'finetune/model/Deepseek_finetuning_MessiQ_critic'
-result_folder_name = result_fol + 'deepseek_ft_3'
+result_fol = 'result/finetuned_rerun/finetuned_single/'
+model_name = 'deepseek-ai/deepseek-llm-7b-chat'
+model_name2 = 'deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct'
+result_folder_name = result_fol + 'deepseek_ft'
+
+
 
 model_name = 'finetune/model/Nxcode_finetuning_MessiQ_20ep_GPTLens_40ep_byfunc_new'
-model_name2 = 'finetune/model/Deepseek_finetuning_MessiQ_critic'
-result_folder_name =result_fol +  'nxcode_ft_3'
+# model_name2 = 'finetune/model/Deepseek_finetuning_MessiQ_critic'
+result_folder_name =result_fol +  'nxcode_ft'
 
 model_name = 'finetune/model/final_models/gemma_messi_5ep_CVE_10ep'
-model_name2 = 'finetune/model/Deepseek_finetuning_MessiQ_critic'
-result_folder_name = result_fol + 'gemma_ft_3'
+# # model_name2 = 'finetune/model/Deepseek_finetuning_MessiQ_critic'
+result_folder_name = result_fol + 'gemma_ft'
 
 model_name = 'finetune/model/final_models/OpenCodeInterpreter_gptLensFT_ds'
-model_name2 = 'finetune/model/Deepseek_finetuning_MessiQ_critic'
-result_folder_name = result_fol + 'opencodeinterpreter_ft_3'
+# # model_name2 = 'finetune/model/Deepseek_finetuning_MessiQ_critic'
+result_folder_name = result_fol + 'opencodeinterpreter_ft'
 
 model_name = 'finetune/model/final_models/codellama_CVE_10ep'
-model_name2 = 'finetune/model/Deepseek_finetuning_MessiQ_critic'
-result_folder_name = result_fol + 'codellama_ft_3'
+# # model_name2 = 'finetune/model/Deepseek_finetuning_MessiQ_critic'
+result_folder_name = result_fol + 'codellama_ft'
 
 
 k = 5

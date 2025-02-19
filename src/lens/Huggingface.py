@@ -10,7 +10,7 @@ import time
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 from peft import AutoPeftModelForCausalLM
 from trl import setup_chat_format
-generation_params=param1
+generation_params=param2
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class Huggingface_LLM(BaseLLM):
     def __init__(self, model_id, prompt_path, model_params_path=None):
@@ -37,7 +37,7 @@ class Huggingface_LLM(BaseLLM):
         
         
         
-        self.tokenizer.model_max_length = 35000
+        self.tokenizer.model_max_length = 10000
         if self.model_id == "THUDM/codegeex2-6b":
             self.model = AutoModel.from_pretrained("THUDM/codegeex2-6b", trust_remote_code=True)
             self.model = self.model.eval()
@@ -58,7 +58,7 @@ class Huggingface_LLM(BaseLLM):
             bnb_4bit_compute_dtype=compute_dtype,
             load_in_8bit_fp32_cpu_offload=True
         )
-        bnb_config = None
+        # bnb_config = None
         print(self.model_id)
         if self.model_id == 'finetune/model/final_models/codellama_CVE_10ep':
 
@@ -87,6 +87,10 @@ class Huggingface_LLM(BaseLLM):
         return None
     
     def invoke(self, prompt) -> str:
+        print("Prompt Template:", self.prompt.template)
+        print("Prompt Keys:", prompt.keys())
+        print("Prompt Content:", prompt)
+
         prompt_input = self.prompt.format_prompt(**prompt)
         print("prompt! : ", prompt_input)
         prompt = str(prompt_input)[6:-1]

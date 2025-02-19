@@ -65,7 +65,7 @@ rerun the command, make sure the result file remain the same
 
 
 ## Commands for testing
-salloc --ntasks-per-node=60 --gpus=7
+salloc --ntasks-per-node=60 --gpus=1
 module load anaconda3/2023.03
 conda activate /home/hice1/yyuan394/scratch/env
 

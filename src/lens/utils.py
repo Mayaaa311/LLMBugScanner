@@ -2,7 +2,7 @@ import json
 import os
 
 param1 = {
-    "max_new_tokens": 400,
+    "max_new_tokens": 800,
     "do_sample": True,
     "temperature": 0.6,
     "top_k": 10,

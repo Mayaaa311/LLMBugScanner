@@ -150,7 +150,8 @@ class BugScanner:
                 ]
                 print("filtered VUlnerability: ",filtered_vulnerabilities)
                 # Sort the filtered vulnerabilities by severity in descending order
-                sorted_vulnerabilities = sorted(filtered_vulnerabilities, key=lambda x: x.get("severity", 0), reverse=True)
+                # sorted_vulnerabilities = sorted(filtered_vulnerabilities, key=lambda x: x.get("severity", 0), reverse=True)
+                sorted_vulnerabilities = filtered_vulnerabilities
 
                 # Keep only the top k vulnerabilities
                 k = 5  # Adjust the value of k as needed
