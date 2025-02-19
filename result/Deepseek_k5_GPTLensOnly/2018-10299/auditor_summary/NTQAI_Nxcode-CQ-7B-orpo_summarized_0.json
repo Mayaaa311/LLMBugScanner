@@ -1,0 +1,19 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function has an integer overflow vulnerability. The requirement of '_value > 0 && _value <= balances[msg.sender]' is not met when _value is at the smallest value a uint256 can represent, causing an overflow in the balances[msg.sender] -= _value; balances[_to] += _value; statements, granting arbitrary balance to recipients."
+        },
+        {
+            "function_name": "batchTransfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'batchTransfer' function has an integer overflow vulnerability. When 'cnt' is large, 'amount' = 'cnt * _value' will cause an overflow, allowing the batch transfer function to be locked out of the contract due to integer overflow."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'approve' function has an integer overflow vulnerability. When 'cnt' is large, 'amount' = 'cnt * _value' will cause an overflow, reducing the owner's balance to a large negative value."
+        }
+    ]
+}

@@ -1,0 +1,59 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) public {
+        _transfer(msg.sender, _to, _value);
+    }",
+            "reason": "In the transfer function, the _value parameter is directly passed to the _transfer function without any checks. If the _value parameter is greater than the balanceOf[msg.sender], it will cause an integer overflow."
+        },
+        {
+            "function_name": "_transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function _transfer(address _from, address _to, uint _value) internal {
+        require(_to != 0x0);
+        require(balanceOf[_from] >= _value);
+        require(balanceOf[_to] + _value > balanceOf[_to]);
+        uint previousBalances = balanceOf[_from] + balanceOf[_to];
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        emit Transfer(_from, _to, _value);
+        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+    }",
+            "reason": "In the _transfer function, the balanceOf[_to] + _value > balanceOf[_to] check is missing. If the _value parameter is greater than the balanceOf[_to], it will cause an integer overflow."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }",
+            "reason": "In the transferFrom function, the _value parameter is directly passed to the _transfer function without any checks. If the _value parameter is greater than the allowance[_from][msg.sender], it will cause an integer overflow."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint256 _value) public returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }",
+            "reason": "In the approve function, the allowance[msg.sender][_spender] = _value; assignment is missing. If the _value parameter is greater than the maximum value that can be stored in the allowance mapping, it will cause an integer overflow."
+        },
+        {
+            "function_name": "burn",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function burn(uint256 _value) public returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);
+        balanceOf[msg.sender] -= _value;
+        totalSupply -= _value;
+        emit Burn(msg.sender, _value);
+        return true;
+    }",
+            "reason": "In the burn function, the balanceOf[msg.sender] >= _value check is missing. If the _value parameter is greater than the balanceOf[msg.sender], it will cause an integer overflow."
+        }
+    ]
+}

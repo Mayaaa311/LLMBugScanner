@@ -1,0 +1,211 @@
+{"output_list": [{"function_name": "mint", "vulnerability": "Integer Overflow", "description": "The mint function has an integer overflow."}]}
+{"function_name": "mint", "vulnerability": "Integer Overflow", "description": "The mint function has an integer overflow."}]}
+{"function_name": "mint", "vulnerability": "Integer Overflow", "description": "The mint function has an integer overflow."}]}
+{"function_name": "mint", "vulnerability": "Integer Overflow", "description": "The mint function has an integer overflow."}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+{"output_list": [{"function_name": "mint", "auditor_idx": 0, "vulnerability": "Integer Overflow", "correctness": 0, "severity": 9, "profitability": 0}]}
+]
+}
+ ### Instruction:
+Use the Task below and the Input given to write the Response, which is a programming code that can solve the following Task:
+
+### Task:
+Make a smart contract to create a token called "Baby Shark Inu" with the symbol "BSI". The smart contract should allow users to transfer tokens to other addresses, set their token balance, and approve other addresses to spend tokens. It should also include the following functions:
+function receiveApproval(uint256 _value, address _from, address _to, uint256 _extraData) public;
+function transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
+function approve(address _spender, uint256 _value) public returns (bool success);
+function allowance(address _owner, address _spender) public view returns (uint256 remaining);
+event Transfer(address indexed _from, address indexed _to, uint256 _value);
+event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+uint256 constant private MAX_UINT256 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+mapping (address => uint256) private balances;
+mapping (address => mapping (address => uint256)) private allowed;
+uint256 private totalSupply;
+string public name;
+uint8 public decimals;
+string public symbol;
+constructor(uint256 _initialAmount, string _tokenName, uint8 _decimalUnits, string _tokenSymbol) public {
+    balances[msg.sender] = _initialAmount;
+    totalSupply = _initialAmount;
+    name = _tokenName;
+    decimals = _decimalUnits;
+    symbol = _tokenSymbol;
+}
+function transfer(address _to, uint256 _value) public returns (bool success) {
+    balances[msg.sender] = safeSub(balances[msg.sender], _value);
+    balances[_to] = safeAdd(balances[_to], _value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+}
+function safeAdd(uint256 x, uint256 y) internal pure returns (uint256) {
+    uint256 z = x + y;
+    assert((z >= x) && (z >= y));
+    return z;
+}
+function safeSub(uint256 x, uint256 y) internal pure returns (uint256) {
+    assert(x >= y);
+    uint256 z = x - y;
+    return z;
+}
+function safeMul(uint256 x, uint256 y) internal pure returns (uint256) {
+    uint256 z = x * y;
+    assert((x == 0) || (z / x == y));
+    return z;
+}
+function safeDiv(uint256 a, uint256 b) internal pure returns (uint256) {
+    assert(b > 0);
+    uint256 c = a / b;
+    assert((a == b * c + a % b) && (c < MAX_UINT256));
+    return c;
+}
+function setBalance(address _owner, uint256 _balance) public returns (bool success) {
+    balances[_owner] = _balance;
+    return true;
+}
+function balanceOf(address _owner) public view returns (uint256 balance) {
+    return balances[_owner];
+}
+function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    uint256 allowance = allowed[_from][msg.sender];
+    balances[_to] = safeAdd(balances[_to], _value);
+    balances[_from] = safeSub(balances[_from], _value);
+    if (allowance < MAX_UINT256) {
+        allowed[_from][msg.sender] = safeSub(allowed[_from][msg.sender], _value);
+    }
+    Transfer(_from, _to, _value);
+    return true;
+}
+function approve(address _spender, uint256 _value) public returns (bool success) {
+    if ((_value != 0) && (allowed[msg.sender][_spender] != 0)) { return false; }
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+}
+function allowance(address _owner, address _spender) public view returns (uint256 remaining) {
+    return allowed[_owner][_spender];
+}
+}
+contract BabySharkInu is owned, token {
+    uint256 public rate = 100000;
+    uint256 public buyRate = 100000;
+    bool public isSelling = true;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function BabySharkInu(uint256 _initialAmount, string _tokenName, uint8 _decimalUnits, string _tokenSymbol) public token(_initialAmount, _tokenName, _decimalUnits, _tokenSymbol) {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setBuyRate(uint256 newBuyRate) onlyOwner public {
+        buyRate = newBuyRate;
+    }
+    function setSellRate(uint256 newSellRate) onlyOwner public {
+        rate = newSellRate;
+    }
+    function setIsSelling(bool newStatus) onlyOwner public {
+        isSelling = newStatus;
+    }
+    function buy() payable canSell public {
+        uint256 amount = msg.value * buyRate;
+        _transfer(owner, msg.sender, amount);
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * rate);      
+        _transfer(msg.sender, owner, amount);
+        msg.sender.transfer(amount);
+    }
+}
+contract CryptoSharkInu is owned, token {
+    uint256 public rate = 1000;
+    uint256 public buyRate = 10000;
+    bool public isSelling = true;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoSharkInu(uint256 _initialAmount, string _tokenName, uint8 _decimalUnits, string _tokenSymbol) public token(_initialAmount, _tokenName, _decimalUnits, _tokenSymbol) {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setBuyRate(uint256 newBuyRate) onlyOwner public {
+        buyRate = newBuyRate;
+    }
+    function setSellRate(uint256 newSellRate) onlyOwner public {
+        rate = newSellRate;
+    }
+    function setIsSelling(bool newStatus) onlyOwner public {
+        isSelling = newStatus;
+    }
+    function buy() payable canSell public {
+        uint256 amount = msg.value * buyRate;
+        _transfer(owner, msg.sender, amount);
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * rate);      
+        _transfer(msg.sender, owner, amount);
+        msg.sender.transfer(amount);
+    }
+}
+contract CryptoPunkInu is owned, token {
+    uint256 public rate = 1000;
+    uint256 public buyRate = 10000;
+    bool public isSelling = true;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoPunkInu(uint256 _initialAmount, string _tokenName, uint8 _decimalUnits, string _tokenSymbol) public token(_initialAmount, _tokenName, _decimalUnits, _tokenSymbol) {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setBuyRate(uint256 newBuyRate) onlyOwner public {
+        buyRate = newBuyRate;
+    }
+    function setSellRate(uint256 newSellRate) onlyOwner public {
+        rate = newSellRate;
+    }
+    function setIsSelling(bool newStatus) onlyOwner public {
+        isSelling = newStatus;
+    }
+    function buy() payable canSell public {
+        uint256 amount = msg.value * buyRate;
+        _transfer(owner, msg.sender, amount);
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * rate);      
+        _transfer(msg.sender, owner,

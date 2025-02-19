@@ -1,0 +1,335 @@
+{"output_list": [{"function_name": "updateSettings", "reason": "The settings have changed", "impact": "none", "users affected": ["user"]}]}
+{"output_list": [{"function_name": "claimStakingReward", "reason": "User rewarded", "impact": "strong", "users affected": ["user"]}]}
+{"output_list": [{"function_name": "fundDAO", "reason": "DAO created", "impact": "none", "users affected": ["owner"]}]}
+{"output_list": [{"function_name": "sellTokenForLRC", "reason": "LRC sold", "impact": "strong", "users affected": ["user"]}]}
+{"output_list": [{"function_name": "getProtocolFeeStats", "reason": "Failed to compute fees", "impact": "weak", "users affected": ["owner"]}]}
+}
+          
+          
+        function() public payable { }
+        address owner = msg.sender;
+        function withdraw() owner.send(this.balance);
+        function burn(uint amount) owner.call(bytes4(keccak256("burn(uint256)")), amount);
+    
+    function setParameters(address userStakingPoolAddress, address tokenSellerAddress, address daoAddress) public nonReentrant {
+        _guardValue = 1;
+        userStakingPoolAddress = userStakingPoolAddress == address(0) ? owner : userStakingPoolAddress;
+        tokenSellerAddress = tokenSellerAddress == address(0) ? owner : tokenSellerAddress;
+        daoAddress = daoAddress == address(0) ? owner : daoAddress;
+        _lrcAddress = lrcAddress;
+    }
+    
+    function() public payable {
+        require(msg.value == 0, "LPX_PAYOUT");
+        owner.transfer(this.balance);
+    }
+    function setLRCAddress(address lrcAddress_) public nonReentrant {
+        _lrcAddress = lrcAddress_;
+    }
+    function setParams(address userStakingPoolAddress, address tokenSellerAddress, address daoAddress) public nonReentrant {
+        _guardValue = 1;
+        userStakingPoolAddress = userStakingPoolAddress == address(0) ? owner : userStakingPoolAddress;
+        tokenSellerAddress = tokenSellerAddress == address(0) ? owner : tokenSellerAddress;
+        daoAddress = daoAddress == address(0) ? owner : daoAddress;
+        _userStakingPoolAddress = userStakingPoolAddress;
+        _tokenSellerAddress = tokenSellerAddress;
+        _daoAddress = daoAddress;
+    }
+    function() public {
+        require(msg.value == 0, "WRONG_CASH");
+        owner.transfer(this.balance);
+    }
+    function mintToken(address target, uint256 mintedAmount) public nonReentrant {
+        require(mintedAmount > 0, "WRONG_AMOUNT");
+        if (_daoAddress != address(0)) {
+            _daoAddress.transfer(this.balance);
+        }
+        target.transfer(mintedAmount);
+        totalBounty += mintedAmount;
+        emit DAOFund(mintedAmount, totalBounty);
+    }
+    function payout() public {
+        require(msg.sender == owner, "WRONG_OWNER");
+        owner.transfer(this.balance);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(msg.sender == owner, "WRONG_OWNER");
+        _to.transfer(_value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(msg.sender == owner, "WRONG_OWNER");
+        require(_value <= balances[_from], "WRONG_AMOUNT");
+        _to.transfer(_value);
+        balances[_from] = balances[_from].sub(_value);
+        totalBounty -= _value;
+        emit DAOFund(_value, totalBounty);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        require(msg.sender == owner, "WRONG_OWNER");
+        if (_value != 0 && allowed[msg.sender][_spender] != 0) return false;
+        allowed[msg.sender][_spender] = _value;
+        return true;
+    }
+    function allowance(address _owner, address _spender) public view returns (uint256) {
+        return allowed[_owner][_spender];
+    }
+    function getTokenBalance(address tokenAddress, address owner) public view returns (uint){
+        token = ERC20(tokenAddress);
+        ownerBalance = token.balanceOf(owner);
+        return ownerBalance;
+    }
+    function withdrawERC20(address tokenAddress) public {
+        require(msg.sender == owner, "WRONG_OWNER");
+        token = ERC20(tokenAddress);
+        owner.transfer(token.balanceOf(address(this)));
+    }
+    function burn(uint256 _value) public onlyOwner {
+        require(msg.value == _value, "WRONG_AMOUNT");
+        owner.transfer(this.balance);
+        totalBounty += _value;
+        _value = 0;
+        emit DAOFund(_value, totalBounty);
+    }
+    function withdrawToOwner(uint256 amountToTransfer, address owner, uint256 minimumBalanceRemaining) public nonReentrant {
+        require(amountToTransfer > 0, "WRONG_AMOUNT");
+        require(totalBounty >= minimumBalanceRemaining, "NOT_RELEANT");
+        owner.transfer(amountToTransfer);
+        totalBounty -= amountToTransfer;
+        emit DAOFund(amountToTransfer, totalBounty);
+    }
+    function() public payable {
+        require(msg.sender == owner, "WRONG_OWNER");
+        owner.transfer(this.balance);
+    }
+    function setOwner(address owner_) public nonReentrant {
+        owner = owner_;
+    }
+    function setParams(address userStakingPoolAddress, address tokenSellerAddress, address daoAddress) public nonReentrant {
+        _guardValue = 1;
+        userStakingPoolAddress = userStakingPoolAddress == address(0) ? owner : userStakingPoolAddress;
+        tokenSellerAddress = tokenSellerAddress == address(0) ? owner : tokenSellerAddress;
+        daoAddress = daoAddress == address(0) ? owner : daoAddress;
+        _userStakingPoolAddress = userStakingPoolAddress;
+        _tokenSellerAddress = tokenSellerAddress;
+        _daoAddress = daoAddress;
+    }
+    function setLRCAddress(address lrcAddress_) public nonReentrant {
+        _lrcAddress = lrcAddress_;
+    }
+    function setParams(address userStakingPoolAddress, address tokenSellerAddress, address daoAddress) public nonReentrant {
+        _guardValue = 1;
+        userStakingPoolAddress = userStakingPoolAddress == address(0) ? owner : userStakingPoolAddress;
+        tokenSellerAddress = tokenSellerAddress == address(0) ? owner : tokenSellerAddress;
+        daoAddress = daoAddress == address(0) ? owner : daoAddress;
+        _userStakingPoolAddress = userStakingPoolAddress;
+        _tokenSellerAddress = tokenSellerAddress;
+        _daoAddress = daoAddress;
+    }
+    function() public {
+        require(msg.value == 0, "WRONG_CASH");
+        owner.transfer(this.balance);
+    }
+    function mintToken(address target, uint256 mintedAmount) public nonReentrant {
+        require(mintedAmount > 0, "WRONG_AMOUNT");
+        if (_daoAddress != address(0)) {
+            _daoAddress.transfer(this.balance);
+        }
+        target.transfer(mintedAmount);
+        totalBounty += mintedAmount;
+        emit DAOFund(mintedAmount, totalBounty);
+    }
+    function payout() public {
+        require(msg.sender == owner, "WRONG_OWNER");
+        owner.transfer(this.balance);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(msg.sender == owner, "WRONG_OWNER");
+        _to.transfer(_value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(msg.sender == owner, "WRONG_OWNER");
+        require(_value <= balances[_from], "WRONG_AMOUNT");
+        _to.transfer(_value);
+        balances[_from] = balances[_from].sub(_value);
+        totalBounty += _value;
+        emit DAOFund(_value, totalBounty);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        require(msg.sender == owner, "WRONG_OWNER");
+        if (_value != 0 && allowed[msg.sender][_spender] != 0) return false;
+        allowed[msg.sender][_spender] = _value;
+        return true;
+    }
+    function getBalance(address tokenAddress, address owner) public view returns (uint){
+        token = ERC20(tokenAddress);
+        ownerBalance = token.balanceOf(owner);
+        return ownerBalance;
+    }
+    function withdrawToOwner(uint256 amountToTransfer, address owner, uint256 minimumBalanceRemaining) public nonReentrant {
+        require(msg.sender == owner, "WRONG_OWNER");
+        require(amountToTransfer > 0, "WRONG_AMOUNT");
+        require(totalBounty >= minimumBalanceRemaining, "NOT_RELEANT");
+        owner.transfer(amountToTransfer);
+        totalBounty -= amountToTransfer;
+        emit DAOFund(amountToTransfer, totalBounty);
+    }
+    function burn(uint256 _value) public onlyOwner {
+        require(msg.value == _value, "WRONG_AMOUNT");
+        owner.transfer(this.balance);
+        totalBounty += _value;
+        _value = 0;
+        emit DAOFund(_value, totalBounty);
+    }
+    function setOwner(address owner_) public nonReentrant {
+        owner = owner_;
+    }
+    function setParams(address userStakingPoolAddress, address tokenSellerAddress, address daoAddress) public nonReentrant {
+        _guardValue = 1;
+        userStakingPoolAddress = userStakingPoolAddress == address(0) ? owner : userStakingPoolAddress;
+        tokenSellerAddress = tokenSellerAddress == address(0) ? owner : tokenSellerAddress;
+        daoAddress = daoAddress == address(0) ? owner : daoAddress;
+        _userStakingPoolAddress = userStakingPoolAddress;
+        _tokenSellerAddress = tokenSellerAddress;
+        _daoAddress = daoAddress;
+    }
+    function setLRCAddress(address lrcAddress_) public nonReentrant {
+        _lrcAddress = lrcAddress_;
+    }
+    function setParams(address userStakingPoolAddress, address tokenSellerAddress, address daoAddress) public nonReentrant {
+        _guardValue = 1;
+        userStakingPoolAddress = userStakingPoolAddress == address(0) ? owner : userStakingPoolAddress;
+        tokenSellerAddress = tokenSellerAddress == address(0) ? owner : tokenSellerAddress;
+        daoAddress = daoAddress == address(0) ? owner : daoAddress;
+        _userStakingPoolAddress = userStakingPoolAddress;
+        _tokenSellerAddress = tokenSellerAddress;
+        _daoAddress = daoAddress;
+    }
+    function() public payable {
+        require(msg.sender == owner, "WRONG_OWNER");
+        owner.transfer(this.balance);
+    }
+    function mintToken(address target, uint256 mintedAmount) public nonReentrant {
+        require(mintedAmount > 0, "WRONG_AMOUNT");
+        if (_daoAddress != address(0)) {
+            _daoAddress.transfer(this.balance);
+        }
+        target.transfer(mintedAmount);
+        totalBounty += mintedAmount;
+        emit DAOFund(mintedAmount, totalBounty);
+    }
+    function payout() public {
+        require(msg.sender == owner, "WRONG_OWNER");
+        owner.transfer(this.balance);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(msg.sender == owner, "WRONG_OWNER");
+        _to.transfer(_value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(msg.sender == owner, "WRONG_OWNER");
+        require(_value <= balances[_from], "WRONG_AMOUNT");
+        _to.transfer(_value);
+        balances[_from] = balances[_from].sub(_value);
+        totalBounty += _value;
+        emit DAOFund(_value, totalBounty);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        require(msg.sender == owner, "WRONG_OWNER");
+        if (_value != 0 && allowed[msg.sender][_spender] != 0) return false;
+        allowed[msg.sender][_spender] = _value;
+        return true;
+    }
+    function getBalance(address tokenAddress, address owner) public view returns (uint){
+        token = ERC20(tokenAddress);
+        ownerBalance = token.balanceOf(owner);
+        return ownerBalance;
+    }
+    function withdrawToOwner(uint256 amountToTransfer, address owner, uint256 minimumBalanceRemaining) public nonReentrant {
+        require(msg.sender == owner, "WRONG_OWNER");
+        require(amountToTransfer > 0, "WRONG_AMOUNT");
+        require(totalBounty >= minimumBalanceRemaining, "NOT_RELEANT");
+        owner.transfer(amountToTransfer);
+        totalBounty -= amountToTransfer;
+        emit DAOFund(amountToTransfer, totalBounty);
+    }
+    function burn(uint256 _value) public onlyOwner {
+        require(msg.value == _value, "WRONG_AMOUNT");
+        owner.transfer(this.balance);
+        totalBounty += _value;
+        _value = 0;
+        emit DAOFund(_value, totalBounty);
+    }
+    function setOwner(address owner_) public nonReentrant {
+        owner = owner_;
+    }
+    function setParams(address userStakingPoolAddress, address tokenSellerAddress, address daoAddress) public nonReentrant {
+        _guardValue = 1;
+        userStakingPoolAddress = userStakingPoolAddress == address(0) ? owner : userStakingPoolAddress;
+        tokenSellerAddress = tokenSellerAddress == address(0) ? owner : tokenSellerAddress;
+        daoAddress = daoAddress == address(0) ? owner : daoAddress;
+        _userStakingPoolAddress;
+        _tokenSellerAddress;
+        _daoAddress;
+    }
+    function setLRCAddress(address lrcAddress_) public nonReentrant {
+        _lrcAddress;
+    }
+    function setParams(address user, address dao, address token) public {
+        require(msg.sender == owner, setOwner(user), "WRONG_OWNER");
+        require(dao == 0, setDao(dao), "WRONG_OWNER");
+        require(token == 0, theking, "WRONG_OWNER");
+        owner.transfer(this.balance);
+    }
+    function() public payable {
+        owner.transfer(msg.value);
+    }
+    function setOwner(address owner_) public onlyOwner {
+        owner = owner_;
+    }
+    function setParams(address userStakingPoolAddress, address tokenSellerAddress, address daoAddress) public nonReentrant {
+        owner = userStakingPoolAddress;
+        token = userStakingPoolAddress;
+        dao = daoAddress;
+    }
+    function() public {
+        require(msg.sender == owner, "WRONG_OWNER");
+        owner.transfer(this.balance);
+    }
+    function burn(uint256 _value) public onlyOwner {
+        require(msg.value == _value, "WRONG_AMOUNT");
+        owner.transfer(msg.value);
+    }
+    function() public {
+        require(msg.sender == owner, "WRONG_OWNER");
+    }
+    function() public {
+        require(msg.sender == owner, theking, thekingAddress == 0 ? true : false);
+        owner.transfer(this.balance);
+    }
+    function() public {
+        require(msg.sender == owner, thekingAddress != 0);
+        owner.transfer(this.balance);
+    }
+    function() public {
+        require(msg.sender == owner, thekingAddress == 0);
+        _value = maxOf(this.balance, owner.balance);
+        owner.transfer(_value);
+    }
+    function() public {
+        require(msg.sender == owner);
+        _value = maxOf(this.balance));
+        owner.transfer(_value);
+    }
+    function() public {
+        require(msg.sender == owner);
+        _value = maxOf(this.balance));
+        owner.transfer(_value);
+    }
+    function() public {
+        require(msg

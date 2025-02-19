@@ -1,0 +1,88 @@
+{
+    "output_list": [
+        {
+            "function_name": "allocateTokens",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function allocateTokens(address[] _owners, uint256[] _values) public onlyOwner {
+                if(allocateEndTime < now) revert();
+                if(_owners.length != _values.length) revert();
+                for(uint256 i = 0; i < _owners.length ; i++){
+                    address to = _owners[i];
+                    uint256 value = _values[i];
+                    if(totalSupply + value <= totalSupply || balances[to] + value <= balances[to]) revert();
+                    totalSupply += value;
+                    balances[to] += value;
+                }
+            }",
+            "reason": "The function allocateTokens is vulnerable to integer overflow. The totalSupply and balances variables are not checked for overflow when they are incremented. This can lead to incorrect results and potentially loss of funds. The fix is to add checks for overflow before incrementing the variables."
+        },
+        {
+            "function_name": "transferProxy",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferProxy(address _from, address _to, uint256 _value, uint256 _feeSmt,
+                uint8 _v,bytes32 _r, bytes32 _s) public transferAllowed(_from) returns (bool){
+                if(balances[_from] < _feeSmt + _value) revert();
+                uint256 nonce = nonces[_from];
+                bytes32 h = keccak256(_from,_to,_value,_feeSmt,nonce);
+                if(_from != ecrecover(h,_v,_r,_s)) revert();
+                if(balances[_to] + _value < balances[_to]
+                    || balances[msg.sender] + _feeSmt < balances[msg.sender]) revert();
+                balances[_to] += _value;
+                Transfer(_from, _to, _value);
+                balances[msg.sender] += _feeSmt;
+                Transfer(_from, msg.sender, _feeSmt);
+                balances[_from] -= _value + _feeSmt;
+                nonces[_from] = nonce + 1;
+                return true;
+            }",
+            "reason": "The function transferProxy is vulnerable to integer overflow. The balances variables are not checked for overflow when they are incremented. This can lead to incorrect results and potentially loss of funds. The fix is to add checks for overflow before incrementing the variables."
+        },
+        {
+            "function_name": "approveProxy",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approveProxy(address _from, address _spender, uint256 _value,
+                uint8 _v,bytes32 _r, bytes32 _s) public returns (bool success) {
+                uint256 nonce = nonces[_from];
+                bytes32 hash = keccak256(_from,_spender,_value,nonce);
+                if(_from != ecrecover(hash,_v,_r,_s)) revert();
+                allowed[_from][_spender] = _value;
+                Approval(_from, _spender, _value);
+                nonces[_from] = nonce + 1;
+                return true;
+            }",
+            "reason": "The function approveProxy is vulnerable to integer overflow. The allowed variable is not checked for overflow when it is incremented. This can lead to incorrect results and potentially loss of funds. The fix is to add checks for overflow before incrementing the variable."
+        },
+        {
+            "function_name": "allocateTokens",
+            "vulnerability": "Access Control",
+            "function_code": "function allocateTokens(address[] _owners, uint256[] _values) public onlyOwner {
+                if(allocateEndTime < now) revert();
+                if(_owners.length != _values.length) revert();
+                for(uint256 i = 0; i < _owners.length ; i++){
+                    address to = _owners[i];
+                    uint256 value = _values[i];
+                    if(totalSupply + value <= totalSupply || balances[to] + value <= balances[to]) revert();
+                    totalSupply += value;
+                    balances[to] += value;
+                }
+            }",
+            "reason": "The function allocateTokens is vulnerable to access control. The onlyOwner modifier is used to restrict access to this function to the contract owner. However, the function does not check if the caller is the contract owner before executing the allocation. This can lead to unauthorized access and potentially loss of funds. The fix is to add a check to ensure that the caller is the contract owner before executing the allocation."
+        },
+        {
+            "function_name": "allocateTokens",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function allocateTokens(address[] _owners, uint256[] _values) public onlyOwner {
+                if(allocateEndTime < now) revert();
+                if(_owners.length != _values.length) revert();
+                for(uint256 i = 0; i < _owners.length ; i++){
+                    address to = _owners[i];
+                    uint256 value = _values[i];
+                    if(totalSupply + value <= totalSupply || balances[to] + value <= balances[to]) revert();
+                    totalSupply += value;
+                    balances[to] += value;
+                }
+            }",
+            "reason": "The function allocateTokens has a typo in the constructor name. The constructor name should be allocateTokens, not allocateEndTime. This can lead to confusion and potential misuse of the function. The fix is to rename the constructor to allocateTokens."
+        }
+    ]
+}

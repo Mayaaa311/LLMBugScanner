@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "batchTransfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'batchTransfer' function has an integer overflow vulnerability. The vulnerability exists in the following code: 'require(!frozenAccount[msg.sender]); balanceOf[msg.sender] -= amount; for (uint i = 0; i < cnt; i++) { balanceOf[_receivers[i]] += _value; Transfer(msg.sender, _receivers[i], _value); } ' The overflow is in the line: 'balanceOf[msg.sender] -= amount;' 'amount' is the user-supplied value, so an attacker can underflow 'amount' to a very large value, causing the attacker's balance to increase, while the sender's balance decreases. This can be exploited to increase the attacker's balance during the 'for' loop, where _value is added to it."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function has an integer overflow vulnerability. The vulnerability exists in the following code: '_transfer(msg.sender, _to, _value); } function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) { require(_value <= allowance[_from][msg.sender]); allowance[_from][msg.sender] -= _value; _transfer(_from, _to, _value); return true; } ' The overflow is in the line: 'balanceOf[_to] += _value;' 'balanceOf[_to]' is the user-controlled value, so an attacker can overflow 'balanceOf[_to]' to a very large value, causing the attacker's balance to increase, while the sender's balance decreases. This can be exploited to increase the attacker's balance during the transfer function, where _value is added to it."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferFrom' function has an integer overflow vulnerability. The vulnerability exists in the following code: '_transfer(msg.sender, _to, _value); } function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) { require(_value <= allowance[_from][msg.sender]); allowance[_from][msg.sender] -= _value; _transfer(_from, _to, _value); return true; } ' The overflow is in the line: 'balanceOf[_to] += _value;' 'balanceOf[_to]' is the user-controlled value, so an attacker can overflow 'balanceOf[_to]' to a very large value, causing the attacker's balance to increase, while the sender's balance decreases. This can be exploited to increase the attacker's balance during the transferFrom function, where _value is added to it."
+        },
+        {
+            "function_name": "batchTransfer",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'batchTransfer' function has a wrong logic vulnerability. The vulnerability exists in the following code: 'require(cnt > 0 && cnt <= 10); require(_value > 0 && balanceOf[msg.sender] >= amount); require(!frozenAccount[msg.sender]); balanceOf[msg.sender] -= amount; for (uint i = 0; i < cnt; i++) { balanceOf[_receivers[i]] += _value; Transfer(msg.sender, _receivers[i], _value); } ' The wrong logic is in the following code: 'require(cnt > 0 && cnt <= 10); ' 'cnt' is a user-controlled variable, so an attacker can set 'cnt' to a large value, causing 'amount' to be very large, causing 'balanceOf[msg.sender]' to underflow, and increase the attacker's balance."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'transfer' function has a wrong logic vulnerability. The vulnerability exists in the following code: '_transfer(msg.sender, _to, _value); } function output only if (msg.sender == owner) { this.output = value; } ' The wrong logic is in the following code: 'output only if (msg.sender == owner) { this.output = value; } ' 'msg.sender' is a user-controlled variable, so an attacker can set 'msg.sender' to a large value, causing 'value' to underflow, and increase the attacker's balance."
+        }
+    ]
+}

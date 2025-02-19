@@ -1,0 +1,53 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+    _transfer(msg.sender, _to, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function does not check if the subtraction of the transfer amount and the burn amount causes an underflow, allowing users to transfer tokens to addresses that they do not own, leading to a denial of service."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public returns (bool success) {
+    require(_value == 0 || allowance[msg.sender][_spender] == 0);
+    allowance[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+}",
+            "vulnerability": "Incorrect Allowance Assignment",
+            "reason": "The 'approve' function allows users to set the allowance to a non-zero value only if the current allowance is zero, which is incorrect logic. This can lead to unexpected token transfers."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal {
+    require (_to != 0x0);
+    require (balanceOf[_from] >= _value + burnPerTransaction);
+    require (balanceOf[_to] + _value > balanceOf[_to]);
+    balanceOf[_from] -= _value + burnPerTransaction;
+    balanceOf[_to] += _value;
+    balanceOf[0x0] += burnPerTransaction;
+    currentSupply -= burnPerTransaction;
+    Burn(_from, burnPerTransaction);
+    Transfer(_from, _to, _value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The '_transfer' function does not check if the subtraction of the transfer amount and the burn amount causes an underflow, allowing users to transfer tokens to addresses that they do not own, leading to a denial of service."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) {
+    require(balanceOf[msg.sender] >= _value);
+    balanceOf[msg.sender] -= _value;
+    balanceOf[0x0] += _value;
+    currentSupply -= _value;
+    Burn(msg.sender, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'burn' function does not check if the subtraction causes a underflow, allowing users to burn more tokens than they own, leading to a denial of service."
+        }
+    ]
+}

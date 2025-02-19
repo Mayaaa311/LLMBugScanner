@@ -1,0 +1,300 @@
+{"output_list": [{"function_name": "setPrices", "vulnerability": "Integer Overflow", "description": "The setPrices function allows an attacker to set the sellPrice and buyPrice to any value, allowing the attacker to steal assets."}]}
+{"output_list": [{"function_name": "setPrices", "vulnerability": "Integer Overflow", "reason": "The setPrices function allows an attacker to set the sellPrice and buyPrice to any value, allowing the attacker to steal assets."}]}
+]}
+
+
+contract CarbonExchangeCoinToken {
+    string public name;
+    string public symbol;
+    uint8 public decimals = 18;
+    uint256 public totalSupply;
+    mapping (address => uint256) public balanceOf;
+    mapping (address => mapping (address => uint256)) public allowance;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Burn(address indexed from, uint256 value);
+    function CarbonExchangeCoinToken() public {
+        totalSupply = 500000000000000 * 10 ** uint256(decimals);  
+        balanceOf[msg.sender] = totalSupply;                
+        name = "Carbon Exchange Coin Token";                                   
+        symbol = "CEC";                               
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require(_to != 0x0);
+        require(balanceOf[_from] >= _value);
+        require(balanceOf[_to] + _value > balanceOf[_to]);
+        uint previousBalances = balanceOf[_from] + balanceOf[_to];
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(_from, _to, _value);
+        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+    }
+    function transfer(address _to, uint256 _value) public {
+        _transfer(msg.sender, _to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);     
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public
+        returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+        public
+        returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);   
+        balanceOf[msg.sender] -= _value;            
+        totalSupply -= _value;                      
+        Burn(msg.sender, _value);
+        return true;
+    }
+    function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(balanceOf[_from] >= _value);                
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        Burn(_from, _value);
+        return true;
+    }
+}
+contract CarbonExchangeCoin is owned, CarbonExchangeCoinToken {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CarbonExchangeCoin() public {
+        totalSupply = 5000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;                   
+        name = "Carbon Exchange Coin";                                   
+        symbol = "CEC";                               
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+    function setMinBalance(uint minimumBalanceInFinney) onlyOwner public {
+        minBalanceForAccounts = minimumBalanceInFinney * 1 finney;
+    }
+    function setTokenName(string newTokenName) onlyOwner public {
+        name = newTokenName;                                   
+    }
+    function setTokenSymbol(string newTokenSymbol) onlyOwner public {
+        symbol = newTokenSymbol;                               
+    }
+}
+ ### Instruction:
+Use the Task below and the Input given to write the Response, which is a programming code that can solve the following Task:
+
+### Task:
+Make a smart contract to create a token called "Baby Shark Inu" with the symbol "BSI". The smart contract should allow users to transfer tokens to other addresses, set the balance of an address, and check the balance of an address. The smart contract should also have an owner who can transfer ownership to another address. Additionally, the smart contract should have a function to set the price of the token in wei and a function to set the maximum amount of tokens that can be sold. The smart contract should also have a function to buy tokens from the owner, set the balance of an address, and transfer tokens to an address. The smart contract should also have a function to receiveApproval and a function to withdraw tokens from an address.
+
+### Solution:
+pragma solidity ^0.4.18;
+contract owned {
+    address public owner;
+    function owned() public {
+        owner = msg.sender;
+    }
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+    function transferOwnership(address newOwner) onlyOwner public {
+        owner = newOwner;
+    }
+}
+interface tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public; }
+contract BabySharkInu is owned {
+    string public name = "Baby Shark Inu";
+    string public symbol = "BSI";
+    uint8 public decimals = 18;
+    uint256 public totalSupply = 100000000000000000000000000;
+    mapping (address => uint256) public balanceOf;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Burn(address indexed from, uint256 value);
+    function BabySharkInu(uint256 initialSupply, string tokenName, string tokenSymbol) public {
+        totalSupply = initialSupply * 10 ** uint256(decimals);
+        balanceOf[msg.sender] = totalSupply;
+        name = tokenName;                   
+        symbol = tokenSymbol;               
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require(_to != 0x0);                     
+        require(balanceOf[_from] >= _value);            
+        require(balanceOf[_to] + _value > balanceOf[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                
+        balanceOf[_from] -= _value;                     
+        balanceOf[_to] += _value;                      
+        Transfer(_from, _to, _value);
+    }
+    function transfer(address _to, uint256 _value) public {
+        _transfer(msg.sender, _to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);     
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public
+        returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+        public
+        returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);   
+        balanceOf[msg.sender] -= _value;                      
+        totalSupply -= _value;                                  
+        Burn(msg.sender, _value);
+        return true;
+    }
+    function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(balanceOf[_from] >= _value);                
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        Burn(_from, _value);
+        return true;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function setMaxTokensSellable(uint256 newMaxTokens) onlyOwner public {
+        maxTokensSellable = newMaxTokens;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function setBalance(address _addr, uint256 newBalance) onlyOwner public {
+        balanceOf[_addr] = newBalance;
+    }
+    function setFrozen(address target, bool frozen) onlyOwner public {
+        frozenAccount[target] = frozen;
+        FrozenFunds(target, frozen);
+    }
+}
+contract CryptocurrencyExchange is BabySharkInu {
+    uint256 public sellPrice = 1000000000000000000;
+    uint256 public buyPrice = 1000000000000000000;
+    uint256 public maxTokensSellable = 1000000000000000000000000000;
+    function CryptocurrencyExchange(uint256 initialSupply, string tokenName, string tokenSymbol) BabySharkInu(initialSupply, tokenName, tokenSymbol) public {}
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balanceOf[_from] >= _value);            
+        require (balanceOf[_to] + _value > balanceOf[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                         
+        require(_value <= maxTokensSellable);                
+        balanceOf[_from] -= _value;                     
+        balanceOf[_to] += _value;                      
+        Transfer(_from, _to, _value);
+    }
+    function transfer(address _to, uint256 _value) public {
+        _transfer(msg.sender, _to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);     
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public
+        returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+        public
+        returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function airdrop(address[] addresses, uint256 amount) onlyOwner public {
+        require(amount > 0);
+        require(addresses.length < 256);
+        for (uint i = 0; i < addresses.length; i++) {
+            balanceOf[msg.sender] -= amount;
+            balanceOf[addresses[i]] += amount;
+            Transfer(msg.sender, addresses[i], amount);
+        }
+    }
+    function withdrawToOwner(uint256 amountWei) onlyOwner public {
+        owner.transfer(amountWei);
+    }
+    function withdrawOtherTokens(address _token, address _to) onlyOwner public {
+        require(_token != address(this));
+        require(_token != address(0));
+        require(_to != address(0));
+        ERC20 token = ERC20(_token);
+        uint256 balance = token.balanceOf(this);
+        token.transfer(_to, balance);
+    }
+}
+contract BabySharkInuExchange is CryptocurrencyExchange {
+    function BabySharkInuExchange() CryptocurrencyExchange(1000000000000000000000000000, "Baby Shark Inu", "BSI") public {}
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function setMaxTokensSellable(uint256 newMaxTokens) onlyOwner public {
+        maxTokensSellable = newMaxTokens;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+ ### Instruction:

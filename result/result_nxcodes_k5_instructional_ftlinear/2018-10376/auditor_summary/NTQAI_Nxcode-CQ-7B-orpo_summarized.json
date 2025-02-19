@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "allocateTokens",
+            "code": "function allocateTokens(address[] _owners, uint256[] _values) public onlyOwner { if(allocateEndTime < now) revert(); if(_owners.length != _values.length) revert(); for(uint256 i = 0; i < _owners.length ; i++){ address to = _owners[i]; uint256 value = _values[i]; if(totalSupply + value <= totalSupply || balances[to] + value <= balances[to]) revert(); totalSupply += value; balances[to] += value; } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function allocateTokens is vulnerable to integer overflow. The totalSupply and balances variables are not properly checked for overflow. In the for loop, the totalSupply and balances variables are being updated with the sum of the value and the current balance. If the sum exceeds the maximum value for uint256, it will cause an integer overflow. This can be exploited by a malicious user to cause the contract to revert and prevent the tokens from being allocated."
+        },
+        {
+            "function_name": "approveProxy",
+            "code": "function approveProxy(address _from, address _spender, uint256 _value, uint8 _v,bytes32 _r, bytes32 _s) public returns (bool success) { uint256 nonce = nonces[_from]; bytes32 hash = keccak256(_from,_spender,_value,nonce); if(_from != ecrecover(hash,_v,_r,_s)) revert(); allowed[_from][_spender] = _value; Approval(_from, _spender, _value); nonces[_from] = nonce + 1; return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The approveProxy function is vulnerable to integer overflow. The nonce variable is not properly checked for overflow. In the if statement, the nonce is being incremented by 1. If the nonce exceeds the maximum value for uint256, it will cause an integer overflow. This can be exploited by a malicious user to cause the contract to revert and prevent the nonce from being incremented."
+        },
+        {
+            "function_name": "transferProxy",
+            "code": "function transferProxy(address _from, address _to, uint256 _value, uint256 _feeSmt, uint8 _v,bytes32 _r, bytes32 _s) public transferAllowed(_from) returns (bool){ if(balances[_from] < _feeSmt + _value) revert(); uint256 nonce = nonces[_from]; bytes32 h = keccak256(_from,_to,_value,_feeSmt,nonce); if(_from != ecrecover(h,_v,_r,_s)) revert(); if(balances[_to] + _value < balances[_to] || balances[msg.sender] + _feeSmt < balances[msg.sender]) revert(); balances[_to] += _value; Transfer(_from, _to, _value); balances[msg.sender] += _feeSmt; Transfer(_from, msg.sender, _feeSmt); balances[_from] -= _value + _feeSmt; nonces[_from] = nonce + 1; return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferProxy function is vulnerable to integer overflow. The nonce variable is not properly checked for overflow. In the if statement, the nonce is being incremented by 1. If the nonce exceeds the maximum value for uint256, it will cause an integer overflow. This can be exploited by a malicious user to cause the contract to revert and prevent the nonce from being incremented."
+        }
+    ]
+}

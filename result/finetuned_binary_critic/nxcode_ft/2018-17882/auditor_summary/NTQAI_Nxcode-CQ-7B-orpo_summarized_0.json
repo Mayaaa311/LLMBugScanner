@@ -1,0 +1,19 @@
+{
+    "output_list": [
+        {
+            "function_name": "batchTransfer",
+            "code": "            function batchTransfer(address[] _to, uint _value) public {
+                    balances[msg.sender] = safeSub(
+                        balances[msg.sender], _to.length * _value
+                    );
+                    for (uint i = 0; i < _to.length; i++) {
+                        balances[_to[i]] = safeAdd(balances[_to[i]], _value);
+                        Transfer(msg.sender, _to[i], _value);
+                    }
+                }
+                ",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in the batchTransfer function allows an attacker to set any user's balance."
+        }
+    ]
+}

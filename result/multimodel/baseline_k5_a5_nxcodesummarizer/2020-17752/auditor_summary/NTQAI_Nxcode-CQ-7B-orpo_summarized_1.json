@@ -1,0 +1,79 @@
+{
+    "output_list": [
+        {
+            "function_name": "MON",
+            "code": "function MON(address _benef,uint256 _start,uint256 _sumMul,uint256 _period) public{
+    beneficiary = _benef;
+    if(_start==0){
+        start = GetNow();
+    } else{
+        start = _start;
+    }
+    if(_period!=0){
+        period = _period;
+    }
+    if(_sumMul!=0){
+        sumMultiplayer = _sumMul;
+    }
+    stageDataStore.push(StageData(uint128(start+period*151),uint64(50*sumMultiplayer),uint64(5000)));
+    stageDataStore.push(StageData(uint128(start+period*243),uint64(60*sumMultiplayer),uint64(3000)));
+    stageDataStore.push(StageData(uint128(start+period*334),uint64(50*sumMultiplayer),uint64(1666)));
+    stageDataStore.push(StageData(uint128(start+period*455),uint64(60*sumMultiplayer),uint64(1500)));
+    stageDataStore.push(StageData(uint128(start+period*548),uint64(65*sumMultiplayer),uint64(1444)));
+    stageDataStore.push(StageData(uint128(start+period*641),uint64(55*sumMultiplayer),uint64(1000)));
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function MON initializes the stageDataStore with StageData instances. The stageTime in each StageData instance is calculated by adding a certain value to the start time. If the start time is a large number and the added value is also a large number, the stageTime can exceed the maximum value of uint256, leading to an integer overflow vulnerability."
+        },
+        {
+            "function_name": "GetMaxStageEthAmount",
+            "code": "function GetMaxStageEthAmount() public constant returns(uint256){
+    StageData memory currS = stageDataStore[stageIndex];
+    uint256 retVal = currS.stageSum;
+    retVal = retVal*(10**18);
+    retVal = retVal/currS.stagePrice;
+    retVal = retVal.sub(this.balance);
+    return retVal;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function GetMaxStageEthAmount calculates the maximum amount of ETH that can be obtained from the current stage. It multiplies the stageSum by 10^18, then divides it by the stagePrice. If the stageSum or stagePrice is a large number, the result can exceed the maximum value of uint256, leading to an integer overflow vulnerability."
+        },
+        {
+            "function_name": "mintCoins",
+            "code": "function mintCoins(address _to, uint256 _amount)  canMint internal returns (bool) {
+    _amount = _amount.div(10**10);
+    if(totalSupply.add(_amount)<maxTokenSupply){
+        super.mint(_to,_amount.mul(75).div(100));
+        super.mint(address(beneficiary),_amount.mul(25).div(100));
+        return true;
+    }
+    else{
+        return false; 
+    }
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function mintCoins mints coins for the specified address. It divides the amount by 10^10 to get the actual amount of coins to mint. If the amount is a large number, the result can exceed the maximum value of uint256, leading to an integer overflow vulnerability."
+        },
+        {
+            "function_name": "GetNow",
+            "code": "function GetNow() public constant returns(uint256){
+    return now; 
+}",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function GetNow returns the current timestamp. It does not provide any randomness, which can lead to predictability in the output. This can be exploited by attackers to manipulate the contract's behavior."
+        },
+        {
+            "function_name": "mint",
+            "code": "function mint(address _to, uint256 _amount) canMint internal returns (bool) {
+    totalSupply = totalSupply.add(_amount);
+    balances[_to] = balances[_to].add(_amount);
+    Mint(_to, _amount);
+    Transfer(address(0),_to,_amount);
+    return true;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The function mint adds a specified amount of tokens to the specified address. It does not check if the caller has the necessary permissions to execute the function. This can be exploited by attackers to mint tokens without proper authorization."
+        }
+    ]
+}

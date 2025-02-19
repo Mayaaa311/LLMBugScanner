@@ -1,0 +1,61 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) revert();           
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert();  
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }",
+            "reason": "In the transfer function, the addition operation can cause an integer overflow if the sum of balanceOf[_to] and _value is less than balanceOf[_to]. This can be exploited by an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (balanceOf[_from] < _value) revert();                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert();  
+        if (_value > allowance[_from][msg.sender]) revert();   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                             
+        allowance[_from][msg.sender] -= _value;               
+        Transfer(_from, _to, _value);                        
+        return true;                                       
+    }",
+            "reason": "In the transferFrom function, the addition operation can cause an integer overflow if the sum of balanceOf[_to] and _value is less than balanceOf[_to]. This can be exploited by an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;                      
+        Transfer(0, owner, mintedAmount);                     
+        Transfer(owner, target, mintedAmount);                
+    }",
+            "reason": "In the mintToken function, the mintedAmount is directly added to the balance of the target address. This can lead to bad randomness if the mintedAmount is not properly randomized. An attacker can manipulate the mintedAmount to increase the balance of the target address."
+        },
+        {
+            "function_name": "setBuyRate",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function setBuyRate(uint newBuyRate) onlyOwner {
+        buyRate = newBuyRate;                              
+    }",
+            "reason": "In the setBuyRate function, the buyRate is directly assigned the value of newBuyRate. However, there is no validation or checks on the newBuyRate. An attacker can set a buyRate to a value that is not valid or expected, leading to incorrect logic and potential misuse."
+        },
+        {
+            "function_name": "buy",
+            "vulnerability": "Access Control",
+            "function_code": "function buy() payable {
+        if(isSelling == false) revert();
+        uint amount = msg.value * buyRate;                  
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[owner] -= amount;                        
+        Transfer(owner, msg.sender, amount);               
+    }",
+            "reason": "In the buy function, the contract checks if isSelling is false before allowing the function to proceed. However, there is no access control mechanism in place to ensure that only the owner can call the buy function. An attacker can call the buy function without proper authorization, leading to unauthorized access and potential misuse."
+        }
+    ]
+}

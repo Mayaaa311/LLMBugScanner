@@ -1,0 +1,386 @@
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Integer Overflow", "reason": "The balance of the user is used to calculate the balance of the company, and the result is displayed in the browser."}]}
+ 
+
+Code Input: 
+
+pragma solidity ^0.4.19;
+contract ERC20Basic {
+    uint256 public totalSupply;
+    function balanceOf(address who) public view returns (uint256);
+    function transfer(address to, uint256 value) public returns (bool);
+    event Transfer(address indexed from, address indexed to, uint256 value);
+}
+contract ERC20 is ERC20Basic {
+    function allowance(address owner, address spender) public view returns (uint256);
+    function transferFrom(address from, address to, uint256 value) public returns (bool);
+    function approve(address spender, uint256 value) public returns (bool);
+}
+contract ERC677 is ERC20 {
+    function approveAndCall(address spender, uint256 value, bytes extraData) public returns (bool);
+}
+contract Standard677Token is ERC677 {
+    function transfer(address _to, uint256 _value) public returns (bool);
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool);
+    function approve(address _spender, uint256 _value) public returns (bool);
+    function approveAndCall(address _spender, uint256 _value, bytes extraData) public returns (bool);
+}
+contract BitAseanToken is Standard677Token {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    bool public isSelling = true;
+    bool public isBuying = false;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function BitAseanToken(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol,
+        string tokenVersion,
+        uint256 sellPrice,
+        uint256 buyPrice
+    ) public {
+        totalSupply = initialSupply;
+        balances[msg.sender] = totalTokens;
+        sellPrice = sellPrice;
+        buyPrice = buyPrice;
+        isSelling = true;
+        isBuying = false;
+    }
+    function mintToken(address target, uint256 mintedAmount) public onlyOwner {
+        if (msg.sender != master) throw;
+        if (mintedAmount == 0) throw;
+        if (isSelling) sell((mintedAmount - 1) * sellPrice);
+        if (isBuying) buy(mintedAmount);
+        totalSupply += mintedAmount;
+        balances[target] += mintedAmount;
+        Transfer(0, target, mintedAmount);
+    }
+    function unfreezeAccount(address target, uint256 unfreezeAmount) public onlyOwner {
+        if (msg.sender != master) throw;
+        if (unfreezeAmount == 0) throw;
+        if (!frozenAccount[target]) throw;
+        if (isSelling) sell((unfreezeAmount - 1) * sellPrice);
+        if (isBuying) buy(unfreezeAmount);
+        totalSupply -= unfreezeAmount;
+        balances[target] -= unfreezeAmount;
+        FrozenFunds(target, true);
+    }
+    function freezeAccount(address target, uint256 freezeAmount) public onlyOwner {
+        if (msg.sender != master) throw;
+        if (freezeAmount == 0) throw;
+        if (!frozenAccount[target]) throw;
+        if (isSelling) sell((freezeAmount - 1) * sellPrice);
+        if (isBuying) buy(freezeAmount);
+        totalSupply -= freezeAmount;
+        balances[target] -= freezeAmount;
+        FrozenFunds(target, true);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) public onlyOwner {
+        if (msg.sender != master) throw;
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        if (!isBuying) throw;
+        uint amount = msg.value * buyPrice;
+        if (balances[this].balance > amount) {
+            balances[msg.sender] += amount;
+            balances[this].balance -= amount;
+            Transfer(this, msg.sender, amount);
+        }
+    }
+    function sell(uint256 amount) public {
+        if (isSelling && amount > balances[msg.sender].balance) throw;
+        if (!msg.sender.send(amount * sellPrice)) throw;
+        if (msg.sender.balance < 0) throw;
+        isSelling = false;
+        sell((amount - 1) * sellPrice);
+    }
+    function setMaster(address newMaster) public onlyOwner {
+        if (msg.sender != master) throw;
+        master = newMaster;
+    }
+    function setFreeze(address target, bool freeze) public onlyOwner {
+        if (msg.sender != master) throw;
+        if (freeze == true && !frozenAccount[target]) throw;
+        frozenAccount[target] = freeze;
+    }
+}
+contract MyAdvancedToken is BitAseanToken, Standard677Token {
+    uint256 public maxAccounts;
+    bool public isSelling2;
+    bool public isBuying2;
+    mapping (address => uint256) public totalContributionOf;
+    mapping (address => uint256) public totalEtherOf;
+    mapping (address => uint256) public totalInWei;
+    mapping (address => uint256) public totalReward;
+    mapping (address => uint256) public totalWeiSent;
+    mapping (address => uint256) public totalTokens;
+    mapping (address => uint256) public totalEther;
+    function MyAdvancedToken(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol,
+        string tokenVersion,
+        uint256 sellPrice,
+        uint256 buyPrice
+    ) BitAseanToken(initialSupply, tokenName, tokenSymbol, tokenVersion, sellPrice, buyPrice) public {}
+    function setMaxAccounts(uint256 _maxAccounts) public onlyOwner {
+        maxAccounts = _maxAccounts;
+    }
+    function setSelling(bool _isSelling2) public onlyOwner {
+        isSelling2 = _isSelling2;
+    }
+    function setBuying(bool _isBuying2) public onlyOwner {
+        isBuying2 = _isBuying2;
+    }
+    function getMyTotalBalance(address _investor) public constant returns(uint256){
+        return totalContributionOf[_investor];
+    }
+    function withdraw(address target, uint256 amount) public onlyOwner {
+        if (msg.sender != master) throw;
+        if (target != master) throw;
+        if (amount > totalContributionOf[msg.sender]) throw;
+        if (totalInWei[msg.sender] < amount) throw;
+        target.transfer(amount);
+        totalInWei[msg.sender] -= amount;
+        totalContributionOf[msg.sender] -= amount;
+        totalEtherOf[msg.sender] -= amount;
+        Transfer(msg.sender, target, amount);
+    }
+    function mintToken(address target, uint256 mintedAmount) public onlyOwner {
+        if (msg.sender != master) throw;
+        if (target != master) throw;
+        if (mintedAmount > totalTokens[msg.sender]) throw;
+        totalTokens[target] += mintedAmount;
+        totalContributionOf[target] += mintedAmount;
+        totalInWei[target] += msg.value;
+        totalReward[target] += totalReward[msg.sender];
+        totalWeiSent[target] += totalWeiSent[msg.sender];
+        Transfer(0, target, mintedAmount);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool) {
+        if (msg.sender != master && !isBuying2) throw;
+        if (_to == master && !isSelling2) throw;
+        if (totalContributionOf[msg.sender] < _value) throw;
+        if (totalContributionOf[this] < _value) throw;
+        if (msg.sender == target && _value == 0) throw;
+        if (_to.send(_value)) {
+            totalInWei[msg.sender] -= _value;
+            totalContributionOf[msg.sender] -= _value;
+            totalInWei[this] -= _value;
+            totalContributionOf[this] -= _value;
+            Transfer(msg.sender, the lastResortToken(this), _to, userBalance);
+        }
+        return true;
+    }
+    function transferFrom(address _from, the lastResortToken(msg.sender), _to, the theLastResortToken(msg.sender), _value) public returns (bool) {
+        if (msg.sender != master && !isBuying2) throw;
+        if (_to == master && !isSelling2) throw;
+        if (totalContributionOf[_from] < _value) throw;
+        if (totalInWei[_to] < _value) throw;
+        if (_to == target && _value == 0) throw;
+        uint256 _extraValue = totalWei[_to] - userBalance;
+        if (msg.sender == target) {
+            totalInWei[this] -= _value;
+            totalContributionOf[this] -= _value;
+            totalInWei[target] += _value;
+            totalContributionOf[target] += _value;
+            totalWeiSent[target] += _value;
+            Transfer(_from, the startdate);
+        }
+        return true;
+    }
+    function setMaster(address _newMaster) public onlyOwner {
+        master = _newMaster;
+    }
+    function setFreeze(address _target, theLastResortToken, theLastResort, theFreezeRate) public onlyOwner {
+        if (msg.sender != master && !isFreezing) throw;
+        freezeRate = _freezeRate;
+    }
+    function setUnfreeze(address _target, theFreezeRate) public onlyOwner {
+        if (msg.sender != master && !isFreezing) throw;
+        freezeRate = _freezeRate;
+    }
+    function setEnable(bool _enabled) public onlyOwner {
+        if (msg.sender != master) throw;
+        isEnable = _enabled;
+    }
+    function setBalance(address _target, theBalance) public {
+        if (msg.sender != master && !isFreezing) throw;
+        theBalance = _target;
+    }
+    function setMaster(address _master) public onlyOwner {
+        master = _master;
+    }
+    function setFreezeAgent(address _agent) public onlyOwner {
+        if (msg.sender != master) throw;
+        freezeAgent = _agent;
+    }
+    function setEnable(bool _enabled) public onlyOwner {
+        if (msg.sender != master) throw;
+        isEnable = _enabled;
+    }
+    function setSettings(bool _enabled) public onlyOwner {
+        if (msg.sender != master) throw;
+        isEnable = _enabled;
+    }
+    function setBalanceOf(address _target) public returns (uint256){
+        if (msg.sender != master && !isFreezing) throw;
+        theBalanceOfTarget = _target;
+        if (msg.sender == master) {
+            master.send(theBalanceOfTarget);
+        if (msg.sender != master && !isFreezing) throw;
+    }
+    function setMyBalance(address target) public returns (uint256) {
+        if (msg.sender == master) {
+            target = msg.sender;
+        }
+    }
+    function setMyEtherBalance(address target) public returns (uint256) {
+        if (!isEnable) throw;
+        if (target == master) {
+            master.send(this);
+        }
+    }
+    function setMyToken(address _token, myToken = _target) public returns (bool);
+    function setMyEther(address target) public returns (uint256);
+    function set setNetwork(address network, theNetwork) public returns (bool);
+    function setOwner(address _owner) public returns (bool);
+    function setNetworkFactory(address) public returns (bool);
+    function setBuyingLimit(uint256);
+    function setSelling(address) public returns (bool);
+    function setSelling2((myNetwork);
+    function setMaster(address _master) public returns (bool);
+    function setFreeze(address) public returns (bool);
+    function setFreeze(address, theFreezeRate);
+    function setNetworkFactory(address) public returns (bool);
+    function userBalance(address) public returns (bool);
+    function setOwner(address) public returns (bool);
+    function setSetting(address, uint256);
+}
+    function setNetwork(address) public returns (bool);
+    function setBalance(address) public returns (bool);
+    function setFreeze(address, userBalance);
+    function setMaster(address) public returns (bool);
+    function setNetworkFactory(address) public returns (bool);
+    function setFreeze(address, uint256);
+    function setFreeze(address, uint256);
+    function setNetworkFactory(address) public returns (bool);
+    function setOwner(address) public returns (bool);
+    function setBalance(address) public returns (bool);
+    function setBalances(address, userBalance);
+    function setNetwork(address) public returns (bool);
+    function setNetworkBalances(address) public returns (bool);
+    function setFreezeRate(address) public returns (bool);
+    function setMyToken(address) public returns (bool);
+    function setMyEther() public returns (bool);
+    function setOwner(address) public returns (bool);
+    function setBalance(address) public returns (bool);
+    function setBalances(address) public returns (bool);
+    function set set setNetwork(address) public returns (bool);
+    function setBalanceOfOwner(address) public returns (bool);
+    function setFreeze(address) public returns (bool);
+    function setNetwork(address) public returns (bool);
+    function set set set set setBalanceOfOwner(address) public returns (bool);
+    function set set setOwner(user) public returns (bool);
+    function setOwner(user) public returns (bool);
+    function setBalanceOfOwner(address) public returns (bool);
+    function setBalance(address) public returns (bool);
+    function set set setBalance(user) public returns (bool);
+    function setBalance(address) public returns (bool);
+    function setBalance(address) public returns (bool);
+    function set setBalance(address) public returns (bool);
+    function set set set setBalance(address) public returns (setBalance);
+    function set setBalance, userAddress, theBalance) public returns (bool bool);
+    function set set set set setBalance);
+    function set set set setBalance);
+    function ownerAddress(user) public returns (bool bool);
+    function set set setOwnerAddress);
+    function set setOwnerAddress((((((((((user) public returns (theBalance);
+    function set setOwnerAddress(user) public returns (theBalance);
+    function set setOwner( the user);
+    function setOwner( the userAddress);
+    function setOwner( the the userAddress);
+    function set set set set set setBalance);
+    function set set set setBalance);
+    function set setBalance,,,,,,,,,,,,,,,,,,,,, theBalance);
+    function set set set setBalance);
+    function((( the the the theBalance);
+    function setBalance, they they are you can beBeforeStart((((( the the new newAddress);
+    function set set set set set set set set set setOwnerAddress(( the set set setBalance);
+    function set setBalance));
+    function());
+    function set set set setBalance);
+    function set set set set set set set set setBalance);
+    function());
+    function());
+    bool setOwner((( the the setBalance);
+    function());
+    bool setBalance));
+    function() public bool((((((((((((( the the the the userAddress);
+
+
+
+
+    function());
+    bool set setBalance));
+    function() public bool);
+
+    bool);
+
+
+    function() public bool);
+
+    bool setBalance);
+
+    bool);
+
+
+
+
+
+
+    bool set setBalance));
+    bool set set setOwner((((((((((((((((( the the balance);
+
+
+    bool bool);
+
+
+
+
+    bool);
+
+
+
+
+
+
+
+
+
+
+
+    bool);
+
+
+theBalance);
+
+
+
+
+
+
+    bool);
+
+
+
+
+
+
+
+
+
+
+ //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////

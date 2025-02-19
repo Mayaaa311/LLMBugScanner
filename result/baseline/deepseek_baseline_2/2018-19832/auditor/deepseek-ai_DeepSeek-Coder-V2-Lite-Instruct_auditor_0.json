@@ -1,0 +1,48 @@
+ {
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "vulnerability": "Integer Overflow",
+            "function_code": "if (value > totalRemaining) {
+    value = totalRemaining;
+}",
+            "reason": "The function 'getTokens' does not properly check for integer overflow when updating the 'value' variable. If 'value' is set to 'totalRemaining' and 'totalRemaining' is very large, it could lead to an integer overflow, causing unexpected behavior in subsequent calculations."
+        },
+        {
+            "function_name": "getTokens",
+            "vulnerability": "Access Control",
+            "function_code": "if (toGive > 0) {
+    blacklist[investor] = true;
+}",
+            "reason": "The function 'getTokens' allows any user to call it, which can lead to unintended consequences if the 'blacklist' mapping is used incorrectly. Specifically, calling 'getTokens' could inadvertently add the caller to the blacklist, restricting their ability to receive tokens in the future."
+        },
+        {
+            "function_name": "distr",
+            "vulnerability": "Access Control",
+            "function_code": "require(!distributionFinished);
+_;
+",
+            "reason": "The function 'distr' uses a modifier 'canDistr' which only checks if the distribution is not finished. This does not ensure that the caller is authorized to perform the distribution, potentially allowing any user to distribute tokens without proper authorization."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "function_code": "require(_to != address(0));
+require(_amount <= balances[msg.sender]);
+balances[msg.sender] = balances[msg.sender].sub(_amount);
+balances[_to] = balances[_to].add(_amount);
+emit Transfer(msg.sender, _to, _amount);
+return true;",
+            "reason": "The function 'transfer' does not enforce any access control before allowing transfers. This means that any user can transfer tokens from any other address, which can lead to unauthorized transactions."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Access Control",
+            "function_code": "if (_value != 0 && allowed[msg.sender][_spender] != 0) { return false; }
+allowed[msg.sender][_spender] = _value;
+emit Approval(msg.sender, _spender, _value);
+return true;",
+            "reason": "The function 'approve' does not check if the caller has already approved a spender for the same amount. This can lead to a situation where a user can approve multiple spenders for the same amount, which might not be the intended behavior."
+        }
+    ]
+}

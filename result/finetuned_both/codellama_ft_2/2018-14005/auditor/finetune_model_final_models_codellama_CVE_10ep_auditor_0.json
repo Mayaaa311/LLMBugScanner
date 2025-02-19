@@ -1,0 +1,251 @@
+{"output_list": [{"output_list": [{"function_name": "transferFrom", "vulnerability": "Integer Overflow", "description": "The transferFrom function has an integer overflow in the calculation of newBalance."}]}], "function_name": "transfer", "vulnerability": "Integer Overflow", "description": "The transfer function has an integer overflow in the calculation of newBalance."}]}], "function_name": "transferFrom", "vulnerability": "Integer Overflow", "description": "The transferFrom function has an integer overflow in the calculation of newBalance."}]}], "function_name": "transferAny", "vulnerability": "Integer Overflow", "description": "The transferAny function has an integer overflow in the calculation of newBalance."}]}], "function_name": "transferAUTOtokens10", "vulnerability": "Integer Overflow", "description": "The transferAUTOtokens10 function has an integer overflow in the calculation of newBalance."}]}], "function_name": "transferAUTOtokens5", "vulnerability": "Integer Overflow", "description": "The transferAUTOtokens5 function has an integer overflow in the calculation of newBalance."}]}], "function_name": "transferAUTOtoken1", "vulnerability": "Integer Overflow", "description": "The transferAUTOtoken1 function has an integer overflow in the calculation of newBalance."}]}
+Code Input: 
+pragma solidity ^0.4;
+contract ERC20Basic {
+  uint256 public totalSupply;
+  function balanceOf(address who) constant returns (uint256);
+  function transfer(address to, uint256 value) returns (bool);
+  event Transfer(address indexed from, address indexed to, uint256 value);
+}
+contract ERC20 is ERC20Basic {
+  function allowance(address owner, address spender) constant returns (uint256);
+  function transferFrom(address from, address to, uint256 value) returns (bool);
+  function approve(address spender, uint256 value) returns (bool);
+  event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+contract SafeMath {
+  function mul(uint256 a, uint256 b) internal constant returns (uint256) {
+    uint256 c = a * b;
+    assert(a == 0 || c / a == b);
+    return c;
+  }
+  function div(uint256 a, uint256 b) internal constant returns (uint256) {
+    uint256 c = a / b;
+    return c;
+  }
+  function sub(uint256 a, uint256 b) internal constant returns (uint256) {
+    assert(b <= a);
+    return a - b;
+  }
+  function add(uint256 a, uint256 b) internal constant returns (uint256) {
+    uint256 c = a + b;
+    assert(c >= a);
+    return c;
+  }
+}
+contract BasicToken is ERC20Basic {
+  using SafeMath for uint256;
+  mapping(address => uint256) balances;
+  function transfer(address _to, uint256 _value) returns (bool) {
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function balanceOf(address _owner) constant returns (uint256 balance) {
+    return balances[_owner];
+  }
+}
+contract ERC20 is ERC20Basic {
+  function allowance(address owner, address spender) constant returns (uint256);
+  function transferFrom(address from, address to, uint256 value) returns (bool);
+  function approve(address spender, uint256 value) returns (bool);
+  event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+contract StandardToken is ERC20, BasicToken {
+  mapping (address => mapping (address => uint256)) allowed;
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool) {
+    require(_to != address(0));
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    balances[_from] = balances[_from].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function approve(address _spender, uint256 _value) returns (bool) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+  function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+    return allowed[_owner][_spender];
+  }
+}
+contract BurnableToken is StandardToken {
+  event Burn(address indexed from, uint256 value);
+  function burn(uint256 _value) returns (bool success) {
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    totalSupply = totalSupply.sub(_value);
+    Burn(msg.sender, _value);
+    return true;
+  }
+  function burnFrom(address _from, uint256 _value) returns (bool success) {
+    balances[_from] = balances[_from].sub(_value);
+    totalSupply = totalSupply.sub(_value);
+    Burn(_from, _value);
+    return true;
+  }
+}
+contract MalaysianCoin is BurnableToken {
+    string public price = '1 MYR per 1 Xmc';
+  string public constant name = "Malaysian coins";
+  string public constant symbol = "Xmc";
+  uint public constant decimals = 3;
+  uint256 public initialSupply  = 25000000 * 10 ** decimals;
+  address Buterin = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
+  address giftToButerin = Buterin;
+  uint256 public constant burned = max;
+  function MalaysianCoin () { 
+      balances[owner] = (initialSupply - burned);
+      balances[giftToButerin] = custom;
+      balances[0] = 250000 * 10 ** decimals;
+      balances[msg.sender] = max;
+        summary = (balances[owner] + balances[Buterin]  -  balances[0] + i);
+        Transfer(Buterin, 0 , ((initialSupply / 10) - n));
+        Transfer(this, owner, (initialSupply - (initialSupply / 10) - n));
+        Transfer(Buterin, owner, i);
+        totalSupply = summary; 
+  }
+function transferAUTOtokens10(address[] addresses) {
+    for (uint i = 0; i < addresses.length; i++)
+    {
+    require(balances[msg.sender] >= 0);
+      balances[msg.sender] -= 10000;
+      balances[addresses[i]] += 10000;
+      Transfer(msg.sender, addresses[i], 10000);
+    }
+}
+function transferAUTOtokens5(address[] addresses) {
+    for (uint i = 0; i < addresses.length; i++)
+    {
+    require(balances[msg.sender] >= 0);
+      balances[msg.sender] -= 5000;
+      balances[addresses[i]] += 5000;
+      Transfer(msg.sender, addresses[i], 5000);
+    }
+  }
+function transferAUTOtoken1(address[] addresses) {
+trequire(balances[msg.sender] >= 0);
+    for (uint i = 0; i < addresses.length; i++)
+    {
+      balances[msg.sender] -= 1000;
+      balances[addresses[i]] += 1000;
+      Transfer(msg.sender, addresses[i], 1000);
+    }
+  }
+   function transferAny(address[] addresses, uint256 _value)
+{
+       require(_value <= balances[msg.sender]);
+ for (uint i = 0; i < addresses.length; i++) {
+   balances[msg.sender] -= _value;
+   balances[addresses[i]] += _value;
+   Transfer(msg.sender, addresses[i], _value);
+    }
+}
+}
+contract CryptoniteCoin is MalaysianCoin {
+    string public price = '1 CNX per 1 Xmc';
+  string public constant name = "Cryptonite Coins";
+  string public constant symbol = "CNX";
+  uint public constant decimals = 3;
+  uint256 public initialSupply  = 25000000 * 10 ** decimals;
+  address Buterin = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
+  address giftToButerin = Buterin;
+  uint256 public constant burned = max;
+  function CryptoniteCoin () { 
+      balances[owner] = (initialSupply - burned);
+      balances[giftToButerin] = custom;
+      balances[0] = 2500000 * 10 ** decimals;
+        summary = (balances[owner] + balances[Buterin]  -  balances[0] + i);
+        Transfer(Buterin, 0 , ((initialSupply / 10) - n));
+        Transfer(this, owner, (initialSupply - (initialSupply / 10) - n));
+        Transfer(Buterin, owner, i);
+        totalSupply = summary; 
+  }
+}
+contract CryptoniteCoin is BurnableToken {
+    string public price = '1 CNX per 1 Xmc';
+  string public constant name = "Cryptonite Coins";
+  string public constant symbol = "CNX";
+  uint public constant decimals = 3;
+  uint256 public initialSupply  = 25000000 * 10 ** decimals;
+  address Buterin = 0x79574f4474ba14820798ccaebb779fe8c8029d0;
+  address giftToButerin = Buterin;
+  uint256 public constant burned = max;
+  function CryptoniteCoin () { 
+      balances[owner] = (initialSupply - burned);
+      balances[giftToButerin] = custom;
+      balances[0] = 25000000 * 10 ** decimals;
+        summary = (balances[owner] + balances[Buterin]  -  balances[0] + i);
+        Transfer(Buterin, 0 , ((initialSupply / 10) - n));
+        Transfer(this, owner, (initialSupply - (initialSupply / 10) - n));
+        Transfer(Buterin, owner, i);
+        totalSupply = summary; 
+  }
+}
+contract CryptoniteCoin is BurnableToken {
+    string public price = '1 CNX per 1 Xmc';
+  string public constant name = "Cryptonite Coins";
+  string public constant symbol = "CNX";
+  uint public constant decimals = 3;
+  uint256 public initialSupply  = 25000000 * 10 ** decimals;
+  address Buterin = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
+  address giftToButerin = Buterin;
+  uint256 public constant burned = max;
+  function CryptoniteCoin () { 
+      balances[owner] = (initialSupply - burned);
+      balances[giftToButerin] = custom;
+      balances[0] = 25000000000 * 10 ** decimals;
+        summary = (balances[owner] + balances[Buterin]  -  balances[0] + i);
+        Transfer(Buterin, 0 , ((initialSupply / 10) - n));
+        Transfer(this, owner, (initialSupply - (initialSupply / 10) - n));
+        Transfer(Buterin, owner, i);
+        totalSupply = summary; 
+  }
+}
+contract CryptoniteCoin is BurnableToken {
+    string public price = '1 CNX per 1 Xmc';
+  string public constant name = "Cryptonite Coins";
+  string public constant symbol = "CNX";
+  uint public constant decimals = 3;
+  uint256 public initialSupply  = 25000000 * 10 ** decimals;
+  address Buterin = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
+  address giftToButerin = Buterin;
+  uint256 public constant burned = max;
+  function CryptoniteCoin () { 
+      balances[owner] = (initialSupply - burned);
+      balances[giftToButerin] = custom;
+      balances[0] = 2500000 * 10 ** decimals;
+        summary = (balances[owner] + balances[Buterin]  -  balances[0] + i);
+        Transfer(Buterin, 0 , ((initialSupply / 10) - n));
+        Transfer(this, owner, (initialSupply - (initialSupply / 10) - n));
+        Transfer(Buterin, owner, i);
+        totalSupply = summary; 
+  }
+}
+contract CryptoniteCoin is BurnableToken {
+    string public price = '1 CNX per 1 Xmc';
+  string public constant name = "Cryptonite Coins";
+  string public constant symbol = "CNX";
+  uint public constant decimals = 3;
+  uint256 public initialSupply  = 25000000 * 10 ** decimals;
+  address Buterin = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
+  address giftToButerin = Buterin;
+  uint256 public constant burned = max;
+  function CryptoniteCoin () { 
+      balances[owner] = (initialSupply - burned);
+      balances[giftToButerin] = custom;
+      balances[0] = 2500000 * 10 ** decimals;
+        summary = (balances[owner] + balances[Buterin]  -  balances[0] + i);
+        Transfer(Buterin, 0 , ((initialSupply / 10) - n));
+        Transfer(this, owner, (initialSupply - (initialSupply / 10) - n));
+        Transfer(Buterin, owner, i);
+        totalSupply = summary; 
+  }
+}
+contract CryptoniteCoin is BurnableToken {
+    string public price = '1 CNX per 1 Xmc';
+  string public constant name = "Cryptonite Coins";
+  string public constant symbol

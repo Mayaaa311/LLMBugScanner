@@ -1,0 +1,46 @@
+ ```json
+{
+    "output_list": [
+        {
+            "function_name": "sell",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function 'sell' contains multiple instances of integer overflow vulnerabilities. The critical lines involve arithmetic operations that can lead to unexpected behavior if the input values are not properly validated. Specifically, the lines `amount * sellPrice` and `_from.transfer(revenue)` are particularly risky as they directly involve multiplication and transfer of funds, respectively. These operations can cause the contract to enter an invalid state, potentially leading to loss of funds for the contract owner or other users.",
+            "correctness": 2,
+            "severity": 8,
+            "profitability": 3,
+            "recommendation": "Implement input validation to ensure that the 'amount' and 'sellPrice' are within safe bounds. Consider using SafeMath library to handle arithmetic operations safely."
+        },
+        {
+            "function_name": "transfer",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'transfer' function also contains multiple instances of integer overflow vulnerabilities. The lines `balances[_to] += _value` and `balances[_from] -= _value` are particularly risky as they involve updating balances and can lead to overflows if the values are not properly checked. This can result in the contract's state being corrupted, which could lead to serious financial losses.",
+            "correctness": 2,
+            "severity": 7,
+            "profitability": 3,
+            "recommendation": "Implement checks to ensure that the values of '_to' and '_from' are within expected ranges and that '_value' does not cause an overflow. Consider using SafeMath library to handle arithmetic operations safely."
+        },
+        {
+            "function_name": "mintToken",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'mintToken' function contains multiple instances of integer overflow vulnerabilities. The lines `totalSupply += mintedAmount` and `worldOwner.transfer(ownerTax)` are particularly risky as they involve updating the total supply and transferring funds, respectively. These operations can cause the contract to enter an invalid state if the input values are not properly validated.",
+            "correctness": 2,
+            "severity": 7,
+            "profitability": 3,
+            "recommendation": "Implement input validation to ensure that the 'mintedAmount' and 'ownerTax' are within safe bounds. Consider using SafeMath library to handle arithmetic operations safely."
+        },
+        {
+            "function_name": "receiveApproval",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'receiveApproval' function contains multiple instances of integer overflow vulnerabilities. The lines `allowed[msg.sender][_from] -= _value` and `allowed[msg.sender][_from] += _value` are particularly risky as they involve updating allowances and can lead to overflows if the values are not properly checked. This can result in the contract's state being corrupted, which could lead to serious financial losses.",
+            "correctness": 2,
+            "severity": 7,
+            "profitability": 3,
+            "recommendation": "Implement checks to ensure that the values of '_from' and '_value' are within expected ranges and that '_value' does not cause an overflow. Consider using SafeMath library to handle arithmetic operations safely."
+        }
+    ]
+}
+```

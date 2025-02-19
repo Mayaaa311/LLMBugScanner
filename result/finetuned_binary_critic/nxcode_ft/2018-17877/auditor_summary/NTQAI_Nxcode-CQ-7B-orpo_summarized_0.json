@@ -1,0 +1,27 @@
+{
+    "output_list": [
+        {
+            "function_name": "buyHeart",
+            "code": "                if (referred != address(0) && referred != msg.sender)
+                {
+                     _pearn = (((msg.value.mul(30) / 100).mul(1000000000000000000)) / (RoundHeart[Round])).mul(_hearts)/ (1000000000000000000);
+                    onwerfee += (msg.value.mul(4) / 100);
+                    RoundETH[Round] += msg.value.mul(54) / 100;
+                    Luckybuy += msg.value.mul(2) / 100;
+                    MyreferredRevenue[referred] += (msg.value.mul(10) / 100);
+                    RoundPayMask[Round] += ((msg.value.mul(30) / 100).mul(1000000000000000000)) / (RoundHeart[Round]);
+                    RoundMyPayMask[Round][msg.sender] = (((RoundPayMask[Round].mul(_hearts)) / (1000000000000000000)).sub(_pearn)).add(RoundMyPayMask[Round][msg.sender]);
+                    emit referredEvent(msg.sender, referred, msg.value.mul(10) / 100);
+                } else {
+                     _pearn = (((msg.value.mul(40) / 100).mul(1000000000000000000)) / (RoundHeart[Round])).mul(_hearts)/ (1000000000000000000);
+                    RoundETH[Round] += msg.value.mul(54) / 100;
+                    Luckybuy += msg.value.mul(2) / 100;
+                    onwerfee +=(msg.value.mul(4) / 100);
+                    RoundPayMask[Round] += ((msg.value.mul(40) / 100).mul(1000000000000000000)) / (RoundHeart[Round]);
+                    RoundMyPayMask[Round][msg.sender] = (((RoundPayMask[Round].mul(_hearts)) / (1000000000000000000)).sub(_pearn)).add(RoundMyPayMask[Round][msg.sender]);
+                }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in the _pearn calculation allows an attacker to increase a victim's payout by arbitrarily large amounts, exploiting the victim's trust in the smart contract."
+        }
+    ]
+}

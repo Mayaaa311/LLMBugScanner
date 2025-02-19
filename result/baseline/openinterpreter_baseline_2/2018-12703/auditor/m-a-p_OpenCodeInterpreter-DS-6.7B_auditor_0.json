@@ -1,0 +1,66 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) returns (bool success) {
+        require(_to != address(0));
+        require(_value <= balances[msg.sender]);
+        require(balances[_to] + _value > balances[_to]);
+        balances[msg.sender] -= _value;
+        balances[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }",
+            "reason": "In the transfer function, the line 'balances[_to] += _value' can cause an integer overflow if the sum of balances[_to] and _value exceeds the maximum value that can be stored in a uint256 variable."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(_to != address(0));
+        require(_value <= balances[_from]);
+        require(_value <= allowed[_from][msg.sender]);
+        require(balances[_to] + _value > balances[_to]);
+        balances[_to] += _value;
+        balances[_from] -= _value;
+        allowed[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }",
+            "reason": "In the transferFrom function, the line 'balances[_to] += _value' can cause an integer overflow if the sum of balances[_to] and _value exceeds the maximum value that can be stored in a uint256 variable."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function approve(address _spender, uint256 _value) returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }",
+            "reason": "In the approve function, the line 'allowed[msg.sender][_spender] = _value' does not seem to be a random number or a secure random number. It directly assigns the value of _value to the allowed mapping, which can lead to predictable and potentially harmful behavior."
+        },
+        {
+            "function_name": "approveAndCall",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) { revert(); }
+        return true;
+    }",
+            "reason": "In the approveAndCall function, there is a typo in the function signature. The function signature should be 'receiveApproval(address,uint256,address,bytes)', but it is written as 'receiveApproval(address,uint256,address,bytes)'."
+        },
+        {
+            "function_name": "approveAndCallcode",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function approveAndCallcode(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        if(!_spender.call(_extraData)) { revert(); }
+        return true;
+    }",
+            "reason": "In the approveAndCallcode function, there is a typo in the function signature. The function signature should be 'receiveApproval(address,uint256,address,bytes)', but it is written as 'receiveApproval(address,uint256,address,bytes)'."
+        }
+    ]
+}

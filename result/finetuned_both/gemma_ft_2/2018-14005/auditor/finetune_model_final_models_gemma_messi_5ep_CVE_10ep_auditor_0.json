@@ -1,0 +1,355 @@
+{"output_list": [{"function_name": "transferAUTOtokens10", "vulnerability": "Integer Overflow", "reason": "Integer overflow in transfer function causes a loss of identity."}]}
+{"output_list": [{"function_name": "transferAUTOtokens5", "vulnerability": "Integer Overflow", "reason": "Integer overflow in transfer function causes a loss of identity."}]}
+{"output_list": [{"function_name": "transferAUTOtoken1", "vulnerability": "Integer Overflow", "reason": "Integer overflow in transfer function causes a loss of identity."}]}
+{"output_list": [{"function_name": "transferAny", "vulnerability": "Integer Overflow", "reason": "Integer overflow in transfer function causes a loss of identity."}]}
+  function setMyBalance(uint256 _value) public {
+    balances[msg.sender] = _value;
+  }
+  function burnMyToken(uint256 _value) public {
+    require(balances[msg.sender] >= _value);
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    totalSupply = totalSupply.sub(_value);
+    Transfer(msg.sender, 0, _value);
+  }
+  function withdraw(address _to, uint256 _value) public {
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+  }
+  function airdrop(address[] addresses, uint256 _value) public {
+    for (uint i = 0; i < addresses.length; i++) {
+      balances[msg.sender] = balances[msg.sender].sub(_value);
+      balances[addresses[i]] = balances[addresses[i]].add(_value);
+      Transfer(msg.sender, addresses[i], _value);
+    }
+  }
+  function distribute(address[] addresses, uint256 _value) public {
+    for (uint i = 0; i < addresses.length; i++) {
+      uint toSend = _value.div(addresses.length);
+      balances[msg.sender] = balances[msg.sender].sub(toSend);
+      balances[addresses[i]] = balances[addresses[i]].add(toSend);
+      Transfer(msg.sender, addresses[i], toSend);
+    }
+  }
+  function setNetworkParams(string _name, string _symbol, uint256 _decimals) public {
+    networkName = _name;
+    networkSymbol = _symbol;
+    networkDecimals = _decimals;
+  }
+  function create(address[] addresses, uint256 _value) public {
+    require(addresses.length <= 255);
+    require(addresses.length == 256);
+    token = SuperToken.create(this, addresses);
+    token.setNetworkParams(networkName, networkSymbol, networkDecimals);
+  }
+  function setOwner(address _owner) public {
+    owner = _owner;
+  }
+  function setInitialSupply(uint256 _value) public {
+    initialSupply = _value;
+  }
+  function setBurnAmount(uint256 _value) public {
+    burned = _value;
+  }
+  function setNetworkName(string _name) public {
+    networkName = _name;
+  }
+  function setNetworkSymbol(string _symbol) public {
+    networkSymbol = _symbol;
+  }
+  function setNetworkDecimals(uint256 _value) public {
+    networkDecimals = _value;
+  }
+  function setParams(address[] addresses, uint256 _value) public {
+    require(addresses.length <= 255);
+    require(addresses.length == 256);
+    token = SuperToken.create(this, addresses);
+    token.setNetworkParams(networkName, networkSymbol, networkDecimals);
+    setOwner(msg.sender);
+  }
+  function() public payable {
+    uint256 myBalance = balances[msg.sender];
+    if(msg.value > myBalance) {
+      withdraw(msg.sender, myBalance);
+    } else if(msg.value == myBalance) {
+      burnMyToken(myBalance);
+    }
+  }
+}
+contract KoreanCoin is MalaysianCoin, Ownable {
+  string public constant name = "Korean Coin";
+  string public constant symbol = "TKZ";
+  uint public constant decimals = 3;
+  address public founder = 0x316A01149F64738138E11C439E05C5B3259aeC9B;
+  function KoreanCoin() {
+    balances[founder] = initialSupply;
+    totalSupply = initialSupply;
+  }
+  function setNetworkParams(string _name, string _symbol, uint256 _decimals) public {
+    networkName = _name;
+    networkSymbol = _symbol;
+    networkDecimals = _decimals;
+    founderName = msg.sender;
+  }
+  function create(address[] addresses, uint256 _value) public {
+    require(addresses.length <= 255);
+    require(addresses.length == 256);
+    token = SuperToken.create(this, addresses);
+    token.setNetworkParams(networkName, networkSymbol, networkDecimals);
+    setOwner(msg.sender);
+  }
+  function transfer(address _to, uint256 _value) public returns (bool success) {
+    require(balances[msg.sender] >= _value);
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function transferAny(address[] addresses, uint256 _value) public {
+    require(balances[msg.sender] >= _value);
+    for (uint i = 0; i < addresses.length; i++) {
+      balances[msg.sender] = balances[msg.sender].sub(_value);
+      balances[addresses[i]] = balances[addresses[i]].add(_value);
+      Transfer(msg.sender, addresses[i], _value);
+    }
+  }
+  function withdraw(address _to, uint256 _value) public {
+    require(balances[_to] >= _value);
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+  }
+  function airdrop(address[] addresses, uint256 _value) public {
+    for (uint i = 0; i < addresses.length; i++) {
+      balances[msg.sender] = balances[msg.sender].sub(_value);
+      balances[addresses[i]] = balances[addresses[i]].add(_value);
+      Transfer(msg.sender, addresses[i], _value);
+    }
+  }
+  function distribute(address[] addresses, uint256 _value) public {
+    for (uint i = 0; i < addresses.length; i++) {
+      uint toSend = _value.div(addresses.length);
+      balances[msg.sender] = balances[msg.sender].sub(toSend);
+      balances[addresses[i]] = balances[addresses[i]].add(toSend);
+      Transfer(msg.sender, addresses[i], toSend);
+    }
+  }
+  function burn(address _owner, uint256 _value) public {
+    require(_value <= balances[_owner]);
+    address target = _owner;
+    balances[_owner] = balances[_owner].sub(_value);
+    totalSupply = totalSupply.sub(_value);
+    Transfer(target, _value);
+  }
+  function transferOwnership(address _newOwner) public onlyOwner {
+    owner = _newOwner;
+  }
+  function setNetworkParams(string _name, string _symbol, uint256 _decimals) public onlyOwner {
+    networkName = _name;
+    networkSymbol = _symbol;
+    networkDecimals = _decimals;
+    founderName = msg.sender;
+  }
+  function create(address[] addresses, uint256 _value) public {
+    require(addresses.length <= 255);
+    require(addresses.length == 256);
+    token = SuperToken.create(this, addresses);
+    token.setNetworkParams(networkName, networkSymbol, networkDecimals);
+    setOwner(msg.sender);
+  }
+}
+contract ERC20Extra is ERC20 {
+  function burn(address _owner, uint256 _value) public onlyOwner {
+    require(_value <= balances[_owner]);
+    address target = _owner;
+    balances[_owner] = balances[_owner].sub(_value);
+    totalSupply = totalSupply.sub(_value);
+    Transfer(target, _value);
+  }
+}
+contract Standard2 is ERC20Extra {
+  function burnMyToken(uint256 _value) public {
+    require(balances[msg.sender] >= _value);
+    address target = msg.sender;
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    totalSupply = totalSupply.sub(_value);
+    Transfer(target, _value);
+  }
+}
+contract KoreanExtra is Standard2 {
+  function burn(address _owner, uint256 _value) public onlyOwner {
+    require(balances[_owner] >= _value);
+    address target = _owner;
+    balances[_owner] = balances[_owner].sub(_value);
+    totalSupply = totalSupply.sub(_value);
+    Transfer(target, _value);
+  }
+}
+contract malayalamCoin is KoreanExtra {
+  string public constant name = "Malayalam Coin";
+  string public constant symbol = "MALC";
+  uint public constant decimals = 3;
+  function malayalamCoin() {
+    balances[msg.sender] = initialSupply;
+    totalSupply = initialSupply;
+  }
+  function setNetworkParams(string _name, string _symbol, uint256 _decimals) public onlyOwner {
+    networkName = _name;
+    networkSymbol = _symbol;
+    networkDecimals = _decimals;
+    founderName = msg.sender;
+  }
+  function create(address[] addresses, uint256 _value) public {
+    require(addresses.length <= 255);
+    require(addresses.length == 256);
+    token = SuperToken.create(this, addresses);
+    token.setNetworkParams(networkName, networkSymbol, networkDecimals);
+    setOwner(msg.sender);
+  }
+}
+contract ERC20 is ERC20Extra {
+  function burnFrom(address _owner, uint256 _value) public returns (bool success) {
+    require(_value <= balances[_owner]);
+    require(_value <= allowed[_owner][msg.sender]);
+    balances[_owner] = balances[_owner].sub(_value);
+    allowed[_owner][msg.sender] = allowed[_owner][msg.sender].sub(_value);
+    totalSupply = totalSupply.sub(_value);
+    Transfer(_owner, _value);
+    return true;
+  }
+}
+contract owned is ERC20 {
+  address public owner;
+  function owned() {
+    owner = msg.sender;
+  }
+  function transferOwnership(address _newOwner) public onlyOwner {
+    owner = _newOwner;
+  }
+}
+contract bitAseanToken is owned, Standard2, KoreanExtra {
+  string public constant name = "BitAsean Token";
+  string public constant symbol = "BTAT";
+  uint public constant decimals = 3;
+  function bitAseanToken() {
+    balances[msg.sender] = initialSupply;
+    totalSupply = initialSupply;
+  }
+  function setNetworkParams(string _name, string _symbol, uint256 _decimals) public onlyOwner {
+    networkName = _name;
+    networkSymbol = _symbol;
+    networkDecimals = _decimals;
+    founderName = msg.sender;
+  }
+  function create(address[] addresses, uint256 _value) public {
+    require(addresses.length <= 255);
+    require(addresses.length == 256);
+    token = SuperToken.create(this, addresses);
+    token.setNetworkParams(networkName, networkSymbol, networkDecimals);
+    setOwner(msg.sender);
+  }
+}
+contract BitAsean = bitAseanToken;
+contract BitAseanExtra is owned, Standard2, KoreanExtra {
+  string public constant name = "BitAsean Extra";
+  string public constant symbol = "BTATX";
+  uint public constant decimals = 3;
+  function BitAseanExtra() {
+    balances[msg.sender] = initialSupply;
+    totalSupply = initialSupply;
+  }
+  function setNetworkParams(string _name, string _symbol, uint256 _decimals) public onlyOwner {
+    networkName = _name;
+    networkSymbol = _symbol;
+    networkDecimals = _decimals;
+    founderName = msg.sender;
+  }
+  function create(address[] addresses, uint256 _value) public {
+    require(addresses.length <= 255);
+    require(addresses.length == 256);
+    token = SuperToken.create(this, addresses);
+    token.setNetworkParams(networkName, networkSymbol, networkDecimals);
+    setOwner(msg.sender);
+  }
+}
+contract MySuperToken is BitAseanExtra {
+  string public constant name = "MySuperToken";
+  string public constant symbol = "MSX";
+  uint public constant decimals = 3;
+  function MySuperToken() {
+    balances[msg.sender] = initialSupply;
+    totalSupply = initialSupply;
+  }
+  function setNetworkParams(string _name, string _symbol, uint256 _decimals) public onlyOwner {
+    networkName = _name;
+    networkSymbol = _symbol;
+    networkDecimals = _decimals;
+    founderName = msg.sender;
+  }
+  function create(address[] addresses, uint256 _value) public {
+    require(addresses.length <= 255);
+    require(addresses.length == 256);
+    token = SuperToken.create(this, addresses);
+    token.setNetworkParams(networkName, networkSymbol, networkDecimals);
+    setOwner(msg.sender);
+  }
+}
+contract MalaysianCoin is MySuperToken {
+  uint256 public constant minBalance = 100000000000000000000000000;
+  function MalaysianCoin() {
+    balances[msg.sender] = initialSupply;
+    totalSupply = initialSupply;
+  }
+  function setNetworkParams(string _name, string _symbol, uint256 _decimals) public onlyOwner {
+    networkName = _name;
+    networkSymbol = _symbol;
+    networkDecimals = _decimals;
+    founderName = msg.sender;
+  }
+  function create(address[] addresses, uint256 _value) public {
+    require(addresses.length <= 255);
+    require(addresses.length == 256);
+    token = SuperToken.create(this, addresses);
+    token.setNetworkParams(networkName, networkSymbol, networkDecimals);
+    setOwner(msg.sender);
+  }
+}
+contract ERC223 is ERC20 {
+  function approveAndCall(address _spender, uint256 _value, bytes _extraData) public returns (bool success) {
+    allowed[msg.sender][_spender] = _value;
+    if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) { throw; }
+    return true;
+  }
+}
+contract Owned2 is owned {
+  address public owner;
+  function Owned2() {
+    owner = msg.sender;
+  }
+  function setOwner(address _newOwner) public onlyOwner {
+    owner = _newOwner;
+  }
+}
+contract malayalamCoin2 is Owned2, ERC223 {
+  string public constant name = "Malayalam Coin";
+  string public constant symbol = "MALC";
+  uint public constant decimals = 3;
+  function malayalamCoin2() {
+    balances[msg.sender] = initialSupply;
+    totalSupply = initialSupply;
+  }
+  function setNetworkParams(string _name, string _symbol, uint256 _decimals) public onlyOwner {
+    networkName = _name;
+    networkSymbol = _symbol;
+    networkDecimals = _decimals;
+    founderName = msg.sender;
+  }
+  function create(address[] addresses, uint256 _value) public {
+    require(addresses.length <= 255);
+    require(addresses.length == 256);
+    token = SuperToken.create(this, addresses);
+    token.setNetworkParams(networkName, networkSymbol, networkDecimals);
+    setOwner(msg.sender);
+  }
+}
+contract Bit

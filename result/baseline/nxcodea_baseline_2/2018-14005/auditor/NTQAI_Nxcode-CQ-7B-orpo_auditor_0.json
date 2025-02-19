@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferAUTOtokens10",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferAUTOtokens10(address[] addresses) { for (uint i = 0; i < addresses.length; i++) { require(balances[msg.sender] >= 0); balances[msg.sender] -= 10000; balances[addresses[i]] += 10000; Transfer(msg.sender, addresses[i], 10000); } }",
+            "reason": "The function transferAUTOtokens10 is vulnerable to integer overflow. The subtraction operation balances[msg.sender] -= 10000 can cause an underflow if the current balance of the sender is less than 10000. This can lead to a loss of funds for the sender and potentially other users. The fix is to use SafeMath.sub function to prevent underflow."
+        },
+        {
+            "function_name": "transferAUTOtokens5",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferAUTOtokens5(address[] addresses) { for (uint i = 0; i < addresses.length; i++) { require(balances[msg.sender] >= 0); balances[msg.sender] -= 5000; balances[addresses[i]] += 5000; Transfer(msg.sender, addresses[i], 5000); } }",
+            "reason": "The function transferAUTOtokens5 is vulnerable to integer overflow. The subtraction operation balances[msg.sender] -= 5000 can cause an underflow if the current balance of the sender is less than 5000. This can lead to a loss of funds for the sender and potentially other users. The fix is to use SafeMath.sub function to prevent underflow."
+        },
+        {
+            "function_name": "transferAUTOtoken1",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferAUTOtoken1(address[] addresses) { require(balances[msg.sender] >= 0); for (uint i = 0; i < addresses.length; i++) { balances[msg.sender] -= 1000; balances[addresses[i]] += 1000; Transfer(msg.sender, addresses[i], 1000); } }",
+            "reason": "The function transferAUTOtoken1 is vulnerable to integer overflow. The subtraction operation balances[msg.sender] -= 1000 can cause an underflow if the current balance of the sender is less than 1000. This can lead to a loss of funds for the sender and potentially other users. The fix is to use SafeMath.sub function to prevent underflow."
+        },
+        {
+            "function_name": "transferAny",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferAny(address[] addresses, uint256 _value) { require(_value <= balances[msg.sender]); for (uint i = 0; i < addresses.length; i++) { balances[msg.sender] -= _value; balances[addresses[i]] += _value; Transfer(msg.sender, addresses[i], _value); } }",
+            "reason": "The function transferAny is vulnerable to integer overflow. The subtraction operation balances[msg.sender] -= _value can cause an underflow if the current balance of the sender is less than _value. This can lead to a loss of funds for the sender and potentially other users. The fix is to use SafeMath.sub function to prevent underflow."
+        },
+        {
+            "function_name": "MalaysianCoin",
+            "vulnerability": "Access Control",
+            "function_code": "function MalaysianCoin () { balances[owner] = (initialSupply - burned); balances[giftToButerin] = custom; balances[0] = 2500000 * 10 ** decimals; balances[msg.sender] = max; summary = (balances[owner] + balances[Buterin]  -  balances[0] + i); Transfer(Buterin, 0 , ((initialSupply / 10) - n)); Transfer(this, owner, (initialSupply - (initialSupply / 10) - n)); Transfer(Buterin, owner, i); totalSupply = summary; }",
+            "reason": "The constructor of the contract is vulnerable to access control. The contract owner is hardcoded to 0x79574f4474ba144820798ccaebb779fe8c8029d0. This means that anyone can call the constructor and set the owner to any address. This can lead to unauthorized ownership transfers and potentially other security issues. The fix is to use a modifier to restrict the constructor to only be called by the contract owner."
+        }
+    ]
+}

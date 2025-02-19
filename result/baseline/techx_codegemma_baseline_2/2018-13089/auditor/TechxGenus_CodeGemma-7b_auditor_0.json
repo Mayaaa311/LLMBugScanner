@@ -1,0 +1,56 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "TokenERC20.transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) public {
+    _transfer(msg.sender, _to, _value);
+}",
+            "reason": "The function doesn't check for the value of 'msg.sender' while performing a transfer. This can allow a malicious user to transfer more funds than he/she actually owns."
+        },
+        {
+            "function_name": "UCoinToken.freezeAccount",
+            "vulnerability": "Access Control",
+            "function_code": "function freezeAccount(address target, bool freeze) onlyOwner public {
+    frozenAccount[target] = freeze;
+    FrozenFunds(target, freeze);
+}",
+            "reason": "The function doesn't check if the account to be frozen is the owner. This can allow a malicious user to freeze an account that is not owned by him/her."
+        },
+        {
+            "function_name": "TokenERC20.burn",
+            "vulnerability": "Token Devalue",
+            "function_code": "function burn(uint256 _value) public returns (bool success) {
+    require(balanceOf[msg.sender] >= _value);
+    balanceOf[msg.sender] -= _value;
+    totalSupply -= _value;
+    Burn(msg.sender, _value);
+    return true;
+}",
+            "reason": "The function decreases the balance of the owner. This can lead to incorrect balance calculations if the function is called multiple times by different owners."
+        },
+        {
+            "function_name": "UCoinToken.mintToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+}",
+            "reason": "The function increases the balance of the target. This can lead to incorrect balance calculations if the function is called multiple times by different owners."
+        },
+        {
+            "function_name": "TokenERC20.transferFrom",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    require(_value <= allowance[_from][msg.sender]);
+    allowance[_from][msg.sender] -= _value;
+    _transfer(_from, _to, _value);
+    return true;
+}",
+            "reason": "The function allows a higher amount of tokens to be transferred than the owner actually owns. This can lead to incorrect balance calculations if the function is called multiple times by different owners."
+        }
+    ]
+}<eos>

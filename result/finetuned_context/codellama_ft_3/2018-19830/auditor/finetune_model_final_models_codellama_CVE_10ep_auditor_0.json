@@ -1,0 +1,375 @@
+{"output_list": [{"function_name": "PayWinner", "vulnerability": "Integer Overflow", "description": "The mintToken function has an integer overflow in the calculation of totalSupply, allowing unauthorized minting of tokens."}]}
+{"function_name": "PayWinner", "vulnerability": "Bad Randomness", "description": "The PayWinner function has a bad randomness, allowing unauthorized minting of tokens."}]}
+{"function_name": "ToOwner", "vulnerability": "Typo Constructor", "description": "The ToOwner function has a Typo Constructor issue, allowing unauthorized reinitialization of the contract's ownership."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Bad Randomness", "description": "The mintToken function has a bad randomness, allowing unauthorized minting of tokens."}, {"function_name": "PayWinner", "vulnerability": "Bad Randomness", "description": "The PayWinner function has a bad randomness, allowing unauthorized minting of tokens."}]}
+
+
+pragma solidity: [{"output_list": [{"function_name": "PayWinner", "vulnerability": "Bad Randomness", "description": "The PayWinner function has a bad randomness, allowing unauthorized minting of tokens."}]}
+pragma solidity ^0.4;
+contract KingOfEther {
+    address public king;
+    uint public balance;
+    function claimThrone() external payable {
+        require(msg.value > balance, "Need to pay more to become the king");
+        balance += msg.value;
+        king = msg.sender;
+    }
+}
+contract BAFCToken is StandardToken {
+    string public name = "Business Alliance Financial Circle";
+    string public symbol = "BAFC";
+    uint public decimals = 18;
+    uint public totalSupply = 19 * 10 ** 26;
+    address owner;
+    bool public transferable = true;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    event InvalidCaller(address caller);
+    event LiquidityAlarm(bytes msg);
+    function BAFCToken() {
+        owner = msg.sender;
+        balances[owner] = totalSupply;
+    }
+    function transfer(address _to, uint _value) onlyPayloadSize(2 * 32) unFrozenAccount onlyTransferable {
+        if (frozenAccount[_to]) {
+            InvalidAccount(_to, "The receiver account is frozen");
+        } else {
+            balances[msg.sender] = balances[msg.sender].sub(_value);
+            balances[_to] = balances[_to].add(_value);
+            Transfer(msg.sender, _to, _value);
+        } 
+    }
+    function balanceOf(address _owner) view returns (uint balance) {
+        return balances[_owner];
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target]=freeze;
+        FrozenFunds(target, freeze);
+    }
+    function accountFrozenStatus(address target) view returns (bool frozen) {
+        return frozenAccount[target];
+    }
+    function transferOwnership(address newOwner) onlyOwner {
+        if (newOwner != address(0)) {
+            owner = newOwner;
+            Transfer(owner, newOwner, balances[owner]);
+        }
+    }
+    function switchLiquidity (bool _transferable) onlyOwner returns (bool success) {
+        transferable=_transferable;
+        return true;
+    }
+    function liquidityStatus () view returns (bool _transferable) {
+        return transferable;
+    }
+}
+contract MorphToken is BAFCToken {
+    address public worldOwner;
+    uint public maxTickets = 10;
+    uint public numtickets = 0;
+    uint public totalBounty = 0;
+    uint public lottoIndex = 0;
+    uint public maxTickets = 10;
+    uint public _direction = 0;
+    mapping (address => uint) public tickets;
+    event LottoComplete(address indexed from, uint indexed lotto, uint value);
+    function MorphToken() {
+        owner = msg.sender;
+        worldOwner = msg.sender;
+        totalSupply = 1.9 * 10 ** 26;
+        balances[owner] = totalSupply;
+    }
+    function() payable {
+        revert();
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        require(mintedAmount > 0 && balances[msg.sender] >= mintedAmount);
+        balances[msg.sender] -= mintedAmount;
+        balances[target] += mintedAmount;
+        Transfer(msg.sender, target, mintedAmount);
+    }
+    function distribute(address[] _addresses, uint[] _amounts) public returns (bool success) {
+        require(_addresses.length < 256 && _addresses.length == _amounts.length);
+        uint totalAmount;
+        for (uint a = 0; a < _amounts.length; a++) {
+            totalAmount += _amounts[a]; // Vulnerability exists in the line `totalAmount += _amounts[a];`. 
+        }
+        require(totalAmount > 0 && balances[msg.sender] >= totalAmount);
+        balances[msg.sender] -= totalAmount;
+        for (uint b = 0; b < _addresses.length; b++) {
+            if (_amounts[b] > 0) {
+                balances[_addresses[b]] += _amounts[b];
+                Transfer(msg.sender, _addresses[b], _amounts[b]);
+            }
+        }
+        return true;
+    }
+    function PayWinner(address winner) private {
+        require(numtickets == maxTickets);
+        uint ownerTax = 6 * totalBounty / 100;
+        uint winnerPrice = totalBounty - ownerTax;
+        LottoComplete(msg.sender, lottoIndex, winnerPrice);
+        lottoIndex += 1;
+        numtickets = 0;
+        totalBounty = 0;
+        if (_direction == 0 && maxTickets < 20) maxTickets += 1;
+        if (_direction == 1 && maxTickets > 10) maxTickets -= 1;
+        if (_direction == 0 && maxTickets == 20) _direction = 1;
+        if (_direction == 1 && maxTickets == 10) _direction = 0;
+        worldOwner.transfer(ownerTax);
+        winner.transfer(winnerPrice);
+    }
+    function PayWinner() public payable {
+        require(msg.value > totalBounty, "Need to pay more to become the king");
+        totalBounty += msg.value;
+        numtickets += 1;
+        if (numtickets == maxTickets) {
+            PayWinner(msg.sender);
+        }
+    }
+    function ToOwner() public {
+        balances[msg.sender] = totalSupply;               
+        owner = msg.sender;
+    }
+}
+contract KingOfEther {
+    address public king;
+    uint public balance;
+    function claimThrone() external payable {
+        require(msg.value > balance, "Need to pay more to become the king");
+        balance += msg.value;
+        king = msg.sender;
+    }
+}
+contract BAFCToken is StandardToken {
+    string public name = "Business Alliance Financial Circle";
+    string public symbol = "BAFC";
+    uint public decimals = 18;
+    uint public totalSupply = 1.9 * 10 ** 26;
+    address owner;
+    bool public transferable = true;
+    mapping (address => bool) public frozenAccount;
+    modifier onlyPayloadSize(uint size) {
+        if(msg.data.length < size + 4) {
+            throw;
+        }
+        _;
+    }
+    modifier unFrozenAccount{
+        require(!frozenAccount[msg.sender]);
+        _;
+    }
+    modifier onlyOwner {
+        if (owner == msg.sender) {
+            _;
+        } else {
+            InvalidCaller(msg.sender);
+            throw;
+        }
+    }
+    modifier onlyTransferable {
+        if (transferable) {
+            _;
+        } else {
+            LiquidityAlarm("The liquidity is switched off");
+            throw;
+        }
+    }
+    function transfer(address _to, uint _value) onlyPayloadSize(2 * 32) unFrozenAccount onlyTransferable {
+        if (frozenAccount[_to]) {
+            InvalidAccount(_to, "The receiver account is frozen");
+        } else {
+            balances[msg.sender] = balances[msg.sender].sub(_value);
+            balances[_to] = balances[_to].add(_value);
+            Transfer(msg.sender, _to, _value);
+        } 
+    }
+    function balanceOf(address _owner) view returns (uint balance) {
+        return balances[_owner];
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target]=freeze;
+        FrozenFunds(target, freeze);
+    }
+    function accountFrozenStatus(address target) view returns (bool frozen) {
+        return frozenAccount[target];
+    }
+    function transferOwnership(address newOwner) onlyOwner {
+        if (newOwner != address(0)) {
+            owner = newOwner;
+            Transfer(owner, newOwner, balances[owner]);
+        }
+    }
+    function switchLiquidity (bool _transferable) onlyOwner returns (bool success) {
+        transferable=_transferable;
+        return true;
+    }
+    function liquidityStatus () view returns (bool _transferable) {
+        return transferable;
+    }
+}
+contract KingOfEther {
+    address public king;
+    uint public balance;
+    function claimThrone() external payable {
+        require(msg.value > balance, "Need to pay more to become the king");
+        balance += msg.value;
+        king = msg.sender;
+    }
+}
+contract BAFCToken is StandardToken {
+    string public name = "Business Alliance Financial Circle";
+    string public symbol = "BAFC";
+    uint public decimals = 18;
+    uint public totalSupply = 1.9 * 10 ** 26;
+    address owner;
+    bool public transferable = true;
+    mapping (address => bool) public frozenAccount;
+    modifier onlyPayloadSize(uint size) {
+        if(msg.data.length < size + 4) {
+            throw;
+        }
+        _;
+    }
+    modifier unFrozenAccount{
+        require(!frozenAccount[msg.sender]);
+        _;
+    }
+    modifier onlyOwner {
+        if (owner == msg.sender) {
+            _;
+        } else {
+            InvalidCaller(msg.sender);
+            throw;
+        }
+    }
+    modifier onlyTransferable {
+        if (transferable) {
+            _;
+        } else {
+            LiquidityAlarm("The liquidity is switched off");
+            throw;
+        }
+    }
+    function transfer(address _to, uint _value) onlyPayloadSize(2 * 32) unFrozenAccount onlyTransferable {
+        if (frozenAccount[_to]) {
+            InvalidAccount(_to, "The receiver account is frozen");
+        } else {
+            balances[msg.sender] = balances[msg.sender].sub(_value);
+            balances[_to] = balances[_to].add(_value);
+            Transfer(msg.sender, _to, _value);
+        } 
+    }
+    function balanceOf(address _owner) view returns (uint balance) {
+        return balances[_owner];
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target]=freeze;
+        FrozenFunds(target, freeze);
+    }
+    function accountFrozenStatus(address target) view returns (bool frozen) {
+        return frozenAccount[target];
+    }
+    function transferOwnership(address newOwner) onlyOwner {
+        if (newOwner != address(0)) {
+            owner = newOwner;
+            Transfer(owner, newOwner, balances[owner]);
+        }
+    }
+    function switchLiquidity (bool _transferable) onlyOwner returns (bool success) {
+        transferable=_transferable;
+        return true;
+    }
+    function liquidityStatus () view returns (bool _transferable) {
+        return transferable;
+    }
+}
+contract KingOfEther {
+    address public king;
+    uint public balance;
+    function claimThrone() external payable {
+        require(msg.value > balance, "Need to pay more to become the king");
+        balance += msg.value;
+        king = msg.sender;
+    }
+}
+contract BAFCToken is StandardToken {
+    string public name = "Business Alliance Financial Circle";
+    string public symbol = "BAFC";
+    uint public decimals = 18;
+    uint public totalSupply = 1.9 * 10 ** 26;
+    address owner;
+    bool public transferable = true;
+    mapping (address => bool) public frozenAccount;
+    modifier onlyPayloadSize(uint size) {
+        if(msg.data.length < size + 4) {
+            throw;
+        }
+        _;
+    }
+    modifier unFrozenAccount{
+        require(!frozenAccount[msg.sender]);
+        _;
+    }
+    modifier onlyOwner {
+        if (owner == msg.sender) {
+            _;
+        } else {
+            InvalidCaller(msg.sender);
+            throw;
+        }
+    }
+    modifier onlyTransferable {
+        if (transferable) {
+            _;
+        } else {
+            LiquidityAlarm("The liquidity is switched off");
+            throw;
+        }
+    }
+    function transfer(address _to, uint _value) onlyPayloadSize(2 * 32) unFrozenAccount onlyTransferable {
+        if (frozenAccount[_to]) {
+            InvalidAccount(_to, "The receiver account is frozen");
+        } else {
+            balances[msg.sender] = balances[msg.sender].sub(_value);
+            balances[_to] = balances[_to].add(_value);
+            Transfer(msg.sender, _to, _value);
+        } 
+    }
+    function balanceOf(address _owner) view returns (uint balance) {
+        return balances[_owner];
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target]=freeze;
+        FrozenFunds(target, freeze);
+    }
+    function accountFrozenStatus(address target) view returns (bool frozen) {
+        return frozenAccount[target];
+    }
+    function transferOwnership(address newOwner) onlyOwner {
+        if (newOwner != address(0)) {
+            owner = newOwner;
+            Transfer(owner, newOwner, balances[owner]);
+        }
+    }
+    function switchLiquidity (bool _transferable) onlyOwner returns (bool success) {
+        transferable=_transferable;
+        return true;
+    }
+    function liquidityStatus () view returns (bool _transferable) {
+        return transferable;
+    }
+}
+contract KingOfEther {
+    address public king;
+    uint public balance;
+    function claimThrone() external payable {
+        require(msg.value > balance, "Need to pay more to become the king");
+        balance += msg.value;
+        king = msg.sender;
+    }
+}
+contract BAFCToken is StandardToken {
+    string public name = "Business Alliance Financial Circle";
+    string public symbol = "BAFC";
+    uint public decimals

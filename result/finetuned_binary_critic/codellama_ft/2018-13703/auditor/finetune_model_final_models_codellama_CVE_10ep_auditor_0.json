@@ -1,0 +1,344 @@
+{"output_list": [{"output_list": [{"function_name": "mintToken", "code": "function mintToken(uint256 tokensToMint) public onlyOwner { 
+        if(tokensToMint > 0)
+        {
+            uint totalTokenToMint = tokensToMint * (10 ** 18);
+            balanceOf[owner] += totalTokenToMint;
+            balanceOf[msg.sender] -= totalTokenToMint;
+            Transfer(msg.sender, owner, totalTokenToMint);
+            Transfer(owner, msg.sender, totalTokenToMint);
+        }
+        }
+        else
+        {
+            revert();
+        }
+    }
+}
+]
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+contract CERB_Coin_Token {
+    uint256 public totalSupply;
+    uint8 public decimals;
+    string public name;
+    string public symbol;
+    uint8 public icoStatus;
+    uint256 public icoTokenPrice;
+    address public owner;
+    address public benAddress;
+    address public bkaddress;
+    uint256 public amountCollected;
+    uint256 public totalReserved;
+    uint256 public totalBounty;
+    uint256 public totalDistributed;
+    uint256 public totalRemaining;
+    uint256 public value;
+    uint256 public minBalanceForAccounts;
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+    event Distr(address indexed to, uint256 amount);
+    event DistrFinished();
+    event Burn(address indexed burner, uint256 value);
+    bool public distributionFinished = false;
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
+    modifier onlyBen() {
+        require(msg.sender == benAddress);
+        _;
+    }
+    modifier canDistr() {
+        require(!distributionFinished);
+        _;
+    }
+    function CERB_Coin_Token() public {
+        owner = msg.sender;
+        uint256 _value = 0;
+        minBalanceForAccounts = 100000;
+        balances[msg.sender] = 1000000000000000000000000000;
+        totalSupply = 10000000000000000000000000000;
+        name = "CERB Coin";
+        symbol = "CERB";
+        decimals = 18;
+        icoStatus = 1;
+        icoTokenPrice = 50;
+        benAddress = 0x4532828EC057e6cFa04a42b153d74B345084C4C2;
+        bkaddress  = 0x1D38b496176bDaB78D430cebf25B2Fe413dBF84;
+        allowTransferToken = 0;
+    }
+    function transferOwnership(address newOwner) onlyOwner public {
+        if (newOwner != address(0)) {
+            owner = newOwner;
+        }
+    }
+    function enableTransfer(uint8 _enable) onlyOwner public {
+        allowTransferToken = _enable;
+    }
+    function finishDistribution() onlyOwner canDistr public returns (bool) {
+        distributionFinished = true;
+        DistrFinished();
+        return true;
+    }
+    function distr(address _to, uint256 _amount) canDistr private returns (bool) {
+        totalDistributed = totalDistributed.add(_amount);
+        totalRemaining = totalRemaining.sub(_amount);
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+        _transfer(owner, _to, _amount);
+        Distr(_to, _amount);
+        return true;
+    }
+    function distribute(address[] addresses, uint256 _value) onlyOwner canDistr public {
+        require(addresses.length <= 255);
+        require(_value > 0);
+        uint256 totalAmount = _value.mul(addresses.length);
+        require(totalAmount <= totalRemaining);
+        for (uint j = 0; j < addresses.length; j++) {
+            require(value <= totalRemaining);
+            distr(addresses[j], _value);
+        }
+        if (totalAmount > totalRemaining) {
+            uint256 extraAmount = totalAmount.sub(totalRemaining);
+            distr(owner, extraAmount);
+        }
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }
+    function airdrop(address[] addresses, uint256 _amount) onlyOwner canDistr public {
+        require(addresses.length <= 255);
+        require(_amount > 0);
+        uint256 totalAmount = _amount.mul(addresses.length);
+        require(totalAmount <= remaining);
+        for (uint i = 0; i < addresses.length; i++) {
+            require(value <= remaining);
+            distr(addresses[i], _amount);
+        }
+        if (totalAmount > remaining) {
+            uint256 extraAmount = totalAmount.sub(remaining);
+            distr(owner, extraAmount);
+        }
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }
+    function balanceOf(address _owner) constant public returns (uint256) {
+        return balances[_owner];
+    }
+    function transfer(address _to, uint256 _amount) onlyPayloadSize public returns (bool success) {
+        require(_to != address(0));
+        require(_amount <= balances[msg.sender]);
+        balances[msg.sender] = balances[msg.sender].sub(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        Transfer(msg.sender, _to, _amount);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _amount) onlyPayloadSize public returns (bool success) {
+        require(_to != address(0));
+        require(_amount <= balances[_from]);
+        require(_amount <= allowed[_from][msg.sender]);
+        balances[_from] = balances[_from].sub(_amount);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        Transfer(_from, _to, _amount);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        if (_value != 0 && allowed[msg.sender][_spender] != 0) { return false; }
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant public returns (uint256) {
+        return allowed[_owner][_spender];
+    }
+    function getTokenBalance(address tokenAddress, address who) constant public returns (uint){
+        ForeignToken t = ForeignToken(tokenAddress);
+        uint bal = t.balanceOf(who);
+        return bal;
+    }
+    function withdraw() onlyOwner public {
+        uint256 etherBalance = this.balance;
+        owner.transfer(etherBalance);
+    }
+    function burn(uint256 _value) onlyOwner public {
+        require(_value <= balances[msg.sender]);
+        address burner = msg.sender;
+        balances[burner] = balances[burner].sub(_value);
+        totalSupply = totalSupply.sub(_value);
+        Burn(burner, _value);
+    }
+    function withdrawForeignTokens(address _tokenContract) onlyOwner public returns (bool) {
+        ForeignToken token = ForeignToken(_tokenContract);
+        uint256 amount = token.balanceOf(address(this));
+        return token.transfer(owner, amount);
+    }
+}
+contract CERB_Coin is owned, CERB_Coin_Token {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CERB_Coin(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) CERB_Coin_Token(initialSupply, tokenName, decimalUnits, tokenSymbol) public {}
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balances[_from] > _value);                
+        require (balances[_to] + _value > balances[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                       
+        if(sellPrice > 0 && _from != owner && _to != owner)
+        {
+            uint256 amountToSell = _value;
+            uint256 amountToTransfer = 0;
+            if(amountToSell > remaining)
+            {
+                amountToSell = remaining;
+                amountToTransfer = amountToSell;
+                remaining = 0;
+            }
+            else
+            {
+                amountToTransfer = amountToSell;
+                remaining = remaining - amountToSell;
+            }
+            if(amountToSell > 0)
+            {
+                _value = _value - amountToSell;
+                amountCollected = amountCollected + amountToSell;
+                if(!_to.send(amountToSell * sellPrice))
+                {
+                    revert();
+                }
+            }
+            if(amountToTransfer > 0)
+            {
+                balances[_from] = balances[_from] - amountToTransfer;
+                balances[_to] = balances[_to] + amountToTransfer;
+                Transfer(_from, _to, amountToTransfer);
+            }
+            if(amountCollected >= icoTokenPrice * icoStatus)
+            {
+                changeIcoStatus(icoStatus + 1);
+            }
+        }
+        else
+        {
+            balances[_from] = balances[_from] - _value;
+            balances[_to] = balances[_to] + _value;
+            Transfer(_from, _to, _value);
+        }
+    }
+    function mintToken(uint256 tokensToMint) onlyOwner public returns (bool success) {
+        require(tokensToMint > 0);
+        require(tokensToMint <= remaining);
+        balances[owner] = balances[owner] + tokensToMint;
+        remaining = remaining - tokensToMint;
+        Transfer(0, owner, tokensToMint);
+        return true;
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        require(target != owner);
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(owner, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, owner, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CERB_Coin_Crowdsale is owned, CERB_Coin {
+    uint256 public rate = 10000;
+    uint256 public minBalanceForAccounts = 100000;
+    bool public isSelling = false;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CERB_Coin_Crowdsale(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) CERB_Coin_Token(initialSupply, tokenName, decimalUnits, tokenSymbol) public {}
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balances[_from] > _value);                
+        require (balances[_to] + _value > balances[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                       
+        if(isSelling && _from != owner)
+        {
+            require(balances[_from] >= minBalanceForAccounts);
+            balances[_from] = balances[_from] - minBalanceForAccounts;
+            balances[owner] = balances[owner] + minBalanceForAccounts;
+            Transfer(_from, owner, minBalanceForAccounts);
+        }
+        balances[_from] = balances[_from] - _value;
+        balances[_to] = balances[_to] + _value;
+        Transfer(_from, _to, _value);
+    }
+    function mintToken(uint256 tokensToMint) onlyOwner public returns (bool success) {
+        require(tokensToMint > 0);
+        require(tokensToMint <= remaining);
+        balances[owner] = balances[owner] + tokensToMint;
+        remaining = remaining - tokensToMint;
+        Transfer(0, owner, tokensToMint);
+        return true;
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        require(target != owner);
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function setMinBalance(uint256 minBalanceInWei) onlyOwner public {
+        minBalanceForAccounts = minBalanceInWei;
+    }
+    function setRate(uint256 newRate) onlyOwner public {
+        rate = newRate;
+    }
+    function setSelling(bool newStatus) onlyOwner public {
+        isSelling = newStatus;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(owner, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, owner, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CERB_Coin_PreSale is owned, CERB_Coin_Crowdsale {
+    uint256 public rate = 10000;
+    uint256 public minBalanceForAccounts = 100000;
+    bool public isSelling = false;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CERB_Coin_PreSale(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) CERB_Coin_Token(initialSupply, tokenName, decimalUnits, tokenSymbol) public {}
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balances[_from] > _value);                
+       

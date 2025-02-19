@@ -1,0 +1,52 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value <= balanceOf[msg.sender]);
+    balanceOf[msg.sender] -= _value;
+    balanceOf[_to] += _value;
+    emit Transfer(msg.sender, _to, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function does not check for overflows, allowing attackers to exploit an integer overflow in the balanceOf mapping, granting them unintended access to user funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value <= balanceOf[_from]);
+    require(_value <= allowance[_from][msg.sender]);
+    balanceOf[_from] -= _value;
+    balanceOf[_to] += _value;
+    allowance[_from][msg.sender] -= _value;
+    emit Transfer(_from, _to, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferFrom' function does not check for overflows, allowing attackers to exploit an integer overflow in the balanceOf mapping, granting them unintended access to user funds."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(uint256 _amount) public onlyOwner {
+    require(_amount > 0);
+    balanceOf[owner] += _amount;
+    totalSupply += _amount;
+    emit Transfer(address(0), owner, _amount);
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'mintToken' function allows the owner to mint tokens out of thin air, creating an incentive for the owner to mint tokens to their account, devaluing the token."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 _buyPrice, uint256 _sellPrice) public onlyOwner {
+    buyPrice = _buyPrice;
+    sellPrice = _sellPrice;
+}",
+            "vulnerability": "Bad Randomness",
+            "reason": "The 'setPrices' function allows the owner to set the buy and sell prices, which can be manipulated to create a vulnerability where attackers can manipulate the price of the token."
+        }
+    ]
+}

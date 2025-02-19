@@ -1,0 +1,103 @@
+{
+    "output_list": [
+        {
+            "function_name": "claimTile",
+            "code": "function claimTile(uint xCoord, uint yCoord, uint gameNumber) gameRunning payable {
+        if (gameNumber != currentGameNumber || tiles[xCoord][yCoord].gameClaimed == currentGameNumber) {
+            revert();
+        }
+        require(msg.value == currentGameCost);
+        currentGameBalance += msg.value;
+        tiles[xCoord][yCoord] = Tile(currentGameNumber, msg.sender);
+        TileClaimed(currentGameNumber, xCoord, yCoord, msg.sender);
+        numTilesClaimed += 1;
+        if (numTilesClaimed == NUM_TILES) {
+            determineWinner();
+        }
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function claimTile has an integer overflow vulnerability. The variable xCoord and yCoord are used to index into the tiles array, which is 16x16 in size. The function does not check if the values of xCoord and yCoord are within the bounds of the array, which could cause an integer overflow and potentially lead to a security vulnerability."
+        },
+        {
+            "function_name": "claimWinnings",
+            "code": "function claimWinnings() {
+        if (pendingWithdrawals[msg.sender] != 0) {
+            if (msg.sender.send(pendingWithdrawals[msg.sender])) {
+                WinningsClaimed(msg.sender, pendingWithdrawals[msg.sender]);
+                pendingWithdrawals[msg.sender] = 0;
+            } else {
+                FailedToClaim(msg.sender, pendingWithdrawals[msg.sender]);
+            }
+        }
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function claimWinnings has wrong logic. The function checks if the pendingWithdrawals[msg.sender] is not equal to 0, but it should check if the pendingWithdrawals[msg.sender] is greater than 0. This could cause the function to not execute correctly and potentially lead to a security vulnerability."
+        },
+        {
+            "function_name": "claimOwnersEarnings",
+            "code": "function claimOwnersEarnings() onlyOwner {
+        if (gameEarnings != 0) {
+            if (owner.send(gameEarnings)) {
+                gameEarnings = 0;
+            }
+        }
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The function claimOwnersEarnings has access control vulnerability. The function onlyOwner modifier is not used, which could allow anyone to call the function and potentially lead to a security vulnerability."
+        },
+        {
+            "function_name": "updateGameCost",
+            "code": "function updateGameCost(uint newGameCost) onlyOwner returns (bool) {
+        if (newGameCost > 0) {
+            nextGameCost = newGameCost;
+            willChangeCost = true;
+        }
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The function updateGameCost has access control vulnerability. The function onlyOwner modifier is not used, which could allow anyone to call the function and potentially lead to a security vulnerability."
+        },
+        {
+            "function_name": "cancelContract",
+            "code": "function cancelContract() onlyOwner returns (bool) {
+        gameStopped = true;
+        refundTiles();
+        refundWinnings();
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The function cancelContract has access control vulnerability. The function onlyOwner modifier is not used, which could allow anyone to call the function and potentially lead to a security vulnerability."
+        },
+        {
+            "function_name": "getRightCoordinate",
+            "code": "function getRightCoordinate(byte input) returns(uint) {
+        byte val = input & byte(15);
+        return uint(val);
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function getRightCoordinate has bad randomness. The function uses the & operator to extract the rightmost 4 bits of the input byte, which could potentially lead to a security vulnerability."
+        },
+        {
+            "function_name": "getLeftCoordinate",
+            "code": "function getLeftCoordinate(byte input) returns(uint) {
+        byte val = input >> 4;
+        return uint(val);
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function getLeftCoordinate has bad randomness. The function uses the >> operator to extract the leftmost 4 bits of the input byte, which could potentially lead to a security vulnerability."
+        },
+        {
+            "function_name": "Tiles",
+            "code": "function Tiles() payable {
+        owner = msg.sender;
+        currentGameNumber = STARTING_GAME_NUMBER;
+        currentGameCost = DEFAULT_GAME_COST;
+        numTilesClaimed = 0;
+        gameStopped = false;
+        gameEarnings = 0;
+        willChangeCost = false;
+        nextGameCost = DEFAULT_GAME_COST;
+    }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The function Tiles has a typo constructor. The function does not have a payable modifier, which could potentially lead to a security vulnerability."
+        }
+    ]
+}

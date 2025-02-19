@@ -1,0 +1,73 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+ttif (isContract(_to)) {
+tttbytes memory empty;
+tttreturn transferToContract(_to, _value, empty);
+tt} else {
+tttrequire(_to != address(0x0));
+tttrequire(balances[msg.sender] >= _value);
+tttbalances[msg.sender] -= _value;
+tttbalances[_to] += _value;
+tttTransfer(msg.sender, _to, _value);
+tt}
+ttreturn true;
+t}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `transfer` does not check if the transfer operation will cause an integer overflow. In the worst case, if the sender has a balance of 2^256 - 1 and tries to transfer 1, it will cause an integer overflow. This will result in the sender's balance being reduced to 2^256 - 2 and the recipient's balance being increased to 2^256 - 1. This can be exploited to steal tokens from the sender."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+ttrequire(_to != address(0x0));
+        require(balances[_from] >= _value && allowed[_from][msg.sender] >= _value);
+        balances[_from] -= _value;
+        balances[_to] += _value;
+ttallowed[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+ttbytes memory empty;
+ttTransfer(_from, _to, _value, empty);
+        return true;
+t}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `transferFrom` does not check if the transfer operation will cause an integer overflow. In the worst case, if the sender has a balance of 2^256 - 1 and the approved amount is 1, and the recipient has a balance of 2^256 - 1, the sender can transfer 1 token to the recipient, causing the sender's balance to be reduced to 2^256 - 2 and the recipient's balance to be increased to 2^256 - 2. This can be exploited to steal tokens from the sender."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value, bytes _data) public returns (bool success) {
+ttrequire(balances[msg.sender] >= _value);
+ttbalances[msg.sender] -= _value;
+tttotalBurned += _value;
+ttBurn(msg.sender, _value, totalSupply(), _data);
+ttreturn true;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `burn` does not check if the burn operation will cause an integer overflow. In the worst case, if the sender has a balance of 2^256 - 1 and tries to burn 1, it will cause an integer overflow. This will result in the sender's balance being reduced to 2^256 - 2 and the total supply being reduced to 2^256 - 1. This can be exploited to steal tokens from the sender."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value, bytes _data) public returns (bool success) {
+ttif (transferFrom(_from, msg.sender, _value)) {
+tttreturn burn(_value, _data);
+tt}
+        return false;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `burnFrom` does not check if the burn operation will cause an integer overflow. In the worst case, if the sender has a balance of 2^256 - 1 and the approved amount is 1, and the recipient has a balance of 2^256 - 1, the sender can burn 1 token from the recipient, causing the recipient's balance to be reduced to 2^256 - 2 and the total supply to be reduced to 2^256 - 1. This can be exploited to steal tokens from the recipient."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value, bytes _data) public returns (bool success) {
+ttrequire(balances[msg.sender] >= _value);
+ttbalances[msg.sender] -= _value;
+tttotalBurned += _value;
+ttBurn(msg.sender, _value, totalSupply(), _data);
+ttreturn true;
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The function `burn` does not check if the caller is the owner of the tokens. This means that anyone can burn tokens from any address, which is not a good practice. This can be exploited to steal tokens from the owner."
+        }
+    ]
+}

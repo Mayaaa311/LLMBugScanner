@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "_transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The _transfer function uses the require statement to check if the _to address is not equal to 0x0. However, this check is not sufficient to prevent integer overflow attacks. An attacker can send a large amount of tokens to a contract that has a balance of 0x0, causing the contract to overflow and lose all of its tokens."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "reason": "The transferFrom function uses the require statement to check if the _value is less than or equal to the allowance of the _from address. However, this check is not sufficient to prevent wrong logic attacks. An attacker can send a large amount of tokens to a contract that has a balance of 0x0, causing the contract to overflow and lose all of its tokens."
+        },
+        {
+            "function_name": "approveAndCall",
+            "vulnerability": "Bad Randomness",
+            "reason": "The approveAndCall function uses the approve function to approve the _spender address to spend a certain amount of tokens. However, this function does not check if the _spender address is a valid token recipient. An attacker can send a large amount of tokens to a contract that is not a valid token recipient, causing the contract to lose all of its tokens."
+        },
+        {
+            "function_name": "burn",
+            "vulnerability": "Access Control",
+            "reason": "The burn function uses the require statement to check if the msg.sender has a balance greater than the _value being burned. However, this check is not sufficient to prevent access control attacks. An attacker can burn a large amount of tokens from a contract that they do not own, causing the contract to lose all of its tokens."
+        },
+        {
+            "function_name": "owned",
+            "vulnerability": "Typo Constructor",
+            "reason": "The owned contract uses the onlyOwner modifier to restrict access to the changeOwner function. However, this modifier is not sufficient to prevent typo constructor attacks. An attacker can create a contract that inherits from the owned contract and overrides the onlyOwner modifier, allowing them to change the owner of the contract without the original owner's permission."
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+ {
+    "output_list": [
+        {
+            "function_name": "batchTransfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'batchTransfer' function multiplies the number of recipients by the value to determine the total amount to be deducted from the sender's balance. If the number of recipients is sufficiently large, the resulting value can cause an integer overflow, leading to a stable ownership of tokens in the attackers' accounts."
+        },
+        {
+            "function_name": "Trade",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'Trade' function allows a manager to trade tokens for an arbitrary buyer, where the seller is the contract itself. The amount transferred to the seller is calculated as msg.value * _qty, which can overflow the seller's balance if '_qty' is sufficiently large."
+        },
+        {
+            "function_name": "Buy",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'Buy' function allows anyone to buy tokens from the contract owner, where the amount of ether sent is checked to be at least 'price * 1 ether'. If the price is set to a very high value, an attacker can send a large amount of ether in a single transaction, causing an integer overflow in the msg.value / price calculation, leading to the attacker obtaining a disproportionate amount of tokens."
+        },
+        {
+            "function_name": "Sell",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'Sell' function allows anyone to sell tokens to the contract owner, where the amount of tokens to be sold is checked to be at most the contract's balance. If the token price is set to a very high value, an attacker can cause an integer overflow in the _qty * price calculation, allowing the attacker to sell a disproportionate amount of tokens."
+        },
+        {
+            "function_name": "airDrop",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'airDrop' function allows the owner to distribute a large number of tokens to multiple recipients in a single transaction. The total amount of tokens to be distributed is calculated as _adr.length * _val, which can overflow the sender's balance if '_adr.length' and '_val' are sufficiently large."
+        }
+    ]
+}

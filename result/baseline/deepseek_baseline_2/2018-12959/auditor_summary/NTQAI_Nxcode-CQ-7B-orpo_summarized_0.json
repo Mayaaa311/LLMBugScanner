@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The condition `balances[msg.sender] >= _value` does not prevent integer overflow. If `_value` is large, `balances[msg.sender]` will be decremented beyond the minimum value, leading to an integer overflow and potentially allowing an attacker to transfer more tokens than they should."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "reason": "The function does not check if the spender (`msg.sender`) has been approved by the owner (`_from`) to spend the specified amount. An attacker can use the `transferFrom` function to transfer tokens on behalf of others without their consent, leading to unauthorized token transfers."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Access Control",
+            "reason": "The `approve` function does not check if the spender is allowed to receive the tokens. An attacker can approve a contract to transfer tokens on their behalf without any checks, leading to unauthorized token transfers."
+        },
+        {
+            "function_name": "AditusToken",
+            "vulnerability": "Typo Constructor",
+            "reason": "There is a typo in the constructor where `totalSupply` is assigned twice, which might be a mistake. However, this typo does not directly introduce a vulnerability but could be considered a mistake in code maintenance."
+        },
+        {
+            "function_name": "approveAndCall",
+            "vulnerability": "Wrong Logic",
+            "reason": "The `approveAndCall` function calls a contract with the `receiveApproval` function signature. However, if the called contract does not implement the `receiveApproval` function, the call will fail, leading to a denial of service (DoS) for the token owner."
+        }
+    ]
+}

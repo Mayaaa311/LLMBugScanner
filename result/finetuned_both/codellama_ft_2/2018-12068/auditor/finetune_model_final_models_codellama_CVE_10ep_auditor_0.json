@@ -1,0 +1,233 @@
+{"output_list": [
+    {
+        "function_name": "<function_name>",
+        "vulnerability": "<vulnerability>",
+        "reason": "<reason>"
+    }
+]
+}
+}
+
+contract CryptoTrolls is owned, tokenRecipient {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoTrolls(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) throw;           
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+        if (frozenAccount[msg.sender]) throw;                
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (frozenAccount[_from]) throw;                        
+        if (balanceOf[_from] < _value) throw;                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+        if (_value > allowance[_from][msg.sender]) throw;   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyPrice;                
+        if (balanceOf[this] < amount) throw;               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                   
+    }
+    function sell(uint256 amount) {
+        if (balanceOf[msg.sender] < amount ) throw;        
+        balanceOf[this] += amount;                         
+        balanceOf[msg.sender] -= amount;                   
+        if (!msg.sender.send(amount * sellPrice)) {        
+            throw;                                         
+        } else {
+            Transfer(msg.sender, this, amount);            
+        }               
+    }
+}
+contract CryptoTrollsPreSale is owned, token {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoTrollsPreSale(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) throw;           
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+        if (frozenAccount[msg.sender]) throw;                
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (frozenAccount[_from]) throw;                        
+        if (balanceOf[_from] < _value) throw;                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+        if (_value > allowance[_from][msg.sender]) throw;   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;                   
+        totalSupply += mintedAmount;                         
+        Transfer(0, this, mintedAmount);                   
+        Transfer(this, target, mintedAmount);            
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyPrice;                
+        if (balanceOf[this] < amount) throw;               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                   
+    }
+    function sell(uint256 amount) {
+        if (balanceOf[msg.sender] < amount ) throw;        
+        balanceOf[this] += amount;                         
+        balanceOf[msg.sender] -= amount;                   
+        if (!msg.sender.send(amount * sellPrice)) {        
+            throw;                                         
+        } else {
+            Transfer(msg.sender, this, amount);            
+        }               
+    }
+}
+contract CryptoTrollsICO is owned, tokenRecipient {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    uint256 public totalTokens;
+    uint256 public totalPreTokens;
+    uint256 public minTokens;
+    uint256 public maxTokens;
+    uint256 public minPreTokens;
+    uint256 public maxPreTokens;
+    uint256 public preTokens;
+    uint256 public preTokensSold;
+    uint256 public tokensSold;
+    uint256 public preTokensRemaining;
+    uint256 public tokensRemaining;
+    uint256 public startTime;
+    uint256 public endTime;
+    uint256 public preTokensPerTokens;
+    uint256 public preTokensPerTokensRemaining;
+    uint256 public preTokensPerTokensSold;
+    uint256 public preTokensPerTokensRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemainingSold;
+    uint256 public preTokensPerTokensRemainingRemainingRemainingRemainingRemainingRemaining;
+    uint256 public preTokensPerTokensRemainingRemainingRem

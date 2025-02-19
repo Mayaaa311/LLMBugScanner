@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "totalSupply",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function totalSupply() constant returns (uint256 totalSupply) { totalSupply = _totalSupply; }",
+            "reason": "The totalSupply function is a constant function that returns the total supply of tokens. However, the variable _totalSupply is declared as a uint256, which means it can hold values up to 2^256 - 1. If the total supply of tokens exceeds this limit, an integer overflow will occur, leading to incorrect results and potentially loss of funds. This vulnerability can be exploited by an attacker who manipulates the total supply of tokens to exceed the maximum limit."
+        },
+        {
+            "function_name": "balanceOf",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function balanceOf(address _owner) constant returns (uint256 balance) { return balances[_owner]; }",
+            "reason": "The balanceOf function is a constant function that returns the balance of tokens held by a specific address. However, the variable balances is a mapping that stores the balance of tokens for each address. If an address holds a balance that exceeds the maximum value that can be stored in a uint256, an integer overflow will occur, leading to incorrect results and potentially loss of funds. This vulnerability can be exploited by an attacker who manipulates the balances of tokens held by an address to exceed the maximum limit."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _amount) returns (bool success) { if (balances[msg.sender] >= _amount && _amount > 0 && balances[_to] + _amount > balances[_to]) { balances[msg.sender] -= _amount; balances[_to] += _amount; Transfer(msg.sender, _to, _amount); return true; } else { return false; } }",
+            "reason": "The transfer function is a public function that allows one address to transfer a specified amount of tokens to another address. However, the variable balances is a mapping that stores the balance of tokens for each address. If the sender's balance is greater than or equal to the amount being transferred, and the recipient's balance plus the amount being transferred does not exceed the maximum value that can be stored in a uint256, an integer overflow will occur, leading to incorrect results and potentially loss of funds. This vulnerability can be exploited by an attacker who manipulates the balances of tokens held by the sender and recipient to exceed the maximum limit."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _amount) returns (bool success) { if (balances[_from] >= _amount && allowed[_from][msg.sender] >= _amount && _amount > 0 && balances[_to] + _amount > balances[_to]) { balances[_from] -= _amount; allowed[_from][msg.sender] -= _amount; balances[_to] += _amount; Transfer(_from, _to, _amount); return true; } else { return false; } }",
+            "reason": "The transferFrom function is a public function that allows one address to transfer a specified amount of tokens on behalf of another address. However, the variable balances is a mapping that stores the balance of tokens for each address. If the sender's balance is greater than or equal to the amount being transferred, and the allowance granted to the spender by the sender is greater than or equal to the amount being transferred, and the recipient's balance plus the amount being transferred does not exceed the maximum value that can be stored in a uint256, an integer overflow will occur, leading to incorrect results and potentially loss of funds. This vulnerability can be exploited by an attacker who manipulates the balances of tokens held by the sender and recipient to exceed the maximum limit."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint256 _amount) returns (bool success) { allowed[msg.sender][_spender] = _amount; Approval(msg.sender, _spender, _amount); return true; }",
+            "reason": "The approve function is a public function that allows one address to grant a specified amount of tokens to another address on behalf of the sender. However, the variable allowed is a mapping that stores the allowance granted to each spender by each address. If the sender grants an allowance that exceeds the maximum value that can be stored in a uint256, an integer overflow will occur, leading to incorrect results and potentially loss of funds. This vulnerability can be exploited by an attacker who manipulates the allowances granted to spenders by the sender to exceed the maximum limit."
+        }
+    ]
+}

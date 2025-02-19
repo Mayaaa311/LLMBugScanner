@@ -1,0 +1,58 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address _to, uint256 _value) public onlyOwner returns (bool) {
+                require(_to != address(0));
+                totalSupply = totalSupply.add(_value);
+                balances[_to] = balances[_to].add(_value);
+                emit Transfer(address(0), _to, _value);
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'mintToken' function has an integer overflow vulnerability. The function allows the owner to increase the balance of an arbitrary user, without ensuring that the new balance does not overflow the user's balanceOf mapping. This can lead to a user's balance being set to a very high value, granting them an unexpected large amount of tokens."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) {
+                require(_to != address(0));
+                require(balances[msg.sender] >= _value);
+                balances[msg.sender] = balances[msg.sender].sub(_value);
+                balances[_to] = balances[_to].add(_value);
+                emit Transfer(msg.sender, _to, _value);
+                return true;
+            }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'transfer' function does not check if the balance of the sender is sufficient, allowing it to be drained by forcing the sender to send tokens to a target address. This is exploitable in real world because it can be used in a phishing attack to drain tokens from a user's account."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool) {
+                require(balances[msg.sender] >= _value);
+                totalSupply = totalSupply.sub(_value);
+                balances[msg.sender] = balances[msg.sender].sub(_value);
+                emit Burn(msg.sender, _value);
+                return true;
+            }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'burn' function allows the owner to burn the tokens of any user, without ensuring that the user has a sufficient balance. This can be exploited to burn a large amount of tokens from a user's account, granting the owner an unexpected large amount of tokens."
+        },
+        {
+            "function_name": "owned",
+            "code": "constructor() public {
+                owner = msg.sender;
+            }",
+            "vulnerability": "Access Control",
+            "reason": "The 'owned' function is a constructor, allowing anyone to set the owner to any address. This can be exploited to lock the owner out of the contract, if the constructor is called with a compromised address."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) public onlyOwner {
+                frozenAccount[target] = freeze;
+                emit FrozenFunds(target, freeze);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'freezeAccount' function has an integer overflow vulnerability. The function allows the owner to set the frozen state of an arbitrary user, without ensuring that the new state does not overflow the user's frozenAccount mapping. This can lead to a user's frozen state being set to a very high value, granting them an unexpected large amount of tokens."
+        }
+    ]
+}

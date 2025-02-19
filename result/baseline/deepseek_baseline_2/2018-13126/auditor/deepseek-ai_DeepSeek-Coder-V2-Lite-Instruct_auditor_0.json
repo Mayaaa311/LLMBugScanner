@@ -1,0 +1,44 @@
+ {
+    "output_list": [
+        {
+            "function_name": "buyTokens",
+            "vulnerability": "Integer Overflow",
+            "function_code": "uint256 boughtTokens = _value / pricePerToken;
+require(boughtTokens > 0);
+token.mint(_buyer, boughtTokens);",
+            "reason": "The calculation of 'boughtTokens' can overflow if '_value' is sufficiently large, leading to unintended minting of tokens and potential loss of funds."
+        },
+        {
+            "function_name": "buyTokens",
+            "vulnerability": "Wrong Logic",
+            "function_code": "require(preSaleState == PreSaleState.PreSaleStarted);
+require(!isPaused);",
+            "reason": "The check for 'preSaleState' should be followed by a check for '!isPaused' to ensure that the presale is both started and not paused before proceeding with token purchase."
+        },
+        {
+            "function_name": "mint",
+            "vulnerability": "Access Control",
+            "function_code": "require(msg.sender == presale);
+require(_value > 0);
+require(totalSupply + _value <= TOKEN_LIMIT);
+balances[_holder] += _value;
+totalSupply += _value;
+Transfer(0x0, _holder, _value);",
+            "reason": "The 'mint' function allows anyone with the address of the presale to mint tokens, which can be exploited if the presale address is compromised, leading to uncontrolled token creation."
+        },
+        {
+            "function_name": "withdrawFunds",
+            "vulnerability": "Access Control",
+            "function_code": "_target.transfer(_amount);
+",
+            "reason": "The 'withdrawFunds' function allows the team to withdraw funds to any address, which can be risky if the team's address is compromised or if the team itself is malicious."
+        },
+        {
+            "function_name": "MoxyOnePresale",
+            "vulnerability": "Typo Constructor",
+            "function_code": "team = msg.sender;
+token = new SpendToken(this, team);",
+            "reason": "The constructor 'MoxyOnePresale' does not perform any validation on the 'team' address, which could lead to the deployment of a contract with a compromised team address."
+        }
+    ]
+}

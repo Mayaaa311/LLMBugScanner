@@ -1,0 +1,104 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow."}]}
+{"function_name": "mintToken", "vulnerability": "Integer Overflow", "description": "The mintToken function has an integer overflow in the calculation of totalSupply."}]}
+{"function_name": "mintToken", "vulnerability": "Wrong Logic", "description": "The mintToken function does not emit the Transfer event."}]}
+{"function_name": "mintToken", "vulnerability": "Integer Overflow", "description": "The mintToken function has an integer overflow in the calculation of totalSupply."}]}
+{"function_name": "mintToken", "vulnerability": "Wrong Logic", "description": "The mintToken function does not emit the Transfer event."}]}
+{"output_list": [
+    {
+        "function_name": "mintToken",
+        "vulnerability": "Integer Overflow",
+        "reason": "The mintToken function has an integer overflow in the calculation of totalSupply."
+    }
+]
+}
+{"output_list": [
+    {
+        "function_identifier": "<function_identifier_1>",
+        "vulnerability_type": "<vulnerability_type_1>",
+        "vulnerability_description": "<vulnerability_description_1>",
+        "code_sample": "<code_sample_1>",
+        "function_arguments": "<function_arguments_1>"
+    }
+]
+}
+*/
+contract DestiNeedToken is owned, token {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping(address=>bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    uint256 public constant initialSupply = 95000000 * 10**18;
+    uint8 public constant decimalUnits = 18;
+    string public tokenName = "DestiNeed";
+    string public tokenSymbol = "DSN";
+    function DestiNeedToken() token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) throw;           
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+        if (frozenAccount[msg.sender]) throw;                
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (frozenAccount[_from]) throw;                        
+        if (balanceOf[_from] < _value) throw;                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+        if (_value > allowance[_from][msg.sender]) throw;   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value)
+        returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+        returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;                   
+        totalSupply += mintedAmount;                        
+        Transfer(0, this, mintedAmount);                   
+        Transfer(this, target, mintedAmount);               
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyPrice;                
+        if (balanceOf[this] < amount) throw;               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+    }
+    function sell(uint256 amount) {
+        if (balanceOf[msg.sender] < amount ) throw;        
+        balanceOf[this] += amount;                         
+        balanceOf[msg.sender] -= amount;                   
+        if (!msg.sender.send(amount * sellPrice)) {        
+            throw;                                         
+        } else {
+            Transfer(msg.sender, this, amount);            
+        }
+    }
+}
+contract CryptonCoin is owned, token {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address=>bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    uint256 public constant initialSupply = 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

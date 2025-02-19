@@ -1,0 +1,78 @@
+{
+    "output_list": [
+        {
+            "function_name": "multiTransfer",
+            "code": "function multiTransfer(address[] _addresses, uint[] _amounts) public returns (bool success) {
+        require(_addresses.length <= 100 && _addresses.length == _amounts.length);
+        uint totalAmount;
+        for (uint a = 0; a < _amounts.length; a++) {
+            totalAmount += _amounts[a];
+        }
+        require(totalAmount > 0 && balances[msg.sender] >= totalAmount);
+        balances[msg.sender] -= totalAmount;
+        for (uint b = 0; b < _addresses.length; b++) {
+            if (_amounts[b] > 0) {
+                balances[_addresses[b]] += _amounts[b];
+                Transfer(msg.sender, _addresses[b], _amounts[b]);
+            }
+        }
+        return true;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function multiTransfer has an integer overflow vulnerability. The function uses a for loop to calculate the total amount of tokens to be transferred. However, the loop does not check for overflows, which can lead to an unlimited amount of tokens being transferred."
+        },
+        {
+            "function_name": "setupAirDrop",
+            "code": "function setupAirDrop(bool _status, uint _amount, uint _Gwei) public returns (bool success) {
+        require(msg.sender == owner);
+        airDropStatus = _status;
+        airDropAmount = _amount * 10 ** decimals;
+        airDropGasPrice = _Gwei * 10 ** 9;
+        return true;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function setupAirDrop has wrong logic. The function sets the airDropStatus to _status, which can be set to true or false. However, the function does not check if the _status is true or false. This can lead to a situation where the airDropStatus is set to true even if it is not intended to be true."
+        },
+        {
+            "function_name": "withdrawFunds",
+            "code": "function withdrawFunds(address _token) public returns (bool success) {
+        require(msg.sender == owner);
+        if (_token == address(0)) {
+            owner.transfer(this.balance);
+        }
+        else {
+            Token ERC20 = Token(_token);
+            ERC20.transfer(owner, ERC20.balanceOf(this));
+        }
+        return true;
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The function withdrawFunds has access control vulnerability. The function requires the msg.sender to be the owner of the contract. However, the function does not check if the msg.sender is the owner of the contract. This can lead to a situation where a malicious user can withdraw funds from the contract."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _amount) public returns (bool success) {
+        require(balances[msg.sender] >= _amount && _amount > 0);
+        balances[msg.sender] -= _amount;
+        balances[_to] += _amount;
+        Transfer(msg.sender, _to, _amount);
+        return true;
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function transfer has bad randomness. The function uses a require statement to check if the amount is greater than 0. However, the function does not check if the amount is greater than 0. This can lead to a situation where a malicious user can transfer a large amount of tokens."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _amount) public returns (bool success) {
+        require(balances[_from] >= _amount && allowed[_from][msg.sender] >= _amount && _amount > 0);
+        balances[_from] -= _amount;
+        allowed[_from][msg.sender] -= _amount;
+        balances[_to] += _amount;
+        Transfer(_from, _to, _amount);
+        return true;
+    }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The function transferFrom has a typo constructor. The function uses a require statement to check if the amount is greater than 0. However, the function does not check if the amount is greater than 0. This can lead to a situation where a malicious user can transfer a large amount of tokens."
+        }
+    ]
+}

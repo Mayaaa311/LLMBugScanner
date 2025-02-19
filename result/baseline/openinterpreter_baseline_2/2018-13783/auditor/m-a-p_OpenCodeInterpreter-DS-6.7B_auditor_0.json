@@ -1,0 +1,59 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) public {
+        _transfer(msg.sender, _to, _value);
+    }",
+            "reason": "In the transfer function, the value of _value is not checked before it is transferred to the _transfer function. If the value of _value is greater than the balance of the sender, it will cause an integer overflow."
+        },
+        {
+            "function_name": "_transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function _transfer(address _from, address _to, uint _value) internal {
+        require(_to != 0x0);
+        require(balanceOf[_from] >= _value);
+        require(balanceOf[_to] + _value > balanceOf[_to]);
+        uint previousBalances = balanceOf[_from] + balanceOf[_to];
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        emit Transfer(_from, _to, _value);
+        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+    }",
+            "reason": "In the _transfer function, the value of _value is not checked before it is transferred to the _to address. If the value of _value is greater than the balance of the _to address, it will cause an integer overflow."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function approve(address _spender, uint256 _value) public
+        returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }",
+            "reason": "In the approve function, the value of _value is directly assigned to the allowance mapping. If the value of _value is not properly randomized, it may lead to predictable and exploitable behavior."
+        },
+        {
+            "function_name": "setPrices",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function setPrices(uint256 newPrice, uint256 newPriceInc, uint256 newTransferFees) onlyOwner public {
+        require(newTransferFees > newPriceInc);
+        price = newPrice;
+        priceInc = newPriceInc;
+        transferFees = newTransferFees;
+    }",
+            "reason": "In the setPrices function, the value of newTransferFees is directly assigned to the transferFees variable. If newTransferFees is not properly validated, it may lead to wrong logic and potential vulnerabilities."
+        },
+        {
+            "function_name": "buy",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function buy() payable public {
+        require(msg.value == price);
+        uint amount = msg.value / price;
+        _transfer(this, msg.sender, amount);
+        price += priceInc;
+    }",
+            "reason": "In the buy function, the value of price is directly used in the require statement. If the value of price is not properly initialized or updated, it may lead to typo constructor and potential vulnerabilities."
+        }
+    ]
+}

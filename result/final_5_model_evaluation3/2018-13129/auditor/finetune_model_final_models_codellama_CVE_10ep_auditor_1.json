@@ -1,0 +1,263 @@
+{"output_list": [{"function_name": "outputList", "vulnerability": "Integer Overflow", "description": "Integer overflow in the outputList function allows an attacker to set the balance of an arbitrary user to any value."}]}
+contract CryptoCoinRealWorld {
+    function outputList() constant public returns (string) {
+        return '{"output_list": [{"function_name": "mint", "vulnerability": "Integer Overflow", "reason": "Integer overflow in the mint function allows an attacker to set the balance of an arbitrary user to any value."}]}';
+    }
+}
+}
+interface Token {
+    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public;
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool);
+    function balanceOf(address _owner) public view returns (uint256 balance);
+    function transfer(address _to, uint256 _value) public returns (bool);
+    function balanceOf(address _owner) public view returns (uint256 balance);
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool);
+    function approve(address _spender, uint256 _value) public returns (bool);
+    function allowance(address _owner, address _spender) public view returns (uint256);
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+}
+contract RealWorldCoin is CryptoCoinRealWorld, Token {
+    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public;
+    function balanceOf(address _owner) public view returns (uint256 balance);
+    function transfer(address _to, uint256 _value) public returns (bool success);
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
+    function approve(address _spender, uint256 _value) public returns (bool success);
+    function mintToken(address target, uint256 mintedAmount) public;
+    function burn(uint256 _value) public returns (bool success);
+    function burnFrom(address _from, uint256 _value) public returns (bool success);
+}
+contract CryptoCoin is RealWorldCoin {
+    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public {
+        require(_token != 0x0);
+        require(_value == 0);
+        Token token = Token(_token);
+        token.receiveApproval(msg.sender, _value, this, _extraData);
+    }
+    function balanceOf(address _owner) public view returns (uint256 balance) {
+        return super.balanceOf(_owner);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(_to != 0x0);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_to != 0x0);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        require((_value == 0) || (msg.sender == _spender));
+        return super.approve(_spender, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) public {
+        require(msg.sender == migrationMaster);
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        require(msg.sender != 0x0);
+        require(balances[msg.sender] >= _value);
+        balances[msg.sender] -= _value;
+        totalSupply -= _value;
+        Burn(msg.sender, _value);
+        return true;
+    }
+    function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(_value <= allowed[_from][msg.sender]);
+        allowed[_from][msg.sender] -= _value;
+        balances[_from] -= _value;
+        totalSupply -= _value;
+        Burn(_from, _value);
+        return true;
+    }
+}
+contract CryptoCoinToken is CryptoCoin, SafeMath {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balances[_from] >= _value);               
+        require (balances[_to] + _value > balances[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                       
+        balances[_from] -= _value;                         
+        balances[_to] += _value;                           
+        Transfer(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);      
+    }
+}
+contract CryptoCoinCash is CryptoCoinToken {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balances[_from] >= _value);               
+        require (balances[_to] + _value > balances[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                       
+        balances[_from] -= _value;                         
+        balances[_to] += _value;                           
+        Transfer(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);      
+    }
+}
+contract CryptoCoinTokenSale is CryptoCoinCash {
+    uint256 public totalTokensSold;
+    uint256 public totalTokens;
+    uint256 public totalWei;
+    uint256 public totalBonusTokens;
+    uint256 public totalBonusWei;
+    uint256 public totalReservedTokens;
+    uint256 public totalReservedWei;
+    uint256 public totalTeamTokens;
+    uint256 public totalTeamWei;
+    uint256 public totalAirdropTokens;
+    uint256 public totalAirdropWei;
+    uint256 public totalBountyTokens;
+    uint256 public totalBountyWei;
+    uint256 public totalPreSaleTokens;
+    uint256 public totalPreSaleWei;
+    uint256 public totalICOTokens;
+    uint256 public totalICOWei;
+    uint256 public totalFounderTokens;
+    uint256 public totalFounderWei;
+    uint256 public totalTokens;
+    uint256 public totalWeiRaised;
+    uint256 public totalWeiRefunded;
+    uint256 public totalWeiRemaining;
+    uint256 public minPurchase;
+    uint256 public maxPurchase;
+    uint256 public maxTokensPerAddress;
+    uint256 public maxWeiPerAddress;
+    uint256 public maxTokensPerAccount;
+    uint256 public maxWeiPerAccount;
+    uint256 public maxTokensPerTime;
+    uint256 public maxWeiPerTime;
+    uint256 public maxTokensPerTimeForTeam;
+    uint256 public maxWeiPerTimeForTeam;
+    uint256 public maxTokensPerTimeForBounty;
+    uint256 public maxWeiPerTimeForBounty;
+    uint256 public maxTokensPerTimeForAirdrop;
+    uint256 public maxWeiPerTimeForAirdrop;
+    uint256 public maxTokensPerTimeForPreSale;
+    uint256 public maxWeiPerTimeForPreSale;
+    uint256 public maxTokensPerTimeForICO;
+    uint256 public maxWeiPerTimeForICO;
+    uint256 public maxTokensPerTimeForFounder;
+    uint256 public maxWeiPerTimeForFounder;
+    uint256 public maxTokensPerTimeForReserved;
+    uint256 public maxWeiPerTimeForReserved;
+    uint256 public maxTokensPerTimeForTeam;
+    uint256 public maxWeiPerTimeForTeam;
+    uint256 public maxTokensPerTimeForBonus;
+    uint256 public maxWeiPerTimeForBonus;
+    uint256 public maxTokensPerTimeForAirdropTeam;
+    uint256 public maxWeiPerTimeForAirdropTeam;
+    uint256 public maxTokensPerTimeForAirdropFounder;
+    uint256 public maxWeiPerTimeForAirdropFounder;
+    uint256 public maxTokensPerTimeForAirdropReserved;
+    uint256 public maxWeiPerTimeForAirdropReserved;
+    uint256 public maxTokensPerTimeForAirdropPreSale;
+    uint256 public maxWeiPerTimeForAirdropPreSale;
+    uint256 public maxTokensPerTimeForAirdropICO;
+    uint256 public maxWeiPerTimeForAirdropICO;
+    uint256 public maxTokensPerTimeForAirdropBonus;
+    uint256 public maxWeiPerTimeForAirdropBonus;
+    uint256 public maxTokensPerTimeForAirdropTeam;
+    uint256 public maxWeiPerTimeForAirdropTeam;
+    uint256 public maxTokensPerTimeForAirdropFounder;
+    uint256 public maxWeiPerTimeForAirdropFounder;
+    uint256 public maxTokensPerTimeForAirdropReserved;
+    uint256 public maxWeiPerTimeForAirdropReserved;
+    uint256 public maxTokensPerTimeForAirdropPreSale;
+    uint256 public maxWeiPerTimeForAirdropPreSale;
+    uint256 public maxTokensPerTimeForAirdropICO;
+    uint256 public maxWeiPerTimeForAirdropICO;
+    uint256 public maxTokensPerTimeForAirdropBonus;
+    uint256 public maxWeiPerTimeForAirdropBonus;
+    uint256 public maxTokensPerTimeForAirdropTeam;
+    uint256 public maxWeiPerTimeForAirdropTeam;
+    uint256 public maxTokensPerTimeForAirdropFounder;
+    uint256 public maxWeiPerTimeForAirdropFounder;
+    uint256 public maxTokensPerTimeForAirdropReserved;
+    uint256 public maxWeiPerTimeForAirdropReserved;
+    uint256 public maxTokensPerTimeForAirdropPreSale;
+    uint256 public maxWeiPerTimeForAirdropPreSale;
+    uint256 public maxTokensPerTimeForAirdropICO;
+    uint256 public maxWeiPerTimeForAirdropICO;
+    uint256 public maxTokensPerTimeForAirdropBonus;
+    uint256 public maxWeiPerTimeForAirdropBonus;
+    uint256 public maxTokensPerTimeForAirdropTeam;
+    uint256 public maxWeiPerTimeForAirdropTeam;
+    uint256 public maxTokensPerTimeForAirdropFounder;
+    uint256 public maxWeiPerTimeForAirdropFounder;
+    uint256 public maxTokensPerTimeForAirdropReserved;
+    uint256 public maxWeiPerTimeForAirdropReserved;
+    uint256 public maxTokensPerTimeForAirdropPreSale;
+    uint256 public maxWeiPerTimeForAirdropPreSale;
+    uint256 public maxTokensPerTimeForAirdropICO;
+    uint256 public maxWeiPerTimeForAirdropICO;
+    uint256 public maxTokensPerTimeForAirdropBonus;
+    uint256 public maxWeiPerTimeForAirdropBonus;
+    uint256 public maxTokensPerTimeForAirdropTeam;
+    uint256 public maxWeiPerTimeForAirdropTeam;
+    uint256 public maxTokensPerTimeForAirdropFounder;
+    uint256 public maxWeiPerTimeForAirdropFounder;
+    uint256 public maxTokensPerTimeForAirdropReserved;
+    uint256 public maxWeiPerTimeForAirdropReserved;
+    uint256 public maxTokensPerTimeForAirdropPreSale;
+    uint256 public maxWeiPerTimeForAirdropPreSale;
+    uint256 public maxTokensPerTimeForAirdropICO;
+    uint256 public maxWeiPerTimeForAirdropICO;
+    uint256 public maxTokensPerTimeForAirdropBonus;
+    uint256 public maxWeiPerTimeForAirdropB

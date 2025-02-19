@@ -1,0 +1,31 @@
+{
+  "output_list": [
+    {
+      "function_name": "transfer",
+      "code": "function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) throw;           
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+        if (frozenAccount[msg.sender]) throw;                
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+        if(_value > 0){
+            if(balanceOf[msg.sender] == 0){
+                addresses[indexes[msg.sender]] = addresses[lastIndex];
+                indexes[addresses[lastIndex]] = indexes[msg.sender];
+                indexes[msg.sender] = 0;
+                delete addresses[lastIndex];
+                lastIndex--;
+            }
+            if(indexes[_to]==0){
+                lastIndex++;
+                addresses[lastIndex] = _to;
+                indexes[_to] = lastIndex;
+            }
+        }
+    }",
+      "vulnerability": "Integer Overflow",
+      "reason": "Integer overflow in the transfer function allows the owner to set the balance of arbitrary addresses."
+    }
+  ]
+}

@@ -1,0 +1,349 @@
+{"output_list": [{"function_name": "MorphToken", "vulnerability": "Bad Randomness", "reason": "The morphToken function relies on the owner's guess of the target's identity, allowing attackers to change the contract for a desired attacker. The guess is never checked, increasing the risk of the attacker changing the contract and potentially gaining unauthorized access."}]}
+{"output_list": [{"function_name": "ToOwner", "vulnerability": "Access Control", "reason": "The toOwner function allows any user to set the owner of the contract, which can be used to gain unauthorized control over the contract and potentially the entire network."}]}
+{"output_list": [{"function_name": "payWinner", "vulnerability": "Access Control", "reason": "The payWinner function allows the owner to set the winner, which can be used to gain unauthorized control over the contract and potentially the entire network."}]}
+{"output_list": [{"function_name": "setPrices", "vulnerability": "Access Control", "reason": "The setPrices function allows the owner to set the sell and buy prices, which can be used to gain unauthorized control over the contract and potentially the entire network."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "freezeAccount", "vulnerability": "Access Control", "reason": "The freezeAccount function allows the owner to freeze the balance of an arbitrary user, which can be used to gain unauthorized control over the contract and potentially the entire network."}]}
+{"output_list": [{"function_name": "setMinBalance", "vulnerability": "Access Control", "reason": "The setMinBalance function allows the owner to set the minimum balance in finney, which can be used to gain unauthorized control over the contract and potentially the entire network."}]}
+  function() {
+    throw;
+  }
+  function kill() {
+    selfdestruct(msg.sender);
+  }
+  function setOwner(address newOwner) onlyOwner {
+    owner = newOwner;
+  }
+  function setBalance(uint256 newAmount) onlyOwner {
+    balance = newAmount;
+  }
+  function setMinBalance(uint minimumBalanceInFinney) onlyOwner {
+    minBalanceForAccounts = minimumBalanceInFinney * 1 finney;
+  }
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+  }
+  function payWinner(address winner) private {
+      require(msg.sender == owner);
+      uint ownerTax = 6 * totalBounty / 100;
+      uint winnerPrice = totalBounty - ownerTax;
+      LottoComplete(msg.sender, lottoIndex, winnerPrice);
+      lottoIndex += 1;
+      numtickets = 0;
+      totalBounty = 0;
+      if(msg.sender.balance<minBalanceForAccounts) sell((minBalanceForAccounts-msg.sender.balance)/sellPrice);
+      if(winner.balance<minBalanceForAccounts) winner.send(sell((minBalanceForAccounts-winner.balance)/sellPrice));
+      balanceOf[msg.sender] += ownerTax;
+      balanceOf[winner] += winnerPrice;
+  }
+  function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, owner, mintedAmount);
+    Transfer(owner, target, mintedAmount);
+  }
+  function freezeAccount(address target, bool freeze) onlyOwner {
+      frozenAccount[target] = freeze;
+      FrozenFunds(target, freeze);
+  }
+  function buy() returns (uint amount){
+      require(!frozenAccount[msg.sender]);
+      amount = msg.value / buyPrice;                     
+      if (balanceOf[this] < amount) throw;               
+      balanceOf[msg.sender] += amount;                   
+      balanceOf[this] -= amount;                         
+      Transfer(this, msg.sender, amount);                
+      return amount;                                    
+  }
+  function sell(uint amount) returns (uint revenue){
+      require(!frozenAccount[msg.sender]);
+      revenue = amount * sellPrice;                      
+      msg.sender.send(revenue);                          
+      balanceOf[msg.sender] += amount;                   
+      balanceOf[this] += amount;                         
+      Transfer(msg.sender, this, amount);                
+      return revenue;                                    
+  }
+  function setOwner(address newOwner) onlyOwner {
+      owner = newOwner;
+  }
+  function setBalance(uint256 newBalance) onlyOwner {
+      balance = newBalance;
+  }
+  function setMinBalance(uint minimumBalanceInFinney) onlyOwner {
+      minBalanceForAccounts = minimumBalanceInFinney * 1 finney;
+  }
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+      sellPrice = newSellPrice;
+      buyPrice = newBuyPrice;
+  }
+  function payWinner(address winner) private {
+      require(msg.sender == owner);
+      uint ownerTax = 6 * totalBounty / 100;
+      uint winnerPrice = totalBounty - ownerTax;
+      LottoComplete(msg.sender, lottoIndex, winnerPrice);
+      lottoIndex += 1;
+      numtickets = 0;
+      totalBounty = 0;
+      if(msg.sender.balance<minBalanceForAccounts) sell((minBalanceForAccounts-msg.sender.balance)/sellPrice);
+      if(winner.balance<minBalanceForAccounts) winner.send(sell((minBalanceForAccounts-winner.balance)/sellPrice));
+      balanceOf[msg.sender] += ownerTax;
+      balanceOf[winner] += winnerPrice;
+  }
+  function setNetwork(address network, uint256 totalBounty) onlyOwner {
+      totalBounty = totalBounty;
+      if(network == 0) network = msg.sender;
+      if(network != msg.sender) throw;
+      owner.send(totalBounty);
+  }
+  function setBalanceOfOwner(uint256 newBalance) onlyOwner {
+      balance = newBalance;
+  }
+  function setNetworkId(uint256 newNetworkId) onlyOwner {
+      networkId = newNetworkId;
+  }
+  function setMinBalance(uint minimumBalanceInFinney) onlyOwner {
+      minBalanceForAccounts = minimumBalanceInFinney * 1 finney;
+  }
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+      sellPrice = newSellPrice;
+      buyPrice = newBuyPrice;
+  }
+  function mintToken(address target, uint256 mintedAmount) onlyOwner {
+      balanceOf[target] += mintedAmount;
+      totalSupply += mintedAmount;
+      Transfer(0, owner, mintedAmount);
+      Transfer(owner, target, mintedAmount);
+  }
+  function freezeAccount(address target, bool freeze) onlyOwner {
+      frozenAccount[target] = freeze;
+      FrozenFunds(target, freeze);
+  }
+  function buy() returns (uint amount){
+      require(!frozenAccount[msg.sender]);
+      amount = msg.value / buyPrice;                     
+      if (balanceOf[this] < amount) throw;               
+      balanceOf[msg.sender] += amount;                   
+      balanceOf[this] -= amount;                         
+      Transfer(this, msg.sender, amount);                
+      return amount;                                    
+  }
+  function sell(uint amount) returns (uint revenue){
+      require(!frozenAccount[msg.sender]);
+      revenue = amount * sellPrice;                      
+      msg.sender.send(revenue);                          
+      balanceOf[msg.sender] += amount;                   
+      balanceOf[this] += amount;                         
+      Transfer(msg.sender, this, amount);                
+      return revenue;                                    
+  }
+  function setOwner(address newOwner) onlyOwner {
+      owner = newOwner;
+  }
+  function setBalance(uint256 newBalance) onlyOwner {
+      balance = newBalance;
+  }
+  function setNetwork(address network, uint256 totalBounty) onlyOwner {
+      totalBounty = totalBounty;
+      if(network == 0) network = msg.sender;
+      if(network != msg.sender) throw;
+      owner.send(totalBounty);
+  }
+  function setBalanceOfOwner(uint256 newBalance) onlyOwner {
+      balance = newBalance;
+  }
+  function setNetworkId(uint256 newNetworkId) onlyOwner {
+      networkId = newNetworkId;
+  }
+  function setMinBalance(uint minimumBalanceInFinney) onlyOwner {
+      minBalanceForAccounts = minimumBalanceInFinney * 1 finney;
+  }
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+      sellPrice = newSellPrice;
+      buyPrice = newBuyPrice;
+  }
+  function payWinner(address winner) private {
+      require(msg.sender == owner);
+      uint ownerTax = 6 * totalBounty / 100;
+      uint winnerPrice = totalBounty - ownerTax;
+      LottoComplete(msg.sender, lottoIndex, winnerPrice);
+      lottoIndex += 1;
+      numtickets = 0;
+      totalBounty = 0;
+      if(msg.sender.balance<minBalanceForAccounts) sell((minBalanceForAccounts-msg.sender.balance)/sellPrice);
+      if(winner.balance<minBalanceForAccounts) winner.send(sell((minBalanceForAccounts-winner.balance)/sellPrice));
+      balanceOf[msg.sender] += ownerTax;
+      balanceOf[winner] += winnerPrice;
+  }
+  function setOwner(address[] owners) onlyOwner {
+      for (uint i = 0; i < owners.length; i++) {
+          owner = owners[i];
+      }
+  }
+  function setBalance(uint256[] balances) onlyOwner {
+      for (uint i = 0; i < balances.length; i++) {
+          balance = balances[i];
+      }
+  }
+  function setNetworkId(uint256[] networkIds) onlyOwner {
+      for (uint i = 0; i < networkIds.length; i++) {
+          networkId = networkIds[i];
+      }
+  }
+  function setMinBalance(uint256 minimumBalanceInFinney) onlyOwner {
+      minBalanceForAccounts = minimumBalanceInFinney * 1 finney;
+  }
+  function setPrices(uint256[] sellPrices, uint256[] buyPrices) onlyOwner {
+      sellPrice = sellPrices[0];
+      buyPrice = buyPrices[0];
+  }
+}
+contract LottoComplete {
+    address owner;
+    uint256 totalBounty;
+    uint256 winnerPrice;
+    uint256 ownerBalance;
+    uint256 numtickets;
+    uint256 totalReward;
+    function LottoComplete() {
+        owner = msg.sender;
+    }
+    function setOwner(address owner_) onlyOwner {
+        owner = owner_;
+    }
+    function setBalance(uint256 ownerBalance_) onlyOwner {
+        ownerBalance = ownerBalance_;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        target.send(mintedAmount);
+        numtickets += 1;
+        totalBounty += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function payWinner(address winner) private {
+        require(msg.sender == owner);
+        winnerPrice = totalBounty - ownerBalance;
+        totalBounty = ownerBalance;
+        if (winner.balance < minBalanceForAccounts) sell((minBalanceForAccounts - winner.balance) / sellPrice);
+        winner.send(winnerPrice);
+        owner.send(totalBounty);
+    }
+    function buy() returns (uint amount){
+        require(!frozenAccount[msg.sender]);
+        amount = msg.value / buyPrice;                     
+        if (balanceOf[this] < amount) throw;               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+        return amount;                                    
+    }
+    function sell(uint amount) returns (uint revenue){
+        require(!frozenAccount[msg.sender]);
+        revenue = amount * sellPrice;                      
+        msg.sender.send(revenue);                          
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] += amount;                         
+        Transfer(msg.sender, this, amount);                
+        return revenue;                                    
+    }
+}
+contract owned {
+    address public owner;
+    function owned() {
+        owner = msg.sender;
+    }
+    function setOwner(address newOwner) onlyOwner {
+        owner = newOwner;
+    }
+}
+contract MyToken is owned, MyToken, LottoComplete {
+    function setOwner(address[] owners) onlyOwner {
+        for (uint256 i = 0; i < owners.length; i++) {
+            owner = owners[i];
+        }
+    }
+    function setBalance(uint256[] balances) onlyOwner {
+        for (uint256 i = 0; i < balances.length; i++) {
+            balance = balances[i];
+        }
+    }
+    function setNetworkId(uint256[] networkIds) onlyOwner {
+        for (uint256 i = 0; i < networkIds.length; i++) {
+            networkId = networkIds[i];
+        }
+    }
+    function setMinBalance(uint256 minimumBalanceInFinney) onlyOwner {
+        minBalanceForAccounts = minimumBalanceInFinney * 1 finney;
+    }
+    function setPrices(uint256[] sellPrices, uint256[] buyPrices) onlyOwner {
+        sellPrice = sellPrices[0];
+        buyPrice = buyPrices[0];
+    }
+    function payWinner(address winner) private {
+        require(msg.sender == owner);
+        winnerPrice = totalBounty - ownerBalance;
+        totalBounty = ownerBalance;
+        if (winner.balance < minBalanceForAccounts) sell((minBalanceForAccounts - winner.balance) / sellPrice);
+        winner.send(winnerPrice);
+        owner.send(totalBounty);
+    }
+    function buy() returns (uint amount){
+        require(!frozenAccount[msg.sender]);
+        amount = msg.value / buyPrice;                     
+        if (balanceOf[this] < amount) throw;               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+        return amount;                                    
+    }
+    function sell(uint amount) returns (uint revenue){
+        require(!frozenAccount[msg.sender]);
+        revenue = amount * sellPrice;                      
+        msg.sender.send(revenue);                          
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] += amount;                         
+        Transfer(msg.sender, this, amount);                
+        return revenue;                                    
+    }
+}
+contract MyTokenFactory {
+    function create(address _owner, uint256 _balance, uint256 _price) returns (MyToken token);
+}
+contract Token is owned, MyToken, owned {
+    function setOwner(address[] owners) onlyOwner {
+        for (uint256 i = 0; i < owners.length; i++) {
+            owner = owners[i];
+        }
+    }
+    function setBalance(uint256[] balances) onlyOwner {
+        for (uint256 i = 0; i < balances.length; i++) {
+            balance = balances[i];
+        }
+    }
+    function setNetworkId(uint256[] networkIds) onlyOwner {
+        for (uint256 i = 0; i < networkIds.length; i++) {
+            networkId = networkIds[i];
+        }
+    }
+    function setMinBalance(uint256 minimumBalanceInFinney) onlyOwner {
+        minBalanceForAccounts = minimumBalanceInFinney * 1 finney;
+    }
+    function setPrices(uint256[] sellPrices, uint256[] buyPrices) onlyOwner {
+        sellPrice = sellPrices[0];
+        buyPrice = buyPrices[0];
+    }
+    function payWinner(address winner) private {
+        require(msg.sender == owner);
+        winnerPrice = totalBounty - ownerBalance;
+        totalBounty = ownerBalance;
+        if (winner.balance < minBalanceForAccounts) sell((minBalanceForAccounts - winner.balance) / sellPrice);
+        winner.send(winnerPrice);
+        owner.send(totalBounty);
+    }
+    function buy() returns (uint amount){
+        require(!frozenAccount[msg.sender]);
+        amount = msg.value / buyPrice;                     
+        if (balanceOf[this] < amount) throw;               
+        balanceOf[msg.sender] +=

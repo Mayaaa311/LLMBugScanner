@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mint(address holder, uint value) { require(msg.sender == preSale); require(value > 0); require(totalSupply + value <= TOKEN_LIMIT); balances[holder] += value; totalSupply += value; Transfer(0x0, holder, value); }",
+            "reason": "The function mint() is vulnerable to integer overflow. The totalSupply variable is incremented by the value parameter, which can lead to an overflow if the value is too large. This can be exploited by an attacker to mint more tokens than the token limit."
+        },
+        {
+            "function_name": "buyPreSaleTokens",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function buyPreSaleTokens(address buyer, uint256 tokens, uint factor, string txHash) external icoAgentOnly returns (uint) { require(buyer != address(0)); require(tokens > 0); require(preSaleState == PreSaleState.PreSaleStarted); require(!isPaused); token.mint(buyer, tokens); TokenBuy(buyer, tokens, factor, txHash); }",
+            "reason": "The function buyPreSaleTokens() is vulnerable to integer overflow. The tokens parameter is used to mint tokens for the buyer, which can lead to an overflow if the tokens parameter is too large. This can be exploited by an attacker to mint more tokens than the token limit."
+        },
+        {
+            "function_name": "mint",
+            "vulnerability": "Access Control",
+            "function_code": "function mint(address holder, uint value) { require(msg.sender == preSale); require(value > 0); require(totalSupply + value <= TOKEN_LIMIT); balances[holder] += value; totalSupply += value; Transfer(0x0, holder, value); }",
+            "reason": "The function mint() is vulnerable to access control. Only the preSale contract can call this function, but it does not check if the caller is the preSale contract. This can be exploited by an attacker to mint tokens for themselves."
+        },
+        {
+            "function_name": "buyPreSaleTokens",
+            "vulnerability": "Access Control",
+            "function_code": "function buyPreSaleTokens(address buyer, uint256 tokens, uint factor, string txHash) external icoAgentOnly returns (uint) { require(buyer != address(0)); require(tokens > 0); require(preSaleState == PreSaleState.PreSaleStarted); require(!isPaused); token.mint(buyer, tokens); TokenBuy(buyer, tokens, factor, txHash); }",
+            "reason": "The function buyPreSaleTokens() is vulnerable to access control. Only the icoAgent contract can call this function, but it does not check if the caller is the icoAgent contract. This can be exploited by an attacker to mint tokens for themselves."
+        },
+        {
+            "function_name": "buyPreSaleTokens",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function buyPreSaleTokens(address buyer, uint256 tokens, uint factor, string txHash) external icoAgentOnly returns (uint) { require(buyer != address(0)); require(tokens > 0); require(preSaleState == PreSaleState.PreSaleStarted); require(!isPaused); token.mint(buyer, tokens); TokenBuy(buyer, tokens, factor, txHash); }",
+            "reason": "The function buyPreSaleTokens() is vulnerable to typo constructor. The function name is buyPreSaleTokens(), but the function code is buyPreSaleTokens(). This can be exploited by an attacker to call the wrong function."
+        }
+    ]
+}

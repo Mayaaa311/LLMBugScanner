@@ -1,0 +1,62 @@
+{
+    "output_list": [
+        {
+            "function_name": "distributeToken",
+            "code": "function distributeToken(address[] addresses, uint256 _value) {
+    for (uint i = 0; i < addresses.length; i++) {
+        balances[msg.sender] -= _value;
+        balances[addresses[i]] += _value;
+        Transfer(msg.sender, addresses[i], _value);
+    }
+}",
+            "vulnerability": "Incorrect Distribution Logic",
+            "reason": "The distributeToken function allows the owner to distribute tokens to multiple recipients in a single transaction, without ensuring that the total supply is not exceeded. This can be exploited by the owner to print additional tokens, as there is no check to ensure the total supply is not exceeded."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) { throw; }
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The approveAndCall function allows the caller to increase the spender's allowance beyond the total supply of tokens, causing an integer overflow and allowing the spender to transfer an unlimited amount of tokens from the owner's account."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) {
+    if (balances[msg.sender] >= _value && _value > 0) {
+        balances[msg.sender] -= _value;
+        balances[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    } else { return false; }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function allows the sender to transfer a value of tokens that the sender does not have, causing an integer overflow and allowing the sender to acquire additional token balance."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
+        balances[_to] += _value;
+        balances[_from] -= _value;
+        allowed[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    } else { return false; }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function allows the caller to transfer tokens from one account to another in an amount that the caller does not have allowance for, causing an integer overflow and allowing the caller to acquire additional token balance."
+        },
+        {
+            "function_name": "balanceOf",
+            "code": "function balanceOf(address _owner) constant returns (uint256 balance) {
+    return balances[_owner];
+}",
+            "vulnerability": "Unrestricted Read Access",
+            "reason": "The balanceOf function allows anyone to query the balance of any account, exposing sensitive information and potentially allowing the identification of accounts holding large balances."
+        }
+    ]
+}

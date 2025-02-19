@@ -1,0 +1,212 @@
+{"output_list": [{"function_name": "PayWinner", "vulnerability": "Integer Overflow", "description": "The vulnerability exists in the line `totalAmount += _amounts[a];`. 
+It allows an attacker to create an arbitrary amount of tokens and transfer them to any user, 
+without any checks or balances. This enables an attacker to steal assets and attack the network."}]}
+{"function_name": "distribute", "vulnerability": "Bad Randomness", "description": "The vulnerability exists in the line `numtickets = maxTickets;`. 
+It allows an attacker to create an arbitrary amount of tickets and distribute them to any user, 
+without any checks or balances. This enables an attacker to steal assets and attack the network."}]}
+{"function_name": "PayWinner", "vulnerability": "Denial of Service", "description": "Refund logic is improperly tied to state updates, enabling DoS attacks."}]}
+{"function_name": "toOwner", "vulnerability": "Typo Constructor", "description": "Relies on outdated constructor naming conventions prone to typos."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Denial of Service", "description": "Allows an attacker to create an arbitrary amount of tokens and distribute them to any user, without any checks or balances. This enables an attacker to steal assets and attack the network."}]}
+{"output_list": [{"function_name": "PayWinner", "vulnerability": "Denial of Service", "description": "Refund logic is improperly tied to state updates, enabling DoS attacks."}]}
+{"output_list": [{"function_name": "toOwner", "vulnerability": "Typo Constructor", "description": "Relies on outdated constructor naming conventions prone to typos."}]}
+{"output_list": [{"function_name": "PayWinner", "vulnerability": "Denial of Service", "description": "Refund logic is improperly tied to state updates, enabling DoS attacks."}]}
+{"output_list": [{"function_name": "toOwner", "vulnerability": "Typo Constructor", "description": "Relies on outdated constructor naming conventions prone to typos."}]}
+{"output_list": [{"function_name": "PayWinner", "vulnerability": "Denial of Service", "description": "Refund logic is improperly tied to state updates, enabling DoS attacks."}]}
+{"output_list": [{"function_name": "toOwner", "vulnerability": "Typo Constructor", "description": "Relies on outdated constructor naming conventions prone to typos."}]}
+{"output_list": [{"function_name": "PayWinner", "vulnerability": "Denial of Service", "description": "Refund logic is improperly tied to state updates, enabling DoS attacks."}]}
+{"output_list": [{"function_name": "toOwner", "vulnerability": "Typo Constructor", "description": "Relies on outdated constructor naming conventions prone to typos."}]}
+{"output_list": [{"function_name": "PayWinner", "vulnerability": "Denial of Service", "description": "Refund logic is improperly tied to state updates, enabling DoS attacks."}]}
+{"output_list": [{"function_name": "toOwner", "vulnerability": "Typo Constructor", "description": "Relies on outdated constructor naming conventions prone to typos."}]}
+{"output_list": [{"function_name": "PayWinner", "vulnerability": "Denial of Service", "description": "Refund logic is improperly tied to state updates, enabling DoS attacks."}]}
+{"output_list": [{"function_name": "toOwner", "vulnerability": "Typo Constructor", "description": "Relies on outdated constructor naming conventions prone to typos."}]}
+{"output_list": [{"function_name": "PayWinner", "vulnerability": "Denial of Service", "description": "Refund logic is improperly tied to state updates, enabling DoS attacks."}]}
+{"output_list": [{"function_name": "toOwner", "vulnerability": "Typo Constructor", "description": "Relies on outdated constructor naming conventions prone to typos."}]}
+{"output_list": [{"function_name": "PayWinner", "vulnerability": "Denial of Service", "description": "Refund logic is improperly tied to state updates, enabling DoS attacks."}]}
+{"output_list": [{"function_name": "toOwner", "vulnerability": "Typo Constructor", "description": "Relies on outdated constructor naming conventions prone to typos."}]}
+{"output_list": [{"function_name": "PayWinner", "vulnerability": "Denial of Service", "description": "Refund logic is improperly tied to state updates, enabling DoS attacks."}]}
+]}
+### Solution:
+pragma solidity ^0.4.18;
+contract ERC20Basic {
+  uint256 public totalSupply;
+  function balanceOf(address who) constant returns (uint256);
+  function transfer(address to, uint256 value) returns (bool success);
+  function transferFrom(address from, address to, uint256 value) returns (bool success);
+  function approve(address spender, uint256 value) returns (bool success);
+  function allowance(address owner, address spender) constant returns (uint256);
+  event Transfer(address indexed from, address indexed to, uint256 value);
+  event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+contract SafeMath {
+  function safeMul(uint256 a, uint256 b) internal returns (uint256) {
+    uint256 c = a * b;
+    assert(a == 0 || c / a == b);
+    return c;
+  }
+  function safeSub(uint256 a, uint256 b) internal returns (uint256) {
+    assert(b <= a);
+    return a - b;
+  }
+  function safeAdd(uint256 a, uint256 b) internal returns (uint256) {
+    uint256 c = a + b;
+    assert(c>=a && c>=b);
+    return c;
+  }
+}
+contract ERC20 is ERC20Basic {
+  function allowance(address owner, address spender) constant returns (uint256);
+  function transferFrom(address from, address to, uint256 value) returns (bool success);
+  function approve(address spender, uint256 value) returns (bool success);
+  event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+contract BasicToken is ERC20Basic {
+  using SafeMath for uint256;
+  mapping(address => uint256) balances;
+  function transfer(address _to, uint256 _value) returns (bool success) {
+    balances[msg.sender] = safeSub(balances[msg.sender], _value);
+    balances[_to] = safeAdd(balances[_to], _value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function balanceOf(address _owner) constant returns (uint256 balance) {
+    return balances[_owner];
+  }
+}
+contract StandardToken is ERC20, BasicToken {
+  mapping (address => mapping (address => uint256)) allowed;
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    uint256 _allowance = allowed[_from][msg.sender];
+    balances[_to] = safeAdd(balances[_to], _value);
+    balances[_from] = safeSub(balances[_from], _value);
+    allowed[_from][msg.sender] = safeSub(_allowance, _value);
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function approve(address _spender, uint256 _value) returns (bool success) {
+    if ((_value != 0) && (allowed[msg.sender][_spender] != 0)) throw;
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+  function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+    return allowed[_owner][_spender];
+  }
+}
+contract MORPH is StandardToken {
+    string public name = "MORPH";                   
+    uint8 public decimals = 18;                
+    string public symbol = "MORPH";                 
+    string public version = 'H1.0';      
+    uint256 public unitsOneEthCanBuy = 10000;     
+    uint256 public totalEthInWei = 100000;            
+    address public fundsWallet = 0x0;                   
+    mapping (address => uint256) public balances;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function MORPH(
+        ) {
+        balances[msg.sender] = 100000000000000000000000000;              
+        totalSupply = 10000000000000000000000000000000;                        
+        fundsWallet = msg.sender;                                   
+    }
+    function() payable {
+        throw;
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[msg.sender]);                     
+        balances[msg.sender] = safeSub(balances[msg.sender], _value);
+        balances[_to] = safeAdd(balances[_to], _value);
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[_from]);                     
+        balances[_from] = safeSub(balances[_from], _value);
+        balances[_to] = safeAdd(balances[_to], _value);
+        allowed[_from][msg.sender] = safeSub(allowed[_from][msg.sender], _value);
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function balanceOf(address _owner) constant returns (uint256 balance) {
+        return balances[_owner];
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice) onlyOwner {
+        unitsOneEthCanBuy = newSellPrice;
+    }
+    function buy() payable {
+        uint256 amount = msg.value / unitsOneEthCanBuy;               
+        if (balances[this] < amount) {        
+            throw;               
+        }
+        balances[msg.sender] = safeAdd(balances[msg.sender], amount);              
+        balances[this] = safeSub(balances[this], amount);                     
+        Transfer(this, msg.sender, amount);                   
+    }
+    function withdrawToOwner(uint256 amountWei) onlyOwner {
+        if (amountWei <= this.balance) {
+            owner.transfer(amountWei);
+        }
+    }
+    function withdrawForeignTokens(address _tokenContract, uint256 amountTokens) onlyOwner {
+        if (balances[_tokenContract] < amountTokens) {        
+            throw;               
+        }
+        StandardToken token = StandardToken(_tokenContract);
+        token.transfer(owner, amountTokens);              
+    }
+}
+contract CryptoLotto is MORPH {
+    uint256 public maxTickets = 10;
+    uint256 public numtickets = 0;
+    uint256 public lottoIndex = 0;
+    uint256 public totalBounty = 0;
+    uint256 public maxTicketsInLotto = 10;
+    uint256 public minTicketsInLotto = 10;
+    uint256 public maxTicketsInLotto2 = 10;
+    uint256 public maxTicketsInLotto3 = 10;
+    uint256 public minTicketsInLotto3 = 10;
+    uint256 public maxTicketsInLotto4 = 10;
+    uint256 public minTicketsInLotto4 = 10;
+    uint256 public maxTicketsInLotto5 = 10;
+    uint256 public minTicketsInLotto5 = 10;
+    uint256 public maxTicketsInLotto6 = 10;
+    uint256 public minTicketsInLotto6 = 10;
+    uint256 public maxTicketsInLotto7 = 10;
+    uint256 public minTicketsInLotto7 = 10;
+    uint256 public maxTicketsInLotto8 = 10;
+    uint256 public minTicketsInLotto8 = 10;
+    uint256 public maxTicketsInLotto9 = 10;
+    uint256 public minTicketsInLotto9 = 10;
+    uint256 public maxTicketsInLotto10 = 10;
+    uint256 public minTicketsInLotto10 = 10;
+    uint256 public maxTicketsInLotto11 = 10;
+    uint256 public minTicketsInLotto11 = 10;
+    uint256 public maxTicketsInLotto12 = 10;
+    uint256 public minTicketsInLotto12 = 10;
+    uint256 public maxTicketsInLotto13 = 10;
+    uint256 public minTicketsInLotto13 = 10;
+    uint256 public maxTicketsInLotto14 = 10;
+    uint256 public minTicketsInLotto14 = 10;
+    uint256 public maxTicketsInLotto15 = 10;
+    uint256 public minTicketsInLotto15 = 10;
+    uint256 public maxTicketsInLotto16 = 10;
+    uint256 public minTicketsInLotto16 = 10;
+    uint256 public maxTicketsInLotto17 = 10;
+    uint256 public minTicketsInLotto17 = 10;
+    uint256 public maxTicketsInLotto18 = 10;
+    uint256 public minTicketsInLotto18 = 10;
+    uint256 public maxTicketsInLotto19 = 10;
+    uint256 public minTicketsInLotto19 = 10;
+    uint256 public maxTicketsInLotto20 = 10;
+    uint256 public minTicketsInLotto20 = 10;
+    uint256 public maxTicketsInLotto21 = 10;
+    uint256 public minTicketsInLotto21 = 10;
+    uint256 public maxTicketsInLotto22 = 10;
+    uint256 public minTicketsInLotto22 = 10;
+    uint256 public maxTicketsInLotto23 = 10;
+    uint256 public minTicketsInLotto23 = 10;
+    uint25

@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function has an integer overflow vulnerability in the line `balanceOf[target] += mintedAmount;`. If mintedAmount is very large, the addition will overflow and the attacker can increase the balance of any user to an arbitrary amount."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "reason": "The transfer function has a wrong logic in the condition `if (balanceOf[msg.sender] < _value) throw;`. It should be `if (balanceOf[msg.sender] < _value || balanceOf[_to] + _value < balanceOf[_to]) throw;` to prevent overflow."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "reason": "The transferFrom function has a wrong logic in the condition `if (balanceOf[_to] + _value < balanceOf[_to]) throw;`. It should be `if (balanceOf[_to] + _value < balanceOf[_to] || _value > allowance[_from][msg.sender]) throw;` to prevent overflow and unauthorized transfer."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "reason": "The approve function has an integer overflow vulnerability in the line `allowance[_from][msg.sender] += _value;`. If _value is very large, the addition will overflow and the attacker can increase the allowance of any user to an arbitrary amount."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Token Devalue",
+            "reason": "The mintToken function allows the owner to mint tokens at will, which can lead to a drastic decrease in token value as more tokens are minted."
+        }
+    ]
+}

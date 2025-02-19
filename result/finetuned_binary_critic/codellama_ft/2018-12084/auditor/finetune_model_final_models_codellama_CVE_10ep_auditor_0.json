@@ -1,0 +1,266 @@
+{"output_list": [{"output_list": [{"function_name": "mintToken", "code": "function mintToken(address _to, uint256 _value) public returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);
+        require(_value > 0);
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }]}]}
+}
+
+
+contract BitAseanTokenSale is owned, token { 
+    uint256 public sellPrice;
+    uint256 public totalTokensSold;
+    uint256 public totalEtherReceived;
+    uint256 public valueToReserveTokens;
+    uint256 public valueToReserveEther;
+    uint256 public minBalanceForAccounts;
+    event TokenPurchase(address indexed buyer, uint256 indexed amount, uint256 indexed price);
+    event AdditionalTokens(address indexed from, uint256 indexed amount);
+    function BitAseanTokenSale(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function setPrices(uint256 newSellPrice, uint256 newValueToReserveTokens, uint256 newValueToReserveEther, uint256 newMinBalanceForAccounts) onlyOwner {
+        sellPrice = newSellPrice;
+        valueToReserveTokens = newValueToReserveTokens;
+        valueToReserveEther = newValueToReserveEther;
+        minBalanceForAccounts = newMinBalanceForAccounts;
+    }
+    function() payable {
+        revert();     
+    }
+    function buy() payable {
+        uint amount = msg.value / sellPrice;               
+        require(balanceOf[this] >= amount);               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+        return true;                                      
+    }
+    function reserveTokens(uint256 amount) onlyOwner {
+        require(balanceOf[this] >= amount);               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+    }
+    function reserveEther() onlyOwner {
+        uint amount = balanceOf[this];               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+    }
+}
+contract BitAseanTokenPreSale is owned, BitAseanTokenSale { 
+    uint256 public buyRate = 4000; 
+    uint256 public sellRate = 100; 
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function BitAseanTokenPreSale(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) BitAseanTokenSale (initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;                          
+        Transfer(0, this, mintedAmount);                   
+        Transfer(this, target, mintedAmount);                
+    }
+    function setPrices(uint256 newBuyRate, uint256 newSellRate) onlyOwner {
+        buyRate = newBuyRate;
+        sellRate = newSellRate;
+    }
+    function setBuyRate(uint256 newBuyRate) onlyOwner {
+        buyRate = newBuyRate;
+    }
+    function setSellRate(uint256 newSellRate) onlyOwner {
+        sellRate = newSellRate;
+    }
+    function setMinBalanceForAccounts(uint256 minimumBalanceInWei) onlyOwner {
+        minBalanceForAccounts = minimumBalanceInWei;
+    }
+    function setFreezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function buy() payable {
+        uint amount = msg.value / buyRate;               
+        require(balanceOf[this] >= amount);               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+    }
+    function sell(uint256 amount) onlyOwner {
+        require(this.balance >= amount * sellRate);      
+        balanceOf[this] += amount;                         
+        balanceOf[msg.sender] -= amount;                   
+        if (!msg.sender.send(amount * sellRate)) {        
+            throw;                                         
+        } else {
+            Transfer(msg.sender, this, amount);            
+        }
+    }
+    function withdrawToOwner(uint256 amountWei) onlyOwner {
+        if (amountWei < balance) revert();               
+        owner.send(amountWei);               
+    }
+    function withdrawToTeam(uint256 amountWei) onlyOwner {
+        if (amountWei < balance) revert();               
+        teamAddress.send(amountWei);               
+    }
+    function withdrawToFounder(uint256 amountWei) onlyOwner {
+        if (amountWei < balance) revert();               
+        founderAddress.send(amountWei);               
+    }
+    function withdrawToReserve(uint256 amountWei) onlyOwner {
+        if (amountWei < balance) revert();               
+        reserveAddress.send(amountWei);               
+    }
+    function withdrawToPreSale(uint256 amountWei) onlyOwner {
+        if (amountWei < balance) revert();               
+        preSaleAddress.send(amountWei);               
+    }
+    function withdrawToAsean(uint256 amountWei) onlyOwner {
+        if (amountWei < balance) revert();               
+        aseanAddress.send(amountWei);               
+    }
+    function withdrawToBitAsean(uint256 amountWei) onlyOwner {
+        if (amountWei < balance) revert();               
+        bitAseanAddress.send(amountWei);               
+    }
+    function withdrawToBitAsean(uint256 amountTokens) onlyOwner {
+        require(this.balance >= amountTokens * sellRate);      
+        balanceOf[msg.sender] -= amountTokens;               
+        balanceOf[this] += amountTokens;                         
+        Transfer(msg.sender, this, amountTokens);                
+        bitAseanAddress.send(amountTokens);               
+    }
+    function withdrawToPreSaleTokens(uint256 amountTokens) onlyOwner {
+        require(this.balance >= amountTokens * sellRate);      
+        balanceOf[this] += amountTokens;                         
+        balanceOf[preSaleAddress] -= amountTokens;                   
+        Transfer(this, preSaleAddress, amountTokens);                
+    }
+    function withdrawToFounder(uint256 amountWei) onlyOwner {
+        if (amountWei < balance) revert();               
+        founderAddress.send(amountWei);               
+    }
+    function withdrawToReserveTokens(uint256 amountTokens) onlyOwner {
+        require(this.balance >= amountTokens * sellRate);      
+        balanceOf[this] += amountTokens;                         
+        balanceOf[reserveAddress] -= amountTokens;                   
+        Transfer(this, reserveAddress, amountTokens);                
+    }
+    function withdrawToReserveEther(uint256 amountWei) onlyOwner {
+        if (amountWei < balance) revert();               
+        reserveAddress.send(amountWei);               
+    }
+    function withdrawToPreSaleEther(uint256 amountWei) onlyOwner {
+        if (amountWei < balance) revert();               
+        preSaleAddress.send(amountWei);               
+    }
+    function withdrawToAseanEther(uint256 amountWei) onlyOwner {
+        if (amountWei < balance) revert();               
+        aseanAddress.send(amountWei);               
+    }
+    function withdrawToBitAseanEther(uint256 amountTokens) onlyOwner {
+        require(this.balance >= amountTokens * sellRate);      
+        balanceOf[this] += amountTokens;                         
+        balanceOf[bitAseanAddress] -= amountTokens;                   
+        Transfer(this, bitAseanAddress, amountTokens);                
+    }
+}
+contract BitAseanTokenPreICO is owned, BitAseanTokenPreSale { 
+    uint256 public preICOEndsAt;
+    uint256 public preICOStartsAt;
+    uint256 public preICOTokensSold;
+    uint256 public preICOTokensLimit;
+    uint256 public preICOTokensReserve;
+    uint256 public preICOTokensReserveTeam;
+    uint256 public preICOTokensReserveFounder;
+    uint256 public preICOTokensReservePreSale;
+    uint256 public preICOTokensReserveReserve;
+    uint256 public preICOTokensReserveAsean;
+    uint256 public preICOTokensReserveBitAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReserveTeam;
+    uint256 public preICOTokensReserveFounder;
+    uint256 public preICOTokensSold;
+    uint256 public preICOTokensLimit;
+    uint256 public preICOTokensReserve;
+    uint256 public preICOTokensReserve;
+    uint256 public preICOTokensReserveTeam;
+    uint256 public preICOTokensReserveFounder;
+    uint256 public preICOTokensReservePreSale;
+    uint256 public preICOTokensReserveReserve;
+    uint256 public preICOTokensReserveAsean;
+    uint256 public preICOTokensReserveBitAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSale;
+    uint256 public preICOTokensReservePreSale;
+    uint256 public preICOTokensReserveReserve;
+    uint256 public preICOTokensReserveAsean;
+    uint256 public preICOTokensReserveBitAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleBitAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReservePreSaleAsean;
+    uint256 public preICOTokensReserveSaleAsean;
+    uint256 public preICOTokensReserveSaleBitAsean;
+    uint256 public preICOTokensReserveSaleAsean;
+    uint256

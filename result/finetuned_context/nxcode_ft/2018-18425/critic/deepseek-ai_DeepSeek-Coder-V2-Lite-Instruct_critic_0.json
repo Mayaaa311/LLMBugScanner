@@ -1,0 +1,33 @@
+ ```json
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "auditor_idx": 0,
+            "vulnerability": "Reentrancy",
+            "criticism": "The function `getTokens` does not implement any mechanism to prevent reentrancy attacks. The `distr` function is called within this function, which does not have any reentrancy guards. This makes the contract susceptible to reentrancy attacks where an attacker could call `getTokens` multiple times in a single transaction, leading to potential loss of funds.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 6
+        },
+        {
+            "function_name": "burn",
+            "auditor_idx": 0,
+            "vulnerability": "Unchecked Return Value",
+            "criticism": "The function `burn` does not check the return value of the `transfer` function call. If the transfer fails (e.g., due to insufficient balance), the burned tokens will be lost. This is a critical issue as it results in permanent loss of tokens that were intended to be destroyed.",
+            "correctness": 6,
+            "severity": 9,
+            "profitability": 4
+        },
+        {
+            "function_name": "withdrawAltcoinTokens",
+            "auditor_idx": 0,
+            "vulnerability": "Unchecked Return Value",
+            "criticism": "The function `withdrawAltcoinTokens` does not check the return value of the `transfer` function call. If the transfer fails, the tokens will be lost. This is a significant vulnerability as it results in permanent loss of tokens that were intended to be withdrawn from the contract.",
+            "correctness": 6,
+            "severity": 8,
+            "profitability": 5
+        }
+    ]
+}
+```

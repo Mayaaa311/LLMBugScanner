@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "distributeTokens",
+            "vulnerability": "Integer Overflow",
+            "reason": "The vulnerability exists in the line `uint reward = balanceOf[holder] * 3 / 100;`. If the total supply of tokens is large, the reward value can exceed the maximum value representable by the 'uint256' type, causing an integer overflow. This bypasses the subsequent 'require' check, leading to unauthorized deductions and logical inconsistencies."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "reason": "The vulnerability exists in the line `balanceOf[target] += mintedAmount;`. If the minted amount is large, it can cause an integer overflow, allowing the owner to mint an arbitrary large number of tokens, devaluing the token."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function allows users to transfer tokens to a contract address, which can be exploited to cause a denial of service to the token holders. The issue arises from the incorrect 'require' statement: 'require(_value > 0);'. This allows users to transfer tokens to a contract address, causing the contract to reject the transfer and blocking the token holders from accessing their funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function allows users to transfer tokens from one address to another, which can be exploited to cause a denial of service to the token holders. The issue arises from the incorrect 'require' statement: 'require(_value > 0);'. This allows users to transfer tokens to a contract address, causing the contract to reject the transfer and block the token holders from accessing their funds."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Token Devalue",
+            "reason": "The function allows the owner to mint an arbitrary large number of tokens, devaluing the token. The issue arises from the lack of supply limit, allowing the owner to mint tokens without any restrictions."
+        }
+    ]
+}

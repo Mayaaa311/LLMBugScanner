@@ -1,0 +1,219 @@
+{"output_list": [{"function_name": "sellToken", "vulnerability": "Integer Overflow", "description": "The sellToken function in the sellTokenForLRC function in the ProtocolFeeVault contract allows an attacker to cause an integer overflow in the following formula: 2 * a * b, where a = 2 ** 256, b = 2 ** 256. The attacker can set a = 2 ** 256, b = 2 ** 256, allowing the attacker to set a = 2 ** 256, b = 2 ** 256, resulting in a value of 2 ** 256 * 2 ** 256, which is an integer overflow."}]}
+        ]
+    }
+}
+contract solid
+contract IntegerOverflow {
+    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public;
+    function allowance(address _owner, address _spender) public constant returns (uint);
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool);
+    function approve(address _owner, uint256 _value) public;
+}
+contract LRC is ERC20 {
+    string public constant name = "Loopring Registry Credit";
+    string public constant symbol = "LRC";
+    uint8 public constant decimals = 18;
+    uint256 public totalSupply;
+    mapping (address => uint256) public balanceOf;
+    mapping (address => mapping (address => uint256)) public allowance;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+    function LRC(uint256 _initialSupply, address _owner) public {
+        totalSupply = _initialSupply;
+        balanceOf[_owner] = _initialSupply;
+        owner = _owner;
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require(_to != 0x0);
+        require(balanceOf[_from] >= _value);
+        require(balanceOf[_to] + _value > balanceOf[_to]);
+        uint previousBalances = balanceOf[_from] + balanceOf[_to];
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(_from, _to, _value);
+        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        _transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);     
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+        public
+        returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);   
+        balanceOf[msg.sender] -= _value;            
+        totalSupply -= _value;                      
+        Burn(msg.sender, _value);
+        return true;
+    }
+    function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(balanceOf[_from] >= _value);                
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        Burn(_from, _value);
+        return true;
+    }
+}
+contract Burnable is LRC {
+    function burn(uint256 _value) public returns (bool success);
+    function burnFrom(address _from, uint256 _value) public returns (bool success);
+}
+contract StandardToken is LRC {
+    function transfer(address _to, uint256 _value) public returns (bool success);
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
+    function approve(address _spender, uint256 _value) public returns (bool success);
+}
+contract StandardBurnable is Burnable, StandardToken {
+    function burn(uint256 _value) public returns (bool success);
+    function burnFrom(address _from, uint256 _value) public returns (bool success);
+}
+contract CappedToken is StandardBurnable {
+    uint256 public cap;
+    function CappedToken(uint256 _cap) public {
+        require(_cap > 0);
+        cap = _cap;
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);
+        require(balanceOf[_to] + _value > balanceOf[_to]);
+        require(cap - _value >= 0);
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(balanceOf[_from] >= _value);
+        require(_value <= allowance[_from][msg.sender]);
+        require(balanceOf[_to] + _value > balanceOf[_to]);
+        require(cap - _value >= 0);
+        balanceOf[_from] -= _value;
+        allowance[_from][msg.sender] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function setCap(uint256 _cap) public onlyOwner {
+        require(_cap > 0);
+        cap = _cap;
+        return true;
+    }
+}
+}
+contract SellToken is CappedToken {
+    uint256 public sellPrice;
+    uint256 public minBalanceForAccount;
+    uint256 public totalTokensSold;
+    uint256 public totalTokens;
+    uint256 public totalTokensSold;
+    uint256 public totalTokensBurned;
+    uint256 public totalTokensClaimed;
+    uint256 public totalTokensClaimedDAO;
+    uint256 public totalTokensClaimedBurn;
+    uint256 public totalTokensClaimedReward;
+    uint256 public totalTokensClaimedLRC;
+    uint256 public totalTokensClaimedLRCBurn;
+    uint256 public totalTokensClaimedLRCReward;
+    uint256 public totalTokensClaimedLRCUser;
+    uint256 public totalTokensClaimedLRCUserBurn;
+    uint256 public totalTokensClaimedLRCUserReward;
+    uint256 public totalTokensClaimedLRCUserDAO;
+    uint256 public totalTokensClaimedLRCUserDAOBurn;
+    uint256 public totalTokensClaimedLRCUserDAOReward;
+    uint256 public totalTokensClaimedLRCUserLRC;
+    uint256 public totalTokensClaimedLRCUserLRCBurn;
+    uint256 public totalTokensClaimedLRCUserLRCReward;
+    uint256 public totalTokensClaimedLRCUserLRCUser;
+    uint256 public totalTokensClaimedLRCUserLRCUserBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserReward;
+    uint256 public totalTokensClaimedLRCUser;
+    uint256 public totalTokensClaimedLRCUserBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUser;
+    uint256 public totalTokensClaimedLRCUserLRCUserBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserReward;
+    uint256 public totalTokensClaimedLRCUserLRCUserDAO;
+    uint256 public totalTokensClaimedLRCUserLRCUserDAOBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserDAOReward;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRC;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCReward;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUser;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserReward;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserDAO;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserDAOBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserDAOReward;
+    uint256 public totalTokensClaimedLRCUserLRC;
+    uint256 public totalTokensClaimedLRCUserBurn;
+    uint256 public totalTokensClaimedLRCUserLRC;
+    uint256 public totalTokensClaimedLRCUserLRCUser;
+    uint256 public totalTokensClaimedLRCUserLRCUserBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserReward;
+    uint256 public totalTokensClaimedLRCUserLRCUserDAO;
+    uint256 public totalTokensClaimedLRCUserLRCUserDAOBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserDAOReward;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRC;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUser;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUser;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserReward;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserDAO;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserDAOBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserDAOReward;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRC;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCReward;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUser;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserReward;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserDAO;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserDAOBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRC;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRC;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUser;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserReward;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserDAO;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserDAOBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserDAOReward;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRC;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCReward;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCUser;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCUserBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCUserReward;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCUserDAO;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCUserDAOBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCUserDAOReward;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCUserLRC;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCUserLRCBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCUserLRCReward;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCUserLRCUser;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCUserLRCUserBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCUserLRCUserReward;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCUserLRCUserDAO;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCUserLRCUserDAOBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCUserLRCUser;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCUserLRCUserBurn;
+    uint256 public totalTokensClaimedLRCUserLRCUserLRCUserLRCUserLRCUserLRCUser

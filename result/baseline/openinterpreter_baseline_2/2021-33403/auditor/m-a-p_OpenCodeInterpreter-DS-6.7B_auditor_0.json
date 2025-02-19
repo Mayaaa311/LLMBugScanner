@@ -1,0 +1,79 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) returns (bool success) {
+        if(funding) throw;
+        if(!allowTransfer)throw;
+        var senderBalance = balances[msg.sender];
+        if (senderBalance >= _value && _value > 0) {
+            senderBalance -= _value;
+            balances[msg.sender] = senderBalance;
+            balances[_to] += _value;
+            lastTransferred[msg.sender]=block.timestamp;
+            Transfer(msg.sender, _to, _value);
+            return true;
+        }
+        return false;
+    }
+",
+            "reason": "In the transfer function, the sender's balance is subtracted from the value being transferred. If the value being transferred is greater than the sender's balance, an integer overflow will occur."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from,address _to,uint256 _amount) returns (bool success) {
+         if(funding) throw;
+         if(!allowTransfer)throw;
+         if (balances[_from] >= _amount
+             && allowed[_from][msg.sender] >= _amount
+             && _amount > 0
+             && balances[_to] + _amount > balances[_to]) {
+             balances[_from] -= _amount;
+             allowed[_from][msg.sender] -= _amount;
+             balances[_to] += _amount;
+             Transfer(_from, _to, _amount);
+             return true;
+         } else {
+             return false;
+         }
+     }
+",
+            "reason": "In the transferFrom function, the amount being transferred is subtracted from the sender's balance and added to the recipient's balance. If the amount being transferred is greater than the sender's balance or the sum of the recipient's current balance and the amount being transferred is greater than the recipient's balance, an integer overflow will occur."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint256 _amount) returns (bool success) {
+         if(funding) throw;
+         if(!allowTransfer)throw;
+         allowed[msg.sender][_spender] = _amount;
+         Approval(msg.sender, _spender, _amount);
+         return true;
+     }
+",
+            "reason": "In the approve function, the amount being approved is set as the allowed amount for the spender. If the sum of the spender's current allowed amount and the amount being approved is greater than the maximum uint256 value, an integer overflow will occur."
+        },
+        {
+            "function_name": "setExchangeRate",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function setExchangeRate(uint _exchangeRate){
+        if(msg.sender!=master)throw;
+        exchangeRate=_exchangeRate;
+    }
+",
+            "reason": "In the setExchangeRate function, the exchange rate is set based on the input value. This function does not seem to have any randomness or unpredictability, which could lead to unfair or undesired behavior."
+        },
+        {
+            "function_name": "setEarlyInvestorExchangeRate",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function setEarlyInvestorExchangeRate(uint invest){
+ttif(msg.sender!=master)throw;
+ttEarlyInvestorExchangeRate=invest;
+t}
+",
+            "reason": "In the setEarlyInvestorExchangeRate function, the early investor exchange rate is set based on the input value. This function does not seem to have any randomness or unpredictability, which could lead to unfair or undesired behavior."
+        }
+    ]
+}

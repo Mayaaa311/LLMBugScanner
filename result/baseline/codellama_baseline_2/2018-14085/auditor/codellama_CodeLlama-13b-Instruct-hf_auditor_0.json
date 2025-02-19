@@ -1,0 +1,87 @@
+ Here are the 5 most severe vulnerabilities in the provided smart contract, along with their associated functions and reasons:
+
+1. Integer Overflow Vulnerability in the `sweep` function of the `DefaultSweeper` contract:
+```
+function sweep(address _token, uint _amount)
+    canSweep
+    returns (bool) {
+        bool success = false;
+        address destination = controller.destination();
+        if (_token != address(0)) {
+            Token token = Token(_token);
+            uint amount = _amount;
+            if (amount > token.balanceOf(this)) {
+                return false;
+            }
+            success = token.transfer(destination, amount);
+        }
+        else {
+            uint amountInWei = _amount;
+            if (amountInWei > this.balance) {
+                return false;
+            }
+            success = destination.send(amountInWei);
+        }
+        if (success) {
+            controller.logSweep(this, destination, _token, _amount);
+        }
+        return success;
+    }
+```
+Reason: The `amount` variable in the `sweep` function is not checked for integer overflow, which means that if the `amount` is too large, it can cause the `amount` variable to overflow and become a negative value, which can lead to a loss of funds.
+
+2. Wrong Logic Vulnerability in the `sweep` function of the `DefaultSweeper` contract:
+```
+function sweep(address _token, uint _amount)
+    canSweep
+    returns (bool) {
+        bool success = false;
+        address destination = controller.destination();
+        if (_token != address(0)) {
+            Token token = Token(_token);
+            uint amount = _amount;
+            if (amount > token.balanceOf(this)) {
+                return false;
+            }
+            success = token.transfer(destination, amount);
+        }
+        else {
+            uint amountInWei = _amount;
+            if (amountInWei > this.balance) {
+                return false;
+            }
+            success = destination.send(amountInWei);
+        }
+        if (success) {
+            controller.logSweep(this, destination, _token, _amount);
+        }
+        return success;
+    }
+```
+Reason: The `sweep` function in the `DefaultSweeper` contract has a wrong logic. If the `amount` is greater than the balance of the `token`, the function will still try to transfer the `amount` to the `destination`, which can lead to a loss of funds.
+
+3. Bad Randomness Vulnerability in the `makeWallet` function of the `Controller` contract:
+```
+function makeWallet() onlyAdmins returns (address wallet)  {
+        wallet = address(new UserWallet(this));
+        LogNewWallet(wallet);
+    }
+```
+Reason: The `makeWallet` function in the `Controller` contract uses the `address(new UserWallet(this))` expression to create a new wallet, which can lead to a bad randomness vulnerability. The `address` function is not cryptographically secure, and it can be used to predict the address of the new wallet.
+
+4. Access Control Vulnerability in the `addSweeper` function of the `Controller` contract:
+```
+function addSweeper(address _token, address _sweeper) onlyOwner {
+        sweepers[_token] = _sweeper;
+    }
+```
+Reason: The `addSweeper` function in the `Controller` contract has an access control vulnerability. The function can be called by anyone, including non-owners, which can lead to a loss of control over the sweepers.
+
+5. Typo Constructor Vulnerability in the `DefaultSweeper` contract:
+```
+function DefaultSweeper(address controller)
+             AbstractSweeper(controller) {}
+```
+Reason: The `DefaultSweeper` contract has a typo constructor vulnerability. The `AbstractSweeper` constructor is not called correctly, which can lead to a loss of functionality.
+
+Note: These vulnerabilities are exploitable in real-world scenarios and can be beneficial to attackers.

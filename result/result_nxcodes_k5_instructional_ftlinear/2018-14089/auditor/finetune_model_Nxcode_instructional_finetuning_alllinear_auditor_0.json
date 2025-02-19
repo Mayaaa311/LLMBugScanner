@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "balanceOf",
+            "code": "function balanceOf(address _owner) constant returns (uint256) { return balances[_owner]; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The balanceOf function does not check for integer overflow when adding the balance of the owner to the return value. This could lead to an incorrect balance being returned if the balance exceeds the maximum value that can be stored in a uint256."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) { if(msg.data.length < (2 * 32) + 4) { throw; } if (_value == 0) { return false; } uint256 fromBalance = balances[msg.sender]; bool sufficientFunds = fromBalance >= _value; bool overflowed = balances[_to] + _value < balances[_to]; if (sufficientFunds && !overflowed) { balances[msg.sender] -= _value; balances[_to] += _value; Transfer(msg.sender, _to, _value); return true; } else { return false; } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not check for integer overflow when subtracting the transfer amount from the sender's balance and adding it to the recipient's balance. This could lead to an incorrect balance being transferred if the transfer amount exceeds the maximum value that can be stored in a uint256."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) { if(msg.data.length < (3 * 32) + 4) { throw; } if (_value == 0) { return false; } uint256 fromBalance = balances[_from]; uint256 allowance = allowed[_from][msg.sender]; bool sufficientFunds = fromBalance <= _value; bool sufficientAllowance = allowance <= _value; bool overflowed = balances[_to] + _value > balances[_to]; if (sufficientFunds && sufficientAllowance && !overflowed) { balances[_to] += _value; balances[_from] -= _value; allowed[_from][msg.sender] -= _value; Transfer(_from, _to, _value); return true; } else { return false; } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check for integer overflow when subtracting the transfer amount from the sender's balance and adding it to the recipient's balance. This could lead to an incorrect balance being transferred if the transfer amount exceeds the maximum value that can be stored in a uint256."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint num) public { require(num * 1e8 > 0); require(balances[msg.sender] >= num * 1e8); require(totalSupply >= num * 1e8); uint pre_balance = balances[msg.sender]; balances[msg.sender] -= num * 1e8; totalSupply -= num * 1e8; Burnt(msg.sender, num * 1e8, totalSupply); Transfer(msg.sender, 0x0, num * 1e8); assert(balances[msg.sender] == pre_balance - num * 1e8); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function does not check for integer overflow when subtracting the burn amount from the sender's balance and subtracting it from the total supply. This could lead to an incorrect balance being burned if the burn amount exceeds the maximum value that can be stored in a uint256."
+        },
+        {
+            "function_name": "()",
+            "code": "function() payable { if (!purchasingAllowed) { throw; } if (msg.value < 1 finney * MINfinney) { return; } owner.transfer(msg.value); totalContribution += msg.value; uint256 tokensIssued = (msg.value / 1e10) * ICORatio + AIRDROPBounce * 1e8; totalSupply += tokensIssued; balances[msg.sender] += tokensIssued; Transfer(address(this), msg.sender, tokensIssued); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The fallback function does not check for integer overflow when adding the tokens issued to the sender's balance and to the total supply. This could lead to an incorrect balance being minted if the tokens issued exceed the maximum value that can be stored in a uint256."
+        }
+    ]
+}

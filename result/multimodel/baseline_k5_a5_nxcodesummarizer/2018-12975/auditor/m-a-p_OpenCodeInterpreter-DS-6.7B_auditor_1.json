@@ -1,0 +1,89 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address _owner, uint32 _heroClassId) onlyAccessMint public returns (uint256) {
+    require(_owner != address(0));
+    require(_heroClassId < numberOfHeroClasses);
+    var _heroClassInfo = heroClasses[_heroClassId];
+    _mint(_owner, numberOfTokenIds);
+    uint32[5] memory _ivForStats;
+    uint32[5] memory _initialStats;
+    for (uint8 i = 0; i < 5; i++) {
+      _ivForStats[i] = (random(_heroClassInfo.maxIVForStats[i] + 1, _heroClassInfo.minIVForStats[i]));
+      _initialStats[i] = _heroClassInfo.baseStats[i] + _ivForStats[i];
+    }
+    HeroInstance memory _heroInstance = HeroInstance({
+      heroClassId: _heroClassId,
+      heroName: "",
+      currentLevel: 1,
+      currentExp: 0,
+      lastLocationId: 0,
+      availableAt: now,
+      currentStats: _initialStats,
+      ivForStats: _ivForStats
+    });
+    tokenIdToHeroInstance[numberOfTokenIds] = _heroInstance;
+    numberOfTokenIds ++;
+    _heroClassInfo.currentNumberOfInstancedHeroes ++;
+    return numberOfTokenIds - 1;
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function mint uses the variable numberOfTokenIds to generate the tokenId for the new hero instance. If the number of tokenIds exceeds the maximum value of uint256, an integer overflow error will occur."
+        },
+        {
+            "function_name": "addExp",
+            "code": "function addExp(uint256 _tokenId, uint32 _exp) onlyAccessDeploy public returns (bool) {
+    require(ownerOf(_tokenId) != address(0));
+    var _heroInstance = tokenIdToHeroInstance[_tokenId];
+    var _newExp = _heroInstance.currentExp + _exp;
+    require(_newExp == uint256(uint128(_newExp)));
+    _heroInstance.currentExp += _newExp;
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function addExp adds the input _exp to the current exp of the hero instance. If the sum of currentExp and _exp exceeds the maximum value of uint256, an integer overflow error will occur."
+        },
+        {
+            "function_name": "addDeposit",
+            "code": "function addDeposit(address _to, uint256 _amount) onlyAccessDeposit public {
+    addressToGoldDeposit[_to] += _amount;
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function addDeposit adds the input _amount to the current deposit of the address _to. If the sum of addressToGoldDeposit[_to] and _amount exceeds the maximum value of uint256, an integer overflow error will occur."
+        },
+        {
+            "function_name": "levelUp",
+            "code": "function levelUp(uint256 _tokenId) onlyOwnerOf(_tokenId) whenNotPaused public {
+    var _heroInstance = tokenIdToHeroInstance[_tokenId];
+    require(_heroInstance.availableAt <= now);
+    var _heroClassInfo = heroClasses[_heroInstance.heroClassId];
+    require(_heroInstance.currentLevel < _heroClassInfo.maxLevel);
+    var requiredExp = getHeroRequiredExpForLevelUp(_tokenId);
+    require(_heroInstance.currentExp >= requiredExp);
+    var requiredGold = getHeroRequiredGoldForLevelUp(_tokenId);
+    var _ownerOfToken = ownerOf(_tokenId);
+    require(addressToGoldDeposit[_ownerOfToken] >= requiredGold);
+    _heroInstance.currentLevel += 1;
+    for (uint8 i = 0; i < 5; i++) {
+      _heroInstance.currentStats[i] = _heroClassInfo.baseStats[i] + (_heroInstance.currentLevel - 1) * _heroInstance.ivForStats[i];
+    }
+    _heroInstance.currentExp -= requiredExp;
+    addressToGoldDeposit[_ownerOfToken] -= requiredGold;
+    LevelUp(msg.sender, _tokenId, _heroInstance.currentLevel);
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function levelUp increases the current level of the hero instance by 1 and updates the current stats. If the sum of _heroInstance.currentLevel and _heroInstance.ivForStats[i] exceeds the maximum value of uint256, an integer overflow error will occur."
+        },
+        {
+            "function_name": "transferDeposit",
+            "code": "function transferDeposit(uint256 _amount) whenNotPaused public {
+    require(goldContract.allowance(msg.sender, this) >= _amount);
+    if (goldContract.transferFrom(msg.sender, this, _amount)) {
+      addressToGoldDeposit[msg.sender] += _amount;
+    }
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transferDeposit transfers the input _amount from the sender to the contract. If the sum of addressToGoldDeposit[msg.sender] and _amount exceeds the maximum value of uint256, an integer overflow error will occur."
+        }
+    ]
+}

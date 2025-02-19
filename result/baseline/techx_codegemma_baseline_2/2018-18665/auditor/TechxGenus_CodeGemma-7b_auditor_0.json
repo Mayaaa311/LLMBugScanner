@@ -1,0 +1,41 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) returns (bool success)",
+            "reason": "The function does not check for the value of `_value` which can lead to an overflow if a large value is sent. This can be exploited to transfer a large amount of tokens to a desired address."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success)",
+            "reason": "Similar to the previous vulnerability, the function does not check for the value of `_value` which can lead to an overflow if a large value is sent. This can be exploited to transfer a large amount of tokens from one address to another."
+        },
+        {
+            "function_name": "balanceOf",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function balanceOf(address _owner) constant returns (uint256 balance)",
+            "reason": "The function logic incorrectly assumes that the balance of the owner is the balance of the token. This is a misconception of how balances work and can result in incorrect results."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function approve(address _spender, uint256 _value) returns (bool success)",
+            "reason": "The function does not use a secure random number generator for the token approval. This makes the approval process insecure and potentially allows for manipulation."
+        },
+        {
+            "function_name": "allowance",
+            "vulnerability": "Access Control",
+            "function_code": "function allowance(address _owner, address _spender) constant returns (uint256 remaining)",
+            "reason": "The function does not enforce proper access control. It allows anyone to spend tokens on behalf of the owner, which can lead to potential security breaches."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Typos in Constructor",
+            "function_code": "function mintToken(uint256 _amount) { if (msg.sender == owner) { _totalSupply += _amount; } }",
+            "reason": "The function has a typo in the variable name when increasing the total supply. It should be `totalSupply` instead of `_totalSupply`."
+        }
+    ]
+}<eos>

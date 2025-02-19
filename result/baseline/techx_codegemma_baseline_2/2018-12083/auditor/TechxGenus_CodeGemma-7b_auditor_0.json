@@ -1,0 +1,35 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "msg.sender = _to; _transfer(_from, _to, _value);",
+            "reason": "The function doesn't check for the condition where the sender of the transaction is not allowed to receive the tokens."
+        },
+        {
+            "function_name": "changeOwner",
+            "vulnerability": "Wrong Logic",
+            "function_code": "owner = msg.sender; _transfer(msg.sender, _to, _value);",
+            "reason": "The function doesn't check if the new owner is not already the owner of the contract."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "if (_value <= allowance[_from][msg.sender]) { allowance[_from][msg.sender] -= _value; _transfer(_from, _to, _value); return true; }",
+            "reason": "The function doesn't check if the sender has been whitelisted to transfer tokens."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Typos in Constructor",
+            "function_code": "balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(this, target, mintedAmount);",
+            "reason": "The function lacks an 'require' statement to check if the 'target' address is already the owner of the contract."
+        },
+        {
+            "function_name": "burnFrom",
+            "vulnerability": "Token Devalue",
+            "function_code": "balanceOf[_from] -= _value; allowance[_from][msg.sender] -= _value; totalSupply -= _value; Burn(_from, _value);",
+            "reason": "The function doesn't check if the 'from' address is not already the owner of the contract."
+        }
+    ]
+}<eos>

@@ -1,0 +1,53 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address holder, uint value) {
+    require(msg.sender == preSale);
+    require(value > 0);
+    require(totalSupply + value <= TOKEN_LIMIT);
+    balances[holder] += value;
+    totalSupply += value;
+    Transfer(0x0, holder, value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'mint' function does not properly check for overflow when updating the 'totalSupply' and 'balances' variables. An attacker can exploit this by minting tokens in a way that causes an integer overflow, leading to a denial of service or unintended token distribution."
+        },
+        {
+            "function_name": "unfreeze",
+            "code": "function unfreeze() external {
+    require(msg.sender == team);
+    isFrozen = false;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'unfreeze' function allows the contract owner (team) to unfreeze the contract, potentially enabling an attacker to transfer tokens even after they were frozen. This can be exploited if the attacker can gain control of the team address."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _value) public returns (bool) {
+    require(!isFrozen);
+    return super.transfer(_to, _value);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'transfer' function does not properly check the 'isFrozen' state before allowing transfers. An attacker can exploit this by exploiting other functions that could change the 'isFrozen' state, such as 'unfreeze', to bypass the transfer restrictions."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+    require(!isFrozen);
+    return super.transferFrom(_from, _to, _value);
+}",
+            "vulnerability": "Access Control",
+            "reason": "Similar to the 'transfer' function, the 'transferFrom' function does not properly check the 'isFrozen' state before allowing transfers. An attacker can exploit this by exploiting other functions that could change the 'isFrozen' state, such as 'unfreeze', to bypass the transfer restrictions."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint _value) public returns (bool) {
+    require(!isFrozen);
+    return super.approve(_spender, _value);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'approve' function does not properly check the 'isFrozen' state before allowing approvals. An attacker can exploit this by exploiting other functions that could change the 'isFrozen' state, such as 'unfreeze', to bypass the approval restrictions."
+        }
+    ]
+}

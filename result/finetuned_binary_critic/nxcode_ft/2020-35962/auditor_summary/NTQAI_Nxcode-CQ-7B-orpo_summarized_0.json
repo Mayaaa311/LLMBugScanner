@@ -1,0 +1,31 @@
+{
+    "output_list": [
+        {
+            "function_name": "sellTokenForLRC",
+            "code": "            function sellTokenForLRC(address token, uint amount) external {
+                require(amount > 0, "ZERO_AMOUNT");
+                require(token != lrcAddress, "PROHIBITED");
+                address recipient = tokenSellerAddress == address(0) ? owner : tokenSellerAddress;
+                if (token == address(0)) {
+                    recipient.sendETHAndVerify(amount, gasleft());
+                } else {
+                    token.safeTransferAndVerify(recipient, amount);
+                }
+                require(
+                    tokenSellerAddress == address(0) ||
+                    ITokenSeller(tokenSellerAddress).sellToken(token, lrcAddress),
+                    "SELL_FAILURE"
+                );
+                emit TokenSold(token, amount);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The sellTokenForLRC function has an integer overflow in the following code snippet: 
+                        if (token == address(0)) {
+                            recipient.sendETHAndVerify(amount, gasleft());
+                        } else {
+                            token.safeTransferAndVerify(recipient, amount);
+                        }
+                        The 'amount' of LRC token is directly transferred to a user provided 'recipient' address, if 'recipient' is a contract, it can set any value of LRC token for an attacker."
+        }
+    ]
+}

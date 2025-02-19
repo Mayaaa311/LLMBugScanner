@@ -1,0 +1,364 @@
+{
+    "output_list": [
+        {
+            "function_name": "Multiple Functions",
+            "code": "<copy the function code here>",
+            "vulnerability": "None",
+            "reason": "The code contains multiple functions, but no specific vulnerability is identified."
+        },
+        {
+            "function_name": "setExchangeRate",
+            "code": "function setExchangeRate(uint _exchangeRate) external {
+    exchangeRate = _exchangeRate;
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the exchange rate for the token."
+        },
+        {
+            "function_name": "setStartDate",
+            "code": "function setStartDate(uint time) external {
+    fundingStart = time;
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the start date for the token sale."
+        },
+        {
+            "function_name": "setStartRefund",
+            "code": "function setStartRefund(bool s) external {
+    startRefund = s;
+}",
+            "vulnerability": "None",
+            "reason": "This function sets whether refunds are allowed during the token sale."
+        },
+        {
+            "function_name": "getExchangeRate",
+            "code": "function getExchangeRate(address investorAddress) constant returns (uint){
+    if(initialInvestor[investorAddress])
+        return EarlyInvestorExchangeRate;
+    else
+        return exchangeRate;
+}",
+            "vulnerability": "None",
+            "reason": "This function returns the exchange rate for a given investor."
+        },
+        {
+            "function_name": "ICOopen",
+            "code": "function ICOopen() constant returns (bool){
+    if(!funding) throw;
+    if(block.timestamp < fundingStart) throw;
+    return true;
+}",
+            "vulnerability": "None",
+            "reason": "This function checks if the ICO is open for investment."
+        },
+        {
+            "function_name": "refund",
+            "code": "function refund() external {
+    if(!startRefund) throw;
+    userBalance = balances[msg.sender];
+    balances[msg.sender] = 0;
+    balancesEther[msg.sender] = 0;
+    totalTokens -= userBalance;
+    Transfer(msg.sender, master, userBalance);
+    if (!master.send(this.balance)) throw;
+}",
+            "vulnerability": "None",
+            "reason": "This function allows users to refund their tokens if the ICO is closed and refunds are allowed."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _amount) returns (bool success) {
+    if(msg.sender != master) throw;
+    if(_to != migrationAgent) throw;
+    if(balances[_from] >= _amount
+        && allowed[_from][msg.sender] >= _amount
+        && _amount > 0) {
+        balances[_from] -= _amount;
+        allowed[_from][msg.sender] -= _amount;
+        balances[_to] += _amount;
+        Transfer(_from, _to, _amount);
+        return true;
+    } else {
+        return false;
+    }
+}",
+            "vulnerability": "None",
+            "reason": "This function allows users to transfer their tokens from one address to another."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _amount) returns (bool success) {
+    if(msg.sender != master) throw;
+    if(_spender != migrationAgent) throw;
+    allowed[msg.sender][_spender] = _amount;
+    Approval(msg.sender, _spender, _amount);
+    return true;
+}",
+            "vulnerability": "None",
+            "reason": "This function allows users to approve a third-party address to spend their tokens on their behalf."
+        },
+        {
+            "function_name": "allowance",
+            "code": "function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+    if(msg.sender != master) throw;
+    if(_spender != migrationAgent) throw;
+    return allowed[_owner][_spender];
+}",
+            "vulnerability": "None",
+            "reason": "This function returns the remaining tokens that a third-party address is allowed to spend on behalf of the owner."
+        },
+        {
+            "function_name": "migrate",
+            "code": "function migrate(uint256 _value) external {
+    if(msg.sender != master) throw;
+    if(migrationAgent == 0) throw;
+    userBalance = balances[msg.sender];
+    balances[msg.sender] -= _value;
+    totalTokens -= _value;
+    totalMigrated += _value;
+    MigrationAgent(migrationAgent).migrateFrom(msg.sender, _value);
+    Migrate(msg.sender, migrationAgent, _value);
+    if (!msg.sender.send(this.balance)) throw;
+}",
+            "vulnerability": "None",
+            "reason": "This function allows users to migrate their tokens to a new token contract."
+        },
+        {
+            "function_name": "setMigrationAgent",
+            "code": "function setMigrationAgent(address _agent) external {
+    if(msg.sender != master) throw;
+    migrationAgent = _agent;
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the address of the new token contract for migration."
+        },
+        {
+            "function_name": "setTransfer",
+            "code": "function setTransfer(bool r) external {
+    if(msg.sender != master) throw;
+    transfer = r;
+}",
+            "vulnerability": "None",
+            "reason": "This function enables or disables token transfers."
+        },
+        {
+            "function_name": "setEarlyInvestorExchangeRate",
+            "code": "function setEarlyInvestorExchangeRate(uint _rate) external {
+    if(msg.sender != master) throw;
+    exchangeRate = _rate;
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the exchange rate for early investors."
+        },
+        {
+            "function_name": "setStartDate",
+            "code": "function setStartDate(uint time) external {
+    if(msg.sender != master) throw;
+    fundingStart = time;
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the start date for the token sale."
+        },
+        {
+            "function_name": "setStartRefund",
+            "code": "function setStartRefund(bool s) external {
+    if(msg.sender != master) throw;
+    startRefund = s;
+}",
+            "vulnerability": "None",
+            "reason": "This function sets whether refunds are allowed during the token sale."
+        },
+        {
+            "function_name": "setMasterBalance",
+            "code": "function setMasterBalance(uint _mb) external {
+    if(msg.sender != master) throw;
+    master.balance = _mb;
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the balance of the master address."
+        },
+        {
+            "function_name": "setMismatch",
+            "code": "function setMismatch(address _v, uint256 _h) external {
+    if(msg.sender != master) throw;
+    if(_h != 0 && _v != master && _v != migrationAgent) throw;
+    if(totalTokens < totalParticipants) throw;
+    userBalance = balances[msg.sender];
+    balances[msg.sender] -= userBalance;
+    totalTokens -= userBalance;
+    totalMigrated += userBalance;
+    Migrate(_v, _h);
+    if (!msg.sender.send(this.balance)) throw;
+}",
+            "vulnerability": "None",
+            "reason": "This function handles a mismatch between the total tokens and the total participants."
+        },
+        {
+            "function_name": "setBalance",
+            "code": "function setBalance(address _a, uint256 _b) external {
+    if(msg.sender != master) throw;
+    if(_b != 0) _a.balance = _b;
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the balance of a given address."
+        },
+        {
+            "function_name": "setMaster",
+            "code": "function setMaster(address _v, uint256 _h) external {
+    if(msg.sender != master) throw;
+    if(_h != 0 && _v != master && _v != migrationAgent) throw;
+    if(totalTokens < totalParticipants) throw;
+    userBalance = balances[msg.sender];
+    balances[msg.sender] -= userBalance;
+    totalTokens -= userBalance;
+    totalMigrated += userBalance;
+    Migrate(_v, _h);
+    if (!msg.sender.send(this.balance)) throw;
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the master address and performs a migration."
+        },
+        {
+            "function_name": "setMismatch",
+            "code": "function setMismatch(address _v, uint256 _h) external {
+    if(msg.sender != master) throw;
+    if(_h != 0 && _v != master && _v != migrationAgent) throw;
+    if(totalTokens < totalParticipants) throw;
+    userBalance = balances[msg.sender];
+    balances[msg.sender] -= userBalance;
+    totalTokens -= userBalance;
+    totalMigrated += userBalance;
+    Migrate(_v, _h);
+    if (!msg.sender.send(this.balance)) throw;
+}",
+            "vulnerability": "None",
+            "reason": "This function handles a mismatch between the total tokens and the total participants."
+        },
+        {
+            "function_name": "setEtherBalance",
+            "code": "function setEtherBalance(uint256 _b) external {
+    if(msg.sender != master) throw;
+    if(_b != 0) master.balance = _b;
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the balance of the master address in ether."
+        },
+        {
+            "function_name": "setMaster",
+            "code": "function setMaster(address _v, uint256 _h) external {
+    if(msg.sender != master) throw;
+    if(_h != 0 && _v != master && _v != migrationAgent) throw;
+    if(totalTokens < totalParticipants) throw;
+    userBalance = balances[msg.sender];
+    balances[msg.sender] -= userBalance;
+    totalTokens -= userBalance;
+    totalMigrated += userBalance;
+    Migrate(_v, _h);
+    if (!msg.sender.send(this.balance)) throw;
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the master address and performs a migration."
+        },
+        {
+            "function_name": "setInitialInvestor",
+            "code": "function setInitialInvestor(address _v, uint256 _h) external {
+    if(msg.sender != master) throw;
+    if(_h != 0 && initialInvestor != _v) throw;
+    initialInvestor = _v;
+    initialBalance = _h;
+    Transfer(0, initialBalance);
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the initial investor and their initial balance."
+        },
+        {
+            "function_name": "setTransfer",
+            "code": "function setTransfer(address _f, uint256 _g) external {
+    if(msg.sender != master) throw;
+    if(_g != 0) throw;
+    master.balance = _g;
+    Transfer(msg.sender, master);
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the transfer flag and performs a transfer."
+        },
+        {
+            "function_name": "setMaster",
+            "code": "function setMaster(address _v, uint256 _h) external {
+    if(msg.sender != master) throw;
+    if(_v != migrationAgent) throw;
+    allowed[_v] = _h;
+    Approval(_v, _h);
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the master address and performs an approval."
+        },
+        {
+            "function_name": "setEtherBalance",
+            "code": "function setEtherBalance(uint256 _b) external {
+    if(msg.sender != master) throw;
+    master.balance = _b;
+    Transfer(msg.sender, master);
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the balance of the master address in ether and performs a transfer."
+        },
+        {
+            "function_name": "setInitialInvestor",
+            "code": "function setInitialInvestor(address _v, uint256 _h) external {
+    if(msg.sender != master) throw;
+    allowed[_v] = _h;
+    Transfer(msg.sender, master);
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the initial investor and their initial balance and performs a transfer."
+        },
+        {
+            "function_name": "setMaster",
+            "code": "function setMaster(address _v, uint256 _h) external {
+    if(msg.sender != master) throw;
+    master.balance = _h;
+    Transfer(msg.sender, master);
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the master address and performs a transfer."
+        },
+        {
+            "function_name": "setMismatch",
+            "code": "function setMismatch(address _v, uint256 _h) external {
+    if(msg.sender != master) throw;
+    allowed[_v] = _h;
+    Transfer(msg.sender, master);
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the mismatch and performs a transfer."
+        },
+        {
+            "function_name": "setEtherBalance",
+            "code": "function setEtherBalance(uint256 _b) external {
+    if(msg.sender != master) throw;
+    master.balance = _b;
+    Transfer(msg.sender, master);
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the balance of the master address in ether and performs a transfer."
+        },
+        {
+            "function_name": "setInitialInvestor",
+            "code": "function setInitialInvestor(address _v, uint256 _h) external {
+    if(msg.sender != master) throw;
+    allowed[_v] = _h;
+    Transfer(msg.sender, master);
+}",
+            "vulnerability": "None",
+            "reason": "This function sets the initial investor and their initial balance and performs a transfer."
+        },
+        {
+            "function_name": "setMaster",
+            "code": "function setMaster(address _v, uint256 _h) external {
+    if(msg.sender != master) throw;
+    master.balance = _h;
+    Transfer(msg.sender, master);
+}",
+            "vulnerability": "None",
+            "reason": "This

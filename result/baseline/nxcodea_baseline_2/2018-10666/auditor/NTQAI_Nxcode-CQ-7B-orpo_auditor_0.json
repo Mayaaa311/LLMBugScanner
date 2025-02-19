@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "feeFor",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function feeFor(address from, address to, uint256 amount) constant external returns (uint256 value) { uint256 fee = exportFee[from]; if (fee == 0) return 0; uint256 amountHeld; if (balanceOf[to] != 0) { if (validAfter[to].ts + mustHoldFor < now) amountHeld = balanceOf[to]; else amountHeld = validAfter[to].last; if (amountHeld >= singleIDXMQty) return 0; return amount*fee*(singleIDXMQty - amountHeld) / feeDivisor; } else return amount*fee / baseFeeDivisor; }",
+            "reason": "The function `feeFor` calculates the fee based on the amount of IDXM held by the recipient. If the recipient has held for less than `mustHoldFor` seconds, the fee is calculated as `amount * fee * (singleIDXMQty - amountHeld) / feeDivisor`. However, if the recipient has held for more than `mustHoldFor` seconds, the fee is calculated as `amount * fee / baseFeeDivisor`. This calculation can cause an integer overflow if the recipient has held for a very long time and the amount of IDXM held is very large. This can be exploited by an attacker to steal more IDXM from the recipient than they actually hold."
+        },
+        {
+            "function_name": "setExportFee",
+            "vulnerability": "Access Control",
+            "function_code": "function setExportFee(address addr, uint256 fee) onlyOwner { require(addr != 0x00000000000000000000000000000000000000ff); exportFee[addr] = fee; }",
+            "reason": "The function `setExportFee` allows the owner to set the export fee for a specific address. However, the `onlyOwner` modifier ensures that only the owner can call this function. This means that any address can set the export fee for any other address, which can be exploited by an attacker to manipulate the export fees and steal more IDXM from the recipient."
+        },
+        {
+            "function_name": "setHoldingPeriod",
+            "vulnerability": "Access Control",
+            "function_code": "function setHoldingPeriod(uint256 ts) onlyOwner { mustHoldFor = ts; }",
+            "reason": "The function `setHoldingPeriod` allows the owner to set the holding period for IDXM. However, the `onlyOwner` modifier ensures that only the owner can call this function. This means that any address can set the holding period for any other address, which can be exploited by an attacker to manipulate the holding period and steal more IDXM from the recipient."
+        },
+        {
+            "function_name": "feeFor",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function feeFor(address from, address to, uint256 amount) constant external returns (uint256 value) { uint256 fee = exportFee[from]; if (fee == 0) return 0; uint256 amountHeld; if (balanceOf[to] != 0) { if (validAfter[to].ts + mustHoldFor < now) amountHeld = balanceOf[to]; else amountHeld = validAfter[to].last; if (amountHeld >= singleIDXMQty) return 0; return amount*fee*(singleIDXMQty - amountHeld) / feeDivisor; } else return amount*fee / baseFeeDivisor; }",
+            "reason": "The function `feeFor` has a typo in its name. The correct name should be `feeFor`. This typo can be exploited by an attacker to call the wrong function and potentially cause a security vulnerability."
+        },
+        {
+            "function_name": "feeFor",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function feeFor(address from, address to, uint256 amount) constant external returns (uint256 value) { uint256 fee = exportFee[from]; if (fee == 0) return 0; uint256 amountHeld; if (balanceOf[to] != 0) { if (validAfter[to].ts + mustHoldFor < now) amountHeld = balanceOf[to]; else amountHeld = validAfter[to].last; if (amountHeld >= singleIDXMQty) return 0; return amount*fee*(singleIDXMQty - amountHeld) / feeDivisor; } else return amount*fee / baseFeeDivisor; }",
+            "reason": "The function `feeFor` has a typo in its name. The correct name should be `feeFor`. This typo can be exploited by an attacker to call the wrong function and potentially cause a security vulnerability."
+        }
+    ]
+}

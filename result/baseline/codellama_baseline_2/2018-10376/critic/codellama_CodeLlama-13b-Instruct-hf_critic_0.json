@@ -1,0 +1,61 @@
+ Here is the output for the given code, with the auditor index set to 0:
+
+{
+    "output_list": [
+        {
+            "function_name": "transferProxy",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The `transfer` function uses the `+` operator to add the `_value` and `_feeSmt` parameters, which can cause an integer overflow if the sum exceeds the maximum value of a uint256.",
+            "correctness": 9,
+            "severity": 9,
+            "profitability": 9
+        },
+        {
+            "function_name": "approveProxy",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The `approve` function uses the `keccak256` function to hash the `_from`, `_spender`, and `_value` parameters, but it does not include the `nonce` parameter in the hash.",
+            "correctness": 8,
+            "severity": 8,
+            "profitability": 8
+        },
+        {
+            "function_name": "allocateTokens",
+            "auditor_idx": 0,
+            "vulnerability": "Bad Randomness",
+            "criticism": "The `allocateTokens` function uses the `keccak256` function to hash the `_owners` and `_values` parameters, but it does not include the `allocateEndTime` parameter in the hash.",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 7
+        },
+        {
+            "function_name": "transferProxy",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The `transferProxy` function uses the `transferAllowed` modifier to check if the `_from` address is allowed to transfer tokens. However, this modifier does not check if the `_to` address is allowed to receive tokens.",
+            "correctness": 6,
+            "severity": 6,
+            "profitability": 6
+        },
+        {
+            "function_name": "SMT",
+            "auditor_idx": 0,
+            "vulnerability": "Typo Constructor",
+            "criticism": "The `SMT` constructor uses the `allocateEndTime` parameter to set the end time for token allocation. However, it does not check if the `allocateEndTime` parameter is set correctly.",
+            "correctness": 5,
+            "severity": 5,
+            "profitability": 5
+        }
+    ]
+}
+
+Explanation:
+
+* The `transferProxy` function is vulnerable to integer overflow, as the `+` operator can cause an overflow if the sum of `_value` and `_feeSmt` exceeds the maximum value of a uint256. This is a critical vulnerability, as it can lead to a loss of funds for the contract.
+* The `approveProxy` function is vulnerable to wrong logic, as it does not include the `nonce` parameter in the hash. This can lead to a replay attack, where an attacker can reuse a previously signed message to transfer tokens.
+* The `allocateTokens` function is vulnerable to bad randomness, as it does not include the `allocateEndTime` parameter in the hash. This can lead to a loss of funds for the contract, as the tokens can be allocated to the wrong addresses.
+* The `transferProxy` function is vulnerable to access control, as it only checks if the `_from` address is allowed to transfer tokens, but does not check if the `_to` address is allowed to receive tokens. This can lead to a loss of funds for the contract, as the tokens can be transferred to unauthorized addresses.
+* The `SMT` constructor is vulnerable to a typo constructor, as it does not check if the `allocateEndTime` parameter is set correctly. This can lead to a loss of funds for the contract, as the tokens can be allocated to the wrong addresses.
+
+Overall, the code is vulnerable to several critical vulnerabilities, and it is important to address them as soon as possible to prevent a loss of funds for the contract.

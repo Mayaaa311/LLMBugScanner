@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The transfer function uses a condition to prevent overflow during the transfer operation. However, it can be bypassed if an attacker manipulates the _value or balances[_to] in a way that the addition does not overflow but results in an unintended increase in the recipient's balance. This vulnerability is critical as it can lead to unauthorized token transfers.",
+            "correctness": 6,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "Similar to the transfer function, the transferFrom function uses a condition to prevent overflow during the transfer operation. The same issue of bypassing this check through manipulation of _value or balances[_to] applies here. This vulnerability is equally severe as it allows unauthorized token transfers.",
+            "correctness": 6,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "approve",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The approve function does not check if the spender's allowance is already set to a higher value before setting it to the new value. This can lead to a situation where a user's tokens can be stolen if they approve a contract to transfer more tokens than they currently have. This vulnerability is significant as it compromises the trust and security of the token's users.",
+            "correctness": 4,
+            "severity": 8,
+            "profitability": 5
+        },
+        {
+            "function_name": "transferProxy",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The transferProxy function does not properly check the sender's allowance before transferring tokens, which can lead to unauthorized transfers. Additionally, the use of ECDSA signatures for authorization can be risky if the implementation is not done correctly. This vulnerability is high-severity as it allows unauthorized token transfers.",
+            "correctness": 3,
+            "severity": 9,
+            "profitability": 6
+        },
+        {
+            "function_name": "approveProxy",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "Similar to approve, the approveProxy function does not check if the spender's allowance is already set to a higher value before setting it to the new value. This can lead to a situation where a user's tokens can be stolen if they approve a contract to transfer more tokens than they currently have. This vulnerability is high-severity as it compromises the trust and security of the token's users.",
+            "correctness": 4,
+            "severity": 8,
+            "profitability": 5
+        }
+    ]
+}

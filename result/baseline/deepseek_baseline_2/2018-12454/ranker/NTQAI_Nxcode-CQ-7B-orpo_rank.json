@@ -1,0 +1,52 @@
+[
+  {
+    "function_name": "findWinner",
+    "auditor_idx": 0,
+    "vulnerability": "Wrong Logic",
+    "criticism": "The vulnerability arises from the predictable nature of the index selection in the `findWinner` function. By using a modulo operation with the current number of guesses, an attacker can easily manipulate the outcome to always pick a specific address as the winner. This is a severe vulnerability because it allows an attacker to control the lottery's outcome, leading to potential theft of funds.",
+    "correctness": 7,
+    "severity": 9,
+    "profitability": 6,
+    "recommendations": "Consider implementing a more secure random number generation method or using Chainlink VRF for randomness."
+  },
+  {
+    "function_name": "_finish",
+    "auditor_idx": 0,
+    "vulnerability": "Access Control",
+    "criticism": "The `_finish` function does not adequately check the developer address or the lottery state before transferring funds, which can lead to unauthorized access. An attacker could exploit this by manipulating the state or by setting the developer address to their own, forcing the transfer of funds to their address.",
+    "correctness": 6,
+    "severity": 8,
+    "profitability": 5,
+    "recommendations": "Ensure that only authorized parties can call the `_finish` function and that all critical state changes are properly validated."
+  },
+  {
+    "function_name": "simplelottery",
+    "auditor_idx": 0,
+    "vulnerability": "Typo Constructor",
+    "criticism": "The typo in the constructor function where `_starttime` is assigned the value of `block.timestamp` instead of `_starttime` can lead to incorrect initialization of the contract's state variables. This could cause the contract to function improperly, potentially leading to unexpected behavior or loss of funds.",
+    "correctness": 5,
+    "severity": 7,
+    "profitability": 4,
+    "recommendations": "Carefully review and correct all state variable initializations to avoid such typos."
+  },
+  {
+    "function_name": "_addguess",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The potential integer overflow vulnerability in the `_addguess` function is concerning. The condition `if((uint)(numguesses)>=arraysize)` checks for overflow but is too late since `numguesses` is incremented before this check. This could lead to unpredictable behavior and potentially allow attackers to bypass checks and execute unintended code.",
+    "correctness": 4,
+    "severity": 8,
+    "profitability": 3,
+    "recommendations": "Implement checks to prevent integer overflow before incrementing the `numguesses` variable."
+  },
+  {
+    "function_name": "getDeveloperFee",
+    "auditor_idx": 0,
+    "vulnerability": "Token Devalue",
+    "criticism": "The method of calculating the developer fee by dividing the contract's balance by 100 can lead to a significant reduction in the contract's value if the balance is small. This is a vulnerability because it can be exploited by an attacker to devalue the token or contract, potentially leading to its deprecation.",
+    "correctness": 3,
+    "severity": 7,
+    "profitability": 6,
+    "recommendations": "Consider implementing a more equitable method of calculating developer fees that does not disproportionately reduce the contract's value."
+  }
+]

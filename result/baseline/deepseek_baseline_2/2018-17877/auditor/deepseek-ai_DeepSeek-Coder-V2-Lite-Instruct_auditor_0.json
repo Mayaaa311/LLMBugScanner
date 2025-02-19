@@ -1,0 +1,59 @@
+ {
+    "output_list": [
+        {
+            "function_name": "buyHeart",
+            "vulnerability": "Integer Overflow",
+            "function_code": "require(_hearts >= 1000000000000000000);
+require(RoundTime[Round] > now || RoundTime[Round] == 0);
+updateTimer(_hearts);
+RoundHeart[Round] += _hearts;
+RoundMyHeart[Round][msg.sender] += _hearts;
+",
+            "reason": "The function does not properly check for integer overflow when updating the RoundHeart and RoundMyHeart mappings. An attacker can manipulate the _hearts value to cause an overflow, leading to a denial of service or unauthorized access to funds."
+        },
+        {
+            "function_name": "win",
+            "vulnerability": "Wrong Logic",
+            "function_code": "require(now > RoundTime[Round] && RoundTime[Round] != 0);
+RoundLastGreedyMan[Round].transfer(RoundETH[Round]);
+emit winnerEvent(RoundLastGreedyMan[Round], RoundETH[Round], Round);
+Round++;",
+            "reason": "The function does not check if the contract has enough balance before transferring funds. If the contract balance is insufficient, the transfer will fail, but the event will still be emitted, leading to a potential inconsistency in the contract's state."
+        },
+        {
+            "function_name": "withdraw",
+            "vulnerability": "Access Control",
+            "function_code": "uint _revenue = getMyRevenue(_round);
+uint _revenueRef = MyreferredRevenue[msg.sender];
+RoundMyPayMask[_round][msg.sender] += _revenue;
+MyreferredRevenue[msg.sender] = 0;
+msg.sender.transfer(_revenue + _revenueRef);",
+            "reason": "The function allows any user to withdraw revenue without any access control. This means that any user can withdraw funds that do not belong to them, leading to potential theft of funds."
+        },
+        {
+            "function_name": "withdrawOwner",
+            "vulnerability": "Access Control",
+            "function_code": "uint _revenue = onwerfee;
+msg.sender.transfer(_revenue);
+",
+            "reason": "The function onlyOwner modifier is missing, allowing any user to call this function and withdraw owner fees, which can lead to unauthorized access to funds."
+        },
+        {
+            "function_name": "luckyBuy",
+            "vulnerability": "Bad Randomness",
+            "function_code": "uint256 seed = uint256(keccak256(abi.encodePacked(
+    (block.timestamp).add
+    (block.difficulty).add
+    ((uint256(keccak256(abi.encodePacked(block.coinbase)))) / (now)).add
+    (block.gaslimit).add
+    ((uint256(keccak256(abi.encodePacked(msg.sender)))) / (now)).add
+    (block.number)
+)));
+if((seed - ((seed / 1000) * 1000)) < luckybuyTracker_)
+    return(true);
+else
+    return(false);",
+            "reason": "The function uses a predictable source of randomness (block.timestamp, block.difficulty, etc.) which can be manipulated by attackers. This makes it vulnerable to attacks where the attacker can predict the outcome of the random function to their advantage."
+        }
+    ]
+}

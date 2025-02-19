@@ -1,0 +1,116 @@
+Based on the provided smart contract code, there are several vulnerabilities that can be identified:
+
+1. Integer Overflow:
+   - Function: `burnTokens`
+   - Code:
+     ```
+     function burnTokens(uint256 _amount) onlyOwner {
+       if(balances[msg.sender] < _amount) throw;
+       if(supply < _amount) throw;
+       supply -= _amount;
+       balances[msg.sender] -= _amount;
+       Burn(msg.sender, _amount);
+       Transfer(msg.sender, 0x0, _amount);
+     }
+     ```
+   - Vulnerability: The function `burnTokens` allows the owner to burn tokens by subtracting the specified amount from the balance and supply. However, there is no check to ensure that the specified amount does not exceed the available supply. This can lead to an integer overflow, where the supply becomes negative.
+   - Reason: The function does not check if the specified amount exceeds the available supply before subtracting it from the supply.
+
+2. Wrong Logic:
+   - Function: `transfer`
+   - Code:
+     ```
+     function transfer(address _to, uint256 _value) returns (bool success) {
+       if (block.number < tokenFrozenUntilBlock) throw;
+       if (restrictedAddresses[_to]) throw;
+       if (balances[msg.sender] < _value) throw;
+       if (balances[_to] + _value < balances[_to]) throw;
+       balances[msg.sender] -= _value;
+       balances[_to] += _value;
+       Transfer(msg.sender, _to, _value);
+       return true;
+     }
+     ```
+   - Vulnerability: The function `transfer` allows the sender to transfer tokens to another address. However, there is a check that ensures that the sender's balance is less than the specified value. This logic is incorrect because it does not check if the sender has enough balance to transfer the specified amount.
+   - Reason: The function does not check if the sender has enough balance to transfer the specified amount.
+
+3. Bad Randomness:
+   - Function: `isRestrictedAddress`
+   - Code:
+     ```
+     function isRestrictedAddress(address _querryAddress) constant returns (bool answer){
+       return restrictedAddresses[_querryAddress];
+     }
+     ```
+   - Vulnerability: The function `isRestrictedAddress` checks if an address is restricted. However, the logic used to check if an address is restricted is not random. Instead, it uses a mapping `restrictedAddresses` to determine if an address is restricted. This can lead to predictability in the restricted addresses.
+   - Reason: The function does not use randomness to determine if an address is restricted.
+
+4. Access Control:
+   - Function: `burnTokens`
+   - Code:
+     ```
+     function burnTokens(uint256 _amount) onlyOwner {
+       if(balances[msg.sender] < _amount) throw;
+       if(supply < _amount) throw;
+       supply -= _amount;
+       balances[msg.sender] -= _amount;
+       Burn(msg.sender, _amount);
+       Transfer(msg
+     ```
+   - Vulnerability: The function `burnTokens` allows the owner to burn tokens. However, there is no access control mechanism in place to ensure that only the owner can call this function. This can lead to unauthorized access and potential misuse.
+   - Reason: The function does not have an access control mechanism to ensure that only the owner can call it.
+
+5. Typo Constructor:
+   - Function: `SunContractToken`
+   - Code:
+     ```
+     function SunContractToken(address _icoAddress) {
+       restrictedAddresses[0x0] = true;
+       restrictedAddresses[_icoAddress] = true;
+       restrictedAddresses[address(this)] = true;
+       icoContractAddress = _icoAddress;
+     }
+     ```
+   - Vulnerability: The constructor function `SunContractToken` has a typo in the function name. The correct function name should be `SunContractToken`, but it is written as `SunContractToken`. This can lead to confusion and potential errors in the code.
+   - Reason: The function name `SunContractToken` has a typo in the constructor function.
+
+Based on the analysis, the identified vulnerabilities are:
+
+```json
+{
+    "output_list": [
+        {
+            "function_name": "burnTokens",
+            "code": "function burnTokens(uint256 _amount) onlyOwner {...}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function does not check if the specified amount exceeds the available supply before subtracting it from the supply."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) {...}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function does not check if the sender has enough balance to transfer the specified amount."
+        },
+        {
+            "function_name": "isRestrictedAddress",
+            "code": "function isRestrictedAddress(address _querryAddress) constant returns (bool answer){...}",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function does not use randomness to determine if an address is restricted."
+        },
+        {
+            "function_name": "burnTokens",
+            "code": "function burnTokens(uint256 _amount) onlyOwner {...}",
+            "vulnerability": "Access Control",
+            "reason": "The function does not have an access control mechanism to ensure that only the owner can call it."
+        },
+        {
+            "function_name": "SunContractToken",
+            "code": "function SunContractToken(address _icoAddress) {...}",
+            "vulnerability": "Typo Constructor",
+            "reason": "The function name `SunContractToken` has a typo in the constructor function."
+        }
+    ]
+}
+```
+
+Please note that these vulnerabilities are exploitable in real-world scenarios and can lead to security risks. It is important to address these vulnerabilities by implementing appropriate security measures and best practices.

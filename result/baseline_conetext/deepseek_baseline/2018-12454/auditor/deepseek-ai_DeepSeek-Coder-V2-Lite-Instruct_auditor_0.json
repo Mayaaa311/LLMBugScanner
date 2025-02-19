@@ -1,0 +1,72 @@
+ {
+    "output_list": [
+        {
+            "function_name": "setBettingCondition",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function setBettingCondition(uint _contenders, uint _bettingprice)
+{
+  if(msg.sender != developer)
+    return;
+  arraysize  = _contenders;
+  if(arraysize>1000)
+    arraysize = 1000;
+  bettingprice = _bettingprice;
+}",
+            "reason": "The function does not properly validate the input parameters, allowing for potential misuse and incorrect state updates."
+        },
+        {
+            "function_name": "findWinner",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function findWinner(uint value)
+{
+  uint i = value % numguesses;
+  _winner = guesses[i].addr;
+}",
+            "reason": "The function relies on a predictable outcome based on the input value, which can be manipulated to always pick a specific winner."
+        },
+        {
+            "function_name": "finish",
+            "vulnerability": "Access Control",
+            "function_code": "function finish()
+{
+  if(msg.sender != developer)
+    return;
+  _finish();
+}",
+            "reason": "The function allows any user to call `finish`, potentially leading to unauthorized state changes and financial loss."
+        },
+        {
+            "function_name": "_finish",
+            "vulnerability": "Access Control",
+            "function_code": "function _finish() private
+{
+  state = State.Locked;
+  uint block_timestamp = block.timestamp;
+  uint lotterynumber = (uint(curhash)+block_timestamp)%(maxguess+1);
+  findWinner(lotterynumber);
+  uint prize = getLotteryMoney();
+  uint numwinners = 1;
+  uint remain = this.balance - (prize*numwinners);
+  _winner.transfer(prize);
+  SentPrizeToWinner(_winner, prize, _gameindex, lotterynumber, _starttime, block_timestamp);
+  developer.transfer(remain); 
+  numguesses = 0;
+  _gameindex++;
+  state = State.Started;
+  _starttime = block.timestamp;
+}",
+            "reason": "The function does not check who calls it, allowing any user to finish the lottery and claim the prize, leading to potential financial loss."
+        },
+        {
+            "function_name": "addguess",
+            "vulnerability": "Access Control",
+            "function_code": "function addguess() 
+inState(State.Started)
+payable
+{
+  _addguess();
+}",
+            "reason": "The function allows anyone to call `addguess`, which can lead to unexpected state changes and potential financial loss."
+        }
+    ]
+}

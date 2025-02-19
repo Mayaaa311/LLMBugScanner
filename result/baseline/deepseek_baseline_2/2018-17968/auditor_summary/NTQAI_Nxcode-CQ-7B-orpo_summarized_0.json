@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "enterWithReferral",
+            "vulnerability": "Access Control",
+            "reason": "The function `enterWithReferral` allows any user to enter a room by specifying a referrer, which can be exploited by an attacker to gain access to privileged functions or to manipulate the room creation process. Since the referrer's address is directly used in the room creation logic, an attacker can specify a contract address as the referrer to gain control over the room creation process."
+        },
+        {
+            "function_name": "executeRoom",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function `executeRoom` transfers fees to the CTO and CEO before determining the dead seat, which can lead to a situation where the contract is drained of funds before the correct dead seat is calculated. This can be exploited by an attacker to manipulate the distribution of funds and potentially gain control over the contract's funds."
+        },
+        {
+            "function_name": "distributeFunds",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `distributeFunds` uses `SafeMath.div` to divide the room balance by 5, which can lead to an integer overflow if the room balance is large enough. This overflow can cause the division to return a much larger value than intended, leading to incorrect distribution of funds and potential theft of funds from the contract."
+        },
+        {
+            "function_name": "random",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function `random` uses block.timestamp and block.difficulty directly in the keccak256 hash function to generate a random number. This is predictable and can be manipulated by an attacker to influence the outcome, leading to potential exploitation of vulnerabilities in the contract."
+        },
+        {
+            "function_name": "RuletkaIo",
+            "vulnerability": "Typo Constructor",
+            "reason": "There is a typo in the constructor function `RuletkaIo` where 'CEO' is assigned using 'msg.sender' instead of '_newCEO'. This typo can lead to incorrect initialization of the CEO address, potentially causing the contract to be controlled by an unintended party."
+        }
+    ]
+}

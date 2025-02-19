@@ -1,0 +1,70 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if(msg.data.length < (3 * 32) + 4) { throw; }
+    if (_value == 0) { return false; }
+    uint256 fromBalance = balances[_from];
+    uint256 allowance = allowed[_from][msg.sender];
+    bool sufficientFunds = fromBalance <= _value;
+    bool sufficientAllowance = allowance <= _value;
+    bool overflowed = balances[_to] + _value > balances[_to];
+    if (sufficientFunds && sufficientAllowance && !overflowed) {
+        balances[_to] += _value;
+        balances[_from] -= _value;
+        allowed[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    } else {
+        return false;
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferFrom' function allows users to transfer tokens from one address to another, where the amount of tokens is determined by the caller. The function checks for overflow by verifying if the sum of the target address's balance and the transfer amount is greater than the target address's balance. However, due to the unchecked addition of balances, an attacker can exploit this vulnerability to increase the balance of any user to any value, leading to a denial of service to the user and potential loss of funds."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint num) public {
+    require(num * 1e8 > 0);
+    require(balances[msg.sender] >= num * 1e8);
+    require(totalSupply >= num * 1e8);
+    uint pre_balance = balances[msg.sender];
+    balances[msg.sender] -= num * 1e8;
+    totalSupply -= num * 1e8;
+    Burnt(msg.sender, num * 1e8, totalSupply);
+    Transfer(msg.sender, 0x0, num * 1e8);
+    assert(balances[msg.sender] == pre_balance - num * 1e8);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'burn' function allows the owner to burn a specified amount of tokens from the caller's balance, reducing the total supply. The function checks for overflow by ensuring that the caller's balance is greater than or equal to the amount to be burned, and that the total supply is greater than or equal to the amount to be burned. However, due to the unchecked subtraction of balances, an attacker can exploit this vulnerability to decrease the caller's balance to any value, leading to a denial of service to the user and potential loss of funds."
+        },
+        {
+            "function_name": "setAIRDROPBounce",
+            "code": "function setAIRDROPBounce(uint _newPrice)  {
+    if (msg.sender != owner) { throw; }
+    AIRDROPBounce = _newPrice;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'setAIRDROPBounce' function allows the owner to set a new price for the AIRDROPBounce variable, which can be used to increase the amount of bonus tokens issued during token purchases. However, the function does not check if the new price is reasonable or beneficial to the token holders, allowing the owner to exploit this function to increase their own bonus tokens without any additional value provided to the token holders, leading to a potential loss of funds."
+        },
+        {
+            "function_name": "setICORatio",
+            "code": "function setICORatio(uint _newPrice)  {
+    if (msg.sender != owner) { throw; }
+    ICORatio = _newPrice;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'setICORatio' function allows the owner to set a new price for the ICORatio variable, which determines the exchange rate between ether and tokens during token purchases. However, the function does not check if the new price is reasonable or beneficial to the token holders, allowing the owner to exploit this function to increase their own token holdings during token purchases without any additional value provided to the token holders, leading to a potential loss of funds."
+        },
+        {
+            "function_name": "setMINfinney",
+            "code": "function setMINfinney(uint _newPrice)  {
+    if (msg.sender != owner) { throw; }
+    MINfinney = _newPrice;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'setMINfinney' function allows the owner to set a new minimum amount of ether required for token purchases, which can be used to restrict token purchases to only the owner, leading to a potential loss of funds for other token holders."
+        }
+    ]
+}

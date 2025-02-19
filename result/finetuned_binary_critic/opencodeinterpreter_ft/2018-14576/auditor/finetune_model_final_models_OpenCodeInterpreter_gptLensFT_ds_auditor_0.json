@@ -1,0 +1,18 @@
+{
+  "output_list": [
+    {
+      "function_name": "mintTokens",
+      "code": "function mintTokens(address _to, uint256 _amount) {         
+    if (msg.sender != icoContractAddress) throw;            
+    if (restrictedAddresses[_to]) throw;                    
+    if (balances[_to] + _amount < balances[_to]) throw;     
+    supply += _amount;                                      
+    balances[_to] += _amount;                               
+    Mint(_to, _amount);                                     
+    Transfer(0x0, _to, _amount);                            
+  }",
+      "vulnerability": "Integer Overflow",
+      "reason": "The mintTokens function has an integer overflow where supply + _amount overflows supply, aka the 'tradeTrap' issue."
+    }
+  ]
+}

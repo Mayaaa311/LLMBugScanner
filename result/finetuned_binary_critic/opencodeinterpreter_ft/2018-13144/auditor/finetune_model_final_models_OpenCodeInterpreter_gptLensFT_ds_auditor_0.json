@@ -1,0 +1,16 @@
+{
+  "output_list": [
+    {
+      "function_name": "transferFrom",
+      "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(balances[_from] >= _value && allowed[_from][msg.sender] >= _value);
+        balances[_to] += _value; 
+        balances[_from] -= _value; 
+        allowed[_from][msg.sender] -= _value; 
+        Transfer(_from, _to, _value);
+        return true; }",
+      "vulnerability": "Integer Overflow",
+      "reason": "Integer overflow in transferFrom function allows an attacker to set any user's balance."
+    }
+  ]
+}

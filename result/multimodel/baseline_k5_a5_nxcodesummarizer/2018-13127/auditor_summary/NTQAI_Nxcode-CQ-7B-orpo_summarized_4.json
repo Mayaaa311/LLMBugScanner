@@ -1,0 +1,66 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    balances[_from] = balances[_from].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    Transfer(_from, _to, _value);
+    return true;
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The code snippet provided is for the transferFrom function in the StandardToken contract. The function is designed to transfer tokens from one address to another, but it does not handle integer overflow. If the value of _value is greater than the balance of the sender's account, it will cause an integer overflow, leading to incorrect balances and potentially loss of funds. This vulnerability can be exploited by malicious actors to manipulate the contract's state and cause financial losses."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint _value) public returns (bool) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The approve function in the StandardToken contract is also susceptible to integer overflow. If the value of _value is greater than the maximum safe integer value for uint256, it will cause an overflow, leading to incorrect approval values and potentially loss of funds. This vulnerability can be exploited by malicious actors to manipulate the contract's state and cause financial losses."
+        },
+        {
+            "function_name": "decreaseApproval",
+            "code": "function decreaseApproval(address _spender, uint _subtractedValue) public returns (bool) {
+    uint oldValue = allowed[msg.sender][_spender];
+    if (_subtractedValue > oldValue) {
+      allowed[msg.sender][_spender] = 0;
+    } else {
+      allowed[msg.sender][_spender] = oldValue.sub(_subtractedValue);
+    }
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The decreaseApproval function in the StandardToken contract is also susceptible to integer overflow. If the value of _subtractedValue is greater than the current approval value, it will cause an overflow, leading to incorrect approval values and potentially loss of funds. This vulnerability can be exploited by malicious actors to manipulate the contract's state and cause financial losses."
+        },
+        {
+            "function_name": "unfreeze",
+            "code": "function unfreeze() external {
+      require(msg.sender == team);
+      isFrozen = false;
+  }",
+            "vulnerability": "Access Control",
+            "reason": "The unfreeze function in the DSPXToken contract is vulnerable to access control. It allows the team address to unfreeze the contract, which can be exploited by malicious actors to bypass the freeze mechanism and manipulate the contract's state. This vulnerability can be exploited by malicious actors to manipulate the contract's state and cause financial losses."
+        },
+        {
+            "function_name": "mint",
+            "code": "function mint(address holder, uint value) {
+    require(msg.sender == preSale);
+    require(value > 0);
+    require(totalSupply + value <= TOKEN_LIMIT);
+    balances[holder] += value;
+    totalSupply += value;
+    Transfer(0x0, holder, value);
+  }",
+            "vulnerability": "Token Devalue",
+            "reason": "The mint function in the DSPXToken contract is vulnerable to token devalue. It allows the preSale address to mint new tokens, but it does not handle the case where the total supply exceeds the token limit. This vulnerability can be exploited by malicious actors to mint more tokens than the token limit, leading to token devalue and potential loss of funds."
+        }
+    ]
+}

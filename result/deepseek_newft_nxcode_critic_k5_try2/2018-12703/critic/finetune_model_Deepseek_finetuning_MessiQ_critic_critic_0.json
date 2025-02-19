@@ -1,0 +1,49 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "auditor_idx" : 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The transfer function implementation is vulnerable to integer overflow, which can be exploited to allow the attacker to send an arbitrary number of tokens to any address. The check 'require(_value <= balances[msg.sender])' is incorrect due to possible overflows in 'balances[msg.sender]' which can lead to the attacker being able to transfer tokens that don't belong to them.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "transferFrom",
+            'auditor_idx' : 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The transferFrom function implementation is vulnerable to integer overflow, which can be exploited to allow the attacker to send an arbitrary number of tokens from any address. The check 'require(_value <= balances[_from])' is incorrect due to possible overflows in 'balances[_from]' which can lead to the attacker being able to transfer tokens that don't belong to them.",
+            "correctness": 6,
+            "severity": 9,
+            "profitability": 6
+        },
+        {
+            "function_name": "approve",
+            'auditor_idx' : 0,
+            "vulnerability": "Unprotected from Reentrancy Attacks",
+            "criticism": "The approve function implementation is vulnerable to reentrancy attacks, which can be exploited to allow the attacker to steal tokens from any approved spender. The operation 'allowed[msg.sender][_spender] = _value' is not protected from reentrancy, making it possible for an attacker to call the function and change the state before the transfer is complete, reverting the state change and preventing the transfer from occurring.",
+            "correctness": 4,
+            "severity": 8,
+            "profitability": 4
+        },
+        {
+            "function_name": "approveAndCall",
+            'auditor_idx' : 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The approveAndCall function implementation is vulnerable to executing arbitrary code in the context of the token owner. The operation 'if(!_spender.call(bytes4(sha3("receiveApproval(address,uint256,address,bytes)")), msg.sender, _value, this, _extraData)) { revert(); }' is incorrect due to the lack of sufficient validation and control over the contract being called, making it possible for an attacker to exploit it to execute arbitrary code.",
+            "correctness": 2,
+            "severity": 9,
+            "profitability": 2
+        },
+        {
+            "function_name": "approveAndCallcode",
+            'auditor_idx' : 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The approveAndCallcode function implementation is vulnerable to executing arbitrary code in the context of the token owner. The operation 'if(!_spender.call(_extraData)) { revert(); }' is incorrect due to the lack of sufficient validation and control over the contract being called, making it possible for an attacker to exploit it to execute arbitrary code.",
+            "correctness": 2,
+            "severity": 9,
+            "profitability": 2
+        }
+    ]
+}

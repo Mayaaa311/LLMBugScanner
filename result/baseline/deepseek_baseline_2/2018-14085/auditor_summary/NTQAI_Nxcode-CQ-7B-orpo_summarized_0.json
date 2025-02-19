@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "sweep",
+            "vulnerability": "Access Control",
+            "reason": "The 'sweep' function does not properly check the return value of the 'send' or 'transfer' functions. If 'send' or 'transfer' fail (e.g., due to insufficient balance or token allowance), the function will still proceed as if the operation was successful, leading to a loss of funds for the contract."
+        },
+        {
+            "function_name": "DefaultSweeper",
+            "vulnerability": "Token Devalue",
+            "reason": "The 'sweep' function in 'DefaultSweeper' does not account for the possibility that the token being swept might devalue after the balance is checked but before the transfer is attempted. This could lead to the contract attempting to sweep a larger amount than actually available, resulting in a loss of funds."
+        },
+        {
+            "function_name": "Controller.makeWallet",
+            "vulnerability": "Access Control",
+            "reason": "The 'makeWallet' function in the 'Controller' contract allows any admin to create a new 'UserWallet' contract. This can be exploited by an attacker to create a large number of wallets, potentially leading to high gas costs or other issues on the network."
+        },
+        {
+            "function_name": "Controller.changeDestination",
+            "vulnerability": "Access Control",
+            "reason": "The 'changeDestination' function allows the owner to change the destination address. If an attacker gains control of the owner role, they can redirect funds to any address they control, leading to theft of funds."
+        },
+        {
+            "function_name": "Controller.changeAuthorizedCaller",
+            "vulnerability": "Access Control",
+            "reason": "The 'changeAuthorizedCaller' function allows the owner to change the authorized caller address. If an attacker gains control of the owner role, they can authorize themselves or any other address to call certain functions, leading to unauthorized access."
+        }
+    ]
+}

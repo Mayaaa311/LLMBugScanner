@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "auditor_idx": 3,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function `mintToken` allows the owner to increase the balance of any address, including the contract itself, without any upper limit on the `mintedAmount`. This can lead to an integer overflow, causing `totalSupply` to become corrupt and potentially allowing the attacker to mint unlimited tokens.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "transfer",
+            "auditor_idx": 3,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The `transfer` function does not check if the recipient address is valid (i.e., not zero address). If an attacker controls an address and uses it to call `transfer`, it could lead to unintended behavior, such as draining funds from the contract.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "burn",
+            "auditor_idx": 3,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function `burn` does not check for the possibility of `totalSupply` underflowing. If `_value` is very large, `totalSupply` could become negative, leading to potential issues in the contract's logic.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 3,
+            "vulnerability": "Access Control",
+            "criticism": "The `transferFrom` function does not check if the `_from` address is frozen, allowing an attacker to transfer tokens from a frozen account if they control the spender's address.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "setPrices",
+            "auditor_idx": 3,
+            "vulnerability": "Access Control",
+            "criticism": "The function `setPrices` is only accessible by the owner. However, it does not check if the new prices are reasonable or if the contract has sufficient balance to set these prices. An attacker could exploit this to set prices that make the contract unusable or lead to financial loss.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 7
+        }
+    ]
+}

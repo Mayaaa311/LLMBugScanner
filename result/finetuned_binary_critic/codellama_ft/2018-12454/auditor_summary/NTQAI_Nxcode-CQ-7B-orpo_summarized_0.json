@@ -1,0 +1,335 @@
+{
+    "output_list": [
+        {
+            "function_name": "safeAdd",
+            "code": "function safeAdd(uint a, uint b)
+        internal
+        returns (uint)
+    {
+        uint c = a + b;
+        assert(c >= a);
+        assert(c <= MAX_UINT256);
+        return c;
+    }",
+            "vulnerability": "Arithmetic Overflow",
+            "reason": "The function `safeAdd` does not handle the overflow condition properly. If the sum of `a` and `b` exceeds the maximum value of `uint`, it will cause an overflow and the function will return an incorrect result."
+        },
+        {
+            "function_name": "safeSub",
+            "code": "function safeSub(uint a, uint b)
+        internal
+        returns (uint)
+    {
+        assert(b <= a);
+        return a - b;
+    }",
+            "vulnerability": "Arithmetic Underflow",
+            "reason": "The function `safeSub` does not handle the underflow condition properly. If `b` is greater than `a`, it will cause an underflow and the function will return an incorrect result."
+        },
+        {
+            "function_name": "safeMul",
+            "code": "function safeMul(uint a, uint b)
+        internal
+        returns (uint)
+    {
+        uint c = a * b;
+        assert(a == 0 || c / a == b);
+        return c;
+    }",
+            "vulnerability": "Arithmetic Overflow",
+            "reason": "The function `safeMul` does not handle the overflow condition properly. If the product of `a` and `b` exceeds the maximum value of `uint`, it will cause an overflow and the function will return an incorrect result."
+        },
+        {
+            "function_name": "safeDiv",
+            "code": "function safeDiv(uint a, uint b)
+        internal
+        returns (uint)
+    {
+        assert(b > 0);
+        uint c = a / b;
+        assert(a == b * c + a % b == 0);
+        return c;
+    }",
+            "vulnerability": "Arithmetic Division by Zero",
+            "reason": "The function `safeDiv` does not handle the division by zero condition properly. If `b` is zero, it will cause a division by zero error and the function will return an incorrect result."
+        },
+        {
+            "function_name": "CryptoLotto",
+            "code": "contract CryptoLotto is Lotto {
+    using Lotto for uint;
+    using Lotto for address;
+    using Lotto for bytes32;
+    using Lotto for uint256;
+    using Lotto for uint8;
+    using Lotto for uint16;
+    using Lotto for uint32;
+    using Lotto for uint64;
+    using Lotto for uint128;
+    using Lotto for uint248;
+    using Lotto for uint40;
+    using Lotto for uint80;
+    using Lotto for uint160;
+    using Lotto for uint208;
+    using Lotto for uint336;
+    using Lotto for uint696;
+    using Lotto for uint1024;
+    using Lotto for uint216;
+    using Lotto for uint42;
+    using Lotto for uint18;
+    using Lotto for uint3;
+    using Lotto for uint96;
+    using Lotto for uint272;
+    using Lotto for uint544;
+    using Lotto for uint14;
+    using Lotto for uint88;
+    using Lotto for uint2;
+    using Lotto for uint32;
+    using Lotto for uint4;
+    using Lotto for uint6;
+    using Lotto for uint12;
+    using Lotto for uint256;
+    using Lotto for uint8;
+    using Lotto for uint16;
+    using Lotto for uint32;
+    using Lotto for uint64;
+    using Lotto for uint128;
+    using Lotto for uint248;
+    using Lotto for uint40;
+    using Lotto for uint80;
+    using Lotto for uint160;
+    using Lotto for uint208;
+    using Lotto for uint336;
+    using Lotto for uint696;
+    using Lotto for uint1024;
+    using Lotto for uint216;
+    using Lotto for uint42;
+    using Lotto for uint18;
+    using Lotto for uint2;
+    using Lotto for uint3;
+    using Lotto for uint4;
+    using Lotto for uint6;
+    using Lotto for uint12;
+    using Lotto for uint24;
+    using Lotto for uint48;
+    using Lotto for uint96;
+    using Lotto for uint192;
+    using Lotto for uint384;
+    using Lotto for uint768;
+    using Lotto for uint1536;
+    uint256 private balanceOf;
+    uint256 private totalSupply;
+    uint8 private constant MAX_UINT8 = 2**8 - 1;
+    uint256 private constant MAX_UINT256 = 2**256 - 1;
+    mapping (address => uint256) private balanceOf;
+    mapping (address => uint8) private unlockTime;
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Unlock(address indexed _from, uint256 _value);
+    function CryptoLotto() {
+        balanceOf[msg.sender] = 10000000000000000000000000;
+        totalSupply = 1000000000000000000000000000;
+    }
+    function getBalance() constant returns (uint256) {
+        return balanceOf[msg.sender];
+    }
+    function getTotalSupply() constant returns (uint256) {
+        return totalSupply;
+    }
+    function getUnlockTime() constant returns (uint8) {
+        return unlockTime[msg.sender];
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if (balanceOf[msg.sender] < _value) return false;
+        if (balanceOf[_to] + _value < balanceOf[_to]) return false;
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (balanceOf[_from] < _value) return false;
+        if (balanceOf[_to] + _value < balanceOf[_to]) return false;
+        if (_value > allowance[_from][msg.sender]) return false;
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        require(_value == 0 || allowance[msg.sender][_spender] == 0);
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+        returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256) {
+        return allowance[_owner][_spender];
+    }
+    function unlock(uint256 _value) returns (bool success) {
+        if (balanceOf[msg.sender] < _value) return false;
+        if (balanceOf[this] + _value < balanceOf[this]) return false;
+        balanceOf[msg.sender] -= _value;
+        balanceOf[this] += _value;
+        unlockTime[msg.sender] = uint8(block.timestamp + 1800);
+        Unlock(msg.sender, _value);
+        return true;
+    }
+    function unlockFrom(address _from, uint256 _value) returns (bool success) {
+        if (balanceOf[_from] < _value) return false;
+        if (balanceOf[this] + _value < balanceOf[this]) return false;
+        balanceOf[_from] -= _value;
+        balanceOf[this] += _value;
+        unlockTime[_from] = uint8(block.timestamp + 1800);
+        Unlock(_from, _value);
+        return true;
+    }
+    function unlock() returns (bool success) {
+        uint256 _value = balanceOf[msg.sender];
+        if (balanceOf[this] + _value < balanceOf[this]) return false;
+        balanceOf[msg.sender] -= _value;
+        balanceOf[this] += _value;
+        unlockTime[msg.sender] = uint8(block.timestamp + 1800);
+        Unlock(msg.sender, _value);
+        return true;
+    }
+    function unlockFrom(address _from) returns (bool success) {
+        uint256 _value = balanceOf[_from];
+        if (balanceOf[this] + _value < balanceOf[this]) return false;
+        balanceOf[_from] -= _value;
+        balanceOf[this] += _value;
+        unlockTime[_from] = uint8(block.timestamp + 1800);
+        Unlock(_from, _value);
+        return true;
+    }
+    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData)
+        returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_token);
+        if (approve(_token, _value)) {
+            spender.receiveApproval(_from, _value, this, _extraData);
+            return true;
+        }
+    }
+    function burn(uint256 _value) returns (bool success) {
+        if (balanceOf[msg.sender] < _value) return false;
+        if (_value > 0) {
+            balanceOf[msg.sender] -= _value;
+            totalSupply -= _value;
+            Burn(msg.sender, _value);
+        }
+        return true;
+    }
+    function burnFrom(address _from, uint256 _value) returns (bool success) {
+        if (balanceOf[_from] < _value) return false;
+        if (_value > 0) {
+            balanceOf[_from] -= _value;
+            totalSupply -= _value;
+            Burn(_from, _value);
+        }
+        return true;
+    }
+}",
+            "vulnerability": "Unchecked Return Value",
+            "reason": "The function `burn` and `burnFrom` do not handle the return value of the `Burn` event properly. If the `Burn` event is not emitted, the function will return an incorrect result."
+        },
+        {
+            "function_name": "CryptoLottoToken",
+            "code": "contract CryptoLottoToken is CryptoLotto {
+    function () {
+        revert();
+    }
+    function balanceOf(address _owner) constant returns (uint256) {
+        return balanceOf[_owner];
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if (balanceOf[msg.sender] < _value) return false;
+        if (balanceOf[_to] + _value < balanceOf[_to]) return false;
+        if (frozenAccount[msg.sender]) return false;
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (frozenAccount[_from]) return false;
+        if (balanceOf[_from] < _value) return false;
+        if (balanceOf[_to] + _value < balanceOf[_to]) return false;
+        if (_value > allowance[_from][msg.sender]) return false;
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        require(_value == 0 || allowance[msg.sender][_spender] == 0);
+        allowance[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+        returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256) {
+        return allowance[_owner][_spender];
+    }
+    function getUnlockTime() constant returns (uint8) {
+        return unlockTime[msg.sender];
+    }
+    function unlock() returns (bool success) {
+        uint256 _value = balanceOf[msg.sender];
+        if (balanceOf[this] + _value < balanceOf[this]) return false;
+        balanceOf[msg.sender] -= _value;
+        balanceOf[this] += _value;
+        unlockTime[msg.sender] = uint8(block.timestamp + 1800);
+        Unlock(msg.sender, _value);
+        return true;
+    }
+    function unlockFrom(address _from, uint256 _value) returns (bool success) {
+        if (balanceOf[_from] < _value) return false;
+        if (balanceOf[this] + _value < balanceOf[this]) return false;
+        balanceOf[_from] -= _value;
+        balanceOf[this] += _value;
+        unlockTime[_from] = uint8(block.timestamp + 1800);
+        Unlock(_from, _value);
+        return true;
+    }
+}",
+            "vulnerability": "Unchecked Return Value",
+            "reason": "The function `unlock` and `unlockFrom` do not handle the return value of the `Unlock` event properly. If the `Unlock` event is not emitted, the function will return an incorrect result."
+        },
+        {
+            "function_name": "CryptoLottoTokenPreSale",
+            "code": "contract CryptoLottoTokenPreSale is CryptoLottoToken {
+    uint256 private constant RATE = 1000;
+    uint256 private constant MAX_UINT256 = 2**256 - 1;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoLottoTokenPreSale(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) CryptoLottoToken(initialSupply, tokenName, decimalUnits, tokenSymbol) {
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if (balanceOf[msg.sender] < _value) return false;
+        if (balanceOf[_to] + _value < balanceOf[_to]) return false;
+        if (frozenAccount[msg.sender]) return false;
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (fro

@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "totalSupply()",
+            "code": "function totalSupply() public constant returns (uint) {
+  return currentSupply;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `totalSupply()` returns the current supply as a `uint`, which can lead to integer overflow if the current supply exceeds the maximum value of `uint`."
+        },
+        {
+            "function_name": "_transfer()",
+            "code": "function _transfer(address _from, address _to, uint _value) internal {
+  require (_to != 0x0);
+  require (balanceOf[_from] >= _value + burnPerTransaction);
+  require (balanceOf[_to] + _value > balanceOf[_to]);
+  balanceOf[_from] -= _value + burnPerTransaction;
+  balanceOf[_to] += _value;
+  balanceOf[0x0] += burnPerTransaction;
+  currentSupply -= burnPerTransaction;
+  Burn(_from, burnPerTransaction);
+  Transfer(_from, _to, _value);
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The logic in the `_transfer()` function is incorrect. It allows the transfer of tokens to the zero address (`0x0`), which is not a valid recipient."
+        },
+        {
+            "function_name": "burn()",
+            "code": "function burn(uint256 _value) public returns (bool success) {
+  require(balanceOf[msg.sender] >= _value);
+  balanceOf[msg.sender] -= _value;
+  balanceOf[0x0] += _value;
+  currentSupply -= _value;
+  Burn(msg.sender, _value);
+  return true;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The function `burn()` allows the owner of the contract to burn tokens. However, it does not check if the owner has sufficient balance before burning."
+        },
+        {
+            "function_name": "Hexagon()",
+            "code": "function Hexagon() public {
+  balanceOf[msg.sender] = initialSupply;
+}",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor function `Hexagon()` is named incorrectly. It should be named `constructor()` instead of `Hexagon()`."
+        }
+    ]
+}

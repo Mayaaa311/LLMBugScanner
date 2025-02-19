@@ -1,0 +1,56 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) {
+        require(_to != address(0));
+        require(_value <= balances[msg.sender]);
+        require(balances[_to] + _value > balances[_to]);
+        balances[msg.sender] -= _value;
+        balances[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transfer has a potential integer overflow vulnerability. The function uses the require statement to check the balance of the sender and the balance of the recipient. However, the function does not check whether the sum of the sender's balance and the amount to be transferred is greater than the recipient's balance. This can lead to an integer overflow and cause the transaction to fail."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(_to != address(0));
+        require(_value <= balances[_from]);
+        require(_value <= allowed[_from][msg.sender]);
+        require(balances[_to] + _value > balances[_to]);
+        balances[_to] += _value;
+        balances[_from] -= _value;
+        allowed[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transferFrom has a potential integer overflow vulnerability. The function uses the require statement to check the balance of the sender and the balance of the recipient. However, the function does not check whether the sum of the sender's balance and the amount to be transferred is greater than the recipient's balance. This can lead to an integer overflow and cause the transaction to fail."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) { revert(); }
+        return true;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function approveAndCall has a potential wrong logic vulnerability. The function uses the require statement to check the balance of the sender and the balance of the recipient. However, the function does not check whether the sum of the sender's balance and the amount to be transferred is greater than the recipient's balance. This can lead to an integer overflow and cause the transaction to fail."
+        },
+        {
+            "function_name": "approveAndCallcode",
+            "code": "function approveAndCallcode(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        if(!_spender.call(_extraData)) { revert(); }
+        return true;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function approveAndCallcode has a potential wrong logic vulnerability. The function uses the require statement to check the balance of the sender and the balance of the recipient. However, the function does not check whether the sum of the sender's balance and the amount to be transferred is greater than the recipient's balance. This can lead to an integer overflow and cause the transaction to fail."
+        }
+    ]
+}

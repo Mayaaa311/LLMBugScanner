@@ -1,0 +1,51 @@
+ ```json
+{
+    "output_list": [
+        {
+            "function_name": "batchTransfer",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The vulnerability in the 'batchTransfer' function arises from the calculation of 'amount' which is the product of 'cnt' (the length of the receivers array) and '_value' (the transfer amount). This calculation can lead to an integer overflow if 'cnt' is sufficiently large, causing 'amount' to be zero. This zero value is then incorrectly used to update balances, leading to a failure to transfer tokens as intended. The vulnerability is severe because it can result in unauthorized token transfers and logical errors in the contract's operation.",
+            "correctness": 8,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "Trade",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The 'Trade' function contains a logic error where it checks if 'balanceOf[_buyer]+_qty<balanceOf[_buyer]'. This condition is always false because adding _qty to 'balanceOf[_buyer]' cannot be less than 'balanceOf[_buyer]'. This check is intended to prevent an overflow but is incorrectly written and serves no purpose. The vulnerability is minor as it does not lead to any functional issues other than unnecessary checks.",
+            "correctness": 4,
+            "severity": 3,
+            "profitability": 2
+        },
+        {
+            "function_name": "Buy",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'Buy' function is vulnerable to integer overflow when checking if 'msg.value' is less than 'price*1 ether'. If 'price' is very large, this condition can fail due to overflow, allowing unauthorized purchases. The severity is high because it compromises the financial integrity of the contract by allowing unauthorized access to buying tokens.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 6
+        },
+        {
+            "function_name": "Sell",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "Similar to the 'Buy' function, the 'Sell' function is vulnerable to integer overflow when checking if 'this.balance' is less than '_qty*price'. If '_qty' or 'price' is very large, this condition can fail due to overflow, allowing unauthorized sales. The severity is high as it compromises the financial integrity of the contract by allowing unauthorized access to selling tokens.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 6
+        },
+        {
+            "function_name": "airDrop",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'airDrop' function is vulnerable to integer overflow when calculating the total value to be dropped. The check 'if(msg.value >= _adr.length * _val)' can fail due to overflow if '_adr.length' is large, allowing unauthorized airdrops. The severity is high because it compromises the financial integrity of the contract by allowing unauthorized airdrops of tokens.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 6
+        }
+    ]
+}
+```

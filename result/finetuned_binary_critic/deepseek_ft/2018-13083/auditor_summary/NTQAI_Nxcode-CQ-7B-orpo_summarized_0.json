@@ -1,0 +1,68 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+  balanceOf[target] += mintedAmount;
+  totalSupply += mintedAmount;
+  emit Transfer(0, this, mintedAmount);
+  emit Transfer(this, target, mintedAmount);
+}",
+            "vulnerability": "Issuance of tokens without restriction",
+            "reason": "The mintToken function allows the owner to mint tokens and assign them to any user account, including those that may not have participated in a crowdsale. This can lead to unfair distribution of tokens and potential exploitation of users."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+  require(_value <= allowance[_from][msg.sender]);    
+  allowance[_from][msg.sender] -= _value; 
+  _transfer(_from, _to, _value);
+  return true;
+}",
+            "vulnerability": "Unrestricted token transfer",
+            "reason": "The transferFrom function does not check if the target account is frozen, allowing the owner to transfer tokens to a frozen account, effectively locking them out of their funds."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal {
+  require(_to != 0x0); 
+  require(balanceOf[_from] >= _value); 
+  require(balanceOf[_to] + _value > balanceOf[_to]); 
+  require(!frozenAccount[_from]); 
+  require(!frozenAccount[_to]); 
+  balanceOf[_from] -= _value; 
+  balanceOf[_to] += _value; 
+  emit Transfer(_from, _to, _value);
+  assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+}",
+            "vulnerability": "Unrestricted token transfer",
+            "reason": "The _transfer function does not check if the target account is frozen, allowing the owner to transfer tokens to a frozen account, effectively locking them out of their funds."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) public returns (bool success) {
+  require(balanceOf[_from] >= _value);                 
+  require(_value <= allowance[_from][msg.sender]);    
+  balanceOf[_from] -= _value;                           
+  allowance[_from][msg.sender] -= _value;             
+  totalSupply -= _value;                                
+  emit Burn(_from, _value);
+  return true;
+}",
+            "vulnerability": "Unrestricted token destruction",
+            "reason": "The burnFrom function allows any user to burn tokens from any other user account, potentially leading to unfair token destruction and unfair distribution of tokens."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) public returns (bool success) {
+  tokenRecipient spender = tokenRecipient(_spender);
+  if (approve(_spender, _value)) {
+    spender.receiveApproval(msg.sender, _value, this, _extraData);
+    return true;
+  }
+}",
+            "vulnerability": "Unrestricted token transfer",
+            "reason": "The approveAndCall function allows any user to approve and call token transfers, potentially leading to unauthorized token transfers."
+        }
+    ]
+}

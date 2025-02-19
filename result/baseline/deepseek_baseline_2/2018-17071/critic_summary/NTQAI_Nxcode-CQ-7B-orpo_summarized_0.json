@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "()",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The vulnerability arises from the unchecked multiplication of `msg.value` with 1000. In Solidity, if the product exceeds the maximum value that can be stored in an `uint`, it will result in an overflow, leading to a much smaller number. This can be exploited to bypass the intended check, allowing an attacker to potentially gain more ether than intended. The severity is high due to the potential for significant financial loss, and the profitability is moderate as it requires a specific condition to be met.",
+            "correctness": 4,
+            "severity": 8,
+            "profitability": 5
+        },
+        {
+            "function_name": "()",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The logic in the contract is flawed, particularly in the payout conditions. The contract pays out rewards based on `entry_number`, but the conditions for these payouts are not correctly aligned. For instance, when `entry_number` is a multiple of 999, the payout to the caller is significantly higher than intended, and the owner receives a disproportionate share of the rewards. This not only misallocates rewards but also exposes the contract to potential abuse.",
+            "correctness": 3,
+            "severity": 7,
+            "profitability": 4
+        },
+        {
+            "function_name": "stopGame",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The `stopGame` function only allows the owner to stop the game and withdraw all the balance, but there is no check to prevent the owner from re-enabling the game after it has been stopped. This creates a vulnerability where the owner can effectively drain the contract's balance while keeping the game temporarily disabled, exploiting the system for personal gain.",
+            "correctness": 2,
+            "severity": 9,
+            "profitability": 6
+        },
+        {
+            "function_name": "()",
+            "auditor_idx": 0,
+            "vulnerability": "Token Devalue",
+            "criticism": "The line that pays out 0.03 ether to the caller and 0.01 ether to the owner every time `entry_number` is a multiple of 9 can be exploited if the value of ether significantly decreases after the contract has been deployed. An attacker could front-run the payout, buy ether at a lower price, and profit from the difference. The severity is high due to the potential financial loss, and the profitability is high as it relies on a specific market condition.",
+            "correctness": 3,
+            "severity": 8,
+            "profitability": 9
+        },
+        {
+            "function_name": "lucky9io",
+            "auditor_idx": 0,
+            "vulnerability": "Typo Constructor",
+            "criticism": "A typo in the constructor where the owner's address is assigned does not affect the functionality but could lead to confusion or errors in the future if the code is updated or maintained. The severity is low as it does not directly impact the security or functionality of the contract, but the correctness score is not high due to the potential for user error.",
+            "correctness": 5,
+            "severity": 1,
+            "profitability": 1
+        }
+    ]
+}

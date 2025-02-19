@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "auditor_idx": 3,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The check `balances[_to] + _value > balances[_to]` can be exploited to cause an integer overflow, allowing an attacker to transfer more tokens than actually available. This can lead to a situation where the attacker can mint tokens out of thin air.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 5
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 3,
+            "vulnerability": "Integer Overflow",
+            "criticism": "Similar to the `transfer` function, the check `balances[_to] + _value > balances[_to]` can lead to an integer overflow, allowing an attacker to transfer more tokens than available from the allowance. This can be exploited to drain tokens from other users.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 5
+        },
+        {
+            "function_name": "approve",
+            "auditor_idx": 3,
+            "vulnerability": "Access Control",
+            "criticism": "The `approve` function does not check if the spender is a contract. If the spender is a contract, it can repeatedly call `approve` with a low-level call to drain tokens from the owner's account. This is a critical vulnerability as it bypasses the normal transfer restrictions.",
+            "correctness": 6,
+            "severity": 9,
+            "profitability": 1
+        },
+        {
+            "function_name": "transferProxy",
+            "auditor_idx": 3,
+            "vulnerability": "Access Control",
+            "criticism": "The `transferProxy` function uses ECDSA signatures to authenticate the transfer. If an attacker can predict or control the nonce of the sender, they can sign a transaction that allows them to transfer tokens on behalf of the owner without their knowledge. This can be exploited to perform unauthorized transfers.",
+            "correctness": 6,
+            "severity": 9,
+            "profitability": 1
+        },
+        {
+            "function_name": "approveProxy",
+            "auditor_idx": 3,
+            "vulnerability": "Access Control",
+            "criticism": "Similar to `approve`, the `approveProxy` function also relies on ECDSA signatures for authorization. If an attacker can manipulate the nonce or sign the transaction, they can approve transfers on behalf of the owner without their knowledge, leading to unauthorized approvals.",
+            "correctness": 6,
+            "severity": 9,
+            "profitability": 1
+        }
+    ]
+}

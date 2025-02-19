@@ -1,0 +1,57 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint _value) public returns (bool) {
+    require(_to != address(0));
+    require(!isFrozen);
+    return super.transfer(_to, _value);
+}",
+            "reason": "The function does not check if the addition of the new balance and the old balance exceeds the maximum uint256 value. This can lead to an integer overflow, potentially allowing an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+    require(!isFrozen);
+    return super.transferFrom(_from, _to, _value);
+}",
+            "reason": "The function does not check if the addition of the new balance and the old balance exceeds the maximum uint256 value. This can lead to an integer overflow, potentially allowing an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint _value) public returns (bool) {
+    require(!isFrozen);
+    return super.approve(_spender, _value);
+}",
+            "reason": "The function does not check if the addition of the new allowance and the old allowance exceeds the maximum uint256 value. This can lead to an integer overflow, potentially allowing an attacker to drain the contract's allowance."
+        },
+        {
+            "function_name": "increaseApproval",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function increaseApproval(address _spender, uint _addedValue) public returns (bool) {
+    allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+}",
+            "reason": "The function does not check if the addition of the new allowance and the old allowance exceeds the maximum uint256 value. This can lead to an integer overflow, potentially allowing an attacker to drain the contract's allowance."
+        },
+        {
+            "function_name": "decreaseApproval",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function decreaseApproval(address _spender, uint _subtractedValue) public returns (bool) {
+    uint oldValue = allowed[msg.sender][_spender];
+    if (_subtractedValue > oldValue) {
+      allowed[msg.sender][_spender] = 0;
+    } else {
+      allowed[msg.sender][_spender] = oldValue.sub(_subtractedValue);
+    }
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+}",
+            "reason": "The function does not check if the subtraction of the new allowance and the old allowance is greater than zero. This can lead to an integer overflow, potentially allowing an attacker to drain the contract's allowance."
+        }
+    ]
+}

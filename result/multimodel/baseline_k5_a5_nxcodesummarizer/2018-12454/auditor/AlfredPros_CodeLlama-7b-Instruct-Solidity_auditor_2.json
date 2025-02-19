@@ -1,0 +1,95 @@
+{
+    "output_list": [
+        {
+            "function_name": "setBettingCondition",
+            "code": "function setBettingCondition(uint _contenders, uint _bettingprice)
+    {
+      if(msg.sender != developer)
+        return;
+      arraysize  = _contenders;
+      if(arraysize>1000)
+        arraysize = 1000;
+      bettingprice = _bettingprice;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function setBettingCondition has a potential Integer Overflow vulnerability. The function takes two parameters, _contenders and _bettingprice. The _contenders parameter is used to set the maximum number of guesses. If the value of _contenders is greater than 1000, the arraysize variable is set to 1000. This can lead to an Integer Overflow vulnerability if the value of _contenders is greater than 1000."
+        },
+        {
+            "function_name": "finish",
+            "code": "function finish()
+    {
+      if(msg.sender != developer)
+        return;
+      _finish();
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function finish has a potential Wrong Logic vulnerability. The function calls the _finish function, which sets the state to Locked and calls the findWinner function. The findWinner function calculates the winner based on the lottery number and the number of guesses. The function then transfers the prize to the winner and sends a message to the developer. The function also sends a message to the developer with the developer fee. The function then resets the number of guesses to 0 and increments the game index. The function also sets the state to Started and sets the start time to the current block timestamp. The function does not check if the developer is the sender of the function call."
+        },
+        {
+            "function_name": "getBettingStatus",
+            "code": "function getBettingStatus()
+      constant
+      returns (uint, uint, uint, uint, uint, uint, uint)
+    {
+      return ((uint)(state), _gameindex, _starttime, numguesses, getLotteryMoney(), this.balance, bettingprice);
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function getBettingStatus has a potential Wrong Logic vulnerability. The function returns the state of the game, the game index, the start time, the number of guesses, the lottery money, the balance of the contract, and the betting price. The function does not check if the sender of the function call is the developer."
+        },
+        {
+            "function_name": "getLotteryMoney",
+            "code": "function getLotteryMoney() constant returns(uint)
+    {
+      uint developerfee = getDeveloperFee();
+      uint prize = (this.balance - developerfee);
+      return prize;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function getLotteryMoney has a potential Wrong Logic vulnerability. The function calculates the lottery money by subtracting the developer fee from the balance of the contract. The function does not check if the developer fee is greater than the balance of the contract."
+        },
+        {
+            "function_name": "getDeveloperFee",
+            "code": "function getDeveloperFee() constant returns(uint)
+    {
+      uint developerfee = this.balance/100;
+      return developerfee;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function getDeveloperFee has a potential Wrong Logic vulnerability. The function calculates the developer fee by dividing the balance of the contract by 100. The function does not check if the balance of the contract is greater than 0."
+        },
+        {
+            "function_name": "getBalance",
+            "code": "function getBalance() constant returns(uint)
+    {
+       return this.balance;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function getBalance has a potential Wrong Logic vulnerability. The function returns the balance of the contract. The function does not check if the sender of the function call is the developer."
+        },
+        {
+            "function_name": "getMaxContenders",
+            "code": "function getMaxContenders() constant returns(uint){
+      return arraysize;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function getMaxContenders has a potential Wrong Logic vulnerability. The function returns the maximum number of guesses. The function does not check if the sender of the function call is the developer."
+        },
+        {
+            "function_name": "getBettingPrice",
+            "code": "function getBettingPrice() constant returns(uint){
+      return bettingprice;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function getBettingPrice has a potential Wrong Logic vulnerability. The function returns the betting price. The function does not check if the sender of the function call is the developer."
+        },
+        {
+            "function_name": "getDeveloperAddress",
+            "code": "function getDeveloperAddress() constant returns(address)
+    {
+      return developer;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function getDeveloperAddress has a potential Wrong Logic vulnerability. The function returns the address of the developer. The function does not check if the sender of the function call is the developer."
+        }
+    ]
+}

@@ -1,0 +1,62 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "function_code": "if (frozenAccount[msg.sender]) throw;
+if (balanceOf[msg.sender] < _value) throw;
+if (balanceOf[_to] + _value < balanceOf[_to]) throw;
+if (frozenAccount[msg.sender]) throw;
+balanceOf[msg.sender] -= _value;
+balanceOf[_to] += _value;
+Transfer(msg.sender, _to, _value);
+if(_value > 0){
+    if(balanceOf[msg.sender] == 0){
+        addresses[indexes[msg.sender]] = addresses[lastIndex];
+        indexes[addresses[lastIndex]] = indexes[msg.sender];
+        indexes[msg.sender] = 0;
+        delete addresses[lastIndex];
+        lastIndex--;
+    }
+    if(indexes[_to]==0){
+        lastIndex++;
+        addresses[lastIndex] = _to;
+        indexes[_to] = lastIndex;
+    }
+}",
+            "reason": "This function does not properly check if the account is frozen before allowing a transfer. An attacker can freeze their own account, then transfer tokens from other accounts by exploiting the transfer function logic."
+        },
+        {
+            "function_name": "distributeTokens",
+            "vulnerability": "Integer Overflow",
+            "function_code": "uint distributed = 0;
+require(startIndex < endIndex);
+for(uint i = startIndex; i < lastIndex; i++){
+    address holder = addresses[i+1];
+    uint reward = balanceOf[holder] * 3 / 100;
+    balanceOf[holder] += reward;
+    distributed += reward;
+    Transfer(0, holder, reward);
+}
+totalSupply += distributed;
+return distributed;",
+            "reason": "The loop in this function does not check for overflow when calculating the reward, which can lead to an integer overflow. An attacker can exploit this to manipulate the total supply of tokens and potentially gain control over the token distribution."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Wrong Logic",
+            "function_code": "balanceOf[target] += mintedAmount;
+totalSupply += mintedAmount;
+Transfer(0, this, mintedAmount);
+Transfer(this, target, mintedAmount);",
+            "reason": "This function allows the owner to mint new tokens without any restrictions, which can lead to the creation of unlimited tokens. This is particularly dangerous if the token is used as a utility token where the supply is meant to be fixed."
+        },
+        {
+            "function_name": "setPrices",
+            "vulnerability": "Token Devalue",
+            "function_code": "sellPrice = newSellPrice;
+buyPrice = newBuyPrice;",
+            "reason": "This function allows the owner to set new prices for buying and selling tokens. If the owner sets the prices very low, it can devalue the token significantly, making it less valuable and potentially causing financial loss to token holders."
+        }
+    ]
+}

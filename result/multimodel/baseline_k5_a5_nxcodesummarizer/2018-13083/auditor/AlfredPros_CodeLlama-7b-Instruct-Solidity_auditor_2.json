@@ -1,0 +1,64 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public {
+        require(_to != 0x0);
+        require(balanceOf[_from] >= _value);
+        require(balanceOf[_to] + _value > balanceOf[_to]);
+        uint previousBalances = balanceOf[_from] + balanceOf[_to];
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        emit Transfer(_from, _to, _value);
+        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transfer() has a potential integer overflow vulnerability. The function calculates the previousBalances variable by adding the balanceOf[_from] and balanceOf[_to] values. If the balanceOf[_from] value is very large, the calculation may overflow and result in an incorrect value for previousBalances. This could allow an attacker to manipulate the balanceOf[_to] value and potentially cause a reentrancy attack."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);     
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function transferFrom() has a potential wrong logic vulnerability. The function checks if the allowance of the _from address is greater than or equal to the _value. However, the function does not check if the allowance is greater than or equal to the _value. This could allow an attacker to transfer more tokens than the allowance allows."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+        public
+        returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function approveAndCall() has a potential bad randomness vulnerability. The function uses the tokenRecipient contract to call the receiveApproval() function. However, the function does not check if the tokenRecipient contract is a valid contract. This could allow an attacker to call a malicious receiveApproval() function and potentially manipulate the token balance."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        emit Transfer(0, this, mintedAmount);
+        emit Transfer(this, target, mintedAmount);
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The function mintToken() has a potential access control vulnerability. The function is only accessible to the owner of the contract. However, the function does not check if the owner is the caller of the function. This could allow an attacker to call the function and potentially mint new tokens."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        emit FrozenFunds(target, freeze);
+    }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The function freezeAccount() has a potential typo constructor vulnerability. The function is only accessible to the owner of the contract. However, the function does not check if the owner is the caller of the function. This could allow an attacker to call the function and potentially freeze an account."
+        }
+    ]
+}

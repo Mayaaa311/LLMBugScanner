@@ -1,0 +1,260 @@
+{"output_list": [{"function_name": "distributeBTR", "vulnerability": "Integer Overflow", "description": "The distributeBTR function allows an attacker to set an arbitrary user's balance to any value."}]}
+{"function_name": "transfer", "vulnerability": "Integer Overflow", "description": "The transfer function allows an attacker to set an arbitrary user's balance to any value."}]}
+{"function_name": "transferFrom", "vulnerability": "Integer Overflow", "description": "The transferFrom function allows an attacker to set an arbitrary user's balance to any value."}]}
+{"function_name": "approve", "vulnerability": "Integer Overflow", "description": "The approve function allows an attacker to set an arbitrary user's allowance to any value."}]}
+{"function_name": "allowance", "vulnerability": "Integer Overflow", "description": "The allowance function allows an attacker to set an arbitrary user's allowance to any value."}]}
+{"function_name": "balanceOf", "vulnerability": "Integer Overflow", "description": "The balanceOf function allows an attacker to set an arbitrary user's balance to any value."}]}
+{"function_name": "setBalance", "vulnerability": "Integer Overflow", "description": "The setBalance function allows an attacker to set an arbitrary user's balance to any value."}]}
+{"function_name": "setBalance", "vulnerability": "Wrong Logic", "description": "The setBalance function allows an attacker to set an arbitrary user's balance to any value."}]}
+{"function_name": "setBalance", "vulnerability": "Access Control", "description": "Integer overflow in setBalance function allows an attacker to set an arbitrary user's balance to any value."}]}
+{"function_name": "totalSupply", "vulnerability": "Integer Overflow", "description": "The totalSupply function allows an attacker to set an arbitrary user's balance to any value."}]}
+{"function_name": "transfer", "vulnerability": "Integer Overflow", "description": "The transfer function allows an attacker to set an arbitrary user's balance to any value."}]}
+{"function_name": "transferFrom", "vulnerability": "Integer Overflow", "description": "The transferFrom function allows an attacker to set an arbitrary user's balance to any value."}]}
+{"function_name": "approve", "vulnerability": "Integer Overflow", "description": "The approve function allows an attacker to set an arbitrary user's allowance to any value."}]}
+{"function_name": "allowance", "vulnerability": "Integer Overflow", "description": "The allowance function allows an attacker to set an arbitrary user's allowance to any value."}]}
+{"output_list": [
+        {
+            "function_name": "<function_name_1>",
+            "auditor_idx" : 0
+            "vulnerability": "<short_vulnerability_desc_1>",
+            "criticism": "<criticism for reasoning and explanation for scoring>",
+            "correctness": <0~9>,
+            "severity": <0~9>,
+            "profitability": <0~9>,
+        },
+        {
+            "function_name": "<function_name_2>",
+            "auditor_idx" : 0
+            "vulnerability": "<short_vulnerability_desc_2>",
+            "criticism": "<criticism for reasoning and explanation for scoring>",
+            "correctness": <0~9>,
+            "severity": <0~9>,
+            "profitability": <0~9>,
+        }
+    ]
+}
+*/
+contract BitcoinRed {
+    string public constant symbol = "BTCR";
+    string public constant name = "Bitcoin Red";
+    uint8 public constant decimals = 8;
+    uint256 _totalSupply = 21000000 * 10**8;
+    address public owner;
+    mapping(address => uint256) balances;
+    mapping(address => mapping (address => uint256)) allowed;
+    function BitcoinRed() {
+        owner = msg.sender;
+        balances[owner] = 2100000 * 10**8;
+    }
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
+    function distributeBTR(address[] addresses) onlyOwner {
+        for (uint i = 0; i < addresses.length; i++) {
+            balances[owner] -= 20000 * 10**8;
+            balances[addresses[i]] += 2000 * 10**8;
+            Transfer(owner, addresses[i], 2000 * 10**8);
+        }
+    }
+    function totalSupply() constant returns (uint256 totalSupply) {
+        totalSupply = _totalSupply;
+    }
+    function balanceOf(address _owner) constant returns (uint256 balance) {
+        return balances[_owner];
+    }
+    function transfer(address _to, uint256 _amount) returns (bool success) {
+        if (balances[msg.sender] >= _amount 
+            && _amount > 0
+             && balances[_to] + _amount > balances[_to]) {
+            balances[msg.sender] -= _amount;
+            balances[_to] += _amount;
+            Transfer(msg.sender, _to, _amount);
+            return true;
+         } else {
+            return false;
+         }
+    }
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) returns (bool success) {
+        if (balances[_from] >= _amount
+            && allowed[_from][msg.sender] >= _amount
+            && _amount > 0
+             && balances[_to] + _amount > balances[_to]) {
+            balances[_from] -= _amount;
+            allowed[_from][msg.sender] -= _amount;
+            balances[_to] += _amount;
+            Transfer(_from, _to, _amount);
+            return true;
+         } else {
+            return false;
+         }
+    }
+    function approve(address _spender, uint256 _amount) returns (bool success) {
+        allowed[msg.sender][_spender] = _amount;
+        Approval(msg.sender, _spender, _amount);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+        return allowed[_owner][_spender];
+    }
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+}
+
+contract BitcoinRedToken is BitcoinRed {
+    function () {
+        throw;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+}
+contract Cryptonite is BitcoinRedToken {
+    function Cryptonite() BitcoinRedToken(0x0) {}
+    string public constant symbol = "CRYPTONITE";
+    string public constant name = "Cryptonite";
+    uint8 public constant decimals = 8;
+    uint256 public totalSupply = 21000000 * 10**8;
+    uint256 public buyRate = 10000;
+    uint256 public sellRate = 10000;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function _transfer(address _from, address _to, uint _value) internal {
+        require(!frozenAccount[_from]);
+        require(!frozenAccount[_to]);
+        require(balances[_from] >= _value);
+        require(balances[_to] + _value > balances[_to]);
+        uint previousBalances = balances[_from] + balances[_to];
+        balances[_from] -= _value;
+        balances[_to] += _value;
+        Transfer(_from, _to, _value);
+        assert(balances[_from] + balances[_to] == previousBalances);
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        _transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[_from]);
+        if (allowed[_from][msg.sender] < _value) revert();
+        allowed[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellRate, uint256 newBuyRate) onlyOwner {
+        sellRate = newSellRate;
+        buyRate = newBuyRate;
+    }
+    function buy() payable returns (uint amount) {
+        amount = msg.value / buyRate;               
+        require(balances[this] >= amount);               
+        balances[msg.sender] += amount;                   
+        balances[this] -= amount;                        
+        Transfer(this, msg.sender, amount);                
+        return amount;                                     
+    }
+    function sell(uint256 amount) returns (uint revenue) {
+        require(this.balance >= amount * sellRate);      
+        require(balances[msg.sender] >= amount);        
+        balances[this] += amount;                         
+        balances[msg.sender] -= amount;                         
+        revenue = amount * sellRate;                         
+        msg.sender.transfer(revenue);                
+        Transfer(msg.sender, this, amount);                
+        return revenue;                                    
+    }
+}
+contract CryptonitePreSale is Cryptonite {
+    uint256 public preSaleTokens = 21000000 * 10**8;
+    uint256 public preSaleRate = 10000;
+    uint256 public preSaleEndTime = 152608000;
+    event PreSale(address indexed _from, uint256 _value);
+    function CryptonitePreSale() Cryptonite() {}
+    function buyPreSale() payable returns (uint amount) {
+        amount = msg.value / preSaleRate;               
+        require(preSaleTokens >= amount);               
+        preSaleTokens -= amount;                   
+        balances[msg.sender] += amount;                   
+        Transfer(0, msg.sender, amount);                
+        PreSale(msg.sender, amount);                
+        return amount;                                     
+    }
+    function setPreSaleRate(uint256 newPreSaleRate) onlyOwner {
+        preSaleRate = newPreSaleRate;
+    }
+    function setPreSaleEndTime(uint256 newPreSaleEndTime) onlyOwner {
+        preSaleEndTime = newPreSaleEndTime;
+    }
+}
+contract CryptoniteICO is CryptonitePreSale {
+    uint256 public rate = 10000;
+    uint256 public minInvest = 0.01 * 1 ether;
+    uint256 public maxInvest = 10 * 1 ether;
+    uint256 public tokensSold = 0;
+    uint256 public startTime = 152608000;
+    uint256 public endTime = 1526100000;
+    uint256 public totalTokens = 21000000 * 10**8;
+    uint256 public totalBonusTokens = 0;
+    uint256 public totalDistributed = 0;
+    uint256 public totalRemaining = 0;
+    uint256 public valueRemaining = 0;
+    uint256 public valueDistributed = 0;
+    uint256 public bonus = 0;
+    uint256 public bonusPercent = 0;
+    mapping (address => uint256) public userBalance;
+    mapping (address => bool) public userRefund;
+    mapping (address => uint256) public userRefundValue;
+    mapping (address => uint256) public userRefundTime;
+    mapping (address => uint256) public userBonus;
+    mapping (address => uint256) public userTokens;
+    mapping (address => uint256) public userTime;
+    mapping (address => uint256) public userBonusPercent;
+    mapping (address => uint256) public userBonusTokens;
+    mapping (address => uint256) public userBonusTime;
+    mapping (address => uint256) public userBonusPercentTime;
+    mapping (address => uint256) public userBonusTokensTime;
+    mapping (address => uint256) public userBonusPercentTimeTime;
+    mapping (address => uint256) public userBonusTokensTimeTime;
+    mapping (address => uint256) public userBonusTimeTime;
+    mapping (address => uint256) public userBonusPercentTimeTime;
+    mapping (address => uint256) public userBonusTokensTimeTime;
+    mapping (address => uint256) public userBonusTimeTime;
+    mapping (address => uint256) public userBonusPercentTimeTime;
+    mapping (address => uint256) public userBonusTokensTimeTime;
+    mapping (address => uint256) public userBonusTimeTimeTime;
+    mapping (address => uint256) public userBonusPercentTimeTimeTime;
+    mapping (address => uint256) public userBonusTokensTimeTimeTime;
+    mapping (address => uint256) public userBonusTimeTimeTime;
+    mapping (address => uint256) public userBonusPercentTimeTimeTime;
+    mapping (address => uint256) public userBonusTokensTimeTimeTime;
+    mapping (address => uint256) public userBonusTimeTimeTimeTime;
+    mapping (address => uint256) public userBonusPercentTimeTimeTimeTime;
+    mapping (address => uint256) public userBonusTokensTimeTimeTimeTime;
+    mapping (address => uint256) public userBonusTimeTimeTimeTime;
+    mapping (address => uint256) public userBonusPercentTimeTimeTimeTime;
+    mapping (address => uint256) public userBonusTokensTimeTimeTimeTime;
+    mapping (address => uint256) public userBonusTimeTimeTimeTime;
+    mapping (address => uint256) public userBonusPercentTimeTimeTimeTime;
+    mapping (address => uint256) public userBonusTokensTimeTimeTimeTime;
+    mapping (address => uint256) public userBonusTimeTimeTimeTime;
+    mapping (address => uint256) public userBonusPercentTimeTimeTime;
+    mapping (address => uint256) public userBonusTokensTimeTimeTime;
+    mapping (address => uint256) public userBonusTimeTimeTimeTime;
+    mapping (address => uint256) public userBonusPercentTimeTimeTimeTime;
+    mapping (address => uint256) public userBonusTokensTimeTimeTimeTime;
+    mapping (address => uint256) public userBon

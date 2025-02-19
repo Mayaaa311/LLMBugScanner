@@ -1,0 +1,15 @@
+{"output_list": [
+            {
+                "function_name": "mint",
+                "code": "function mint(address wallet, address buyer, uint256 tokenAmount) public onlyOwner {
+      require(tokenBalances[wallet] >= tokenAmount);               
+      tokenBalances[buyer] = tokenBalances[buyer].add(tokenAmount);                  
+      tokenBalances[wallet] = tokenBalances[wallet].add(tokenAmount);                        
+      Transfer(wallet, buyer, tokenAmount); 
+      totalSupply=totalSupply.sub(tokenAmount);
+    }
+                ",
+                "vulnerability": "Integer Overflow",
+                "reason": "Integer overflow in mint function allows minting of arbitrarily large amounts of tokens arbitrarily to any user, also known as a 'tradeTrap' issue."
+            }
+        ]

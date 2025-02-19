@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "RocketCoin",
+            "vulnerability": "Access Control",
+            "reason": "The constructor sets the owner of the contract to the address that deploys the contract. This means that the owner has full control over the contract, including the ability to manipulate the token distribution and withdraw all tokens."
+        },
+        {
+            "function_name": "()",
+            "vulnerability": "Access Control",
+            "reason": "The fallback function allows anyone to call the `airDrop` function, which transfers tokens from the owner to the caller. This function does not check if the caller is allowed, leading to a potential exploitation where attackers can drain the contract's tokens."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The subtraction `balances[msg.sender] -= _amount` and addition `balances[_to] += _amount` do not include checks to prevent integer overflow, which can be exploited by sending a large amount of tokens to drain the contract's balance."
+        },
+        {
+            "function_name": "multiTransfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "Similar to the `transfer` function, the `multiTransfer` function does not include checks to prevent integer overflow, making it vulnerable to attacks where a large total amount of tokens is transferred to drain the contract."
+        },
+        {
+            "function_name": "withdrawFunds",
+            "vulnerability": "Token Devalue",
+            "reason": "This function allows the owner to withdraw any ERC20 tokens from the contract. If the owner is malicious, they can drain the contract's token balance, devaluing the tokens held by the contract and potentially the entire token's utility."
+        }
+    ]
+}

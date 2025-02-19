@@ -1,0 +1,61 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) returns (bool success) {
+        if (balances[msg.sender] >= _value && _value > 0) {
+            balances[msg.sender] -= _value;
+            balances[_to] += _value;
+            Transfer(msg.sender, _to, _value);
+            return true;
+        } else { return false; }
+    }",
+            "reason": "In the transfer function, the addition operation for updating the balance of the recipient may cause an integer overflow if the sum of the current balance and the transfer value exceeds the maximum value that can be represented by the uint256 data type."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
+            balances[_to] += _value;
+            balances[_from] -= _value;
+            allowed[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        } else { return false; }
+    }",
+            "reason": "In the transferFrom function, the addition operation for updating the balance of the recipient and the subtraction operation for updating the allowance may cause an integer overflow if the sum of the current balance and the transfer value exceeds the maximum value that can be represented by the uint256 data type."
+        },
+        {
+            "function_name": "distributeToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function distributeToken(address[] addresses, uint256 _value) {
+     for (uint i = 0; i < addresses.length; i++) {
+         balances[msg.sender] -= _value;
+         balances[addresses[i]] += _value;
+         Transfer(msg.sender, addresses[i], _value);
+     }
+}",
+            "reason": "In the distributeToken function, the subtraction operation for updating the balance of the sender and the addition operation for updating the balance of each recipient may cause an integer overflow if the sum of the current balance and the transfer value exceeds the maximum value that can be represented by the uint256 data type."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint256 _value) returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }",
+            "reason": "In the approve function, the assignment operation for updating the allowance may cause an integer overflow if the value exceeds the maximum value that can be represented by the uint256 data type."
+        },
+        {
+            "function_name": "allowance",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+      return allowed[_owner][_spender];
+    }",
+            "reason": "In the allowance function, the return statement may cause an integer overflow if the value exceeds the maximum value that can be represented by the uint256 data type."
+        }
+    ]
+}

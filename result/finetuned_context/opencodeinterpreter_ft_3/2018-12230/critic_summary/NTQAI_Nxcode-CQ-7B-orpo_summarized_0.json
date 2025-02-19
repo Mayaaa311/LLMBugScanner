@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function does not check for integer overflow when transferring tokens, which can lead to unexpected behavior or even a denial of service. The check `if(balances[to] + value < balances[to]) return false;` is flawed because it assumes that the addition will not overflow. This is a critical issue as it can cause the contract to become unusable if an attacker can manipulate the balance values to trigger this condition.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 8
+        },
+        {
+            "function_name": "approve",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function does not check for integer overflow when approving an allowance, which can lead to unexpected behavior or even a denial of service. The check `if(allowed[msg.sender][_spender] >= value) return false;` is incorrect because it does not account for the possibility of overflow. This flaw can be exploited to grant more allowance than intended, leading to potential loss of funds.",
+            "correctness": 6,
+            "severity": 8,
+            "profitability": 7
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function does not check for integer overflow when transferring tokens from one account to another, which can lead to unexpected behavior or even a denial of service. The check `if(balances[from] < value) return false;` is insufficient as it does not prevent overflow. This issue is as critical as the `transfer` function's overflow because it can also lead to the contract becoming unusable if balances are manipulated.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 8
+        },
+        {
+            "function_name": "burn",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function does not check for integer overflow when burning tokens, which can lead to unexpected behavior or even a denial of service. The check `if(balances[msg.sender] < value) return false;` is not sufficient to prevent overflow. This flaw can allow attackers to cause a denial of service by burning more tokens than exist.",
+            "correctness": 6,
+            "severity": 8,
+            "profitability": 7
+        },
+        {
+            "function_name": "mint",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function does not check for integer overflow when minting new tokens, which can lead to unexpected behavior or even a denial of service. The check `if(balances[target] + mintedAmount < balances[target]) return false;` is flawed because it assumes that the addition will not overflow. This is a critical issue as it can cause the contract to become unusable if an attacker can manipulate the balance values to trigger this condition.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 8
+        }
+    ]
+}

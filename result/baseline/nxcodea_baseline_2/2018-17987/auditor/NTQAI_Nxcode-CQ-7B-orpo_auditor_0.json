@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "claimTile",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function claimTile(uint xCoord, uint yCoord, uint gameNumber) gameRunning payable { if (gameNumber != currentGameNumber || tiles[xCoord][yCoord].gameClaimed == currentGameNumber) { revert(); } require(msg.value == currentGameCost); currentGameBalance += msg.value; tiles[xCoord][yCoord] = Tile(currentGameNumber, msg.sender); TileClaimed(currentGameNumber, xCoord, yCoord, msg.sender); numTilesClaimed += 1; if (numTilesClaimed == NUM_TILES) { determineWinner(); } }",
+            "reason": "The vulnerability lies in the line where the currentGameBalance is incremented by msg.value. If msg.value is greater than the maximum value that can be stored in a uint256, the addition operation will cause an integer overflow. This can lead to incorrect results and potentially loss of funds. The fix is to use SafeMath library to prevent integer overflow."
+        },
+        {
+            "function_name": "updateGameCost",
+            "vulnerability": "Access Control",
+            "function_code": "function updateGameCost(uint newGameCost) onlyOwner returns (bool) { if (newGameCost > 0) { nextGameCost = newGameCost; willChangeCost = true; } }",
+            "reason": "The vulnerability lies in the line where the onlyOwner modifier is used. The onlyOwner modifier restricts the execution of the function to the contract owner. However, it does not check if the newGameCost is greater than 0. This means that the function can be called by anyone, even if the newGameCost is not greater than 0. The fix is to add a check to ensure that the newGameCost is greater than 0 before updating the game cost."
+        },
+        {
+            "function_name": "claimOwnersEarnings",
+            "vulnerability": "Access Control",
+            "function_code": "function claimOwnersEarnings() onlyOwner { if (gameEarnings != 0) { if (owner.send(gameEarnings)) { gameEarnings = 0; } } }",
+            "reason": "The vulnerability lies in the line where the onlyOwner modifier is used. The onlyOwner modifier restricts the execution of the function to the contract owner. However, it does not check if the gameEarnings is greater than 0. This means that the function can be called by anyone, even if the gameEarnings is not greater than 0. The fix is to add a check to ensure that the gameEarnings is greater than 0 before sending the earnings to the owner."
+        },
+        {
+            "function_name": "claimWinnings",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function claimWinnings() { if (pendingWithdrawals[msg.sender] != 0) { if (msg.sender.send(pendingWithdrawals[msg.sender])) { WinningsClaimed(msg.sender, pendingWithdrawals[msg.sender]); pendingWithdrawals[msg.sender] = 0; } else { FailedToClaim(msg.sender, pendingWithdrawals[msg.sender]); } } }",
+            "reason": "The vulnerability lies in the line where the WinningsClaimed event is emitted. The event name is misspelled as WinningsClaimed instead of WinningsClaimed. This means that the event will not be emitted when a user claims their winnings. The fix is to correct the event name to WinningsClaimed."
+        },
+        {
+            "function_name": "claimWinnings",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function claimWinnings() { if (pendingWithdrawals[msg.sender] != 0) { if (msg.sender.send(pendingWithdrawals[msg.sender])) { WinningsClaimed(msg.sender, pendingWithdrawals[msg.sender]); pendingWithdrawals[msg.sender] = 0; } else { FailedToClaim(msg.sender, pendingWithdrawals[msg.sender]); } } }",
+            "reason": "The vulnerability lies in the line where the FailedToClaim event is emitted. The event name is misspelled as FailedToClaim instead of FailedToClaim. This means that the event will not be emitted when a user fails to claim their winnings. The fix is to correct the event name to FailedToClaim."
+        }
+    ]
+}

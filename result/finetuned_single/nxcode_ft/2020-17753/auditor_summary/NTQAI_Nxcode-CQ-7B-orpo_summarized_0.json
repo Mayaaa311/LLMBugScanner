@@ -1,0 +1,19 @@
+{
+    "output_list": [
+        {
+            "function_name": "buyFromRC",
+            "vulnerability": "Integer Overflow",
+            "reason": "The buyFromRC function has an integer overflow in the following code snippet: 
+                    if ( _remainingTokens < remainingTokens ) {
+                        remainingTokens = _remainingTokens;
+                    }
+                    if ( remainingTokens < tokenAmount ) {
+                        uint256 refund = (tokenAmount - remainingTokens).mul(tokenValue).div(oneToken);
+                        tokenAmount = remainingTokens;
+                        forward(msg.value-refund);
+                        _buyer.transfer(refund);
+                    }
+                    The buyer can set _remainingTokens arbitrarily high, allowing him to steal assets of the smart contract."
+        }
+    ]
+}

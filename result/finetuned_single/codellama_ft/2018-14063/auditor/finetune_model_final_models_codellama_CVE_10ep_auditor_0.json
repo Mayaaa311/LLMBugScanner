@@ -1,0 +1,287 @@
+{"output_list": [{"function_name": "transferOwnership", "vulnerability": "Integer Overflow", "reason": "Integer overflow in transfer function allows an attacker to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "transfer", "vulnerability": "Integer Overflow", "reason": "Integer overflow in transfer function allows an attacker to set an arbitrary user's balance to any value."}]}
+]}
+contract FlexiCoin {
+    uint256 _myValue = 0;
+    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public;
+    function increaseApproval(address _token, address _spender, uint _addedValue) public;
+    function decreaseApproval(address _token, address _spender, uint _subtractedValue) public;
+}
+contract Flexi is Tracto, FlexiCoin {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function Flexi(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) Tracto(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        require(!frozenAccount[target]);
+        uint256 balance = super.balanceOf(target);
+        balance += mintedAmount;
+        super.balances[target] = balance;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        uint amountToOwner = amount * sellPrice;
+        owner.transfer(amountToOwner);          
+    }
+}
+contract CryptoniteCoin is Flexi {
+    uint256 public sellPrice = 0.0001 * 1 ether;
+    uint256 public buyPrice = 0.0001 * 1 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        require(!frozenAccount[target]);
+        super.mintToken(target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public {
+        require(!frozenAccount[_from]);
+        super.receiveApproval(_from, _value, _token, _extraData);
+    }
+    function increaseApproval(address _token, address _spender, uint _addedValue) public {
+        require(!frozenAccount[_token]);
+        super.increaseApproval(_token, _spender, _addedValue);
+    }
+    function decreaseApproval(address _token, address _spender, uint _subtractedValue) public {
+        require(!frozenAccount[_token]);
+        super.decreaseApproval(_token, _spender, _subtractedValue);
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        uint amountToOwner = amount * sellPrice;
+        owner.transfer(amountToOwner);          
+    }
+}
+contract CryptoniteCoinToken is CryptoniteCoin {
+    uint256 public sellPrice = 0.00001 * 1 ether;
+    uint256 public buyPrice = 0.00001 * 1 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        require(!frozenAccount[target]);
+        super.mintToken(target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public {
+        require(!frozenAccount[_token]);
+        super.receiveApproval(_from, _value, _token, _extraData);
+    }
+    function increaseApproval(address _token, address _spender, uint _addedValue) public {
+        require(!frozenAccount[_token]);
+        super.increaseApproval(_token, _spender, _addedValue);
+    }
+    function decreaseApproval(address _token, address _spender, uint _subtractedValue) public {
+        require(!frozenAccount[_token]);
+        super.decreaseApproval(_token, _spender, _subtractedValue);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+}
+contract CryptoniteCoinCash is CryptoniteCoinToken {
+    uint256 public sellPrice = 0.00001 * 1 ether;
+    uint256 public buyPrice = 0.0001 * 1 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        require(!frozenAccount[target]);
+        super.mintToken(target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public {
+        require(!frozenAccount[_token]);
+        super.receiveApproval(_from, _value, _token, _extraData);
+    }
+    function increaseApproval(address _token, address _spender, uint _addedValue) public {
+        require(!frozenAccount[_token]);
+        super.increaseApproval(_token, _spender, _addedValue);
+    }
+    function decreaseApproval(address _token, address _spender, uint _subtractedValue) public {
+        require(!frozenAccount[_token]);
+        super.decreaseApproval(_token, _spender, _subtractedValue);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        uint amountToOwner = amount * sellPrice;
+        owner.transfer(amountToOwner);          
+    }
+}
+contract CryptoniteCoinTokenPreSale is CryptoniteCoinToken {
+    uint256 public sellPrice = 0.000001 * 1 ether;
+    uint256 public buyPrice = 0.0001 * 1 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        require(!frozenAccount[target]);
+        super.mintToken(target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public {
+        require(!frozenAccount[_token]);
+        super.receiveApproval(_from, _value, _token, _extraData);
+    }
+    function increaseApproval(address _token, address _spender, uint _addedValue) public {
+        require(!frozenAccount[_token]);
+        super.increaseApproval(_token, _spender, _addedValue);
+    }
+    function decreaseApproval(address _token, address _spender, uint _subtractedValue) public {
+        require(!frozenAccount[_token]);
+        super.decreaseApproval(_token, _spender, _subtractedValue);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+}
+contract CryptoniteCoinPreSale is CryptoniteCoinTokenPreSale {
+    uint256 public sellPrice = 0.0001 * 1 ether;
+    uint256 public buyPrice = 0.0001 * 1 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        require(!frozenAccount[target]);
+        super.mintToken(target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public {
+        require(!frozenAccount[_token]);
+        super.receiveApproval(_from, _value, _token, _extraData);
+    }
+    function increaseApproval(address _token, address _spender, uint _addedValue) public {
+        require(!frozenAccount[_token]);
+        super.increaseApproval(_token, _spender, _addedValue);
+    }
+    function decreaseApproval(address _token, address _spender, uint _subtractedValue) public {
+        require(!frozenAccount[_token]);
+        super.decreaseApproval(_token, _spender, _subtractedValue);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        uint amountToOwner = amount * sellPrice;
+        owner.transfer(amountToOwner);          
+    }
+}
+contract CryptoniteCoinCashICO is CryptoniteCoinPreSale {
+    uint256 public sellPrice = 0.0001 * 1 ether;
+    uint256 public buyPrice = 0.0001 * 1 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        require(!frozenAccount[target]);
+        super.mintToken(target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public {
+        require(!frozenAccount[_token]);
+        super.receiveApproval(_from

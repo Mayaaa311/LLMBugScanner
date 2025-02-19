@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function has an integer overflow that can lead to unintended asset transfer. When balances[msg.sender] is smaller than _value, it causes overflow, setting balances[msg.sender] to 2^256, a situation that can be exploited to create additional funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferFrom' function has an integer overflow that can lead to assets being frozen in an incorrect amount. When balances[_from] is smaller than _value, it causes overflow, setting balances[_from] to 2^256, a situation that can be exploited to create additional funds."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'transfer' function has a typo in a require statement, allowing any user to transfer balances of any account. Typo in 'require(balances[msg.sender] >= _value && _value > 0);' can be exploited to set balances[msg.sender] to 2^256, a situation that can be beneficial to attackers."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Bad Randomness",
+            "reason": "The 'transferFrom' function uses a bad random value, allowing assets to be frozen in an incorrect amount. Bad random value in 'require(allowed[_from][msg.sender] >= _value && balances[_from] >= _value && _value > 0);' can be exploited to create additional funds."
+        },
+        {
+            "function_name": "constructor",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor has a typo, allowing unitsOneEthCanBuy to be set to a large value, a situation that can be exploited to create additional funds."
+        }
+    ]
+}

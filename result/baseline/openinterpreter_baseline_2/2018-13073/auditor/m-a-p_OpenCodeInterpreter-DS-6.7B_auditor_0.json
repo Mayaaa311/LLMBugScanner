@@ -1,0 +1,60 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) throw;
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+    }",
+            "reason": "In the transfer function, the addition operation can cause an integer overflow if the sum of balanceOf[_to] and _value is less than balanceOf[_to]. This can be exploited by an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (balanceOf[_from] < _value) throw;
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;
+        if (_value > allowance[_from][msg.sender]) throw;
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }",
+            "reason": "In the transferFrom function, the addition operation can cause an integer overflow if the sum of balanceOf[_to] and _value is less than balanceOf[_to]. This can be exploited by an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }",
+            "reason": "In the mintToken function, the randomness of the mintedAmount is not properly managed. An attacker can mint a large amount of tokens by calling this function repeatedly. This can lead to a significant increase in the contract's totalSupply and potentially cause a Denial of Service (DoS) attack."
+        },
+        {
+            "function_name": "freezeAccount",
+            "vulnerability": "Access Control",
+            "function_code": "function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }",
+            "reason": "In the freezeAccount function, the ownership check is missing. An attacker can call this function to freeze an account without having the required ownership. This can lead to a potential loss of funds for the frozen account."
+        },
+        {
+            "function_name": "setPrices",
+            "vulnerability": "Access Control",
+            "function_code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }",
+            "reason": "In the setPrices function, the ownership check is missing. An attacker can call this function to set the prices without having the required ownership. This can lead to a potential loss of control over the contract's pricing."
+        }
+    ]
+}

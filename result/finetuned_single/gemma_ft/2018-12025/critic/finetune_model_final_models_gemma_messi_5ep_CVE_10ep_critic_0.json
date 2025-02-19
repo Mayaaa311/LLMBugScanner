@@ -1,0 +1,70 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "transfer", "vulnerability": "Bad Randomness", "reason": "The transfer function uses the setRandom function, which generates random numbers, therefore the transfer process will be affected by this randomness."}]}
+{"output_list": [{"function_name": "transferFrom", "vulnerability": "Integer Overflow", "reason": "The transferFrom function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "approve", "vulnerability": "Integer Overflow", "reason": "The approve function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "freezeAccount", "vulnerability": "Access Control", "reason": "The freezeAccount function allows the owner to restrict access to a specific user, which can be useful for preventing unauthorized access to sensitive data."}]}
+{"output_list": [{"function_name": "changeName", "vulnerability": "Access Control", "reason": "The changeName function allows the owner to change the name of the contract, which can be useful for identifying the purpose of the contract."}]}
+{"output_list": [{"function_name": "changeSymbol", "vulnerability": "Access Control", "reason": "The changeSymbol function allows the owner to change the symbol of the contract, which can be useful for identifying the purpose of the contract."}]}
+{"output_list": [{"function_name": "changeDecimals", "vulnerability": "Access Control", "reason": "The changeDecimals function allows the owner to change the decimal units of the contract, which can be useful for identifying the purpose of the contract."}]}
+}
+}  
+  function() {
+    emit Transfer(this, msg.sender, totalBalance);
+  }
+  function burn(uint256 _value) onlyOwner {
+    if (_value > totalBalance) throw;
+    address burner = msg.sender;
+    totalBalance -= _value;
+    balances[burner] += _value;
+    totalSupply -= _value;
+    Transfer(this, burner, _value);
+  }
+  function withdrawForeign(address _to, uint256 _value) onlyOwner {
+    if (_value > totalBalance) throw;
+    address burner = msg.sender;
+    totalBalance -= _value;
+    balances[burner] += _value;
+    balances[_to] += _value;
+    Transfer(this, _to, _value);
+  }
+  function airdrop(address _to, uint256 _value) onlyOwner {
+    if (_value > totalBalance) throw;
+    address burner = msg.sender;
+    totalBalance -= _value;
+    balances[burner] += _value;
+    balances[_to] += _value;
+    Transfer(this, _to, _value);
+  }
+  function distributeTokens(address[] _addresses, uint256[] _values) onlyOwner {
+    if (_addresses.length < 2) throw;
+    if (_addresses.length > 2) throw;
+    if (_values.length < 2) throw;
+    if (_values.length > 2) throw;
+    uint256 totalValue = 0;
+    uint256 totalFee = 0;
+    uint256 totalRemaining = 0;
+    for (uint i = 0; i < _addresses.length; i++) {
+        if (_values[i] == 0) throw;
+        totalValue += _values[i];
+        totalFee += totalFee;
+        airdrop(_addresses[i], _values[i]);
+    }
+    if (totalValue > totalBalance) throw;
+    if (totalFee > totalBalance) throw;
+    if (totalRemaining > totalBalance) throw;
+    balances[msg.sender] += totalRemaining;
+    totalRemaining = 0;
+    totalFee = totalFee;
+    totalValue = totalValue;
+    if (msg.sender == owner) {
+        if (totalValue > 0) {
+            balances[owner] += totalValue;
+        }
+    }
+    totalSupply += totalValue;
+    Transfer(this, owner, totalValue);
+    Transfer(owner, msg.sender, totalFee);
+  }
+  function () payable {
+    if (msg.sender == owner && totalBalance < 1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

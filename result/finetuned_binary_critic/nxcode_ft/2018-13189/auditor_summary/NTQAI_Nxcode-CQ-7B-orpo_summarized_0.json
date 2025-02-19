@@ -1,0 +1,23 @@
+{
+    "output_list": [
+        {
+            "function_name": "ICO",
+            "code": "function () public payable {
+    require(!paused && now >= ICO_START_DATE && now < ICO_END_DATE);
+    uint _tokenVal = (msg.value * pricePerWei()) / 1 ether;
+    unlb.mint(msg.sender, _tokenVal);
+}
+function foreignBuy(address _investor, uint _unlbValue, string _txHash) external onlyOwner {
+    require(!paused && now >= ICO_START_DATE && now < ICO_END_DATE);
+    require(_unlbValue > 0);
+    unlb.mint(_investor, _unlbValue);
+    ForeignBuy(_investor, _unlbValue, _txHash);
+}
+function withdraw() external onlyOwner {
+    teamWallet.transfer(this.balance);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in mint function allows minting of arbitrarily large amounts of _value of a token to an attacker's account."
+        }
+    ]
+}

@@ -1,0 +1,43 @@
+ Here are the 5 most severe vulnerabilities in the provided smart contract, along with their associated functions and reasons:
+
+1. Integer Overflow:
+
+Function: `safeMul`
+
+Vulnerability: Integer overflow can occur when multiplying two large numbers, resulting in an incorrect product.
+
+Reason: The `safeMul` function uses the `*` operator to multiply two numbers, which can lead to integer overflow if the product is too large to fit in a 256-bit integer.
+
+2. Wrong Logic:
+
+Function: `safeSub`
+
+Vulnerability: The `safeSub` function uses the `require` statement to check if the second number is less than or equal to the first number. However, this check is not sufficient to ensure that the subtraction operation will not result in an underflow.
+
+Reason: The `require` statement only checks if the second number is less than or equal to the first number, but it does not check if the subtraction operation will result in an underflow. An attacker can exploit this vulnerability by providing a second number that is greater than the first number, which will cause the subtraction operation to result in an underflow.
+
+3. Bad Randomness:
+
+Function: `precalculate`
+
+Vulnerability: The `precalculate` function uses the `pow10` function to calculate the `baseFeeDivisor` and `feeDivisor` variables. However, the `pow10` function uses a loop to calculate the power, which can be slow and may not be secure.
+
+Reason: The `pow10` function uses a loop to calculate the power, which can be slow and may not be secure. An attacker can exploit this vulnerability by providing a large number as the base and exponent, which will cause the loop to run for a long time and may cause the contract to become unresponsive.
+
+4. Access Control:
+
+Function: `setExportFee`
+
+Vulnerability: The `setExportFee` function allows any address to set the export fee for any other address. However, this function does not check if the caller has the necessary permissions to set the export fee.
+
+Reason: The `setExportFee` function allows any address to set the export fee for any other address, which can be exploited by an attacker who has the ability to set the export fee for other addresses. An attacker can use this vulnerability to manipulate the export fee for other addresses, which can result in a loss of funds for the contract owner.
+
+5. Typo Constructor:
+
+Function: `IDXM`
+
+Vulnerability: The `IDXM` constructor sets the `totalSupply` variable to 200000000000, which is a large number. However, this number is not checked for correctness, and it may be a typo.
+
+Reason: The `IDXM` constructor sets the `totalSupply` variable to 200000000000, which is a large number. However, this number is not checked for correctness, and it may be a typo. An attacker can exploit this vulnerability by providing a large number as the `totalSupply` variable, which can result in a loss of funds for the contract owner.
+
+Note: These vulnerabilities are not exploitable in real-world scenarios, but they can be exploited by an attacker who has the ability to manipulate the contract.

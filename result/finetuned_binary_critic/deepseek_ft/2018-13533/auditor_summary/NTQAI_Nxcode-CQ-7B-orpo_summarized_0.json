@@ -1,0 +1,79 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public {
+    uint market_value = _value * sellPrice;
+    uint commission = market_value * 4 / 1000;
+    if (commission < minimumCommission){ commission = minimumCommission; }
+    address contr = this;
+    require(contr.balance >= commission);
+    commissionGetter.transfer(commission);
+    _transfer(msg.sender, _to, _value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'commission' variable is vulnerable to integer overflow because it multiplies 'market_value' by 4 and then divides by 1000. If 'market_value' is large enough, 'commission' can become very small, leading to an integer overflow and allowing attackers to gain unexpected tokens."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    require(_value <= allowance[_from][msg.sender]);
+    uint market_value = _value * sellPrice;
+    uint commission = market_value * 4 / 1000;
+    if (commission < minimumCommission){ commission = minimumCommission; }
+    address contr = this;
+    require(contr.balance >= commission);
+    commissionGetter.transfer(commission);
+    allowance[_from][msg.sender] -= _value;
+    _transfer(_from, _to, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "Similar to the 'transfer' function, the 'commission' variable is vulnerable to integer overflow due to the multiplication and division operations. An attacker can exploit this vulnerability to steal unexpected tokens."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(uint256 mintedAmount) onlyOwner public {
+    balanceOf[owner] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, owner, mintedAmount);
+}",
+            "vulnerability": "Token Devalue",
+            "reason": "The 'mintToken' function allows the owner to mint additional tokens and assign them to their own address. This can devalue the token for others, as the total supply increases and the market value might decrease due to the increased supply."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) public {
+    require(!closeSell);
+    address contr = this;
+    uint market_value = amount * sellPrice;
+    uint commission = market_value * 4 / 1000;
+    if (commission < minimumCommission){ commission = minimumCommission; }
+    uint amount_weis = market_value + commission;
+    require(contr.balance >= amount_weis);
+    commissionGetter.transfer(commission);
+    _transfer(msg.sender, this, amount);
+    msg.sender.transfer(market_value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'amount_weis' variable is vulnerable to integer overflow because it adds 'market_value' and 'commission'. If 'market_value' and 'commission' are large enough, 'amount_weis' can become very small, leading to an integer overflow and allowing attackers to gain unexpected tokens."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable public {
+    require(!closeBuy);
+    uint amount = msg.value / buyPrice;
+    uint market_value = amount * buyPrice;
+    uint commission = market_value * 4 / 1000;
+    if (commission < minimumCommission){ commission = minimumCommission; }
+    address contr = this;
+    require(contr.balance >= commission);
+    commissionGetter.transfer(commission);
+    _transfer(this, msg.sender, amount);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'amount' variable is vulnerable to integer overflow because it divides 'msg.value' by 'buyPrice'. If 'msg.value' and 'buyPrice' are large enough, 'amount' can become very small, leading to an integer overflow and allowing attackers to gain unexpected tokens."
+        }
+    ]
+}

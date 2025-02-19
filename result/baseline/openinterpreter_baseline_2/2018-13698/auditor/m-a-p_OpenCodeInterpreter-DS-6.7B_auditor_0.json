@@ -1,0 +1,56 @@
+{
+    "output_list": [
+        {
+            "function_name": "setPromo",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function setPromo(uint256 _newValue) external onlyOwner {
+        promoValue = _newValue;
+    }",
+            "reason": "The function allows the owner to set a new promo value. However, there is no check to ensure that the new value does not exceed the maximum value that can be represented by the uint256 data type. This can lead to an integer overflow vulnerability."
+        },
+        {
+            "function_name": "mintTokens",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintTokens(address _investor) external onlyOwner {
+        balances[_investor] +=  promoValue;
+        totalSupply += promoValue;
+        Transfer(0x0, _investor, promoValue);
+    }",
+            "reason": "The function allows the owner to mint new tokens. However, there is no check to ensure that the new total supply does not exceed the maximum value that can be represented by the uint data type. This can lead to an integer overflow vulnerability."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint _amount) public returns (bool) {
+        balances[msg.sender] -= _amount;
+        balances[_to] -= _amount;
+        Transfer(msg.sender, _to, _amount);
+        return true;
+    }",
+            "reason": "The function allows a user to transfer tokens to another address. However, there is no check to ensure that the new balance of the recipient does not exceed the maximum value that can be represented by the uint256 data type. This can lead to an integer overflow vulnerability."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint _amount) public returns (bool) {
+        balances[_from] -= _amount;
+        allowed[_from][msg.sender] -= _amount;
+        balances[_to] -= _amount;
+        Transfer(_from, _to, _amount);
+        return true;
+    }",
+            "reason": "The function allows a user to transfer tokens from one address to another on behalf of a third party. However, there is no check to ensure that the new balance of the recipient does not exceed the maximum value that can be represented by the uint256 data type. This can lead to an integer overflow vulnerability."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint _amount) public returns (bool) {
+        require((_amount == 0) || (allowed[msg.sender][_spender] == 0));
+        allowed[msg.sender][_spender] = _amount;
+        Approval(msg.sender, _spender, _amount);
+        return true;
+    }",
+            "reason": "The function allows a user to approve a spender to transfer tokens on their behalf. However, there is no check to ensure that the new allowance does not exceed the maximum value that can be represented by the uint data type. This can lead to an integer overflow vulnerability."
+        }
+    ]
+}

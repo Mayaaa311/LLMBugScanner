@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) { assert (balanceOf[msg.sender] >= _value);            assert (balanceOf[_to] + _value >= balanceOf[_to]);  balanceOf[msg.sender] -= _value;                     balanceOf[_to] += _value;                            Transfer(msg.sender, _to, _value);                   }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not check if the transfer will cause an integer overflow. If the balanceOf[_to] + _value is greater than the maximum value of uint256, it will cause an integer overflow. This can be exploited to transfer more tokens than the contract has."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) { assert (balanceOf[_from] >= _value);            assert (balanceOf[_to] + _value >= balanceOf[_to]);  assert (_value <= allowance[_from][msg.sender]);     balanceOf[_from] -= _value;                          balanceOf[_to] += _value;                            allowance[_from][msg.sender] -= _value;Transfer(_from, _to, _value);return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check if the transfer will cause an integer overflow. If the balanceOf[_to] + _value is greater than the maximum value of uint256, it will cause an integer overflow. This can be exploited to transfer more tokens than the contract has."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable { uint amount = msg.value / buyPrice;                assert (balanceOf[this] >= amount);                balanceOf[msg.sender] += amount;                balanceOf[this] -= amount;                         Transfer(this, msg.sender, amount);                }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The buy function does not check if the transfer will cause an integer overflow. If the balanceOf[this] + amount is greater than the maximum value of uint256, it will cause an integer overflow. This can be exploited to buy more tokens than the contract has."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) { assert (balanceOf[msg.sender] >= amount );         balanceOf[this] += amount;                         balanceOf[msg.sender] -= amount;                   assert (msg.sender.send(amount * sellPrice));      Transfer(msg.sender, this, amount);                }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The sell function does not check if the transfer will cause an integer overflow. If the balanceOf[this] + amount is greater than the maximum value of uint256, it will cause an integer overflow. This can be exploited to sell more tokens than the contract has."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0, this, mintedAmount); Transfer(this, target, mintedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function does not check if the transfer will cause an integer overflow. If the balanceOf[target] + mintedAmount is greater than the maximum value of uint256, it will cause an integer overflow. This can be exploited to mint more tokens than the contract has."
+        }
+    ]
+}

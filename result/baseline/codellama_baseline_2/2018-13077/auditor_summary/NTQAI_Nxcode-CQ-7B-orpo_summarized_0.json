@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "_transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The balanceOf mapping is updated with the balanceOf[_from] -= _value and balanceOf[_to] += _value statements, which can cause an integer overflow if the _value is too large."
+        },
+        {
+            "function_name": "burn",
+            "vulnerability": "Wrong Logic",
+            "reason": "The burn function has a wrong logic in the require statement. The function requires that the balanceOf[msg.sender] > _value condition is true, but it should be balanceOf[msg.sender] >= _value to allow burning of the entire balance."
+        },
+        {
+            "function_name": "setPrices",
+            "vulnerability": "Bad Randomness",
+            "reason": "The setPrices function uses the now function to set the sellPrice and buyPrice variables, which can lead to a bad randomness attack. The now function returns the current block timestamp, which can be manipulated by miners to set the prices to arbitrary values."
+        },
+        {
+            "function_name": "freezeAccount",
+            "vulnerability": "Access Control",
+            "reason": "The freezeAccount function has a vulnerability in the require statement. The function requires that the frozenAccount mapping is updated with a value that is equal to the freeze argument, but it should be updated with a value that is equal to the !freeze argument to allow unfreezing of accounts."
+        },
+        {
+            "function_name": "CTB",
+            "vulnerability": "Typo Constructor",
+            "reason": "The CTB constructor has a typo in the token function call. The function call should be token(initialSupply, tokenName, decimalUnits, tokenSymbol), but it is called as token (initialSupply, tokenName, decimalUnits, tokenSymbol)."
+        }
+    ]
+}

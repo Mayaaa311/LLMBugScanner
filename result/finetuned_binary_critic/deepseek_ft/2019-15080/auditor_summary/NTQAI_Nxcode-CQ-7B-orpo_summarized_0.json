@@ -1,0 +1,77 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(uint256 _mintedAmount) public onlyOwner {
+        balanceOf[owner] = balanceOf[owner].add(_mintedAmount);
+        totalSupply = totalSupply.add(_mintedAmount);
+        Transfer(0, owner, _mintedAmount);
+    }",
+            "vulnerability": "Minting Power",
+            "reason": "The mintTokens function allows the owner to mint additional tokens and assign them to their own address, thus increasing the owner's token balance and total supply."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public onlyOwner {
+      require(_value <= balanceOf[msg.sender]);
+      address burner = msg.sender;
+      balanceOf[burner] = balanceOf[burner].sub(_value);
+      totalSupply = totalSupply.sub(_value);
+      Burn(burner, _value);
+  }",
+            "vulnerability": "Destructive Burning",
+            "reason": "The burn function allows the owner to burn tokens from any user's balance, reducing the total supply and effectively deleting the tokens from existence."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) {
+        require(!isblacklistedAccount[msg.sender]);                 
+        require(!isblacklistedAccount[_to]);                         
+        require(balanceOf[msg.sender] > 0);                      
+        require(balanceOf[msg.sender] >= _value);                    
+        require(_to != address(0));                                  
+        require(_value > 0);                                       
+        require(balanceOf[_to] .add(_value) >= balanceOf[_to]);      
+        require(_to != msg.sender);                                  
+        balanceOf[msg.sender] = balanceOf[msg.sender].sub(_value);   
+        balanceOf[_to] = balanceOf[_to].add(_value);                 
+        Transfer(msg.sender, _to, _value);                           
+        return true;
+    }",
+            "vulnerability": "Blacklist Attack",
+            "reason": "The transfer function does not check if the recipient is a blacklist account, allowing a blacklist function to be bypassed, and allowing the attacker to transfer tokens to a blacklist address."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(
+         address _from, 
+         address _to, 
+         uint256 _amount
+     ) public returns (bool success) {
+         if (balanceOf[_from] >= _amount
+             && allowed[_from][msg.sender] >= _amount
+             && _amount > 0
+             && balanceOf[_to].add(_amount) > balanceOf[_to]) {
+             balanceOf[_from] = balanceOf[_from].sub(_amount);
+             allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+             balanceOf[_to] = balanceOf[_to].add(_amount);
+             return true;
+        } else {
+             return false;
+        }
+    }",
+            "vulnerability": "Integer Underflow",
+            "reason": "The transferFrom function has an integer underflow vulnerability in the check: balanceOf[_to].add(_amount) > balanceOf[_to]. An attacker can exploit this vulnerability to increase the allowance of a victim, allowing the attacker to transfer tokens from the victim's account."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _amount) public returns (bool success) {
+         allowed[msg.sender][_spender] = _amount;
+         Approval(msg.sender, _spender, _amount);
+         return true;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The approve function has an integer overflow vulnerability in the following code: allowed[msg.sender][_spender] = _amount;. An attacker can exploit this vulnerability to increase the allowance of a victim, allowing the attacker to transfer tokens from the victim's account."
+        }
+    ]
+}

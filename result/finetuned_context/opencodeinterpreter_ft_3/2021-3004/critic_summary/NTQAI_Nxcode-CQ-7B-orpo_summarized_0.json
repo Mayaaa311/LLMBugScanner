@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "stake",
+            "auditor_idx": 0,
+            "vulnerability": "Reentrancy",
+            "criticism": "The 'stake' function does not implement the ReentrancyGuard modifier correctly. The _status variable is not properly checked before allowing reentrancy, which can lead to a reentrancy attack where an attacker can repeatedly call the function and steal funds. This is a high severity vulnerability because it can lead to significant financial loss.",
+            "correctness": 3,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "unstake",
+            "auditor_idx": 0,
+            "vulnerability": "Reentrancy",
+            "criticism": "Similar to the 'stake' function, the 'unstake' function also does not implement the ReentrancyGuard modifier correctly. This can be exploited in a similar manner, allowing an attacker to unstake more tokens than they actually have. This is also a high severity vulnerability.",
+            "correctness": 3,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "getReward",
+            "auditor_idx": 0,
+            "vulnerability": "Reentrancy",
+            "criticism": "The 'getReward' function does not include the ReentrancyGuard modifier, making it susceptible to reentrancy attacks. An attacker could call this function after a user has staked tokens but before the rewards are credited, allowing the attacker to steal the rewards. This is a high severity vulnerability.",
+            "correctness": 3,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "exit",
+            "auditor_idx": 0,
+            "vulnerability": "Reentrancy",
+            "criticism": "The 'exit' function calls 'unstake' and 'getReward' without any protection against reentrancy. This means an attacker could exploit the unstake process and then reenter the contract to get the rewards again. This is a high severity vulnerability.",
+            "correctness": 3,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "notifyFeeAmount",
+            "auditor_idx": 0,
+            "vulnerability": "Incorrect Reward Calculation",
+            "criticism": "The 'notifyFeeAmount' function calculates the reward rate incorrectly. If the block timestamp is before the period finish, it does not correctly update the reward rate, which can lead to incorrect reward distribution. This is a medium severity vulnerability because it affects the reward distribution but does not directly lead to financial loss.",
+            "correctness": 5,
+            "severity": 5,
+            "profitability": 6
+        }
+    ]
+}

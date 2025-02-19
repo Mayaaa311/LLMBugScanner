@@ -1,0 +1,33 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "SpendToken.mint(address, uint)",
+            "vulnerability": "Integer Overflow",
+            "function_code": "mint(address _holder, uint _value) external {
+    require(msg.sender == presale);
+    require(_value > 0);
+    require(totalSupply + _value <= TOKEN_LIMIT);
+    balances[_holder] += _value;
+    totalSupply += _value;
+    Transfer(0x0, _holder, _value);
+}",
+            "reason": "The function "SpendToken.mint(address, uint)" is vulnerable to Integer Overflow. If the input value is greater than the maximum value of a uint256, it will cause an overflow and potentially crash the contract."
+        },
+        {
+            "function_name": "StandardToken.transferFrom(address, address, uint)",
+            "vulnerability": "Access Control",
+            "function_code": "transferFrom(address _from, address _to, uint _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    balances[_from] = balances[_from].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    Transfer(_from, _to, _value);
+    return true;
+}",
+            "reason": "The function "StandardToken.transferFrom(address, address, uint)" is vulnerable to Access Control. It does not check if the input value is greater than the balance of the from address, which can allow potential attackers to transfer more funds than they actually own."
+        }
+    ]
+}<eos>

@@ -1,0 +1,62 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) returns (bool success) {
+    require(balances[msg.sender] >= _value);
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+}",
+            "reason": "The function does not check for integer overflow when updating the balances. If an attacker can manipulate the _value parameter to a very high value, it could cause an integer overflow, leading to incorrect balance updates and potentially allowing the attacker to transfer tokens they did not own."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    require(balances[_from] >= _value && allowed[_from][msg.sender] >= _value);
+    balances[_to] += _value;
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+}",
+            "reason": "The function does not check if the spender has been approved by the owner for the specific amount of tokens. An attacker can use this flaw to transfer tokens from other users' accounts without their consent by crafting a transaction that appears to come from the legitimate owner."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Access Control",
+            "function_code": "function approve(address _spender, uint256 _value) returns (bool success) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+}",
+            "reason": "The function does not check if the spender has already been approved for a non-zero amount. This allows an attacker to repeatedly call approve with a high value, effectively locking the tokens in the contract and preventing their use until the owner manually resets the allowance."
+        },
+        {
+            "function_name": "approveAndCall",
+            "vulnerability": "Access Control",
+            "function_code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    require(_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData));
+    return true;
+}",
+            "reason": "Similar to the approve function, this function does not check if the spender has already been approved for a non-zero amount. This allows an attacker to repeatedly call approveAndCall with a high value, effectively locking the tokens in the contract and preventing their use until the owner manually resets the allowance."
+        },
+        {
+            "function_name": "HumanStandardToken",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function HumanStandardToken(uint256 _initialAmount, string _tokenName, uint8 _decimalUnits, string _tokenSymbol) {
+    balances[msg.sender] = _initialAmount;
+    totalSupply = _initialAmount;
+    name = _tokenName;
+    decimals = _decimalUnits;
+    symbol = _tokenSymbol;
+}",
+            "reason": "There is a typo in the constructor where 'totalSupply' is set to '_initialAmount' instead of 'balances[msg.sender]'. This typo leads to an incorrect initial supply of tokens being assigned to the contract owner, which can lead to inconsistencies in the token distribution."
+        }
+    ]
+}

@@ -1,0 +1,59 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferOwnership",
+            "code": "function transferOwnership(address newOwner) onlyOwner {
+    owner = newOwner;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The transferOwnership function allows anyone to change the owner of the contract. This can lead to unauthorized access and loss of funds if the owner is maliciously compromised."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value)
+    returns (bool success) {
+    allowance[msg.sender][_spender] = _value;
+    return true;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The approve function allows anyone to approve spending of their tokens by another address. This can lead to unauthorized spending if the spender is maliciously compromised."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+    returns (bool success) {
+    tokenRecipient spender = tokenRecipient(_spender);
+    if (approve(_spender, _value)) {
+        spender.receiveApproval(msg.sender, _value, this, _extraData);
+        return true;
+    }
+}",
+            "vulnerability": "Access Control",
+            "reason": "The approveAndCall function allows anyone to approve spending of their tokens by another address and call a function on the spender. This can lead to unauthorized spending if the spender is maliciously compromised."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if (balanceOf[_from] < _value) throw;                 
+    if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+    if (_value > allowance[_from][msg.sender]) throw;   
+    balanceOf[_from] -= _value;                          
+    balanceOf[_to] += _value;                            
+    allowance[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The transferFrom function allows anyone to transfer tokens from another address on behalf of the owner. This can lead to unauthorized spending if the owner is maliciously compromised."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The setPrices function allows anyone to set the sell and buy prices of the tokens. This can lead to unauthorized price manipulation if the owner is maliciously compromised."
+        }
+    ]
+}

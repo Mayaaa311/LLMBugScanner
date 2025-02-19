@@ -1,0 +1,476 @@
+{"output_list": [{"function_name": "MorphToken", "vulnerability": "Bad Randomness", "impact": "The morphToken function generates a random value, assigns it to the storage of the contract, and allows the owner to use it as a public property. However, the random value is never checked to be within the bounds of the uint256 type, leading to potential unhandled exceptions and hard-to-debug bugs."}]}
+</output>
+This JSON format strictly.  
+</output>
+  function _addguess() private inState(State.Started)  
+  {
+      require(msg.value >= bettingprice);
+      curhash = sha256(block.timestamp, block.coinbase, block.difficulty, curhash);
+      if((uint)(numguesses+1)<=arraysize) {
+        guesses[numguesses++].addr = msg.sender;
+        if((uint)(numguesses)>=arraysize){
+          _finish();
+        }
+      }
+  }
+</output>
+  function addGuess(uint256 _value) public inState(State.Started)
+  {
+      require(msg.value >= bettingprice);
+      curhash = sha256(block.timestamp, block.coinbase, block.difficulty, curhash);
+      if((uint)(numguesses+1)<=arraysize) {
+        guesses[numguesses++].addr = msg.sender;
+        if((uint)(numguesses)>=arraysize){
+          _finish();
+        }
+      }
+    uint ownerHash = sha256(msg.sender, block.timestamp, block.coinbase, block.difficulty, curhash);
+    Guess storage guess = guesses[ownerHash];
+    require(guess.addr == owner);  
+    require(guess.addr != guess.addr);  
+    require(guess.token == this);  
+    require(guess.value == 0);  
+    guess.addr = owner;
+    guess.value = _value;
+    guess.token = this;
+    owner.transfer(_value);
+  }
+</output>
+  function mintToken(address target, uint256 mintedAmount) onlyOwner
+  {
+      require(mintedAmount <= totalBounty);
+      totalBounty -= mintedAmount;
+      balances[target] += mintedAmount;
+      Transfer(0, this, mintedAmount);
+      Transfer(this, target, mintedAmount);
+  }
+</output>
+  function payWinner(address winner) private
+  {
+      require(msg.sender == owner);
+      require(balances[this] < totalBounty);
+      uint ownerHash = sha256(msg.sender, block.timestamp, block.coinbase, block.difficulty, curhash);
+      Guess storage guess = guesses[ownerHash];
+      require(guess.addr == owner);
+      require(guess.token == this);
+      require(guess.value > 0);
+      owner.transfer(guess.value);
+       guess.addr = owner;
+       guess.value = 0;
+       guess.token = this;
+       Transfer(this, owner, guess.value);
+  }
+</output>
+  function getWinner() constant returns (address)
+  {
+      return _winner;
+  }
+</output>
+  function getBalance() constant returns (uint)
+  {
+      return this.balance;
+  }
+</output>
+  function setWinner(address _winner) onlyOwner
+  {
+      _winner = msg.sender;
+  }
+</output>
+  function setBalance(uint256 _balance) onlyOwner
+  {
+      totalBounty = _balance;
+  }
+</output>
+  function transferOwnership(address _newOwner) onlyOwner
+  {
+      owner = _newOwner;
+  }
+</output>
+  function setWorld(address _world, uint256 _balance) onlyOwner
+  {
+      world = _world;
+      totalBounty = _balance;
+  }
+</output>
+  function setDifficulty(uint256 _difficulty) onlyOwner
+  {
+      maxTickets = _difficulty;
+  }
+</output>
+  function setMinBalance(uint256 _minBalance) onlyOwner
+  {
+      minBalance = _minBalance;
+  }
+</output>
+  function setMaxBalance(uint256 _maxBalance) onlyOwner
+  {
+      maxTickets = _maxBalance;
+  }
+</output>
+  function setWinnerFee(uint256 _winnerPrice) onlyOwner
+  {
+      _winnerPrice = _winnerPrice;
+  }
+</output>
+  function setRace(uint256 _value) onlyOwner
+  {
+      _value = maxTickets;
+  }
+</output>
+  function setOwner(address _owner) onlyOwner
+  {
+      owner = _owner;
+  }
+</output>
+  function setEnv(uint256 _minBalance, uint256 _maxBalance, uint256 _difficulty, uint256 _worldPrice) onlyOwner
+  {
+      minBalance = _minBalance;
+      maxTickets = _maxBalance;
+      maxGuess = _difficulty;
+      world = _worldPrice;
+      owner = msg.sender;
+  }
+</output>
+  function() payable
+  {
+      uint ownerBalance = balances[msg.sender];
+      owner.transfer(ownerBalance);
+  }
+</output>
+  function withdraw() onlyOwner
+  {
+      uint ownerBalance = balances[msg.sender];
+      owner.transfer(ownerBalance);
+      selfdestruct(msg.sender);
+  }
+</output>
+  function setConfig(uint256 _minBalance, uint256 _maxBalance, uint256 _difficulty, address _world) onlyOwner
+  {
+      minBalance = _minBalance;
+      maxTickets = _maxBalance;
+      maxGuess = _difficulty;
+      world = _world;
+      owner = msg.sender;
+  }
+</output>
+  function setWorldAndBalance(address _world, uint256 _balance) onlyOwner
+  {
+      world = _world;
+      totalBounty = _balance;
+      owner.transfer(_balance);
+  }
+</output>
+  function setOwnerAndBalance(address _owner, uint256 _balance) onlyOwner
+  {
+      owner = _owner;
+      totalBounty = _balance;
+      owner.transfer(_balance);
+  }
+</output>
+  function setDifficulty(uint256 _difficulty) onlyOwner
+  {
+      maxGuess = _difficulty;
+  }
+</output>
+  function setMinBalance(uint256 _minBalance) onlyOwner
+  {
+      minBalance = _minBalance;
+  }
+</output>
+  function setMaxBalance(uint256 _maxBalance) onlyOwner
+  {
+      maxTickets = _maxBalance;
+  }
+</output>
+  function setWinnerFee(uint256 _winnerPrice) onlyOwner
+  {
+      _winnerPrice = _winnerPrice;
+  }
+</output>
+  function setRace(uint256 _value) onlyOwner
+  {
+      maxTickets = _value;
+  }
+</output>
+  function setOwner(address _owner) onlyOwner
+  {
+      owner = _owner;
+  }
+</output>
+  function setEnv(uint256 _minBalance, uint256 _maxBalance, uint256 _difficulty, address _world) onlyOwner
+  {
+      minBalance = _minBalance;
+      maxTickets = _maxBalance;
+      maxGuess = _difficulty;
+      world = _world;
+      owner = msg.sender;
+  }
+</output>
+  function setBalance(uint256 _balance) onlyOwner
+  {
+      totalBounty = _balance;
+      owner.transfer(_balance);
+  }
+</output>
+  function setWinner(address _winner) onlyOwner
+  {
+      _winner = msg.sender;
+  }
+</output>
+  function setDifficulty(uint256 _difficulty) onlyOwner
+  {
+      maxGuess = _difficulty;
+      if (maxGuess > 1000) maxGuess = 1000;
+  }
+</output>
+  function setMinBalance(uint256 _minBalance) onlyOwner
+  {
+      minBalance = _minBalance;
+      if (minBalance > 25000) minBalance = 25000;
+  }
+</output>
+  function setMaxBalance(uint256 _maxBalance) onlyOwner
+  {
+      maxTickets = _maxBalance;
+      if (maxTickets > 25000) maxTickets = 25000;
+  }
+</output>
+  function setWinnerFee(uint256 _winnerPrice) onlyOwner
+  {
+      _winnerPrice = _winnerPrice;
+  }
+</output>
+  function setEnv(uint256 _minBalance, uint256 _maxBalance, uint256 _difficulty, address _world) onlyOwner
+  {
+      minBalance = _minBalance;
+      maxTickets = _maxBalance;
+      maxGuess = _difficulty;
+      world = _world;
+      owner = msg.sender;
+  }
+</output>
+  function setBalance(uint256 _balance) onlyOwner
+  {
+      totalBounty = _balance;
+      owner.transfer(_balance);
+  }
+</output>
+  function setWinner(address _winner) onlyOwner
+  {
+      _winner = msg.sender;
+  }
+</output>
+  function setDifficulty(uint256 _difficulty) onlyOwner
+  {
+      maxGuess = _difficulty;
+      if (maxGuess > 1000) maxGuess = 1000;
+  }
+</output>
+  function setMinBalance(uint256 _minBalance) onlyOwner
+  {
+      minBalance = _minBalance;
+      if (minBalance > 25000) minBalance = 25000;
+  }
+</output>
+  function setMaxBalance(uint256 _maxBalance) onlyOwner
+  {
+      maxTickets = _maxBalance;
+      if (maxTickets > 25000) maxTickets = 25000;
+  }
+</output>
+  function setWinnerFee(uint256 _winnerPrice) onlyOwner
+  {
+      _winnerPrice = _winnerPrice;
+  }
+</output>
+  function setEnv(uint256 _minBalance, uint256 _maxBalance, uint256 _difficulty, address _world) onlyOwner
+  {
+      minBalance = _minBalance;
+      maxTickets = _maxBalance;
+      maxGuess = _difficulty;
+      world = _world;
+      owner = msg.sender;
+  }
+</output>
+  function setBalance(uint256 _balance) onlyOwner
+  {
+      totalBounty = _balance;
+      owner.transfer(_balance);
+  }
+</output>
+  function setWinner(address _winner) onlyOwner
+  {
+      _winner = msg.sender;
+  }
+</output>
+  function setDifficulty(uint256 _difficulty) onlyOwner
+  {
+      maxGuess = _difficulty;
+      if (maxGuess > 1000) maxGuess = 1000;
+  }
+</output>
+  function setMinBalance(uint256 _minBalance) onlyOwner
+  {
+      minBalance = _minBalance;
+      if (minBalance > 25000) minBalance = 25000;
+  }
+</output>
+  function setMaxBalance(uint256 _maxBalance) onlyOwner
+  {
+      maxTickets = _maxBalance;
+      if (maxTickets > 25000) maxTickets = 25000;
+  }
+</output>
+  function setWinnerFee(uint256 _winnerPrice) onlyOwner
+  {
+      _winnerPrice = _winnerPrice;
+  }
+</output>
+  function setEnv(uint256 _minBalance, uint256 _maxBalance, uint256 _difficulty, address _world) onlyOwner
+  {
+      minBalance = _minBalance;
+      maxTickets = _maxBalance;
+      maxGuess = _difficulty;
+      world = _world;
+      owner = msg.sender;
+  }
+</output>
+  function setBalance(uint256 _balance) onlyOwner
+  {
+      totalBounty = _balance;
+      owner.transfer(_balance);
+  }
+</output>
+  function setWinner(address _winner) onlyOwner
+  {
+      _winner = msg.sender;
+  }
+</output>
+  function setDifficulty(uint256 _difficulty) onlyOwner
+  {
+      maxGuess = _difficulty;
+      if (maxGuess > 1000) maxGuess = 1000;
+  }
+</output>
+  function setMinBalance(uint256 _minBalance) onlyOwner
+  {
+      minBalance = _minBalance;
+      if (minBalance > 25000) minBalance = 25000;
+  }
+</output>
+  function setMaxBalance(uint256 _maxBalance) onlyOwner
+  {
+      maxTickets = _maxBalance;
+      if (maxTickets > 25000) maxTickets = 25000;
+  }
+</output>
+  function setWinnerFee(uint256 _winnerPrice) onlyOwner
+  {
+      _winnerPrice = _winnerPrice;
+  }
+</output>
+  function setEnv(uint256 _minBalance, uint256 _maxBalance, uint256 _difficulty, address _world) onlyOwner
+  {
+      minBalance = _minBalance;
+      maxTickets = _maxBalance;
+      maxGuess = _difficulty;
+      world = _world;
+      owner = msg.sender;
+  }
+</output>
+  function setBalance(uint256 _balance) onlyOwner
+  {
+      totalBounty = _balance;
+      owner.transfer(_balance);
+  }
+</output>
+  function setWinner(address _winner) onlyOwner
+  {
+      _winner = msg.sender;
+  }
+</output>
+  function setDifficulty(uint256 _difficulty) onlyOwner
+  {
+      maxGuess = _difficulty;
+      if (maxGuess > 1000) maxGuess = 1000;
+  }
+</output>
+  function setMinBalance(uint256 _minBalance) onlyOwner
+  {
+      minBalance = _minBalance;
+      if (minBalance > 25000) minBalance = 25000;
+  }
+</output>
+  function setMaxBalance(uint256 _maxBalance) onlyOwner
+  {
+      maxTickets = _maxBalance;
+      if (maxTickets > 25000) maxTickets = 25000;
+  }
+</output>
+  function setWinnerFee(uint256 _winnerPrice) onlyOwner
+  {
+      _winnerPrice = _winnerPrice;
+  }
+</output>
+  function setEnv(uint256 _minBalance, uint256 _maxBalance, uint256 _difficulty, address _world) onlyOwner
+  {
+      minBalance = _minBalance;
+      maxTickets = _maxBalance;
+      maxGuess = _difficulty;
+      world = _world;
+      owner = msg.sender;
+  }
+</output>
+  function setBalance(uint256 _balance) onlyOwner
+  {
+      totalBounty = _balance;
+      owner.transfer(_balance);
+  }
+</output>
+  function setWinner(address _winner) onlyOwner
+  {
+      _winner = msg.sender;
+  }
+</output>
+  function setDifficulty(uint256 _difficulty) onlyOwner
+  {
+      maxGuess = _difficulty;
+      if (maxGuess > 1000) maxGuess = 1000;
+  }
+</output>
+  function setMinBalance(uint256 _minBalance) onlyOwner
+  {
+      minBalance = _minBalance;
+      if (minBalance > 25000) minBalance = 25000;
+  }
+</output>
+  function setMaxBalance(uint256 _maxBalance) onlyOwner
+  {
+      maxTickets = _maxBalance;
+      if (maxTickets > 25000) maxTickets = 25000;
+  }
+</output>
+  function setWinnerFee(uint256 _winnerPrice) onlyOwner
+  {
+      _winnerPrice = _winnerPrice;
+  }
+</output>
+  function setEnv(uint256 _minBalance, uint256 _maxBalance, uint256 _difficulty, address _world) onlyOwner
+  {
+      minBalance = _minBalance;
+      maxTickets = _maxBalance;
+      maxGuess = _difficulty;
+      world = _world;
+      owner = msg.sender;
+  }
+</output>
+  function setBalance(uint256 _balance) onlyOwner
+  {
+      totalBounty = _balance;
+      owner.transfer(_balance);
+  }
+</output>
+  function setWinner(address _winner) onlyOwner
+  {
+      _winner = msg.sender;
+  }

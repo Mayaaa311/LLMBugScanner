@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function in the provided smart contract has an integer overflow vulnerability. The condition 'require(balances[msg.sender] >= _value);' is safe from overflow because '_value' is unsigned, but the following line 'balances[msg.sender] -= _value;' can underflow if '_value' is larger than 'balances[msg.sender]', causing a denial of service to the token holders."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferFrom' function in the provided smart contract has an integer overflow vulnerability. The condition 'require(balances[_from] >= _value && allowed[_from][msg.sender] >= _value);' is safe from overflow because '_value' is unsigned, but the following line 'balances[_to] += _value;' can overflow if '_value' is larger than 'balances[_from]' and 'allowed[_from][msg.sender]', causing a denial of service to the token holders."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'approve' function in the provided smart contract has a wrong logic vulnerability. The function allows the owner to set the allowance of an attacker controlled contract to any value. Even if the owner revokes the approval, the attacker controlled contract still can be used to block further transfers from the owner's account."
+        },
+        {
+            "function_name": "approveAndCall",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'approveAndCall' function in the provided smart contract has a wrong logic vulnerability. The function allows the caller to specify arbitrary data to be sent to the spender. This can be exploited to cause a denial of service to the owner."
+        },
+        {
+            "function_name": "HumanStandardToken",
+            "vulnerability": "Typo Constructor",
+            "reason": "The 'HumanStandardToken' constructor in the provided smart contract has a typo vulnerability. The typo causes the 'totalSupply' to be set to '_initialAmount' instead of the intended value, allowing the contract to be distributed without any initial funds."
+        }
+    ]
+}

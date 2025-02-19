@@ -1,0 +1,53 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address _holder, uint _value) external {
+        require(msg.sender == ico);
+        require(_value != 0);
+        require(totalSupply + _value <= TOKEN_LIMIT);
+        balances[_holder] += _value;
+        totalSupply += _value;
+        emit Transfer(0x0, _holder, _value);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mint function has an integer overflow, allowing minted tokens to be retrieved arbitrarily by the contract owner."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint _value) public {
+        require(msg.sender == ico);
+        super.burn(_value);
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The burn function allows arbitrary token burning, allowing potential attackers to destroy any token for any reason."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _value) public {
+        require(!tokensAreFrozen);
+        super.transfer(_to, _value);
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The transfer function allows arbitrary transfers, allowing potential attackers to steal tokens."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _value) onlyPayloadSize(3 * 32) public {
+        require(!tokensAreFrozen);
+        super.transferFrom(_from, _to, _value);
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The transferFrom function allows arbitrary transfers, allowing potential attackers to steal tokens."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint _value) public {
+        require(!tokensAreFrozen);
+        super.approve(_spender, _value);
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The approve function allows arbitrary transfers, allowing potential attackers to steal tokens."
+        }
+    ]
+}

@@ -1,0 +1,342 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow, allowing an attacker to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow, allowing an attacker to set the balance of an arbitrary user to any value."}]}
+]}
+
+
+contract SafeMath {
+  function safeAdd(uint a, uint b) internal pure returns (uint c) {
+    c = a + b;
+    require(c >= a);
+  }
+  function safeSub(uint a, uint b) internal pure returns (uint c) {
+    require(b <= a);
+    c = a - b;
+  }
+  function safeMul(uint a, uint b) internal pure returns (uint c) {
+    c = a * b;
+    require(a == 0 || c / a == b);
+  }
+  function safeDiv(uint a, uint b) internal pure returns (uint c) {
+    require(b > 0);
+    c = a / b;
+  }
+}
+contract CryptoTrolls is SafeMath {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoTrolls(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) SafeMath public {
+        totalSupply = initialSupply * 10 ** uint256(decimals);  
+        balanceOf[msg.sender] = totalSupply;                
+        name = tokenName;                                   
+        symbol = tokenSymbol;                               
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                     
+        require (balanceOf[_from] >= _value);               
+        require (balanceOf[_to] + _value > balanceOf[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                       
+        balanceOf[_from] -= _value;                         
+        balanceOf[_to] += _value;                           
+        Transfer(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CryptoTrollsToken is CryptoTrolls {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoTrollsToken(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) CryptoTrolls(initialSupply, tokenName, tokenSymbol) public {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CryptoTrollsCash is CryptoTrollsToken { 
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoTrollsCash(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) CryptoTrollsToken(initialSupply, tokenName, tokenSymbol) public {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CryptoTrollsCash is CryptoTrollsCash { 
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoTrollsCash(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) CryptoTrollsToken(initialSupply, tokenName, tokenSymbol) public {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CryptoTrollsCash2 is CryptoTrollsToken { 
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoTrollsCash2(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) CryptoTrollsToken(initialSupply, tokenName, tokenSymbol) public {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CryptoTrollsCash3 is CryptoTrollsToken { 
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoTrollsCash3(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) CryptoTrollsToken(initialSupply, tokenName, tokenSymbol) public {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CryptoTrollsCash4 is CryptoTrollsToken { 
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoTrollsCash4(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) CryptoTrollsToken(initialSupply, tokenName, tokenSymbol) public {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CryptoTrollsCash5 is CryptoTrollsToken { 
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoTrollsCash5(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) CryptoTrollsToken(initialSupply, tokenName, tokenSymbol) public {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CryptoTrollsCash6 is CryptoTrollsToken { 
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoTrollsCash6(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) CryptoTrollsToken(initialSupply, tokenName, tokenSymbol) public {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.trans

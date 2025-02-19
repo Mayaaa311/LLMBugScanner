@@ -1,0 +1,74 @@
+{
+    "output_list": [
+        {
+            "function_name": "RocketCoin",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function RocketCoin() public {
+        owner = msg.sender;
+        balances[owner] = totalSupply;
+        Transfer(address(0), owner, totalSupply);
+    }",
+            "reason": "In the constructor function, the totalSupply is directly assigned to the owner's balance. If the totalSupply exceeds the maximum uint256 value, it will result in an integer overflow."
+        },
+        {
+            "function_name": "multiTransfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function multiTransfer(address[] _addresses, uint[] _amounts) public returns (bool success) {
+        require(_addresses.length <= 100 && _addresses.length == _amounts.length);
+        uint totalAmount;
+        for (uint a = 0; a < _amounts.length; a++) {
+            totalAmount += _amounts[a];
+        }
+        require(totalAmount > 0 && balances[msg.sender] >= totalAmount);
+        balances[msg.sender] -= totalAmount;
+        for (uint b = 0; b < _addresses.length; b++) {
+            if (_amounts[b] > 0) {
+                balances[_addresses[b]] += _amounts[b];
+                Transfer(msg.sender, _addresses[b], _amounts[b]);
+            }
+        }
+        return true;
+    }",
+            "reason": "In the multiTransfer function, the totalAmount is calculated by summing up the amounts in the _amounts array. If the sum exceeds the maximum uint256 value, it will result in an integer overflow."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _amount) public returns (bool success) {
+        require(balances[_from] >= _amount && allowed[_from][msg.sender] >= _amount && _amount > 0);
+        balances[_from] -= _amount;
+        allowed[_from][msg.sender] -= _amount;
+        balances[_to] += _amount;
+        Transfer(_from, _to, _amount);
+        return true;
+    }",
+            "reason": "In the transferFrom function, the balances of the sender and the spender are updated. If the subtraction of _amount from balances[_from] or allowed[_from][msg.sender] results in a negative value, it will result in an integer overflow."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint256 _amount) public returns (bool success) {
+        allowed[msg.sender][_spender] = _amount;
+        Approval(msg.sender, _spender, _amount);
+        return true;
+    }",
+            "reason": "In the approve function, the allowance is set by assigning _amount to allowed[msg.sender][_spender]. If _amount exceeds the maximum uint256 value, it will result in an integer overflow."
+        },
+        {
+            "function_name": "withdrawFunds",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function withdrawFunds(address _token) public returns (bool success) {
+        require(msg.sender == owner);
+        if (_token == address(0)) {
+            owner.transfer(this.balance);
+        }
+        else {
+            Token ERC20 = Token(_token);
+            ERC20.transfer(owner, ERC20.balanceOf(this));
+        }
+        return true;
+    }",
+            "reason": "In the withdrawFunds function, the owner's balance is transferred to the contract. If the contract has a large balance, it may lead to bad randomness as the transfer amount is not randomized."
+        }
+    ]
+}

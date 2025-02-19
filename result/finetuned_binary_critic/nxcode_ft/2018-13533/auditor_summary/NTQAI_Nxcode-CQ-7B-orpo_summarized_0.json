@@ -1,0 +1,35 @@
+{
+    "output_list": [
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) public {
+        trequire(!closeSell);
+            address contr = this;
+            uint market_value = amount * sellPrice;
+            uint commission = market_value * 4 / 1000;
+            if (commission < minimumCommission){ commission = minimumCommission; }
+            uint amount_weis = market_value + commission;
+            require(contr.balance >= amount_weis);
+            commissionGetter.transfer(commission);
+            _transfer(msg.sender, this, amount);
+            msg.sender.transfer(market_value);
+        }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The sell function has an integer overflow in the following code snippet: 
+                    uint amount_weis = market_value + commission;
+                    require(contr.balance >= amount_weis);
+                    msg.sender.transfer(market_value);
+                    Output only in the following JSON format:
+                    {
+                        "output_list": [
+                            {
+                                "function_name": "<function_name>",
+                                "code": "<vulnerable_function_code>",
+                                "vulnerability": "<vulnerability_type>",
+                                "reason": "<vulnerability_description>"
+                            }
+                        ]
+                    }"
+        }
+    ]
+}

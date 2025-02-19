@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "uploadBalances",
+            "code": "function uploadBalances(address[] addresses, uint256[] balances) onlyOwner { require(!balancesLocked); require(addresses.length == balances.length); uint256 sum; for (uint256 i = 0; i < uint256(addresses.length); i++) { sum = safeAdd(sum, safeSub(balances[i], balanceOf[addresses[i]])); balanceOf[addresses[i]] = balances[i]; } balanceOf[owner] = safeSub(balanceOf[owner], sum); }",
+            "vulnerability": "Administrative Override",
+            "reason": "The 'uploadBalances' function allows the owner to arbitrarily set the balances of a list of accounts, without any restrictions, thus allowing the owner to steal funds from any account."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _amount) returns (bool success) { require(!locked); require(balanceOf[msg.sender] >= _amount); require(balanceOf[_to] + _amount >= balanceOf[_to]); balanceOf[msg.sender] -= _amount; uint256 preBalance = balanceOf[_to]; balanceOf[_to] += _amount; bool alreadyMax = preBalance >= singleIDXMQty; if (!alreadyMax) { if (now >= validAfter[_to].ts + mustHoldFor) validAfter[_to].last = preBalance; validAfter[_to].ts = now; } if (validAfter[msg.sender].last > balanceOf[msg.sender]) validAfter[msg.sender].last = balanceOf[msg.sender]; Transfer(msg.sender, _to, _amount); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function does not perform overflow checks, allowing users to increase their balance beyond the maximum allowed value, leading to integer overflow."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _amount) returns (bool success) { require(!locked); require(balanceOf[_from] >= _amount); require(balanceOf[_to] + _amount >= balanceOf[_to]); require(_amount <= allowance[_from][msg.sender]); balanceOf[_from] -= _amount; uint256 preBalance = balanceOf[_to]; balanceOf[_to] += _amount; allowance[_from][msg.sender] -= _amount; bool alreadyMax = preBalance >= singleIDXMQty; if (!alreadyMax) { if (now >= validAfter[_to].ts + mustHoldFor) validAfter[_to].last = preBalance; validAfter[_to].ts = now; } if (validAfter[_from].last > balanceOf[_from]) validAfter[_from].last = balanceOf[_from]; Transfer(_from, _to, _amount); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferFrom' function does not perform overflow checks, allowing users to increase their balance beyond the maximum allowed value, leading to integer overflow."
+        },
+        {
+            "function_name": "setExportFee",
+            "code": "function setExportFee(address addr, uint256 fee) onlyOwner { require(addr != 0x00000000000000000000000000000000000000ff); exportFee[addr] = fee; }",
+            "vulnerability": "Administrative Override",
+            "reason": "The 'setExportFee' function allows the owner to arbitrarily set the export fee for any address, without any restrictions, thus allowing the owner to manipulate the fee system."
+        },
+        {
+            "function_name": "precalculate",
+            "code": "function precalculate() internal returns (bool success) { baseFeeDivisor = pow10(1, feeDecimals); feeDivisor = pow10(1, feeDecimals + decimals); singleIDXMQty = pow10(1, decimals); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'precalculate' function does not perform overflow checks, allowing users to set the 'singleIDXMQty' to a very large value, leading to integer overflow."
+        }
+    ]
+}

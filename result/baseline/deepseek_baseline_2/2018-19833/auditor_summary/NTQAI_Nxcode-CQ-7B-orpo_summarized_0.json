@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Token Devalue",
+            "reason": "The 'mintToken' function allows the owner to increase the total supply of tokens and assign them to any address without any checks. This can lead to token devaluation as the supply increases without a corresponding increase in value or utility. Attackers can exploit this to manipulate the token's market value and potentially drain liquidity from the contract."
+        },
+        {
+            "function_name": "_transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The '_transfer' function does not check for integer overflow when subtracting and adding token balances. If an attacker can manipulate the 'balanceOf[_from]' or 'balanceOf[_to]' values, they can cause an integer overflow, leading to incorrect balance updates and potentially freezing funds or allowing unauthorized transfers."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'transfer' function does not handle the return value of '_transfer', which can be false if '_transfer' reverts due to invalid conditions. This can lead to incorrect logic in the calling function, potentially causing unexpected behavior or loss of funds."
+        },
+        {
+            "function_name": "constructor",
+            "vulnerability": "Typo Constructor",
+            "reason": "There is a typo in the constructor function where 'totalSupply' is assigned before 'decimals' is set. This can lead to incorrect initialization of the token's total supply and potentially other unintended consequences."
+        },
+        {
+            "function_name": "burn",
+            "vulnerability": "Access Control",
+            "reason": "The 'burn' function only requires the owner to burn tokens, which can be risky if there are no other mechanisms in place to prevent malicious users from manipulating the burning process. This can lead to significant token devaluation without proper oversight."
+        }
+    ]
+}

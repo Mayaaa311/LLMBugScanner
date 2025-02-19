@@ -1,0 +1,29 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function 'transfer' has an integer overflow vulnerability in the line 'require(balanceOf[_from] >= _value);'. If the balance of the sender is exactly equal to the transfer value, it will pass the check, allowing a transfer of 0 tokens, which is unintended functionality."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function 'transferFrom' has a wrong logic in the condition 'sufficientFunds = fromBalance <= _value;'. This condition will always be true if 'fromBalance' is less than or equal to '_value', allowing unauthorized transfers. The correct condition should be 'sufficientFunds = fromBalance < _value;'. 'fromBalance' must be strictly less than '_value' to allow the transfer."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Access Control",
+            "reason": "The function 'mintToken' has no access control, allowing anyone to mint tokens arbitrarily. This is dangerous in the real world because it can be exploited to create unlimited tokens, devaluing the token and causing financial loss to holders."
+        },
+        {
+            "function_name": "claimThrone",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function 'claimThrone' has an integer overflow vulnerability in the line 'uint ownerTax = 6 * totalBounty / 100;'. If 'totalBounty' is sufficiently large, the multiplication can overflow, causing 'ownerTax' to be zero, allowing anyone to claim the throne and take the entire bounty."
+        },
+        {
+            "function_name": "MorphToken",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor 'MorphToken' is misspelled as 'MorphToken' instead of 'constructor'. This can unintentionally expose the function as public, allowing anyone to initialize the contract and set the owner arbitrarily."
+        }
+    ]
+}

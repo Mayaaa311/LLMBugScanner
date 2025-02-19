@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer()",
+            "vulnerability": "Integer overflow",
+            "reason": "If the balances[_to] value is close to the maximum value of a uint256, and the _amount value is large, the addition of the two values will result in an integer overflow, which can cause the check to fail even if the transfer should be successful."
+        },
+        {
+            "function_name": "transferFrom()",
+            "vulnerability": "Wrong logic",
+            "reason": "The check should be allowed[_from][msg.sender] >= _amount && balances[_from] >= _amount, but the provided code only checks the first condition. This can allow an attacker to transfer more tokens than they are allowed to transfer, which can lead to a loss of funds for the owner of the contract."
+        },
+        {
+            "function_name": "transferOwnership()",
+            "vulnerability": "Bad randomness",
+            "reason": "The function uses the transfer() function to transfer the contract's balance to the new owner, but it does not check if the transfer was successful. This can allow an attacker to take control of the contract by transferring a large amount of tokens to themselves and then calling the transferOwnership() function."
+        },
+        {
+            "function_name": "changeNameSymbol()",
+            "vulnerability": "Access control",
+            "reason": "The function allows anyone to change the name and symbol of the contract, but it should only be allowed for the owner of the contract. This can allow an attacker to change the name and symbol of the contract to a value that is not intended by the owner."
+        },
+        {
+            "function_name": "Tracto()",
+            "vulnerability": "Typo constructor",
+            "reason": "The constructor function sets the owner variable to msg.sender, but it should be set to msg.sender.address. This can allow an attacker to take control of the contract by setting the owner variable to their own address."
+        }
+    ]
+}

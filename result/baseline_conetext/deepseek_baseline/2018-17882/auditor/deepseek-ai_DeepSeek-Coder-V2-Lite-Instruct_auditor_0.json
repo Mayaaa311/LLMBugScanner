@@ -1,0 +1,60 @@
+ {
+    "output_list": [
+        {
+            "function_name": "create",
+            "vulnerability": "Token Devalue",
+            "function_code": "function create(uint _amount) public onlyOwner {
+    balances[msg.sender] = safeAdd(balances[msg.sender], _amount);
+    totalSupply = safeAdd(totalSupply, _amount);
+}",
+            "reason": "Allows the owner to mint unlimited tokens, which can devalue the token and lead to financial losses for holders."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "function_code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+    balances[msg.sender] = safeSub(balances[msg.sender], _value);
+    balances[_to] = safeAdd(balances[_to], _value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+}",
+            "reason": "The function does not check if the sender has enough balance to transfer, allowing unauthorized transfers."
+        },
+        {
+            "function_name": "batchTransfer",
+            "vulnerability": "Access Control",
+            "function_code": "function batchTransfer(address[] _to, uint _value) public {
+    balances[msg.sender] = safeSub(
+        balances[msg.sender], _to.length * _value
+    );
+    for (uint i = 0; i < _to.length; i++) {
+        balances[_to[i]] = safeAdd(balances[_to[i]], _value);
+        Transfer(msg.sender, _to[i], _value);
+    }
+}",
+            "reason": "Similar to the transfer function, this function does not check if the sender has enough balance to perform multiple transfers, leading to unauthorized deductions."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    balances[_to] = safeAdd(balances[_to], _value);
+    balances[_from] = safeSub(balances[_from], _value);
+    if (_to != fights) {
+        allowed[_from][msg.sender] = safeSub(allowed[_from][msg.sender], _value);
+    }
+    Transfer(_from, _to, _value);
+    return true;
+}",
+            "reason": "The function does not check if the spender has approved the transfer, allowing unauthorized transfers."
+        },
+        {
+            "function_name": "setFightsAddress",
+            "vulnerability": "Access Control",
+            "function_code": "function setFightsAddress(address _fights) public onlyOwner {
+    fights = _fights;
+}",
+            "reason": "The function allows the owner to set the fights address, which could be manipulated to exploit the contract."
+        }
+    ]
+}

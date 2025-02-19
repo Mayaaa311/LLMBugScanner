@@ -1,0 +1,53 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _value) {
+    var _allowance = allowed[_from][msg.sender];
+    balances[_to] = balances[_to].add(_value);
+    balances[_from] = balances[_from].sub(_value);
+    allowed[_from][msg.",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `transferFrom` does not check if the transfer operation will cause an integer overflow. If `_value` is greater than the balance of `_from`, the transfer operation will result in an integer overflow, leading to incorrect balances."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint _value) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The function `approve` does not check if the caller is the owner of the contract. If the caller is not the owner, they can approve any amount of tokens for spending, which can lead to unauthorized spending."
+        },
+        {
+            "function_name": "mint",
+            "code": "function mint(address _spender, uint _value)
+        onlyOwner {
+        balances[_spender] += _value;
+        totalSupply += _value;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The function `mint` does not check if the caller is the owner of the contract. If the caller is not the owner, they can mint new tokens, which can lead to unauthorized token minting."
+        },
+        {
+            "function_name": "mint",
+            "code": "function mint(address _spender, uint _value)
+        onlyOwner {
+        balances[_spender] += _value;
+        totalSupply += _value;
+}",
+            "vulnerability": "Token Devalue",
+            "reason": "The function `mint` allows the owner to mint new tokens, but does not check if the total supply will exceed the maximum supply. If the total supply exceeds the maximum supply, the tokens will be devalued, leading to decreased value for the tokens."
+        },
+        {
+            "function_name": "mint",
+            "code": "function mint(address _spender, uint _value)
+        onlyOwner {
+        balances[_spender] += _value;
+        totalSupply += _value;
+}",
+            "vulnerability": "Typo Constructor",
+            "reason": "The function `mint` has a typo in its name. The correct name should be `mint`, not `mintt`. This typo could lead to confusion and potential security vulnerabilities."
+        }
+    ]
+}

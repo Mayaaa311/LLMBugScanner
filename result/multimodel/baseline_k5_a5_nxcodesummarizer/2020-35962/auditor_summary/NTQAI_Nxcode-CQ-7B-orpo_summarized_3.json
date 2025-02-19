@@ -1,0 +1,56 @@
+{
+    "output_list": [
+        {
+            "function_name": "claimStakingReward",
+            "code": "function claimStakingReward(uint amount) external nonReentrant onlyOwner {
+    require(amount > 0, "ZERO_VALUE");
+    require(msg.sender == userStakingPoolAddress, "UNAUTHORIZED");
+    lrcAddress.safeTransferAndVerify(userStakingPoolAddress, amount);
+    claimedReward = claimedReward.add(amount);
+    emit LRCClaimed(amount);
+}",
+            "vulnerability": "Reentrancy",
+            "reason": "The function does not check the return value of the transfer function, which can be exploited by a malicious contract to reenter the function and claim rewards multiple times."
+        },
+        {
+            "function_name": "fundDAO",
+            "code": "function fundDAO() external nonReentrant {
+    uint amountDAO;
+    uint amountBurn;
+    (, , , , , amountBurn, amountDAO, ) = getProtocolFeeStats();
+    address recipient = daoAddress == address(0) ? owner : daoAddress;
+    if (amountDAO > 0) {
+        lrcAddress.safeTransferAndVerify(recipient, amountDAO);
+    }
+    if (amountBurn > 0) {
+        require(BurnableERC20(lrcAddress).burn(amountBurn), "BURN_FAILURE");
+    }
+    claimedBurn = claimedBurn.add(amountBurn);
+    claimedDAOFund = claimedDAOFund.add(amountDAO);
+    emit DAOFunded(amountDAO, amountBurn);
+}",
+            "vulnerability": "Reentrancy",
+            "reason": "The function does not check the return value of the burn function, which can be exploited by a malicious contract to reenter the function and burn tokens multiple times."
+        },
+        {
+            "function_name": "sellTokenForLRC",
+            "code": "function sellTokenForLRC(address token, uint amount) external nonReentrant {
+    require(amount > 0, "ZERO_AMOUNT");
+    require(token != lrcAddress, "PROHIBITED");
+    address recipient = tokenSellerAddress == address(0) ? owner : tokenSellerAddress;
+    if (token == address(0)) {
+        recipient.sendETHAndVerify(amount, gasleft());
+    } else {
+        token.safeTransferAndVerify(recipient, amount);
+    }
+    require(
+        tokenSellerAddress == address(0) || ITokenSeller(tokenSellerAddress).sellToken(token, lrcAddress),
+        "SELL_FAILURE"
+    );
+    emit TokenSold(token, amount);
+}",
+            "vulnerability": "Reentrancy",
+            "reason": "The function does not check the return value of the sellToken function, which can be exploited by a malicious contract to reenter the function and sell tokens multiple times."
+        }
+    ]
+}

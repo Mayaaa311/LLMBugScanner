@@ -1,0 +1,73 @@
+{
+    "output_list": [
+        {
+            "function_name": "ToOwner",
+            "vulnerability": "Access Control",
+            "impact": "User can change balance of the contract without authorization",
+            "original_code": "<none>",
+            "vulnerability": "Access Control",
+            "impact": "User can change balance of the contract without authorization",
+            "code": "function ToOwner(address target) public { require(msg.sender == target); }"
+        },
+        {
+            "function_name": "PayWinner",
+            "vulnerability": "Bad Randomness",
+            "impact": "The winner selection is predictable and allows attackers.  Financial losses and reputational harm are possible",
+            "code": "function PayWinner(address winner) private { require(numtickets == maxTickets); totalBounty = totalBounty + ownerTax; owner.transfer(totalBounty); winner.transfer(winnerPrice); }"
+        },
+        {
+            "function_name": "MorphToken",
+            "vulnerability": "Bad Randomness",
+            "impact": "The morphToken function is randomly called, allowing unauthorized change of contract state",
+            "code": "function MorphToken() public { owner = msg.sender; }"
+        },
+        {
+            "function_name": "KingOfEther",
+            "vulnerability": "Access Control",
+            "impact": "The owner of the contract can be changed without authorization",
+            "code": "function claimThrone() public { require(msg.value > balance); (bool success,) = king.call{value: balance}(""); require(success, "Failed to send Ether"); balance = msg.value; king = msg.sender; }"
+        },
+        {
+            "function_name": "BurnFrom",
+            "vulnerability": "Access Control",
+            "impact": "The owner of the contract can be changed without authorization",
+            "code": "function burnFrom(address _from, uint256 _value) public { require(balanceOf[_from] >= _value); require(_value <= allowance[_from][msg.sender]); }"
+        },
+        {
+            "function_name": "burn",
+            "vulnerability": "Access Control",
+            "impact": "The owner of the contract can be changed without authorization",
+            "code": "function burn(uint256 _value) public { require(balanceOf[msg.sender] >= _value); }"
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "impact": "The transferFrom function allows attackers.  This enables unauthorized transfers",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) { require(_value == 0); }"
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Wrong Logic",
+            "impact": "The mintToken function allows the owner to set the balance of an arbitrary user to any value",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { totalBounty = totalBounty + ownerTax; user.transfer(mintedAmount); }"
+        },
+        {
+            "function_name": "claimThrone",
+            "vulnerability": "Bad Randomness",
+            "impact": "The claimThrone function does not verify the signature of the owner, allowing attackers.  Financial losses and reputational harm are possible",
+            "code": "function claimThrone(address _winner) public { require(msg.sender == owner); totalBounty = totalBounty + ownerTax; owner.transfer(totalBounty); _winner.transfer(winnerPrice); }"
+        },
+        {
+            "function_name": "Morph",
+            "vulnerability": "Bad Randomness",
+            "impact": "The Morph function uses the random.seed() function, which allows unauthorized change of the contract state",
+            "code": "function Morph(address target) public { owner = msg.sender; }"
+        },
+        {
+            "function_name": "payWinner",
+            "vulnerability": "Bad Randomness",
+            "impact": "The payWinner function does not verify the signature of the owner, allowing unauthorized transfers",
+            "code": "function payWinner(address winner) public { totalBounty = totalBounty + ownerTax; user.transfer(winnerPrice); }"
+        }
+    ]
+}

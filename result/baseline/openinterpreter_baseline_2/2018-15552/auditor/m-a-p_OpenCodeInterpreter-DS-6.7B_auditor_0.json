@@ -1,0 +1,102 @@
+Based on the provided smart contract code, there are several vulnerabilities that can be identified. Here are the five most severe vulnerabilities:
+
+1. Integer Overflow:
+   - Function Name: `AddTicket()`
+   - Vulnerability: The function `AddTicket()` allows users to add tickets to the lottery by sending Ether as payment. However, there is no check to ensure that the total number of tickets does not exceed the maximum allowed number of tickets. This can lead to an integer overflow vulnerability.
+   - Function Code:
+     ```
+     function AddTicket() public payable {
+         require(msg.value == ticketPrice); 
+         require(numtickets < maxTickets);
+         lastTicketTime = now;
+         numtickets += 1;
+         totalBounty += ticketPrice;
+         bool success = numtickets == maxTickets;
+         NewTicket(msg.sender, success);
+         if(success) {
+             PayWinner(msg.sender);
+         } 
+     }
+     ```
+   - Reason: If the maximum number of tickets is reached, the `numtickets` variable will overflow and cause incorrect behavior.
+
+2. Wrong Logic:
+   - Function Name: `PayWinner()`
+   - Vulnerability: The function `PayWinner()` calculates the owner tax and winner price based on the total bounty. However, it does not check if the total bounty is greater than zero before calculating the owner tax and winner price. This can lead to incorrect calculations and potential loss of funds.
+   - Function Code:
+     ```
+     function PayWinner( address winner ) private { 
+         require(numtickets == maxTickets);
+         uint ownerTax = 6 * totalBounty / 100;
+         uint winnerPrice = totalBounty - ownerTax;
+         LottoComplete(msg.sender, lottoIndex, winnerPrice);
+         lottoIndex += 1;
+         numtickets = 0;
+         totalBounty = 0;
+         if(_direction == 0 && maxTickets < 20) maxTickets += 1;
+         if(_direction == 1 && maxTickets > 10) maxTickets -= 1;
+         if(_direction == 0 && maxTickets == 20) _direction = 1;
+         if(_direction == 1 && maxTickets == 10) _direction = 0;
+         worldOwner.transfer(ownerTax);
+         winner.transfer(winnerPrice); 
+     }
+     ```
+   - Reason: If the total bounty is zero, the owner tax and winner price calculations will result in incorrect values. This can lead to potential loss of funds for the owner and the winner.
+
+3. Bad Randomness:
+   - Function Name: `PayWinner()`
+   - Vulnerability: The function `PayWinner()` uses a simple arithmetic operation to calculate the owner tax and winner price. However, it does not use any randomness or unpredictable values. This can make the lottery outcome predictable and potentially unfair.
+   - Function Code:
+     ```
+     function PayWinner( address winner ) private { 
+         require(numtickets == maxTickets);
+         uint ownerTax = 6 * totalBounty / 100;
+         uint winnerPrice = totalBounty - ownerTax;
+         LottoComplete(msg.sender, lottoIndex, winnerPrice);
+         lottoIndex += 1;
+         numtickets = 0;
+         totalBounty = 0;
+         if(_direction == 0 && maxTickets < 20) maxTickets += 1;
+         if(_direction == 1 && maxTickets > 10) maxTickets -= 1;
+         if(_direction == 0 && maxTickets == 20) _direction = 1;
+         if(_direction == 1 && maxTickets == 10) _direction = 0;
+         worldOwner.transfer(ownerTax);
+         winner.transfer(winnerPrice); 
+     }
+     ```
+   - Reason: If the owner tax and winner price calculations are deterministic, the lottery outcome can be easily predicted. This can make the lottery unfair and potentially unfair for the winner.
+
+4. Access Control:
+   - Function Name: `withdraw()`
+   - Vulnerability: The function `withdraw()` allows the owner of the contract to withdraw all the funds from the contract. However, there is no access control mechanism in place to ensure that only the owner can call this function. This can lead to unauthorized access and potential loss of funds.
+   - Function Code:
+     ```
+     function withdraw() public {
+         require(worldOwner == msg.sender);  
+         lottoIndex += 1;
+         numtickets = 0;
+         totalBounty = 0;
+         worldOwner.transfer(this.balance); 
+     }
+     ```
+   - Reason: If the owner's address is compromised, an attacker can call the `withdraw()` function to withdraw all the funds from the contract. This can lead to potential loss of funds for the owner.
+
+5. Typo Constructor:
+   - Function Name: `LottoCount()`
+   - Vulnerability: The constructor function `LottoCount()` has a typo in the function name. The function name should be `LottoCount` without the underscore. This can lead to confusion and potential errors in the code.
+   - Function Code:
+     ```
+     function LottoCount() public {
+         worldOwner = msg.sender; 
+         ticketPrice = 0.0101 * 10**18;
+         maxTickets = 10;
+         _direction = 0;
+         lottoIndex = 1;
+         lastTicketTime = 0;
+         numtickets = 0;
+         totalBounty = 0;
+     }
+     ```
+   - Reason: The typo in the function name can lead to confusion and potential errors in the code. It is recommended to fix the typo to ensure consistency and proper functioning of the contract.
+
+Please note that these vulnerabilities are exploitable in real-world scenarios and can lead to potential loss of funds or unfair outcomes. It is important to thoroughly analyze and test smart contracts to identify and fix any vulnerabilities before deploying them to the blockchain.

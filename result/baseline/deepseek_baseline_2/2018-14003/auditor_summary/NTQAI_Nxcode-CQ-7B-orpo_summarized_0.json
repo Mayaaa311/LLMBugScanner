@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "batchTransfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function 'batchTransfer' calculates the amount to deduct from the sender's balance using `uint256(cnt) * _value`. If `cnt` is sufficiently large, this can lead to an integer overflow, causing the subtraction operation to not properly reduce the sender's balance, leading to a potential loss of tokens for the sender."
+        },
+        {
+            "function_name": "TokenERC20.transfer",
+            "vulnerability": "Access Control",
+            "reason": "The 'transfer' function does not perform any access control check before transferring tokens. This means that any user can transfer tokens to any address, even if the target address is a contract that might be vulnerable to reentrancy attacks. This can lead to unauthorized token transfers."
+        },
+        {
+            "function_name": "WMCToken.freezeAccount",
+            "vulnerability": "Access Control",
+            "reason": "The 'freezeAccount' function allows the owner to freeze any account. However, there is no check to ensure that the 'target' address is not the zero address (0x0), which could lead to unintended consequences such as freezing the owner's own account, locking funds."
+        },
+        {
+            "function_name": "TokenERC20.burn",
+            "vulnerability": "Token Devalue",
+            "reason": "The 'burn' function allows any user to burn their own tokens, reducing the total supply. However, there is no check to prevent users from burning tokens that they do not own, which could lead to token devaluation or even loss of funds if a user mistakenly believes they are burning their own tokens."
+        },
+        {
+            "function_name": "TokenERC20.burnFrom",
+            "vulnerability": "Access Control",
+            "reason": "The 'burnFrom' function allows an approved spender to burn tokens from the owner's account. However, there is no check to ensure that the spender is actually allowed to burn tokens on behalf of the owner, which could lead to unauthorized token burning."
+        }
+    ]
+}

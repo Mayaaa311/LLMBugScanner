@@ -1,0 +1,55 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferAUTOtokens10",
+            "code": "function transferAUTOtokens10(address[] memory _to, uint256 _value) public returns (bool) {
+                require(_value <= 10000 * 10 ** decimals);
+                for (uint i = 0; i < _to.length; i++) {
+                    require(balances[_to[i]] + _value <= balances[_to[i]] + 10000 * 10 ** decimals);
+                    balances[_to[i]] += _value;
+                }
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferAUTOtokens10' function has an integer overflow vulnerability. The initial supply is set to 25000000 * 10 ** decimals, and the initial supply is 25000000 * 10 ** 3. The function allows users to transfer 10000 tokens to multiple addresses in a single transaction, which can overflow the balances mapping if the initial supply is very high, causing a denial of service to the users."
+        },
+        {
+            "function_name": "transferAUTOtokens5",
+            "code": "function transferAUTOtokens5(address[] memory _to, uint256 _value) public returns (bool) {
+                require(_value <= 5000 * 10 ** decimals);
+                for (uint i = 0; i < _to.length; i++) {
+                    require(balances[_to[i]] + _value <= balances[_to[i]] + 5000 * 10 ** decimals);
+                    balances[_to[i]] += _value;
+                }
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferAUTOtokens5' function has an integer overflow vulnerability. The initial supply is set to 25000000 * 10 ** decimals, and the initial supply is 25000000 * 10 ** 3. The function allows users to transfer 5000 tokens to multiple addresses in a single transaction, which can overflow the balances mapping if the initial supply is very high, causing a denial of service to the users."
+        },
+        {
+            "function_name": "transferAUTOtoken1",
+            "code": "function transferAUTOtoken1(address[] memory _to, uint256 _value) public returns (bool) {
+                require(_value <= 1000 * 10 ** decimals);
+                for (uint i = 0; i < _to.length; i++) {
+                    require(balances[_to[i]] + _value <= balances[_to[i]] + 1000 * 10 ** decimals);
+                    balances[_to[i]] += _value;
+                }
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferAUTOtoken1' function has an integer overflow vulnerability. The initial supply is set to 25000000 * 10 ** decimals, and the initial supply is 25000000 * 10 ** 3. The function allows users to transfer 1000 tokens to multiple addresses in a single transaction, which can overflow the balances mapping if the initial supply is very high, causing a denial of service to the users."
+        },
+        {
+            "function_name": "transferAny",
+            "code": "function transferAny(address[] memory _to, uint256 _value) public returns (bool) {
+                for (uint i = 0; i < _to.length; i++) {
+                    require(balances[_to[i]] + _value <= balances[_to[i]] + _value);
+                    balances[_to[i]] += _value;
+                }
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferAny' function has an integer overflow vulnerability. The initial supply is set to 25000000 * 10 ** decimals, and the initial supply is 25000000 * 10 ** 3. The function allows users to transfer any amount of tokens to multiple addresses in a single transaction, which can overflow the balances mapping if the initial supply is very high, causing a denial of service to the users."
+        }
+    ]
+}

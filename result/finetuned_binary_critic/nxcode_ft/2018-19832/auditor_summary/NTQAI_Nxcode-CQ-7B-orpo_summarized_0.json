@@ -1,0 +1,26 @@
+{
+    "output_list": [
+        {
+            "function_name": "distributeToken",
+            "code": "    function distributeToken(address[] addresses) onlyOwner canDistr public {
+        require(addresses.length <= 255);
+        require(value <= totalRemaining);
+        for (uint i = 0; i < addresses.length; i++) {
+            require(value <= totalRemaining);
+            address investor = addresses[i];
+            uint256 toGive = value;
+            distr(investor, toGive);
+            if (toGive > 0) {
+                blacklist[investor] = true;
+            }
+            if (totalDistributed >= totalSupply) {
+                distributionFinished = true;
+            }
+        }
+        value = value.div(100000).mul(99999);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in the distributeToken function allows an attacker to set any user's balance arbitrarily, aka the 'tradeTrap' issue."
+        }
+    ]
+}

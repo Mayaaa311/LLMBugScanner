@@ -1,0 +1,53 @@
+{
+    "output_list": [
+        {
+            "function_name": "quaker",
+            "code": "function quaker(address _oldXRPCToken) public {
+    oldXRPCToken = OldXRPCToken(_oldXRPCToken);
+}",
+            "vulnerability": "Integer Overflow",
+            "description": "The quaker function allows an attacker to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "mint",
+            "code": "function mint(address _to, uint256 _amount) public onlyOwner {
+    require(_amount > 0);
+    require(_to != address(0));
+    uint256 balance = oldXRPCToken.balance(_to);
+    require(balance > 0);
+    uint256 amount = _amount * 10 ** 18;
+    require(amount > 0);
+    uint256 allowance = oldXRPCToken.allowance(_to, this);
+    require(allowance >= amount);
+    oldXRPCToken.transferFrom(_to, this, amount);
+    tokenBalances[this] = tokenBalances[this].add(amount);
+    Transfer(_to, this, amount);
+    tokenBalances[_to] = tokenBalances[_to].sub(amount);
+    Transfer(this, _to, amount);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in mint function allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "pullBack",
+            "code": "function pullBack(address _to, uint256 _amount) public onlyOwner {
+    require(_amount > 0);
+    require(_to != address(0));
+    uint256 balance = oldXRPCToken.balanceOf(this);
+    require(balance >= _amount);
+    oldXRPCToken.transfer(_to, _amount);
+    Transfer(this, _to, _amount);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in pullBack function allows an attacker to transfer an arbitrary amount of tokens from the contract to any address."
+        },
+        {
+            "function_name": "showMyTokenBalance",
+            "code": "function showMyTokenBalance(address addr) public view returns (uint256 balance) {
+    return oldXRPCToken.balanceOf(addr);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in showMyTokenBalance function allows an attacker to view the balance of an arbitrary user."
+        }
+    ]
+}

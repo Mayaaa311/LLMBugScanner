@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "balanceOf",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function balanceOf(address _owner) constant returns (uint256 balance) { return balances[_owner]; }",
+            "reason": "The balanceOf function does not check if the balance of an address exceeds the maximum value of uint256. This can lead to integer overflow, where the balance of an address is greater than the maximum value of uint256. This can be exploited by an attacker to steal all the tokens of a victim."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) returns (bool success) { require(balances[msg.sender] >= _value); balances[msg.sender] -= _value; balances[_to] += _value; Transfer(msg.sender, _to, _value); return true; }",
+            "reason": "The transfer function does not check if the balance of the sender is greater than or equal to the value being transferred. This can lead to integer overflow, where the balance of the sender is greater than the maximum value of uint256. This can be exploited by an attacker to steal all the tokens of a victim."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) { require(balances[_from] >= _value && allowed[_from][msg.sender] >= _value); balances[_to] += _value; balances[_from] -= _value; allowed[_from][msg.sender] -= _value; Transfer(_from, _to, _value); return true; }",
+            "reason": "The transferFrom function does not check if the balance of the sender is greater than or equal to the value being transferred. This can lead to integer overflow, where the balance of the sender is greater than the maximum value of uint256. This can be exploited by an attacker to steal all the tokens of a victim."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint256 _value) returns (bool success) { allowed[msg.sender][_spender] = _value; Approval(msg.sender, _spender, _value); return true; }",
+            "reason": "The approve function does not check if the value being approved is greater than or equal to the maximum value of uint256. This can lead to integer overflow, where the value being approved is greater than the maximum value of uint256. This can be exploited by an attacker to approve a large amount of tokens for a spender."
+        },
+        {
+            "function_name": "allowance",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function allowance(address _owner, address _spender) constant returns (uint256 remaining) { return allowed[_owner][_spender]; }",
+            "reason": "The allowance function does not check if the value being returned is greater than or equal to the maximum value of uint256. This can lead to integer overflow, where the value being returned is greater than the maximum value of uint256. This can be exploited by an attacker to see a large amount of tokens approved for a spender."
+        }
+    ]
+}

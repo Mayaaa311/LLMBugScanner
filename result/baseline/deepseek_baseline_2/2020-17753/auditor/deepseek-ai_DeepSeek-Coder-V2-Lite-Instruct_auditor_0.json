@@ -1,0 +1,82 @@
+ {
+    "output_list": [
+        {
+            "function_name": "buyImplementation",
+            "vulnerability": "Access Control",
+            "function_code": "function buyImplementation(address buyerAddress, uint64 buyerId, uint maxAmount, uint8 v, bytes32 r, bytes32 s) private returns (bool) {
+    bytes32 hash = sha256("Eidoo icoengine authorization", address(0), buyerAddress, buyerId, maxAmount);
+    address signer = ecrecover(hash, v, r, s);
+    if (!isKycSigner[signer]) {
+        revert();
+    } else {
+        uint256 totalPayed = alreadyPayed[buyerId].add(msg.value);
+        require(totalPayed <= maxAmount);
+        alreadyPayed[buyerId] = totalPayed;
+        emit KycVerified(signer, buyerAddress, buyerId, maxAmount);
+        return releaseTokensTo(buyerAddress);
+    }
+}",
+            "reason": "The `buyImplementation` function relies on the `ecrecover` function to determine the signer's identity. If an attacker can manipulate the `hash` input, they can potentially bypass the KYC verification and gain access to the `releaseTokensTo` function, which can lead to unauthorized token distribution."
+        },
+        {
+            "function_name": "takeEther",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function takeEther(address _buyer) internal {
+    require( now > startTime );
+    require( now < endTime );
+    require( msg.value >= etherMinimum); 
+    require( remainingTokens > 0 );
+    uint256 oneToken = 10 ** uint256(tokenSaleContract.decimals());
+    uint256 tokenValue = tokenSaleContract.tokenValueInEther(oneTokenInUsdWei);
+    uint256 tokenAmount = msg.value.mul(oneToken).div(tokenValue);
+    uint256 unboughtTokens = tokenInterface(tokenSaleContract.tokenContract()).balanceOf(tokenSaleContract);
+    if ( unboughtTokens > remainingTokens ) {
+        unboughtTokens = remainingTokens;
+    }
+    uint256 refund = 0;
+    if ( unboughtTokens < tokenAmount ) {
+        refund = (tokenAmount - unboughtTokens).mul(tokenValue).div(oneToken);
+        tokenAmount = unboughtTokens;
+        remainingTokens = 0; 
+        _buyer.transfer(refund);
+    } else {
+        remainingTokens = remainingTokens.sub(tokenAmount); 
+    }
+    etherUser[_buyer] = etherUser[_buyer].add(msg.value.sub(refund));
+    pendingTokenUser[_buyer] = pendingTokenUser[_buyer].add(tokenAmount);
+    emit Buy( _buyer, msg.value, tokenAmount, oneTokenInUsdWei );
+}",
+            "reason": "The `tokenAmount` and `refund` calculations can lead to integer overflow if `msg.value` and `tokenValue` are chosen correctly. This can be exploited by an attacker to manipulate the token distribution and steal funds."
+        },
+        {
+            "function_name": "claimTokenBonus",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function claimTokenBonus(address _buyer) internal {
+    require( now > endTime );
+    require( tokenUser[_buyer] > 0 );
+    uint256 bonusApplied = 0;
+    for (uint i = 0; i < tokenThreshold.length; i++) {
+        if ( soldTokens > tokenThreshold[i] ) {
+            bonusApplied = bonusThreshold[i];
+        }
+    }
+    require( bonusApplied > 0 );
+    uint256 addTokenAmount = tokenUser[_buyer].mul( bonusApplied ).div(10**2);
+    tokenUser[_buyer] = 0; 
+    tokenSaleContract.claim(_buyer, addTokenAmount);
+    _buyer.transfer(msg.value);
+}",
+            "reason": "The logic for calculating the bonus applied to the token purchase is flawed. If the conditions for applying the bonus are not met, the function will still attempt to apply the bonus, leading to incorrect token distribution and potential loss of funds."
+        },
+        {
+            "function_name": "releaseTokensTo",
+            "vulnerability": "Access Control",
+            "function_code": "function releaseTokensTo(address buyer) internal returns(bool) {
+    if( msg.value > 0 ) takeEther(buyer);
+    giveToken(buyer);
+    return true;
+}",
+            "reason": "The `releaseTokensTo` function does not enforce any access control before calling `takeEther` and `giveToken`, which can lead to unauthorized token distribution if these functions are called incorrectly."
+        }
+    ]
+}

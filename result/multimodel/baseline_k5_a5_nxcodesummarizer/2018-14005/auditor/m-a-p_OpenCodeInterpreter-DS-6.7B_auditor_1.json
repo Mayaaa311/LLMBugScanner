@@ -1,0 +1,86 @@
+Based on the provided code, there are several potential vulnerabilities that can be exploited in real-world scenarios. Here are the five most severe vulnerabilities identified:
+
+1. Integer Overflow:
+   - Function: `transferAUTOtokens10`
+   - Code:
+     ```
+     function transferAUTOtokens10(address[] addresses) {
+         for (uint i = 0; i < addresses.length; i++) {
+             require(balances[msg.sender] >= 0);
+             balances[msg.sender] -= 10000;
+             balances[addresses[i]] += 10000;
+             Transfer(msg.sender, addresses[i], 10000);
+         }
+     }
+     ```
+   - Vulnerability: The function `transferAUTOtokens10` allows the transfer of 10,000 tokens from the sender to the specified addresses. However, there is no check to ensure that the sender has enough tokens to be transferred. This can lead to an integer overflow if the sender has a balance of less than 10,000 tokens.
+   - Reason: The lack of a check for the sender's balance before performing the transfer can result in an integer overflow, allowing an attacker to transfer more tokens than they actually have.
+
+2. Wrong Logic:
+   - Function: `transferAUTOtokens5`
+   - Code:
+     ```
+     function transferAUTOtokens5(address[] addresses) {
+         for (uint i = 0; i < addresses.length; i++) {
+             require(balances[msg.sender] >= 0);
+             balances[msg.sender] -= 5000;
+             balances[addresses[i]] += 5000;
+             Transfer(msgender, addresses[i], 5000);
+         }
+     }
+     ```
+   - Vulnerability: The function `transferAUTOtokens5` allows the transfer of 5,000 tokens from the sender to the specified addresses. However, there is no check to ensure that the sender has enough tokens to be transferred. This can lead to an integer overflow if the sender has a balance of less than 5,000 tokens.
+   - Reason: Similar to the previous vulnerability, the lack of a check for the sender's balance before performing the transfer can result in an integer overflow, allowing an attacker to transfer more tokens than they actually have.
+
+3. Bad Randomness:
+   - Function: `transferAUTOtoken1`
+   - Code:
+     ```
+     function transferAUTOtoken1(address[] addresses) {
+         require(balances[msg.sender] >= 0);
+         for (uint i = 0; i < addresses.length; i++) {
+             balances[msg.sender] -= 1000;
+             balances[addresses[i]] += 1000;
+             Transfer(msg.sender, addresses[i], 1000);
+         }
+     }
+     ```
+   - Vulnerability: The function `transferAUTOtoken1` allows the transfer of 1,000 tokens from the sender to the specified addresses. However, there is no check to ensure that the sender has enough tokens to be transferred. This can lead to an integer overflow if the sender has a balance of less than 1,000 tokens.
+   - Reason: Similar to the previous vulnerabilities, the lack of a check for the sender's balance before performing the transfer can result in an integer overflow, allowing an attacker to transfer more tokens than they actually have.
+
+4. Access Control:
+   - Function: `transferAny`
+   - Code:
+     ```
+     function transferAny(address[] addresses, uint256 _value) {
+         require(_value <= balances[msg.sender]);
+         for (uint i = 0; i < addresses.length; i++) {
+             balances[msg.sender] -= _value;
+             balances[addresses[i]] += _value;
+             Transfer(msg.sender, addresses[i], _value);
+         }
+     }
+     ```
+   - Vulnerability: The function `transferAny` allows the transfer of any specified value of tokens from the sender to the specified addresses. However, there is no check to ensure that the sender has enough tokens to be transferred. This can lead to an integer overflow if the sender has a balance of less than the specified value.
+   - Reason: Similar to the previous vulnerabilities, the lack of a check for the sender's balance before performing the transfer can result in an integer overflow, allowing an attacker to transfer more tokens than they actually have.
+
+5. Typo Constructor:
+   - Function: `MalaysianCoin`
+   - Code:
+     ```
+     function MalaysianCoin () { 
+         balances[owner] = (initialSupply - burned);
+         balances[giftToButerin] = custom;
+         balances[0] = 2500000 * 10 ** decimals;
+         balances[msg.sender] = max;
+         summary = (balances[owner] + balances[Buterin]  -  balances[0] + i);
+         Transfer(Buterin, 0 , ((initialSupply / 10) - n));
+         Transfer(this, owner, (initialSupply - (initialSupply / 10) - n));
+         Transfer(Buterin, owner, i);
+         totalSupply = summary; 
+     }
+     ```
+   - Vulnerability: The constructor function `MalaysianCoin` initializes the balances of various addresses and performs some transfers. However, there is a typo in the constructor, where the variable `Buterin` is assigned to `giftToButerin`. This can lead to incorrect balances and transfers.
+   - Reason: The typo in the constructor function can result in incorrect balances and transfers. It is important to ensure that the variable assignments are correct to prevent any potential vulnerabilities.
+
+Please note that these vulnerabilities are potential exploits and can be exploited in real-world scenarios. It is important to thoroughly analyze and test smart contracts to identify and fix any vulnerabilities before deploying them to the blockchain.

@@ -1,0 +1,46 @@
+{
+    "output_list": [
+        {
+            "function_name": "convertPresaleTokens",
+            "code": "function convertPresaleTokens(address buyer, uint256 tokens, uint256 factor, string txHash) external icoAgentOnly returns (uint) {
+    require(buyer != address(0));
+    require(tokens > 0);
+    require(validState());
+    uint256 tokensToSell = SafeMath.add(tokensSold, tokens);
+    require(tokensToSell <= TOKENS_FOR_SALE);
+    tokensSold = tokensToSell;            
+    token.mint(buyer, tokens);
+    TokenBuyPresale(buyer, tokens, factor, txHash);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function convertPresaleTokens has an Integer Overflow vulnerability. The function calculates the total tokens sold by adding the tokensSold variable to the tokens variable. The vulnerability occurs when the tokens variable is greater than the tokensSold variable, resulting in an overflow and a loss of precision. The function should use SafeMath library to prevent this vulnerability."
+        },
+        {
+            "function_name": "creditJackpotTokens",
+            "code": "function creditJackpotTokens(address buyer, uint256 tokens, uint256 jackpot) external icoAgentOnly returns (uint) {
+    require(buyer != address(0));
+    require(tokens > 0);
+    require(validState());
+    token.mint(buyer, tokens);
+    TokenWin(buyer, tokens, jackpot);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function creditJackpotTokens has an Integer Overflow vulnerability. The function calculates the total tokens sold by adding the tokensSold variable to the tokens variable. The vulnerability occurs when the tokens variable is greater than the tokensSold variable, resulting in an overflow and a loss of precision. The function should use SafeMath library to prevent this vulnerability."
+        },
+        {
+            "function_name": "buyTokens",
+            "code": "function buyTokens(address buyer, uint256 tokens, uint256 factor, string txHash) external icoAgentOnly returns (uint) {
+    require(buyer != address(0));
+    require(tokens > 0);
+    require(validState());
+    uint256 tokensToSell = SafeMath.add(tokensSold, tokens);
+    require(tokensToSell <= TOKENS_FOR_SALE);
+    tokensSold = tokensToSell;            
+    token.mint(buyer, tokens);
+    TokenBuy(buyer, tokens, factor, txHash);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function buyTokens has an Integer Overflow vulnerability. The function calculates the total tokens sold by adding the tokensSold variable to the tokens variable. The vulnerability occurs when the tokens variable is greater than the tokensSold variable, resulting in an overflow and a loss of precision. The function should use SafeMath library to prevent this vulnerability."
+        }
+    ]
+}

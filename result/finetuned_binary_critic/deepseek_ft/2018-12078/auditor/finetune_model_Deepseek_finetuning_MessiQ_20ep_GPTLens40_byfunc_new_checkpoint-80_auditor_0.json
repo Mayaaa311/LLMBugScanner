@@ -1,0 +1,55 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+    if (balanceOf[msg.sender] < _value) revert();            
+    if (balanceOf[_to] + _value < balanceOf[_to]) revert();  
+    if (frozenAccount[msg.sender]) revert();                 
+    balanceOf[msg.sender] -= _value;                      
+    balanceOf[_to] += _value;                             
+    Transfer(msg.sender, _to, _value);                    
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'balanceOf[_to] += _value' statement can overflow due to a lack of overflow protection, allowing the contract owner to arbitrarily increase the balance of any user, leading to a denial of service."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    Transfer(0, owner, mintedAmount);
+    Transfer(owner, target, mintedAmount);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'balanceOf[target] += mintedAmount' statement can overflow due to a lack of overflow protection, allowing the contract owner to arbitrarily increase the balance of any user, leading to a denial of service."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if (frozenAccount[_from]) revert();                         
+    if (balanceOf[_from] < _value) revert();                  
+    if (balanceOf[_to] + _value < balanceOf[_to]) revert();   
+    if (_value > allowance[_from][msg.sender]) revert();    
+    balanceOf[_from] -= _value;                           
+    balanceOf[_to] += _value;                             
+    allowance[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'balanceOf[_to] += _value' statement can overflow due to a lack of overflow protection, allowing an attacker to increase the balance of any user, leading to a denial of service."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+    tokenRecipient spender = tokenRecipient(_spender);
+    if (approve(_spender, _value)) {
+        spender.receiveApproval(msg.sender, _value, this, _extraData);
+        return true;
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'approve' function does not check for overflow, allowing the owner to set the allowance to a very large value, which can be exploited to cause a denial of service."
+        }
+    ]
+}

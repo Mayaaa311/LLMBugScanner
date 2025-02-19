@@ -1,0 +1,34 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to,uint256 _value) public{
+    require(!frozenAccount[msg.sender]);
+    if(_to == address(this)){
+        _sell(msg.sender,_value);
+    }else{
+        _transfer(msg.sender,_to,_value);
+    }
+}",
+            "reason": "The function 'transfer' does not check for integer overflow. This can allow for potential manipulation of the function by attackers, potentially leading to loss of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function transferFrom(address _from,address _to,uint256 _value) public returns (bool success){
+    require(!frozenAccount[_from]&&!frozenAccount[msg.sender]);
+    require(_value<=allowance[_from][msg.sender]);
+    allowance[_from][msg.sender] -= _value;
+    if(_to == address(this)){
+        _sell(_from,_value);
+    }else{
+        _transfer(_from,_to,_value);
+    }
+    return true;
+}",
+            "reason": "The function 'transferFrom' does not properly check the conditions for allowance. This can allow attackers to potentially bypass the access control and transfer funds to other addresses."
+        }
+    ]
+}<eos>

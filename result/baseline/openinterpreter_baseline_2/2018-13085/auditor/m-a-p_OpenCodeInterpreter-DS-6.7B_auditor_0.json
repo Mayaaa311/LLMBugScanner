@@ -1,0 +1,53 @@
+{
+    "output_list": [
+        {
+            "function_name": "changeFree",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function changeFree(uint newFree) public {
+tfree = newFree;
+}",
+            "reason": "The function changeFree allows the owner to set the value of 'free' variable which is an uint256 type. If an attacker sets a very large value for 'newFree', it could potentially overflow the uint256 data type and cause the contract to behave unpredictably."
+        },
+        {
+            "function_name": "balanceOf",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function balanceOf(address _owner) public constant returns (uint balance) {
+tif (!created[_owner] && balances[_owner] == 0) {
+ttreturn free;
+t} else {
+ttreturn balances[_owner];
+t}
+}",
+            "reason": "The function balanceOf returns the balance of the specified address. If the balance is zero and the address has not been created, it returns the 'free' value instead. If the 'free' value is set to a very large value, it could potentially overflow the uint data type and cause the contract to behave unpredictably."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function transfer(address _to, uint256 _value) public {
+t_transfer(msg.sender, _to, _value);
+}",
+            "reason": "The function transfer allows the owner to transfer tokens to another address. The transfer function does not implement any randomness or fairness checks, which could potentially lead to unfair transfers or manipulation of the contract's state."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Access Control",
+            "function_code": "function approve(address _spender, uint256 _value) public returns (bool success) {
+tallowance[msg.sender][_spender] = _value;
+treturn true;
+}",
+            "reason": "The function approve allows the owner to set the allowance for a spender. It does not check if the spender is a valid address or if the owner has sufficient balance. This could potentially lead to unauthorized access or manipulation of the contract's state."
+        },
+        {
+            "function_name": "burn",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function burn(uint256 _value) public returns (bool success) {
+trequire(balances[msg.sender] >= _value);
+tbalances[msg.sender] -= _value;
+ttotalSupply -= _value;
+temit Burn(msg.sender, _value);
+treturn true;
+}",
+            "reason": "The function burn allows the owner to burn tokens. It does not check if the sender has sufficient balance. This could potentially lead to unauthorized access or manipulation of the contract's state."
+        }
+    ]
+}

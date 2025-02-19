@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function uses the balances mapping to update the balance of the sender and the recipient. However, the balances mapping is defined as a mapping from address to uint256, which means that the value stored for each address is a 256-bit unsigned integer. If the value to be stored exceeds the maximum value of a 256-bit unsigned integer, it will be truncated to the maximum value, leading to a loss of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "reason": "The transferFrom function has a wrong logic in the if statement. The function checks if the balance of the sender is greater than or equal to the value to be transferred, but it does not check if the balance of the recipient is greater than or equal to the value to be transferred. This can lead to a loss of funds, as the recipient may not have enough funds to receive the transferred amount."
+        },
+        {
+            "function_name": "approveAndCall",
+            "vulnerability": "Bad Randomness",
+            "reason": "The approveAndCall function uses the sha3 function to generate a random number, but the generated number is not truly random. The sha3 function is a hash function that takes a string as input and generates a 256-bit hash value. However, the generated hash value is not truly random, as it is deterministic and can be predicted by an attacker."
+        },
+        {
+            "function_name": "AditusToken",
+            "vulnerability": "Access Control",
+            "reason": "The AditusToken constructor sets the totalSupply and balances mapping to a fixed value, which can be exploited by an attacker to manipulate the token supply and transfer funds. The attacker can create a new contract that inherits from AditusToken and sets the totalSupply and balances mapping to a different value, leading to a loss of funds."
+        },
+        {
+            "function_name": "AditusToken",
+            "vulnerability": "Typo Constructor",
+            "reason": "The AditusToken constructor has a typo in the symbol variable, which can be exploited by an attacker to manipulate the token symbol. The variable is misspelled as "ADI", but the variable is misspelled as "ADI". This can lead to a loss of funds, as the attacker can create a new contract that inherits from AditusToken and sets the symbol variable to a different value, leading to a loss of funds."
+        }
+    ]
+}

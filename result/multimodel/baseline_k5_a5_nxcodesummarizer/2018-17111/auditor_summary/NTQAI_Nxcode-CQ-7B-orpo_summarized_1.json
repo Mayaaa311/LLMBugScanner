@@ -1,0 +1,28 @@
+{
+    "output_list": [
+        {
+            "function_name": "totalSupply()",
+            "code": "function totalSupply() constant returns (uint256 totalSupply) { totalSupply = _totalSupply; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function does not check if _totalSupply exceeds the maximum value that can be represented by a uint256."
+        },
+        {
+            "function_name": "transferFrom()",
+            "code": "function transferFrom(address _from, address _to, uint256 _amount) returns (bool success) { if (balances[_from] >= _amount && allowed[_from][msg.sender] >= _amount && _amount > 0 && balances[_to] + _amount > balances[_to]) { balances[_from] -= _amount; allowed[_from][msg.sender] -= _amount; balances[_to] += _amount; Transfer(_from, _to, _amount); return true; } else { return false; }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The logic does not consider the balance of the recipient when checking the condition for transferring tokens."
+        },
+        {
+            "function_name": "owner",
+            "code": "address public owner; modifier onlyOwner() { require(msg.sender != owner); { } _; } function Coinlancer() { owner = msg.sender; balances[owner] = _totalSupply; }",
+            "vulnerability": "Access Control",
+            "reason": "The owner's balance is set to the total supply during initialization, which can be manipulated by an attacker to gain control over the contract."
+        },
+        {
+            "function_name": "Coinlancer()",
+            "code": "function Coinlancer() { owner = msg.sender; balances[owner] = _totalSupply; }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor function name is incorrect, which can lead to confusion and potential errors in the contract's usage."
+        }
+    ]
+}

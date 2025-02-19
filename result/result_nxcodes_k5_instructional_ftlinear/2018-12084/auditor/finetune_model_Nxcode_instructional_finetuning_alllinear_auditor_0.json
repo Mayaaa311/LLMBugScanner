@@ -1,0 +1,62 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+                if (balanceOf[msg.sender] < _value) revert();           
+                if (balanceOf[_to] + _value < balanceOf[_to]) revert(); 
+                balanceOf[msg.sender] -= _value;                     
+                balanceOf[_to] += _value;                            
+                Transfer(msg.sender, _to, _value);                   
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not check if the transfer will cause an integer overflow. If the balanceOf[_to] + _value exceeds the maximum value of uint256, it will cause an integer overflow. This can be exploited to transfer more tokens than the contract has, leading to a loss of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+                if (balanceOf[_from] < _value) revert();                 
+                if (balanceOf[_to] + _value < balanceOf[_to]) revert();  
+                if (_value > allowance[_from][msg.sender]) revert();   
+                balanceOf[_from] -= _value;                          
+                balanceOf[_to] += _value;                            
+                allowance[_from][msg.sender] -= _value;
+                Transfer(_from, _to, _value);
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check if the transfer will cause an integer overflow. If the balanceOf[_to] + _value exceeds the maximum value of uint256, it will cause an integer overflow. This can be exploited to transfer more tokens than the contract has, leading to a loss of funds."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+                balanceOf[target] += mintedAmount;
+                totalSupply += mintedAmount;
+                Transfer(0, this, mintedAmount);
+                Transfer(this, target, mintedAmount);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function does not check if the totalSupply will exceed the maximum value of uint256. If the totalSupply + mintedAmount exceeds the maximum value of uint256, it will cause an integer overflow. This can be exploited to mint more tokens than the contract can hold, leading to a loss of funds."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+                balanceOf[target] += mintedAmount;
+                totalSupply += mintedAmount;
+                Transfer(0, this, mintedAmount);
+                Transfer(this, target, mintedAmount);
+            }",
+            "vulnerability": "Access Control",
+            "reason": "The mintToken function is only callable by the contract owner. This means that anyone can mint tokens, which is not a good practice. It is recommended to only allow the contract owner to mint tokens."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner {
+                frozenAccount[target] = freeze;
+                FrozenFunds(target, freeze);
+            }",
+            "vulnerability": "Access Control",
+            "reason": "The freezeAccount function is only callable by the contract owner. This means that anyone can freeze or unfreeze accounts, which is not a good practice. It is recommended to only allow the contract owner to freeze or unfreeze accounts."
+        }
+    ]
+}

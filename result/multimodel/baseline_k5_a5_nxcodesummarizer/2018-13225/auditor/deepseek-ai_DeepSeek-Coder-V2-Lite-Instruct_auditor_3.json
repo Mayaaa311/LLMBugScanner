@@ -1,0 +1,65 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+    assert (balanceOf[msg.sender] >= _value);            
+    assert (balanceOf[_to] + _value >= balanceOf[_to]);  
+    assert (!frozenAccount[msg.sender]);                 
+    balanceOf[msg.sender] -= _value;                      
+    balanceOf[_to] += _value;                             
+    Transfer(msg.sender, _to, _value);                    
+}",
+            "vulnerability": "Access Control",
+            "reason": "The contract does not properly check if the account is frozen before transferring tokens, allowing an attacker to transfer tokens from a frozen account."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    assert (!frozenAccount[_from]);                       
+    assert (balanceOf[_from] >= _value);                  
+    assert (balanceOf[_to] + _value >= balanceOf[_to]);   
+    assert (_value <= allowance[_from][msg.sender]);      
+    balanceOf[_from] -= _value;                           
+    balanceOf[_to] += _value;                             
+    allowance[_from][msg.sender] -= _value;              
+    Transfer(_from, _to, _value);                         
+    return true;
+}",
+            "vulnerability": "Access Control",
+            "reason": "Similar to the transfer function, the contract does not properly check if the account is frozen before transferring tokens from another account, allowing an attacker to transfer tokens from a frozen account."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The mintToken function allows the owner to mint new tokens without any restrictions, which can lead to token devaluation if misused."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 amount) onlyOwner returns (bool success) {
+    assert (balanceOf[msg.sender] >= amount);              
+    balanceOf[msg.sender] -= amount;                       
+    totalSupply -= amount;                                 
+    Burn(msg.sender, amount);                            
+    return true;
+}",
+            "vulnerability": "Token Devalue",
+            "reason": "The burn function allows the owner to burn tokens, which can devalue the token as it reduces the total supply."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The setPrices function allows the owner to set prices for buying and selling tokens, which can lead to manipulation of token values if not carefully managed."
+        }
+    ]
+}

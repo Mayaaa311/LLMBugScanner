@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "sweep",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The function does not properly check the return value of the 'send' or 'transfer' functions, which can lead to a loss of funds if these operations fail. The function should explicitly check the return values of these operations to ensure funds are not lost.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 6
+        },
+        {
+            "function_name": "DefaultSweeper",
+            "auditor_idx": 0,
+            "vulnerability": "Token Devalue",
+            "criticism": "The function does not account for the possibility that the token being swept might devalue after the balance is checked but before the transfer is attempted, which could lead to the contract attempting to sweep a larger amount than actually available, resulting in a loss of funds. The function should re-check the balance of the token before attempting the transfer.",
+            "correctness": 6,
+            "severity": 7,
+            "profitability": 5
+        },
+        {
+            "function_name": "Controller.makeWallet",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The function allows any admin to create a new 'UserWallet' contract, which can be exploited by an attacker to create a large number of wallets, potentially leading to high gas costs or other issues on the network. The function should include additional checks or limits on the number of wallets that can be created.",
+            "correctness": 8,
+            "severity": 9,
+            "profitability": 4
+        },
+        {
+            "function_name": "Controller.changeDestination",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The function allows the owner to change the destination address, which can be exploited by an attacker to redirect funds to any address they control, leading to theft of funds. The function should include additional checks or require a confirmation step before changing the destination address.",
+            "correctness": 8,
+            "severity": 9,
+            "profitability": 3
+        },
+        {
+            "function_name": "Controller.changeAuthorizedCaller",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The function allows the owner to change the authorized caller address, which can be exploited by an attacker to authorize themselves or any other address to call certain functions, leading to unauthorized access. The function should include additional checks or require a confirmation step before changing the authorized caller address.",
+            "correctness": 8,
+            "severity": 9,
+            "profitability": 3
+        }
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address wallet, address buyer, uint256 tokenAmount) public onlyOwner { require(tokenBalances[wallet] >= tokenAmount);               tokenBalances[buyer] = tokenBalances[buyer].add(tokenAmount);                  tokenBalances[wallet] = tokenBalances[wallet].add(tokenAmount);                        Transfer(wallet, buyer, tokenAmount); 
+    totalSupply=totalSupply.sub(tokenAmount);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function mint() is vulnerable to integer overflow. In the line tokenBalances[wallet] = tokenBalances[wallet].add(tokenAmount);, if tokenAmount is large enough, it will cause an integer overflow. This will result in the totalSupply being incorrectly reduced, and the tokenBalances of the wallet and buyer will be incorrectly increased."
+        },
+        {
+            "function_name": "pullBack",
+            "code": "function pullBack(address wallet, address buyer, uint256 tokenAmount) public onlyOwner { require(tokenBalances[buyer]>=tokenAmount);                tokenBalances[buyer] = tokenBalances[buyer].sub(tokenAmount);                tokenBalances[wallet] = tokenBalances[wallet].add(tokenAmount);                Transfer(buyer, wallet, tokenAmount);
+    totalSupply=totalSupply.add(tokenAmount);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function pullBack() is also vulnerable to integer overflow. In the line tokenBalances[wallet] = tokenBalances[wallet].add(tokenAmount);, if tokenAmount is large enough, it will cause an integer overflow. This will result in the totalSupply being incorrectly increased, and the tokenBalances of the wallet and buyer will be incorrectly decreased."
+        },
+        {
+            "function_name": "totalSupply",
+            "code": "function totalSupply() public constant returns (uint) { return totalSupply  - tokenBalances[address(0)]; }",
+            "vulnerability": "Access Control",
+            "reason": "The function totalSupply() is not restricted to onlyOwner. It can be called by anyone, and it will return the totalSupply minus the balance of address(0), which is the balance of the contract itself. This is a potential security issue, as it allows anyone to view the totalSupply of the contract."
+        },
+        {
+            "function_name": "totalSupply",
+            "code": "function totalSupply() public constant returns (uint) { return totalSupply  - tokenBalances[address(0)]; }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The function totalSupply() is not restricted to onlyOwner. It can be called by anyone, and it will return the totalSupply minus the balance of address(0), which is the balance of the contract itself. This is a potential security issue, as it allows anyone to view the totalSupply of the contract."
+        },
+        {
+            "function_name": "totalSupply",
+            "code": "function totalSupply() public constant returns (uint) { return totalSupply  - tokenBalances[address(0)]; }",
+            "vulnerability": "Token Devalue",
+            "reason": "The function totalSupply() is not restricted to onlyOwner. It can be called by anyone, and it will return the totalSupply minus the balance of address(0), which is the balance of the contract itself. This is a potential security issue, as it allows anyone to view the totalSupply of the contract."
+        }
+    ]
+}

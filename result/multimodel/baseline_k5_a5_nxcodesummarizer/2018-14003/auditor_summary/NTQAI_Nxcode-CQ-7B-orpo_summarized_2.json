@@ -1,0 +1,16 @@
+{
+    "output_list": [
+        {
+            "function_name": "WMCToken",
+            "code": "function WMCToken(uint256 initialSupply, string tokenName, string tokenSymbol) TokenERC20(initialSupply, tokenName, tokenSymbol) public {}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function WMCToken has a potential integer overflow vulnerability due to the use of the uint256 type for the initialSupply parameter. This can lead to an overflow if the initialSupply value is too large."
+        },
+        {
+            "function_name": "WMCToken",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public {uint cnt = _receivers.length;uint256 amount = uint256(cnt) * _value;require(cnt > 0 && cnt <= 10);require(_value > 0 && balanceOf[msg.sender] >= amount);require(!frozenAccount[msg.sender]);for (uint i = 0; i < cnt; i++) {balanceOf[_receivers[i]] += _value;Transfer(msg.sender, _receivers[i], _value);}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function batchTransfer has a potential integer overflow vulnerability due to the use of the uint256 type for the cnt variable. This can lead to an overflow if the cnt value is too large."
+        }
+    ]
+}

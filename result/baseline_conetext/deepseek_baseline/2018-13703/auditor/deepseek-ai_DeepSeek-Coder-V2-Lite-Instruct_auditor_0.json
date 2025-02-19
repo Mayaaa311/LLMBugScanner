@@ -1,0 +1,76 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Token Devalue",
+            "function_code": "function mintToken(uint256 tokensToMint) public onlyOwner {
+    if(tokensToMint > 0)
+    {
+        var totalTokenToMint = tokensToMint * (10 ** 18);
+        balanceOf[owner] += totalTokenToMint;
+        totalSupply += totalTokenToMint;
+        Transfer(0, owner, totalTokenToMint);
+    }
+}",
+            "reason": "Allows the owner to mint unlimited tokens, which can devalue the token and lead to financial losses for holders."
+        },
+        {
+            "function_name": "sellOffline",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function sellOffline(address rec_address,uint256 token_amount) public onlyOwner {
+    if (remaining > 0)
+    {
+        uint finalTokens =  (token_amount  * (10 ** 18));
+        if(finalTokens < remaining)
+        {
+            remaining = remaining - finalTokens;
+            _transfer(owner,rec_address, finalTokens);
+            TransferSell(owner, rec_address, finalTokens,'Offline');
+        }
+        else
+        {
+            revert();
+        }
+    }
+    else
+    {
+        revert();
+    }
+}",
+            "reason": "The function does not check if the `remaining` tokens are sufficient, leading to potential underflow and incorrect token deductions."
+        },
+        {
+            "function_name": "transferOwnership",
+            "vulnerability": "Access Control",
+            "function_code": "function transferOwnership(address newOwner) public onlyOwner {
+    balanceOf[owner] = 0;
+    balanceOf[newOwner] = remaining;
+    owner = newOwner;
+}",
+            "reason": "The function allows the owner to transfer ownership without any checks, potentially leading to unauthorized transfer of ownership and control."
+        },
+        {
+            "function_name": "approveAndCall",
+            "vulnerability": "Access Control",
+            "function_code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) public returns (bool success) {
+    tokenRecipient spender = tokenRecipient(_spender);
+    if (approve(_spender, _value)) {
+        spender.receiveApproval(msg.sender, _value, this, _extraData);
+        return true;
+    }
+}",
+            "reason": "The function does not check if the approval was successful, allowing unauthorized calls to the spender contract."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    require (_value < allowance[_from][msg.sender]);
+    allowance[_from][msg.sender] -= _value;
+    _transfer(_from, _to, _value);
+    return true;
+}",
+            "reason": "The function does not check if the caller has the allowance to transfer tokens on behalf of another user, leading to unauthorized transfers."
+        }
+    ]
+}

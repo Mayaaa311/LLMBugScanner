@@ -1,0 +1,29 @@
+ {
+    "output_list": [
+        {
+            "function_name": "adminClaimAirdrop",
+            "vulnerability": "Access Control",
+            "reason": "The adminClaimAirdrop function allows the owner to distribute tokens to any address, without any restrictions. This can be exploited by granting a malicious attacker the owner role, allowing them to distribute the token supply to their wallet, devaluing the token's investment value."
+        },
+        {
+            "function_name": "getTokens",
+            "vulnerability": "Integer Overflow",
+            "reason": "The getTokens function allows users to buy tokens with Ether, where tokens are distributed based on the rate set by tokensPerEth. The issue is that tokens are calculated using multiplication between tokensPerEth and msg.value, which can overflow the uint256 data type, causing a buy order to be executed with unintended token amounts, granting the attacker a large amount of tokens for a small Ether investment."
+        },
+        {
+            "function_name": "distr",
+            "vulnerability": "Integer Overflow",
+            "reason": "The distr function allows the owner to distribute tokens to any address, where totalDistributed is incremented by the amount of tokens distributed. The issue is that totalDistributed is not checked against totalSupply, allowing the owner to distribute an arbitrary large amount of tokens, causing an integer overflow and granting the attacker an effectively unlimited amount of tokens."
+        },
+        {
+            "function_name": "doAirdrop",
+            "vulnerability": "Integer Overflow",
+            "reason": "The doAirdrop function allows the owner to distribute tokens to any address, where totalDistributed is incremented by the amount of tokens distributed. The issue is that totalDistributed is not checked against totalSupply, allowing the owner to distribute an arbitrary large amount of tokens, causing an integer overflow and granting the attacker an effectively unlimited amount of tokens."
+        },
+        {
+            "function_name": "adminClaimAirdropMultiple",
+            "vulnerability": "Integer Overflow",
+            "reason": "The adminClaimAirdropMultiple function allows the owner to distribute tokens to multiple addresses in a single transaction, where totalDistributed is incremented by the sum of the amounts of tokens distributed to each address. The issue is that totalDistributed is not checked against totalSupply, allowing the owner to distribute an arbitrary large amount of tokens, causing an integer overflow and granting the attacker an effectively unlimited amount of tokens."
+        }
+    ]
+}

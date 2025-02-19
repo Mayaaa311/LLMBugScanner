@@ -1,0 +1,17 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Incorrect implementation of transfer function leading to potential loss of funds.",
+            "function_code": "transfer(address _to, uint256 _value) { if(_value > balanceOf[_to] || _value > allowance[_to][msg.sender] || (balanceOf[_to]+_value) < balanceOf[_to]) return false; }",
+            "reason": "Potential financial loss to users if transfer function is exploited."
+        },
+        {
+            "function_name": "payWinner",
+            "vulnerability": "Owner can manipulate the payout by setting a high price and not delivering the promised amount.",
+            "function_code": "uint256 _value = totalBounty / 2;  if(msg.sender.balance < _value) return false;  msg.sender.transfer(_value);  totalBounty -= _value;",
+            "reason": "Potential financial loss to users if the payout function is exploited."
+        }
+    ]
+}<eos>

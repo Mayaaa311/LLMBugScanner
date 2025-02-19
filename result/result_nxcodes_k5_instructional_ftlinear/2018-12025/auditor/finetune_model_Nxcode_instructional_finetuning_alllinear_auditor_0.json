@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "balanceOf",
+            "code": "function balanceOf(address _owner) constant returns (uint256 balance) { return balances[_owner]; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The balanceOf function does not check for integer overflow. If the balance of an address exceeds the maximum value that can be stored in a uint256, the function will return an incorrect result."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address to, uint value) returns (bool success) { if (frozenAccount[msg.sender]) return false; if(balances[msg.sender] < value) return false; if(balances[to] + value < balances[to]) return false; balances[msg.sender] -= value; balances[to] += value; Transfer(msg.sender, to, value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not check for integer overflow. If the sender's balance is less than the value to be transferred, the function will return false. If the recipient's balance is greater than the maximum value that can be stored in a uint256, the function will return false. If the recipient's balance is less than the sum of the sender's balance and the value to be transferred, the function will return false."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address from, address to, uint value) returns (bool success) { if (frozenAccount[msg.sender]) return false; if(balances[from] < value) return false; if( allowed[from][msg.sender] >= value ) return false; if(balances[to] + value < balances[to]) return false; balances[from] -= value; allowed[from][msg.sender] -= value; balances[to] += value; Transfer(from, to, value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check for integer overflow. If the sender's balance is less than the value to be transferred, the function will return false. If the allowance of the sender for the recipient is less than the value to be transferred, the function will return false. If the recipient's balance is greater than the maximum value that can be stored in a uint256, the function will return false. If the recipient's balance is less than the sum of the sender's balance and the value to be transferred, the function will return false."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner{ balances[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0,owner,mintedAmount); Transfer(owner,target,mintedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function does not check for integer overflow. If the target's balance is greater than the maximum value that can be stored in a uint256, the function will return false. If the total supply is greater than the maximum value that can be stored in a uint256, the function will return false."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _amount) returns (bool success) { allowed[msg.sender][_spender] = _amount; Approval(msg.sender, _spender, _amount); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The approve function does not check for integer overflow. If the allowance is greater than the maximum value that can be stored in a uint256, the function will return false."
+        }
+    ]
+}

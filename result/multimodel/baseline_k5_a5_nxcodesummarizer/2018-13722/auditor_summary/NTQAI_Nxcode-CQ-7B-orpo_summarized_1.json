@@ -1,0 +1,65 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _value) onlyPayloadSize(2 * 32) returns (bool success) {
+    balances[msg.sender] = safeSub(balances[msg.sender], _value);
+    balances[_to] = safeAdd(balances[_to], _value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function uses the safeAdd and safeSub functions from SafeMath library to perform arithmetic operations. However, these functions do not check if the result of the arithmetic operations exceeds the maximum value of the uint data type. This can lead to integer overflow vulnerabilities."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _value) returns (bool success) {
+    uint _allowance = allowed[_from][msg.sender];
+    balances[_to] = safeAdd(balances[_to], _value);
+    balances[_from] = safeSub(balances[_from], _value);
+    allowed[_from][msg.sender] = safeSub(_allowance, _value);
+    Transfer(_from, _to, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function uses the safeAdd and safeSub functions from SafeMath library to perform arithmetic operations. However, these functions do not check if the result of the arithmetic operations exceeds the maximum value of the uint data type. This can lead to integer overflow vulnerabilities."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint _value) returns (bool success) {
+    if ((_value != 0) && (allowed[msg.sender][_spender] != 0)) throw;
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function uses the safeAdd function from SafeMath library to perform an arithmetic operation. However, this function does not check if the result of the arithmetic operation exceeds the maximum value of the uint data type. This can lead to an integer overflow vulnerability."
+        },
+        {
+            "function_name": "addApproval",
+            "code": "function addApproval(address _spender, uint _addedValue) onlyPayloadSize(2 * 32) returns (bool success) {
+    uint oldValue = allowed[msg.sender][_spender];
+    allowed[msg.sender][_spender] = safeAdd(oldValue, _addedValue);
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function uses the safeAdd function from SafeMath library to perform an arithmetic operation. However, this function does not check if the result of the arithmetic operation exceeds the maximum value of the uint data type. This can lead to an integer overflow vulnerability."
+        },
+        {
+            "function_name": "subApproval",
+            "code": "function subApproval(address _spender, uint _subtractedValue) onlyPayloadSize(2 * 32) returns (bool success) {
+    uint oldVal = allowed[msg.sender][_spender];
+    if (_subtractedValue > oldVal) {
+        allowed[msg.sender][_spender] = 0;
+    } else {
+        allowed[msg.sender][_spender] = safeSub(oldVal, _subtractedValue);
+    }
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function uses the safeSub function from SafeMath library to perform an arithmetic operation. However, this function does not check if the result of the arithmetic operation is negative. This can lead to an integer overflow vulnerability."
+        }
+    ]
+}

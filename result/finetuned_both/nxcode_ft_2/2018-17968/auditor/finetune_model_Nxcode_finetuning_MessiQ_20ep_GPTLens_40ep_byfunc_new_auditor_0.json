@@ -1,0 +1,24 @@
+{"output_list": [
+            {
+                "function_name": "distributeFunds",
+                "vulnerability": "Integer Overflow",
+                "reason": "The distributeFunds function has an integer overflow in the following code snippet: 
+                    uint256 balanceToDistribute = SafeMath.div(room.balance,5);
+                    address victim = room.players[_deadSeat];
+                    address[] memory winners = new address[](5);
+                    uint256 j = 0; 
+                    for (uint i = 0; i<6; i++) {
+                        if(i != _deadSeat){
+                           room.players[i].transfer(balanceToDistribute);
+                           room.balance -= balanceToDistribute;
+                           winners[j] = room.players[i];
+                           j++;
+                        }
+                    }
+                    victim.transfer(balanceToDistribute);
+                    victim.transfer(balanceToDistribute);
+                    victim.transfer(balanceToDistribute);
+                    victim.transfer(balanceToDistribute);
+                    victim.transfer(balanceToDistribute);
+                    victim.transfer(balanceToDistribute);
+                    victim.transfer(balanceToDistribute);

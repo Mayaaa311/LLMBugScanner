@@ -1,0 +1,66 @@
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr public {
+    uint256 tokens = 0;
+    require( msg.value >= minContribution );
+    require( msg.value > 0 );
+    tokens = tokensPerEth.mul(msg.value) / 1 ether;
+    address investor = msg.sender;
+    if (tokens > 0) {
+        distr(investor, tokens);
+    }
+    if (totalDistributed >= totalSupply) {
+        distributionFinished = true;
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function 'getTokens' does not properly handle the case where 'tokensPerEth.mul(msg.value)' results in an overflow, which could lead to a situation where tokens are distributed incorrectly or unexpectedly, potentially allowing attackers to exploit this vulnerability to gain more tokens than intended."
+        },
+        {
+            "function_name": "distr",
+            "code": "function distr(address _to, uint256 _amount) canDistr private returns (bool) {
+    totalDistributed = totalDistributed.add(_amount);
+    balances[_to] = balances[_to].add(_amount);
+    emit Distr(_to, _amount);
+    emit Transfer(address(0), _to, _amount);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'distr' function does not validate the 'totalDistributed' and '_amount' values, which could lead to an overflow and allow attackers to manipulate the total supply of tokens distributed, potentially leading to a loss of funds or other unintended consequences."
+        },
+        {
+            "function_name": "doAirdrop",
+            "code": "function doAirdrop(address _participant, uint _amount) internal {
+    require( _amount > 0 );
+    require( totalDistributed < totalSupply );
+    balances[_participant] = balances[_participant].add(_amount);
+    totalDistributed = totalDistributed.add(_amount);
+    if (totalDistributed >= totalSupply) {
+        distributionFinished = true;
+    }
+    emit Airdrop(_participant, _amount, balances[_participant]);
+    emit Transfer(address(0), _participant, _amount);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'doAirdrop' function does not validate the 'totalDistributed' and '_amount' values, which could lead to an overflow and allow attackers to manipulate the total supply of tokens distributed, potentially leading to a loss of funds or other unintended consequences."
+        },
+        {
+            "function_name": "adminClaimAirdrop",
+            "code": "function adminClaimAirdrop(address _participant, uint _amount) public onlyOwner {
+    doAirdrop(_participant, _amount);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'adminClaimAirdrop' function allows the owner to claim airdrops without any additional checks, which could be exploited if an attacker gains control over the owner's account, allowing them to distribute tokens to their own address or any other address they control."
+        },
+        {
+            "function_name": "adminClaimAirdropMultiple",
+            "code": "function adminClaimAirdropMultiple(address[] _addresses, uint _amount) public onlyOwner {
+    for (uint i = 0; i < _addresses.length; i++) doAirdrop(_addresses[i], _amount);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'adminClaimAirdropMultiple' function allows the owner to claim airdrops for multiple addresses without any additional checks, which could be exploited if an attacker gains control over the owner's account, allowing them to distribute tokens to their own addresses or any other addresses they control."
+        }
+    ]
+}

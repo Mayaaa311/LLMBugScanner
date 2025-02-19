@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The check `balances[_to] + _value > balances[_to]` can be exploited by an attacker to cause an integer overflow, leading to an uncontrolled increase in the balance of the recipient. This can be particularly harmful if the recipient is a contract that relies on the balance to function correctly."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "reason": "Similar to the `transfer` function, the check `balances[_to] + _value > balances[_to]` can lead to an integer overflow, allowing an attacker to increase the balance of the recipient beyond what is intended."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Wrong Logic",
+            "reason": "The `approve` function does not check if the spender's allowance is already set to a higher value before setting it to the new value. This can lead to a situation where a user's tokens can be stolen if they approve a contract to transfer more tokens than they currently have."
+        },
+        {
+            "function_name": "transferProxy",
+            "vulnerability": "Access Control",
+            "reason": "The `transferProxy` function does not properly check the sender's allowance before transferring tokens, which can lead to unauthorized transfers. Additionally, the use of ECDSA signatures for authorization can be risky if the implementation is not done correctly."
+        },
+        {
+            "function_name": "approveProxy",
+            "vulnerability": "Access Control",
+            "reason": "Similar to `approve`, the `approveProxy` function does not check if the spender's allowance is already set to a higher value before setting it to the new value. This can lead to a situation where a user's tokens can be stolen if they approve a contract to transfer more tokens than they currently have."
+        }
+    ]
+}

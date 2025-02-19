@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The vulnerability arises due to the lack of overflow checks when adding `mintedAmount` to `balanceOf[target]` and `totalSupply`. This can lead to a denial of service or manipulation of the token's supply. The use of SafeMath functions is absent, which should have prevented this issue.",
+            "correctness": 8,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "distributeToken",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "This function allows the owner to distribute tokens to multiple users in a single transaction. The issue is that the addition of `_value` to `balanceOf[owner]` and `balanceOf[addresses[i]]` is not protected against overflow. This can be exploited to cause a denial of service or to manipulate the token balances of multiple users.",
+            "correctness": 8,
+            "severity": 8,
+            "profitability": 6
+        },
+        {
+            "function_name": "transfer",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The function does not check if the transfer amount exceeds the balance of the sender. This can lead to tokens being deducted from the sender's account even if the transfer fails, which can be exploited to cause financial loss.",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 5
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "Similar to the transfer function, this function does not check if the transfer amount exceeds the allowance. This can lead to unauthorized token transfers, which can be exploited for various malicious activities.",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 5
+        },
+        {
+            "function_name": "approve",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The function does not check if the spender is a contract. Allowing contracts to spend tokens can lead to unauthorized token transfers and other malicious activities. This is a significant vulnerability as it bypasses the usual restrictions on token transfers.",
+            "correctness": 6,
+            "severity": 8,
+            "profitability": 6
+        }
+    ]
+}

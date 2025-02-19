@@ -1,0 +1,83 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) {
+    if (block.number < tokenFrozenUntilBlock) throw;    
+    if (restrictedAddresses[_to]) throw;                
+    if (balances[msg.sender] < _value) throw;           
+    if (balances[_to] + _value < balances[_to]) throw;  
+    balances[msg.sender] -= _value;                     
+    balances[_to] += _value;                            
+    Transfer(msg.sender, _to, _value);                  
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transfer() has a potential integer overflow vulnerability. The function uses the block.number variable, which can be manipulated by an attacker to cause an overflow. The function also uses the restrictedAddresses mapping, which can be manipulated by an attacker to bypass the restriction."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {      
+    if (block.number < tokenFrozenUntilBlock) throw;    
+    if (restrictedAddresses[_to]) throw;                
+    if (balances[_from] < _value) throw;                
+    if (balances[_to] + _value < balances[_to]) throw;  
+    if (_value > allowances[_from][msg.sender]) throw;  
+    balances[_from] -= _value;                          
+    balances[_to] += _value;                            
+    allowances[_from][msg.sender] -= _value;            
+    Transfer(_from, _to, _value);                       
+    return true;     
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transferFrom() has a potential integer overflow vulnerability. The function uses the block.number variable, which can be manipulated by an attacker to cause an overflow. The function also uses the restrictedAddresses mapping, which can be manipulated by an attacker to bypass the restriction."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {            
+    tokenRecipient spender = tokenRecipient(_spender);              
+    approve(_spender, _value);                                      
+    spender.receiveApproval(msg.sender, _value, this, _extraData);  
+    return true;     
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function approveAndCall() has a potential wrong logic vulnerability. The function uses the tokenRecipient contract, which can be manipulated by an attacker to bypass the approval mechanism."
+        },
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(address _to, uint256 _amount) {         
+    if (msg.sender != icoContractAddress) throw;            
+    if (restrictedAddresses[_to]) throw;                    
+    if (balances[_to] + _amount < balances[_to]) throw;     
+    supply += _amount;                                      
+    balances[_to] += _amount;                               
+    Mint(_to, _amount);                                     
+    Transfer(0x0, _to, _amount);                            
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function mintTokens() has a potential wrong logic vulnerability. The function uses the restrictedAddresses mapping, which can be manipulated by an attacker to bypass the restriction."
+        },
+        {
+            "function_name": "burnTokens",
+            "code": "function burnTokens(uint256 _amount) onlyOwner {
+    if(balances[msg.sender] < _amount) throw;               
+    if(supply < _amount) throw;                             
+    supply -= _amount;                                      
+    balances[msg.sender] -= _amount;                        
+    Burn(msg.sender, _amount);                              
+    Transfer(msg.sender, 0x0, _amount);                     
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function burnTokens() has a potential wrong logic vulnerability. The function uses the balances mapping, which can be manipulated by an attacker to bypass the restriction."
+        },
+        {
+            "function_name": "freezeTransfersUntil",
+            "code": "function freezeTransfersUntil(uint256 _frozenUntilBlock, string _reason) onlyOwner {      
+    tokenFrozenUntilBlock = _frozenUntilBlock;
+    TokenFrozen(_frozenUntilBlock, _reason);
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function freezeTransfersUntil() has a potential wrong logic vulnerability. The function uses the tokenFrozenUntilBlock variable, which can be manipulated by an attacker to bypass the restriction."
+        }
+    ]
+}

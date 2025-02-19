@@ -1,0 +1,70 @@
+{
+    "output_list": [
+        {
+            "function_name": "stake",
+            "code": "function stake(uint256 amount) external nonReentrant updateReward(msg.sender) {
+                require(amount > 0, "Cannot stake 0");
+                stakedSupply += amount;
+                stakes[msg.sender] += amount;
+                _transferTokens(msg.sender, address(this), amount);
+                emit Staked(msg.sender, amount);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `stake` allows an attacker to stake an amount of tokens that exceeds the maximum value of a uint256. This can lead to an integer overflow, where the stakedSupply is increased beyond the maximum value of a uint256, causing the contract to revert or return incorrect results."
+        },
+        {
+            "function_name": "unstake",
+            "code": "function unstake(uint amount) public nonReentrant updateReward(msg.sender) {
+                require(amount > 0, "Cannot withdraw 0");
+                stakedSupply -= amount;
+                stakes[msg.sender] -= amount;
+                _transferTokens(address(this), msg.sender, amount);
+                emit Unstaked(msg.sender, amount);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `unstake` allows an attacker to unstake an amount of tokens that exceeds the maximum value of a uint256. This can lead to an integer overflow, where the stakedSupply is decreased beyond the maximum value of a uint256, causing the contract to revert or return incorrect results."
+        },
+        {
+            "function_name": "notifyFeeAmount",
+            "code": "function notifyFeeAmount(uint reward) internal updateReward(address(0)) {
+                if (block.timestamp >= periodFinish) {
+                    rewardRate = reward / DURATION;
+                } else {
+                    uint remaining = periodFinish - block.timestamp;
+                    uint leftover = remaining * rewardRate;
+                    rewardRate = (reward + leftover) / DURATION;
+                }
+                uint balance = balances[address(this)];
+                require(rewardRate <= balance / DURATION, "Provided reward too high");
+                lastUpdateTime = block.timestamp;
+                periodFinish = block.timestamp + DURATION;
+                emit Fees(reward);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `notifyFeeAmount` allows an attacker to provide a reward amount that exceeds the maximum value of a uint256. This can lead to an integer overflow, where the rewardRate is set beyond the maximum value of a uint256, causing the contract to revert or return incorrect results."
+        },
+        {
+            "function_name": "rewardPerToken",
+            "code": "function rewardPerToken() public view returns (uint) {
+                if (stakedSupply == 0) {
+                    return rewardPerTokenStored;
+                }
+                return
+                    rewardPerTokenStored +
+                        ((lastTimeRewardApplicable() - 
+                        lastUpdateTime) * 
+                        rewardRate * 1e18 / stakedSupply);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `rewardPerToken` allows an attacker to increase the stakedSupply by a large amount, causing the rewardPerToken to exceed the maximum value of a uint256. This can lead to an integer overflow, where the rewardPerToken is set beyond the maximum value of a uint256, causing the contract to revert or return incorrect results."
+        },
+        {
+            "function_name": "earned",
+            "code": "function earned(address account) public view returns (uint) {
+                return (stakes[account] * (rewardPerToken() - userRewardPerTokenPaid[account]) / 1e18) + rewards[account];
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `earned` allows an attacker to increase the stakedSupply by a large amount, causing the earned amount to exceed the maximum value of a uint256. This can lead to an integer overflow, where the earned amount is set beyond the maximum value of a uint256, causing the contract to revert or return incorrect results."
+        }
+    ]
+}

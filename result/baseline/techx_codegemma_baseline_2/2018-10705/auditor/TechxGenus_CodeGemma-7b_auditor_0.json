@@ -1,0 +1,75 @@
+tput:
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+    _transfer(msg.sender, _to, _value);
+    return true;
+}",
+            "reason": "The transfer function does not check for integer overflow, allowing potential attackers to transfer more funds than the specified amount.
+"
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    require(_value <= allowance[_from][msg.sender];
+    allowance[_from][msg.sender] -= _value;
+    _transfer(_from, _to, _value);
+    return true;
+}",
+            "reason": "The transferFrom function does not check for integer overflow, allowing potential attackers to transfer more funds than the specified amount.
+"
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function approve(address _spender, uint256 _value) public returns (bool success) {
+    require(!locked);
+    allowance[msg.sender][_spender] = _value;
+    return true;
+}",
+            "reason": "The approve function sets the allowance of the specified address without checking if it already has an allowance, potentially leading to incorrect permissions.
+"
+        },
+        {
+            "function_name": "approveAndCall",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) public returns (bool success) {
+    tokenRecipient spender = tokenRecipient(_spender);
+    if (approve(_spender, _value)) {
+        spender.receiveApproval(msg.sender, _value, this, _extraData);
+        return true;
+    }
+}",
+            "reason": "The approveAndCall function does not properly check if the address already has an allowance, potentially leading to incorrect permissions.
+"
+        },
+        {
+            "function_name": "uploadBalances",
+            "vulnerability": "Access Control",
+            "function_code": "function uploadBalances(address[] recipients, uint256[] balances) onlyOwner {
+    require(!balancesUploaded);
+    uint256 sum = 0;
+    for (uint256 i = 0; i < recipients.length; i++) {
+        balanceOf[recipients[i]] = safeAdd(balanceOf[recipients[i]], balances[i]);
+        sum = safeAdd(sum, balances[i]);
+    }
+    balanceOf[owner] = safeSub(balanceOf[owner], sum);
+}",
+            "reason": "The uploadBalances function is only accessible to the contract owner, allowing potential attackers to potentially bypass access controls.
+"
+        },
+        {
+            "function_name": "lockBalances",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function lockBalances() onlyOwner {
+    balancesUploaded = true;
+}",
+            "reason": "The lockBalances function is a trivial function that should be an easy target for a typo constructor, allowing potential attackers to bypass access controls.
+"
+        }
+    ]
+}<eos>

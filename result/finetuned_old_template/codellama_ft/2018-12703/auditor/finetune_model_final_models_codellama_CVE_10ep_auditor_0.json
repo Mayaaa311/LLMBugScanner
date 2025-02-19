@@ -1,0 +1,90 @@
+{"output_list": [{"function_name": "output", "vulnerability": "Integer Overflow", "description": "The output_list array contains the following JSON objects: [{"function_name": "<function_name_1>", "vulnerability": "<short_vulnerability_desc_1>", "reason": "<reason_1>"}, {"function_name": "<function_name_2>", "vulnerability": "<short_vulnerability_desc_2>", "reason": "<reason_2>}]}
+}
+]
+The following JSON format is used:
+{
+    "output_list": [
+        {
+            "<function_name>": "<vulnerability>",
+            "<vulnerability>": "<reason>"
+        }
+    ]
+}
+Note the output of the following JSON format is:
+{
+    "output_list": [
+        {
+            "<function_name>": "<vulnerability>",
+            "<vulnerability>": "<reason>",
+            "<function_identifier>": "<function_identifier>"
+        }
+    ]
+}
+Note the output is an array of JSON objects. Each JSON object contains the following information:
+    - <function_name>: The name of the function that the vulnerability was detected in.
+    - <vulnerability>: A short description of the vulnerability.
+    - <reason>: The reason the vulnerability was detected.
+    - <function_identifier>: The identifier of the function that the vulnerability was detected in.
+The purpose of this smart contract is to provide a secure way to manage assets and perform various financial operations. The smart contract is owned and controlled by an attacker, who can set certain function access levels and perform certain actions. The smart contract also includes a function to receive assets from an external world, such as the attacker can set the balance of an arbitrary user to any value.
+                       
+The following smart contract code provides the functionality for the EightteenToken smart contract:
+pragma solidity ^0.4;
+contract EightteenToken {
+    uint256 public totalSupply;
+    function balanceOf(address _owner) constant returns (uint256 balance);
+    function transfer(address _to, uint256 _value) returns (bool success);
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success);
+    function approve(address _spender, uint256 _value) returns (bool success);
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining);
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+}
+contract EightteenToken is EightteenToken { 
+    function EightteenToken() {
+        totalSupply = 1000000000 * 10 ** uint256(decimals);
+        balances[msg.sender] = totalSupply;               
+    }
+    function balanceOf(address _owner) constant returns (uint256 balance) {
+        return balances[_owner];
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        balances[msg.sender] -= _value;                     
+        balances[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+        return true;                                     
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        balances[_to] += _value;                          
+        balances[_from] -= _value;                            
+        if (_to == address(this)) {
+            allowed[_from][msg.sender] -= _value;
+        } else {
+            require(_value <= allowed[_from][msg.sender]);
+            allowed[_from][msg.sender] -= _value;
+        }
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        require((_value == 0) || (allowed[msg.sender][_spender] == 0));
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+        return allowed[_owner][_spender];
+    }
+}
+contract EightteenCoin is EightteenToken { 
+    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) {
+        require(_token.balanceOf(_from) >= _value);
+        _token.transfer(_from, _value);
+    }
+}
+contract EightteenAttack {
+    EightteenCoin public token;
+    function EightteenAttack() {
+        token = new EightteenCoin();
+    }
+    function attack() {
+        token.receiveApproval(msg.sender, 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

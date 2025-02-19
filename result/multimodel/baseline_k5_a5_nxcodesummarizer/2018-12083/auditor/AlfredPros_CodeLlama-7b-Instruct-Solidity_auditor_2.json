@@ -1,0 +1,60 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+        _transfer(msg.sender, _to, _value);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function _transfer uses the arithmetic operation without checking for overflows. This can lead to unexpected behavior and potentially exploitable vulnerabilities."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require (_value <= allowance[_from][msg.sender]);     
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function transferFrom uses the wrong logic to check for overflows. It should check for overflows before subtracting the value from allowance."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+        returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function approveAndCall uses the randomness of the tokenRecipient spender. This can lead to unexpected behavior and potentially exploitable vulnerabilities."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) returns (bool success) {
+        require(balanceOf[_from] >= _value);                
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        Burn(_from, _value);
+        return true;
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The function burnFrom uses the access control to check for overflows. However, it does not check for overflows before subtracting the value from allowance."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(this, target, mintedAmount);
+    }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The function mintToken uses the typo constructor to check for overflows. This can lead to unexpected behavior and potentially exploitable vulnerabilities."
+        }
+    ]
+}

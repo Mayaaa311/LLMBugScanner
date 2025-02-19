@@ -1,0 +1,86 @@
+Based on the provided smart contract code, there are several vulnerabilities that can be identified. Here are the five most severe vulnerabilities:
+
+1. Integer Overflow:
+   - Function: `transferAUTOtokens10`
+   - Vulnerability: The function allows the transfer of 10,000 tokens to multiple addresses at once. If the number of addresses is large, the total amount of tokens transferred can exceed the maximum value of `uint256`, leading to an integer overflow.
+   - Function Code:
+     ```
+     function transferAUTOtokens10(address[] addresses) {
+         for (uint i = 0; i < addresses.length; i++) {
+             require(balances[msg.sender] >= 0);
+             balances[msg.sender] -= 10000;
+             balances[addresses[i]] += 10000;
+             Transfer(msg.sender, addresses[i], 10000);
+         }
+     }
+     ```
+   - Reason: The function does not check if the total amount of tokens transferred exceeds the maximum value of `uint256`.
+
+2. Wrong Logic:
+   - Function: `transferAUTOtokens5`
+   - Vulnerability: The function allows the transfer of 5,000 tokens to multiple addresses at once. If the number of addresses is large, the total amount of tokens transferred can exceed the maximum value of `uint256`, leading to an integer overflow.
+   - Function Code:
+     ```
+     function transferAUTOtokens5(address[] addresses) {
+         for (uint i = 0; i < addresses.length; i++) {
+             require(balances[msg.sender] >= 0);
+             balances[msg.sender] -= 5000;
+             balances[addresses[i]] += 5000;
+             Transfer(msg.sender, addresses[i], 5000);
+         }
+     }
+     ```
+   - Reason: The function does not check if the total amount of tokens transferred exceeds the maximum value of `uint256`.
+
+3. Bad Randomness:
+   - Function: `transferAUTOtoken1`
+   - Vulnerability: The function allows the transfer of 1,000 tokens to multiple addresses at once. If the number of addresses is large, the total amount of tokens transferred can exceed the maximum value of `uint256`, leading to an integer overflow.
+   - Function Code:
+     ```
+     function transferAUTOtoken1(address[] addresses) {
+         require(balances[msg.sender] >= 0);
+         for (uint i = 0; i < addresses.length; i++) {
+             balances[msg.sender] -= 1000;
+             balances[addresses[i]] += 1000;
+             Transfer(msg.sender, addresses[i], 1000);
+         }
+     }
+     ```
+   - Reason: The function does not check if the total amount of tokens transferred exceeds the maximum value of `uint256`.
+
+4. Access Control:
+   - Function: `transferAny`
+   - Vulnerability: The function allows the transfer of any amount of tokens to multiple addresses at once. If the number of addresses is large, the total amount of tokens transferred can exceed the maximum value of `uint256`, leading to an integer overflow.
+   - Function Code:
+     ```
+     function transferAny(address[] addresses, uint256 _value) {
+         require(_value <= balances[msg.sender]);
+         for (uint i = 0; i < addresses.length; i++) {
+             balances[msg.sender] -= _value;
+             balances[addresses[i]] += _value;
+             Transfer(msg.sender, addresses[i], _value);
+         }
+     }
+     ```
+   - Reason: The function does not check if the total amount of tokens transferred exceeds the maximum value of `uint256`.
+
+5. Typo Constructor:
+   - Function: `MalaysianCoin`
+   - Vulnerability: The constructor function `MalaysianCoin` has a typo in the variable name `Buterin`. The variable name should be `Buterin` instead of `Buterin`.
+   - Function Code:
+     ```
+     function MalaysianCoin () { 
+         balances[owner] = (initialSupply - burned);
+         balances[Buterin] = custom;
+         balances[0] = 2500000 * 10 ** decimals;
+         balances[msg.sender] = max;
+         summary = (balances[owner] + balances[Buterin]  -  balances[0] + i);
+         Transfer(Buterin, 0 , ((initialSupply / 10) - n));
+         Transfer(this, owner, (initialSupply - (initialSupply / 10) - n));
+         Transfer(Buterin, owner, i);
+         totalSupply = summary; 
+     }
+     ```
+   - Reason: The constructor function has a typo in the variable name `Buterin`.
+
+Please note that these vulnerabilities are exploitable in real-world scenarios and can lead to loss of funds or other security issues. It is important to thoroughly analyze and test smart contracts before deploying them to the mainnet.

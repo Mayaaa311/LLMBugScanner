@@ -1,0 +1,49 @@
+ {
+    "output_list": [
+        {
+            "function_name": "sweep",
+            "auditor_idx" : 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The vulnerability in the 'sweep' function is a classic integer overflow issue where the '_amount' parameter is not validated before being used in a transferFrom function call, allowing attackers to overflow the amount variable and steal arbitrary large amounts of tokens from user accounts. The exploitative potential of this vulnerability is extremely high due to the severe impact on user assets, yet it is also straightforward to exploit, making it highly profitable. However, the requirement to only allow authorized users to sweep funds mitigates the vulnerability to some extent, thus reducing its overall score in the correctness dimension.",
+            "correctness": 6,
+            "severity": 9,
+            "profitability": 9
+        },
+        {
+            "function_name": "tokenFallback",
+            "auditor_idx" : 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The 'tokenFallback' function in the 'UserWallet' contract fails to implement any access control, allowing any external user to invoke this function and transfer funds to the attacker's control. This is a severe vulnerability as it allows attackers to drain funds from the UserWallet, yet the requirement to only allow authorized users to sweep funds mitigates the vulnerability to some extent, thus reducing its overall score in the correctness dimension.",
+            "correctness": 5,
+            "severity": 8,
+            "profitability": 7
+        },
+        {
+            "function_name": "makeWallet",
+            "auditor_idx" : 0,
+            "vulnerability": "Access Control",
+            "criticism": "The 'makeWallet' function in the 'Controller' contract fails to implement any validation checks, allowing any attacker controlled wallet to be added as a user wallet, draining funds from the attacker's control. This is a critical vulnerability as it can lead to the complete draining of funds from user accounts, yet the exploitative potential is limited due to the requirement to only allow authorized users to add new user wallets, thus reducing its overall score in the correctness dimension.",
+            "correctness": 4,
+            "severity": 9,
+            "profitability": 4
+        },
+        {
+            "function_name": "addSweeper",
+            "auditor_idx" : 0,
+            "vulnerability": "Access Control",
+            "criticism": "The 'addSweeper' function in the 'Controller' contract fails to implement any validation checks, allowing any attacker controlled wallet to be added as a sweeper, draining funds from the attacker's control. This is a severe vulnerability as it can lead to the complete draining of funds from user accounts, yet the exploitative potential is limited due to the requirement to only allow authorized users to add new sweepers, thus reducing its overall score in the correctness dimension.",
+            "correctness": 4,
+            "severity": 9,
+            "profitability": 4
+        },
+        {
+            "function_name": "UserWallet",
+            "auditor_idx" : 0,
+            "vulnerability": "Typo Constructor",
+            "criticism": "The 'UserWallet' contract has a typo in its constructor, causing it to revert, making it unusable and exploitable. This is a straightforward vulnerability as it prevents the contract from being deployed correctly, yet the exploitative potential is limited due to the requirement to only allow authorized users to add new user wallets, thus reducing its overall score in the correctness dimension.",
+            "correctness": 3,
+            "severity": 7,
+            "profitability": 2
+        }
+    ]
+}

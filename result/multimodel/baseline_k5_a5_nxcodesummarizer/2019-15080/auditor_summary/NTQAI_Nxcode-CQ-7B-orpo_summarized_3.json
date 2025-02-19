@@ -1,0 +1,58 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(uint256 _mintedAmount) public onlyOwner { balanceOf[owner] = balanceOf[owner].add(_mintedAmount); totalSupply = totalSupply.add(_mintedAmount); Transfer(0, owner, _mintedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `mintTokens` allows the owner to mint new tokens without any upper limit on the amount to be minted, which can lead to an integer overflow if `_mintedAmount` is very large, causing the `balanceOf` and `totalSupply` to increase uncontrollably."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public onlyOwner { require(_value <= balanceOf[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].sub(_value); totalSupply = totalSupply.sub(_value); Burn(burner, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Similar to `mintTokens`, the `burn` function allows the owner to burn tokens without any upper limit on the amount to be burned, which can lead to an integer overflow if `_value` is very large, causing the `totalSupply` to decrease uncontrollably."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) { require(!isblacklistedAccount[msg.sender]); require(!isblacklistedAccount[_to]); require(balanceOf[msg.sender] > 0); require(balanceOf[msg.sender] >= _value); require(_to != address(0)); require(_value > 0); require(balanceOf[_to].add(_value) >= balanceOf[_to]); require(_to != msg.sender); balanceOf[msg.sender] = balanceOf[msg.sender].sub(_value); balanceOf[_to] = balanceOf[_to].add(_value); Transfer(msg.sender, _to, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The check `require(balanceOf[_to].add(_value) >= balanceOf[_to]);` is potentially vulnerable to an integer overflow. If `balanceOf[_to]` is very large, adding `_value` could cause an overflow, leading to incorrect balance updates."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _amount) public returns (bool success) { if (balanceOf[_from] >= _amount
+        && allowed[_from][msg.sender] >= _amount
+        && _amount > 0
+        && balanceOf[_to].add(_amount) > balanceOf[_to])
+    {
+        balanceOf[_from] = balanceOf[_from].sub(_amount);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+        balanceOf[_to] = balanceOf[_to].add(_amount);
+        return true;
+    } else {
+        return false;
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The check `&& balanceOf[_to].add(_amount) > balanceOf[_to])` is potentially vulnerable to an integer overflow. If `balanceOf[_to]` is very large, adding `_amount` could cause an overflow, leading to incorrect balance updates."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _amount) public returns (bool success) { if (balanceOf[_from] >= _amount
+        && allowed[_from][msg.sender] >= _amount
+        && _amount > 0
+        && balanceOf[_to].add(_amount) > balanceOf[_to])
+    {
+        balanceOf[_from] = balanceOf[_from].sub(_amount);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+        balanceOf[_to] = balanceOf[_to].add(_amount);
+        return true;
+    } else {
+        return false;
+    }
+}",
+            "vulnerability": "Access Control",
+            "reason": "The function `transferFrom` does not check if the `_from` address is allowed to transfer tokens on behalf of another address. This can be exploited if an attacker can trick a user into approving a transfer on their behalf, then the attacker can transfer tokens from the user's account without their consent."
+        }
+    ]
+}

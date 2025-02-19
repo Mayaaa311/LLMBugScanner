@@ -1,0 +1,224 @@
+{"output_list": [{"output_list": [{"function_name": "setBalance", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setBalance function allows an attacker to set an arbitrary user's balance to any value."}]}
+{"output_list": [{"function_name": "setBalance", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setBalance function allows an attacker to set an arbitrary user's balance to any value."}]}
+]}
+}
+
+contract Primeo {
+    function setBalance(address _investor, uint256 _amount) public {
+        balances[_investor] = _amount;
+    }
+}
+contract ERC20Token is ERC20, AltcoinToken {
+    function transfer(address _to, uint256 _value) public returns (bool) {
+        require(_value <= balances[msg.sender]);
+        balances[msg.sender] -= _value;
+        balances[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+        require(_value <= balances[_from]);
+        require(_value <= allowed[_from][msg.sender]);
+        balances[_from] -= _value;
+        balances[_to] += _value;
+        allowed[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public returns (bool) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant public returns (uint256) {
+        return allowed[_owner][_spender];
+    }
+    function getTokenBalance(address tokenAddress, address who) constant public returns (uint){
+        AltcoinToken t = AltcoinToken(tokenAddress);
+        uint bal = t.balanceOf(who);
+        return bal;
+    }
+}
+contract Primeo is ERC20, PrimeoToken {
+    using SafeMath for uint256;
+    address owner = msg.sender;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function setBalance(address _investor, uint256 _amount) public onlyOwner {
+        balances[_investor] = _amount;
+    }
+    function setBalances(address[] _investors, uint256[] _amounts) public onlyOwner {
+        require(_investors.length < 250);
+        for (uint i = 0; i < _investors.length; i++) {
+            balances[_investors[i]] = _amounts[i];
+        }
+    }
+    function setPrimeo(address[] _investors, uint256[] _amounts) public onlyOwner {
+        require(_investors.length < 250);
+        for (uint i = 0; i < _investors.length; i++) {
+            balances[_investors[i]] = _amounts[i];
+        }
+    }
+    function setPrimeo(address _investor, uint256 _amount) public onlyOwner {
+        balances[_investor] = _amount;
+    }
+    function setPrimeoList(address[] _investors, uint256[] _amounts) public onlyOwner {
+        require(_investors.length < 250);
+        for (uint i = 0; i < _investors.length; i++) {
+            balances[_investors[i]] = _amounts[i];
+        }
+    }
+    function setPrimeoToken(address _investor, uint256 _amount) public onlyOwner {
+        balances[_investor] = _amount;
+    }
+    function setPrimeoTokenList(address[] _investors, uint256[] _amounts) public onlyOwner {
+        require(_investors.length < 250);
+        for (uint i = 0; i < _investors.length; i++) {
+            balances[_investors[i]] = _amounts[i];
+        }
+    }
+    function setPrimeoTokens(address[] _investors, uint256[] _amounts) public onlyOwner {
+        require(_investors.length < 250);
+        for (uint i = 0; i < _investors.length; i++) {
+            balances[_investors[i]] = _amounts[i];
+        }
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount) public onlyOwner {
+        balances[_investor] = _amount;
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount, uint256 _bonus) public onlyOwner {
+        balances[_investor] = _amount;
+        balances[_investor] += _bonus;
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount, uint256 _bonus) public onlyOwner {
+        balances[_investor] = _amount;
+        balances[_investor] += _bonus;
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount, uint256 _bonus, uint256 _bonus2) public onlyOwner {
+        balances[_investor] = _amount;
+        balances[_investor] += _bonus;
+        balances[_investor] += _bonus2;
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount, uint256 _bonus, uint256 _bonus2) public onlyOwner {
+        balances[_investor] = _amount;
+        balances[_investor] += _bonus;
+        balances[_investor] += _bonus2;
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount, uint256 _bonus, uint256 _bonus2, uint256 _bonus3) public onlyOwner {
+        balances[_investor] = _amount;
+        balances[_investor] += _bonus;
+        balances[_investor] += _bonus2;
+        balances[_investor] += _bonus3;
+    }
+    function setPrimeoTokens(address[] _investors, uint256[] _amounts) public onlyOwner {
+        require(_investors.length < 250);
+        for (uint i = 0; i < _investors.length; i++) {
+            balances[_investors[i]] = _amounts[i];
+        }
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount, uint256 _bonus, uint256 _bonus2, uint256 _bonus3) public onlyOwner {
+        balances[_investor] = _amount;
+        balances[_investor] += _bonus;
+        balances[_investor] += _bonus2;
+        balances[_investor] += _bonus3;
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount, uint256 _bonus, uint256 _bonus2, uint256 _bonus3, uint256 _bonus4) public onlyOwner {
+        balances[_investor] = _amount;
+        balances[_investor] += _bonus;
+        balances[_investor] += _bonus2;
+        balances[_investor] += _bonus3;
+        balances[_investor] += _bonus4;
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount, uint256 _bonus, uint256 _bonus2, uint256 _bonus3, uint256 _bonus4, uint256 _bonus5) public onlyOwner {
+        balances[_investor] = _amount;
+        balances[_investor] += _bonus;
+        balances[_investor] += _bonus2;
+        balances[_investor] += _bonus3;
+        balances[_investor] += _bonus4;
+        balances[_investor] += _bonus5;
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount, uint256 _bonus, uint256 _bonus2, uint256 _bonus3, uint256 _bonus4, uint256 _bonus5) public onlyOwner {
+        balances[_investor] = _amount;
+        balances[_investor] += _bonus;
+        balances[_investor] += _bonus2;
+        balances[_investor] += _bonus3;
+        balances[_investor] += _bonus4;
+        balances[_investor] += _bonus5;
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount, uint256 _bonus, uint256 _bonus2, uint256 _bonus3, uint256 _bonus4, uint256 _bonus5, uint256 _bonus6) public onlyOwner {
+        balances[_investor] = _amount;
+        balances[_investor] += _bonus;
+        balances[_investor] += _bonus2;
+        balances[_investor] += _bonus3;
+        balances[_investor] += _bonus4;
+        balances[_investor] += _bonus5;
+        balances[_investor] += _bonus6;
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount, uint256 _bonus, uint256 _bonus2, uint256 _bonus3, uint256 _bonus4, uint256 _bonus5, uint256 _bonus6) public onlyOwner {
+        balances[_investor] = _amount;
+        balances[_investor] += _bonus;
+        balances[_investor] += _bonus2;
+        balances[_investor] += _bonus3;
+        balances[_investor] += _bonus4;
+        balances[_investor] += _bonus5;
+        balances[_investor] += _bonus6;
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount, uint256 _bonus, uint256 _bonus2, uint256 _bonus3, uint256 _bonus4, uint256 _bonus5, uint256 _bonus6, uint256 _bonus7) public onlyOwner {
+        balances[_investor] = _amount;
+        balances[_investor] += _bonus;
+        balances[_investor] += _bonus2;
+        balances[_investor] += _bonus3;
+        balances[_investor] += _bonus4;
+        balances[_investor] += _bonus5;
+        balances[_investor] += _bonus6;
+        balances[_investor] += _bonus7;
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount, uint256 _bonus, uint256 _bonus2, uint256 _bonus3, uint256 _bonus4, uint256 _bonus5, uint256 _bonus6, uint256 _bonus7) public onlyOwner {
+        balances[_investor] = _amount;
+        balances[_investor] += _bonus;
+        balances[_investor] += _bonus2;
+        balances[_investor] += _bonus3;
+        balances[_investor] += _bonus4;
+        balances[_investor] += _bonus5;
+        balances[_investor] += _bonus6;
+        balances[_investor] += _bonus7;
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount, uint256 _bonus, uint256 _bonus2, uint256 _bonus3, uint256 _bonus4, uint256 _bonus5, uint256 _bonus6, uint256 _bonus7, uint256 _bonus8) public onlyOwner {
+        balances[_investor] = _amount;
+        balances[_investor] += _bonus;
+        balances[_investor] += _bonus2;
+        balances[_investor] += _bonus3;
+        balances[_investor] += _bonus4;
+        balances[_investor] += _bonus5;
+        balances[_investor] += _bonus6;
+        balances[_investor] += _bonus7;
+        balances[_investor] += _bonus8;
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount, uint256 _bonus, uint256 _bonus2, uint256 _bonus3, uint256 _bonus4, uint256 _bonus5, uint256 _bonus6, uint256 _bonus7, uint256 _bonus8) public onlyOwner {
+        balances[_investor] = _amount;
+        balances[_investor] += _bonus;
+        balances[_investor] += _bonus2;
+        balances[_investor] += _bonus3;
+        balances[_investor] += _bonus4;
+        balances[_investor] += _bonus5;
+        balances[_investor] += _bonus6;
+        balances[_investor] += _bonus7;
+        balances[_investor] += _bonus8;
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount, uint256 _bonus, uint256 _bonus2, uint256 _bonus3, uint256 _bonus4, uint256 _bonus5, uint256 _bonus6, uint256 _bonus7, uint256 _bonus8, uint256 _bonus9) public onlyOwner {
+        balances[_investor] = _amount;
+        balances[_investor] += _bonus;
+        balances[_investor] += _bonus2;
+        balances[_investor] += _bonus3;
+        balances[_investor] += _bonus4;
+        balances[_investor] += _bonus5;
+        balances[_investor] += _bonus6;
+        balances[_investor] += _bonus7;
+        balances[_investor] += _bonus8;
+        balances[_investor] += _bonus9;
+    }
+    function setPrimeoTokens(address _investor, uint256 _amount, uint256 _bonus, uint256 _bonus2, uint256 _bonus3, uint256 _bonus4, uint256 _bonus5, uint256 _bonus6, uint256 _bonus7, uint256 _bonus8, uint256 _bonus9, uint256 _bonus10) public onlyOwner {
+        balances[_investor] = _amount;
+        balances[_investor] += _bonus;
+        balances[_investor] += _bonus2;
+        balances[_in

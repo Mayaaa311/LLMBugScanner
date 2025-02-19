@@ -1,0 +1,310 @@
+{"output_list": [{"function_name": "ToOwner", "vulnerability": "Access Control", "impact": "User can change balance of the contract without authorization", "original_code": "<none>", "vulnerability": "Access Control", "impact": "User can change balance of the contract without authorization", "code": "function ToOwner(address target) public { require(msg.sender == target); }"}, {"function_name": "PayWinner", "vulnerability": "Bad Randomness", "impact": "The winner selection is predictable and allows attackers.  Financial losses and reputational harm are possible", "code": "function PayWinner(address winner) private { require(numtickets == maxTickets); totalBounty = totalBounty + ownerTax; owner.transfer(totalBounty); winner.transfer(winnerPrice); }"}, {"function_name": "MorphToken", "vulnerability": "Bad Randomness", "impact": "The morphToken function is randomly called, allowing unauthorized change of contract state", "code": "function MorphToken() public { owner = msg.sender; }"}, {"function_name": "KingOfEther", "vulnerability": "Access Control", "impact": "The owner of the contract can be changed without authorization", "code": "function claimThrone() public { require(msg.value > balance); (bool success,) = king.call{value: balance}(""); require(success, "Failed to send Ether"); balance = msg.value; king = msg.sender; }"}, {"function_name": "BurnFrom", "vulnerability": "Access Control", "impact": "The owner of the contract can be changed without authorization", "code": "function burnFrom(address _from, uint256 _value) public { require(balanceOf[_from] >= _value); require(_value <= allowance[_from][msg.sender]); }"}, {"function_name": "burn", "vulnerability": "Access Control", "impact": "The owner of the contract can be changed without authorization", "code": "function burn(uint256 _value) public { require(balanceOf[msg.sender] >= _value); }"}, {"function_name": "transferFrom", "vulnerability": "Wrong Logic", "impact": "The transferFrom function allows attackers.  This enables unauthorized transfers", "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) { require(_value == 0); }"), {"function_name": "mintToken", "vulnerability": "Wrong Logic", "impact": "The mintToken function allows the owner to set the balance of an arbitrary user to any value", "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { totalBounty = totalBounty + ownerTax; user.transfer(mintedAmount); }"), {"function_name": "claimThrone", "vulnerability": "Bad Randomness", "impact": "The claimThrone function does not verify the signature of the owner, allowing attackers.  Financial losses and reputational harm are possible", "code": "function claimThrone(address _winner) public { require(msg.sender == owner); totalBounty = totalBounty + ownerTax; owner.transfer(totalBounty); _winner.transfer(winnerPrice); }"}, {"function_name": "Morph", "vulnerability": "Bad Randomness", "impact": "The Morph function uses the random.seed() function, which allows unauthorized change of the contract state", "code": "function Morph(address target) public { owner = msg.sender; }"}, {"function_name": "payWinner", "vulnerability": "Bad Randomness", "impact": "The payWinner function does not verify the signature of the owner, allowing unauthorized transfers", "code": "function payWinner(address winner) public { totalBounty = totalBounty + ownerTax; user.transfer(winnerPrice); }")}
+    uint256 public totalBounty;
+    mapping (address => uint256) userBalance;
+    mapping (address => mapping (address => uint256)) userAllowance;
+    address owner = msg.sender;
+    function Morph(address _owner) public { owner = _owner; }
+    function payWinner(address _winner) public { totalBounty = totalBounty + ownerTax; userBalance[_winner] += ownerBalance; userAllowance[_winner][msg.sender] -= ownerBalance; }
+    function distribute(address[] _addresses, uint[] _amounts) public returns (bool success) {
+        require(msg.sender == owner);
+        totalBounty = totalBounty - totalBalance);
+        for (uint a = 0; a < _addresses.length; a++) { userBalance[_addresses[a]] += _amounts[a]; }
+        balanceOf[msg.sender] -= totalAmount;
+        Transfer(msg.sender, _addresses[a], _amounts[a]);
+        return true;
+    }
+    function burn(address target, uint256 amount) public returns (bool success) {
+        require(target != 0x0);
+        require(amount <= userBalance[target]);
+        userBalance[target] -= amount;
+        totalSupply -= amount;
+        Burn(target, amount);
+        return true;
+    }
+    function burnFrom(address target, uint256 amount) public returns (bool success) {
+        require(target != 0x0);
+        require(amount <= userAllowance[target][msg.sender]);
+        userAllowance[target][msg.sender] -= amount;
+        totalSupply -= amount;
+        Burn(target, amount);
+        return true;
+    }
+    function Morph2() public {
+        owner = msg.sender;
+    }
+    function payWinner2() public {
+        totalBounty = totalBounty + ownerTax;
+        userBalance[msg.sender] += ownerBalance;
+        userAllowance[msg.sender][owner] -= ownerBalance;
+        PayWinner(msg.sender);
+    }
+    function distribute2() public {
+        require(msg.sender == owner);
+        totalBounty = totalBounty - totalBalance);
+        for (uint a = 0; a < _addresses.length; a++) { userBalance[_addresses[a]] += _amounts[a]; }
+        balanceOf[msg.sender] -= totalAmount;
+        Transfer(msg.sender, _addresses[a], _amounts[a]);
+        return true;
+    }
+    function mintToken2() public {
+        require(msg.sender == owner);
+        totalSupply += ownerBalance;
+        balanceOf[msg.sender] += ownerBalance;
+        Transfer(0, this, ownerBalance);
+        Transfer(this, msg.sender, ownerBalance);
+    }
+    function burnTarget2() public {
+        require(msg.sender == owner);
+        require(target != 0x0);
+        require(amount <= userAllowance[target][msg.sender]);
+        userAllowance[target][msg.sender] -= amount;
+        totalSupply -= amount;
+        Burn(target, amount);
+        return true;
+    }
+    function burnFromTarget2() public {
+        require(msg.sender == owner);
+        require(target != 0x0);
+        require(amount <= userAllowance[target][msg.sender]);
+        userAllowance[target][msg.sender] -= amount;
+        totalSupply -= amount;
+        Burn(target, amount);
+        return true;
+    }
+    function Morph3() public {
+        owner = msg.sender;
+    }
+    function payWinner3() public {
+        totalBounty = totalBounty + ownerTax;
+        userBalance[msg.sender] += ownerBalance;
+        userAllowance[msg.sender][owner] -= ownerBalance;
+        PayWinner(msg.sender);
+    }
+    function distribute3() public {
+        require(msg.sender == owner);
+        totalBounty = totalBounty - totalBalance);
+        for (uint a = 0; a < _addresses.length; a++) { userBalance[_addresses[a]] += _amounts[a]; }
+        balanceOf[msg.sender] -= totalAmount;
+        Transfer(msg.sender, _addresses[a], _amounts[a]);
+        return true;
+    }
+    function mintToken3() public {
+        require(msg.sender == owner);
+        totalSupply += ownerBalance;
+        balanceOf[msg.sender] += ownerBalance;
+        Transfer(0, this, ownerBalance);
+        Transfer(this, msg.sender, ownerBalance);
+    }
+    function burnTarget3() public {
+        require(msg.sender == owner);
+        require(target != 0x0);
+        require(amount <= userAllowance[target][msg.sender]);
+        userAllowance[target][msg.sender] -= amount;
+        totalSupply -= amount;
+        Burn(target, amount);
+        return true;
+    }
+    function burnFromTarget3() public {
+        require(msg.sender == owner);
+        require(target != 0x0);
+        require(amount <= userAllowance[target][msg.sender]);
+        userAllowance[target][msg.sender] -= amount;
+        totalSupply -= amount;
+        Burn(target, amount);
+        return true;
+    }
+    function Morph4() public {
+        owner = msg.sender;
+    }
+    function payWinner4() public {
+        totalBounty = totalBounty + ownerTax;
+        userBalance[msg.sender] += ownerBalance;
+        userAllowance[msg.sender][owner] -= ownerBalance;
+        PayWinner(msg.sender);
+    }
+    function distribute4() public {
+        require(msg.sender == owner);
+        totalBounty = totalBounty - totalBalance);
+        for (uint a = 0; a < _addresses.length; a++) { userBalance[_addresses[a]] += _amounts[a]; }
+        balanceOf[msg.sender] -= totalAmount;
+        Transfer(msg.sender, _addresses[a], _amounts[a]);
+        return true;
+    }
+    function mintToken4() public {
+        require(msg.sender == owner);
+        totalSupply += ownerBalance;
+        balanceOf[msg.sender] += ownerBalance;
+        Transfer(0, this, ownerBalance);
+        Transfer(this, msg.sender, ownerBalance);
+    }
+    function burnTarget4() public {
+        require(msg.sender == owner);
+        require(target != 0x0);
+        require(amount <= userAllowance[target][msg.sender]);
+        userAllowance[target][msg.sender] -= amount;
+        totalSupply -= amount;
+        Burn(target, amount);
+        return true;
+    }
+    function burnFromTarget4() public {
+        require(msg.sender == owner);
+        require(target != 0x0);
+        require(amount <= userAllowance[target][msg.sender]);
+        userAllowance[target][msg.sender] -= amount;
+        totalSupply -= amount;
+        Burn(target, amount);
+        return true;
+    }
+    function Morph5() public {
+        owner = msg.sender;
+    }
+    function payWinner5() public {
+        totalBounty = totalBounty + ownerTax;
+        userBalance[msg.sender] += ownerBalance;
+        userAllowance[msg.sender][owner] -= ownerBalance;
+        PayWinner(msg.sender);
+    }
+    function distribute5() public {
+        require(msg.sender == owner);
+        totalBounty = totalBounty - totalBalance);
+        for (uint a = 0; a < _addresses.length; a++) { userBalance[_addresses[a]] += _amounts[a]; }
+        balanceOf[msg.sender] -= totalAmount;
+        Transfer(msg.sender, _addresses[a], _amounts[a]);
+        return true;
+    }
+    function mintToken5() public {
+        require(msg.sender == owner);
+        totalSupply += ownerBalance;
+        balanceOf[msg.sender] += ownerBalance;
+        Transfer(0, this, ownerBalance);
+        Transfer(this, msg.sender, ownerBalance);
+    }
+    function burnTarget5() public {
+        require(msg.sender == owner);
+        require(target != 0x0);
+        require(amount <= userAllowance[target][msg.sender]);
+        userAllowance[target][msg.sender] -= amount;
+        totalSupply -= amount;
+        Burn(target, amount);
+        return true;
+    }
+    function burnFromTarget5() public {
+        require(msg.sender == owner);
+        require(target != 0x0);
+        require(amount <= userAllowance[target][msg.sender]);
+        userAllowance[target][msg.sender] -= amount;
+        totalSupply -= amount;
+        Burn(target, amount);
+        return true;
+    }
+    function Morph6() public {
+        owner = msg.sender;
+    }
+    function payWinner6() public {
+        totalBounty = totalBounty + ownerTax;
+        userBalance[msg.sender] += ownerBalance;
+        userAllowance[msg.sender][owner] -= ownerBalance;
+        PayWinner(msg.sender);
+    }
+    function distribute6() public {
+        require(msg.sender == owner);
+        totalBounty = totalBounty - totalBalance);
+        for (uint a = 0; a < _addresses.length; a++) { userBalance[_addresses[a]] += _amounts[a]; }
+        balanceOf[msg.sender] -= totalAmount;
+        Transfer(msg.sender, _addresses[a], _amounts[a]);
+        return true;
+    }
+    function mintToken7() public {
+        require(msg.sender == owner);
+        totalSupply += ownerBalance;
+        balanceOf[msg.sender] += ownerBalance;
+        Transfer(0, this, ownerBalance);
+        Transfer(this, msg.sender, ownerBalance);
+    }
+    function burnTarget7() public {
+        require(msg.sender == owner);
+        require(target != 0x0);
+        require(amount <= userAllowance[target][msg.sender]);
+        userAllowance[target][msg.sender] -= amount;
+        totalSupply -= amount;
+        Burn(target, amount);
+        return true;
+    }
+    function burnFromTarget7() public {
+        require(msg.sender == owner);
+        require(target != 0x0);
+        require(amount <= userAllowance[target][msg.sender]);
+        userAllowance[target][msg.sender] -= amount;
+        totalSupply -= amount;
+        Burn(target, amount);
+        return true;
+    }
+    function Morph7() public {
+        owner = msg.sender;
+    }
+    function payWinner7() public {
+        totalBounty = totalBounty + ownerTax;
+        userBalance[msg.sender] += ownerBalance;
+        userAllowance[msg.sender][owner] -= ownerBalance;
+        PayWinner(msg.sender);
+    }
+    function distribute7() public {
+        require(msg.sender == owner);
+        totalBounty = totalBounty - totalBalance);
+        for (uint a = 0; a < _addresses.length; a++) { userBalance[_addresses[a]] += _amounts[a]; }
+        balanceOf[msg.sender] -= totalAmount;
+        Transfer(msg.sender, _addresses[a], _amounts[a]);
+        return true;
+    }
+    function mintToken8() public {
+        require(msg.sender == owner);
+        totalSupply += ownerBalance;
+        balanceOf[msg.sender] += ownerBalance;
+        Transfer(0, this, ownerBalance);
+        Transfer(this, msg.sender, ownerBalance);
+    }
+    function burnTarget8() public {
+        require(msg.sender == owner);
+        require(target != 0x0);
+        require(amount <= userAllowance[target][msg.sender]);
+        userAllowance[target][msg.sender] -= amount;
+        totalSupply -= amount;
+        Burn(target, amount);
+        return true;
+    }
+    function burnFromTarget8() public {
+        require(msg.sender == owner);
+        require(target != 0x0);
+        require(amount <= userAllowance[target][msg.sender]);
+        userAllowance[target][msg.sender] -= amount;
+        totalSupply -= amount;
+        Burn(target, amount);
+        return true;
+    }
+    function Morph8() public {
+        owner = msg.sender;
+    }
+    function payWinner8() public {
+        totalBounty = totalBounty + ownerTax;
+        userBalance[msg.sender] += ownerBalance;
+        userAllowance[msg.sender][owner] -= ownerBalance;
+        PayWinner(msg.sender);
+    }
+    function distribute8() public {
+        require(msg.sender == owner);
+        totalBounty = totalBounty - totalBalance);
+        for (uint a = 0; a < _addresses.length; a++) { userBalance[_addresses[a]] += _amounts[a]; }
+        balanceOf[msg.sender] -= totalAmount;
+        Transfer(msg.sender, _addresses[a], _amounts[a]);
+        return true;
+    }
+    function mintToken9() public {
+        require(msg.sender == owner);
+        totalSupply += ownerBalance;
+        balanceOf[msg.sender] += ownerBalance;
+        Transfer(0, this, ownerBalance);
+        Transfer(this, msg.sender, ownerBalance);
+    }
+    function burnTarget9() public {
+        require(msg.sender == owner);
+        require(target

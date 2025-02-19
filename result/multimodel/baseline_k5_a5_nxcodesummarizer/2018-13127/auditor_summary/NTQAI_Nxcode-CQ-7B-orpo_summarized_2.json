@@ -1,0 +1,53 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address holder, uint value) {
+    require(msg.sender == preSale);
+    require(value > 0);
+    require(totalSupply + value <= TOKEN_LIMIT);
+    balances[holder] += value;
+    totalSupply += value;
+    Transfer(0x0, holder, value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mint function has a potential integer overflow vulnerability. The totalSupply variable is not checked for overflow before adding the value. This can lead to a situation where the totalSupply variable overflows and the mint function fails to execute."
+        },
+        {
+            "function_name": "unfreeze",
+            "code": "function unfreeze() external {
+    require(msg.sender == team);
+    isFrozen = false;
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The unfreeze function has a potential wrong logic vulnerability. The isFrozen variable is not checked before being set to false. This can lead to a situation where the isFrozen variable is set to false even if it is already false."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _value) public returns (bool) {
+    require(!isFrozen);
+    return super.transfer(_to, _value);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The transfer function has a potential access control vulnerability. The isFrozen variable is not checked before being used. This can lead to a situation where the transfer function is executed even if the isFrozen variable is true."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+    require(!isFrozen);
+    return super.transferFrom(_from, _to, _value);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The transferFrom function has a potential access control vulnerability. The isFrozen variable is not checked before being used. This can lead to a situation where the transferFrom function is executed even if the isFrozen variable is true."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint _value) public returns (bool) {
+    require(!isFrozen);
+    return super.approve(_spender, _value);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The approve function has a potential access control vulnerability. The isFrozen variable is not checked before being used. This can lead to a situation where the approve function is executed even if the isFrozen variable is true."
+        }
+    ]
+}

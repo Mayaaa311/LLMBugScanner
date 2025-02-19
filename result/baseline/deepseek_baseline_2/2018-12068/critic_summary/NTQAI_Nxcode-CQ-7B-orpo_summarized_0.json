@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The check `if (balanceOf[_to] + _value < balanceOf[_to]) throw;` is flawed because it does not account for the possibility of the addition overflowing. This is a critical issue as it can lead to incorrect balance updates, potentially allowing an attacker to exploit this vulnerability to gain unauthorized access to tokens.",
+            "correctness": 8,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The `transferFrom` function does not include a check to prevent transfers from frozen accounts, which is a significant oversight. This can be exploited by an attacker to transfer tokens from a frozen account, leading to potential theft of funds.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 6
+        },
+        {
+            "function_name": "mintToken",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The `mintToken` function lacks a check to ensure that the target address already has a balance before attempting to mint more tokens. This can lead to incorrect total supply tracking and potential token devaluation or loss of ownership for affected addresses.",
+            "correctness": 6,
+            "severity": 7,
+            "profitability": 5
+        },
+        {
+            "function_name": "sell",
+            "auditor_idx": 0,
+            "vulnerability": "Token Devalue",
+            "criticism": "The reliance on `send` for transferring tokens in the `sell` function is risky as `send` can fail silently, especially with contracts that do not handle received tokens properly. This can result in tokens being locked in the contract, effectively devaluing them.",
+            "correctness": 5,
+            "severity": 8,
+            "profitability": 4
+        },
+        {
+            "function_name": "transfer",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The initial `transfer` function lacks a check to prevent transfers from frozen accounts, which is a significant security flaw. This can be bypassed if an attacker can manipulate the call to `transfer` to include a frozen account as the sender.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 6
+        }
+    ]
+}

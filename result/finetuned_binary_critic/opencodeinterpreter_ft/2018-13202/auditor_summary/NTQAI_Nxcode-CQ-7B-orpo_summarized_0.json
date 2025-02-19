@@ -1,0 +1,71 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+  balanceOf[target] += mintedAmount;
+  totalSupply += mintedAmount;
+  Transfer(0, this, mintedAmount);
+  Transfer(this, target, mintedAmount);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function has an integer overflow, allowing minted tokens to be retrieved arbitrarily by the contract owner."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+  if (frozenAccount[_from]) throw;                        
+  if (balanceOf[_from] < _value) throw;                 
+  if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+  if (_value > allowance[_from][msg.sender]) throw;   
+  balanceOf[_from] -= _value;                          
+  balanceOf[_to] += _value;                            
+  allowance[_from][msg.sender] -= _value;
+  Transfer(_from, _to, _value);
+  return true;
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The transferFrom function allows a user to transfer tokens to arbitrary addresses, allowing a potential attacker to steal all tokens from a user's account."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) {
+  if (balanceOf[msg.sender] < amount ) throw;        
+  balanceOf[this] += amount;                         
+  balanceOf[msg.sender] -= amount;                   
+  if (!msg.sender.send(amount * sellPrice)) {        
+    throw;                                         
+  } else {
+    Transfer(msg.sender, this, amount);            
+  }
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The sell function allows a potential attacker to set the sellPrice to 0, making it impossible to sell tokens."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 amount) onlyOwner returns (bool success) {
+  if (balanceOf[msg.sender] < amount) throw;            
+  balanceOf[msg.sender] -= amount;                      
+  totalSupply -= amount;                                
+  Burn(msg.sender, amount);
+  return true;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The burn function allows a contract owner to burn arbitrary tokens, aka the 'tradeTrap' issue."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+  if (balanceOf[msg.sender] < _value) throw;           
+  if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+  if (frozenAccount[msg.sender]) throw;                
+  balanceOf[msg.sender] -= _value;                     
+  balanceOf[_to] += _value;                            
+  Transfer(msg.sender, _to, _value);                   
+}",
+            "vulnerability": "Access Control",
+            "reason": "The transfer function allows a user to transfer tokens to arbitrary addresses, allowing a potential attacker to steal all tokens from a user's account."
+        }
+    ]
+}

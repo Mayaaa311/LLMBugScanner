@@ -1,0 +1,51 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "auditor_idx" : 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function does not check for overflow when updating the balances of accounts, allowing users to overflow their balance and become unusable. This is a critical issue because it can permanently lock users' assets, causing significant financial loss. However, the code includes a 'assert' function to prevent overflow, which is intended to catch overflow during testing but not in a real environment. This incorrect assumption can lead to a false sense of security, making the vulnerability more exploitable in real world applications.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 7,
+            "output_list": [
+                {
+                    "function_name": "transferFrom",
+                    "auditor_idx" : 0,
+                    "vulnerability": "Integer Overflow",
+                    "criticism": "The function does not check for overflow when updating the balances of accounts, allowing users to overflow their balance and become unusable. This is a critical issue because it can permanently lock users' assets, causing significant financial loss. However, the code includes a 'assert' function to prevent overflow, which is intended to catch overflow during testing but not in a real environment. This incorrect assumption can lead to a false sense of security, making the vulnerability more exploitable in real world applications.",
+                    "correctness": 7,
+                    "severity": 9,
+                    "profitability": 7,
+                },
+                {
+                    "function_name": "approve",
+                    "auditor_idx" : 0,
+                    "vulnerability": "Wrong Logic",
+                    "criticism": "The function allows users to approve an amount that is greater than their current allowance, which can be exploited to steal user funds. This is a severe vulnerability because it can lead to unauthorized financial loss for users. However, the additional check 'if ((_value != 0) && (allowed[msg.sender][_spender] != 0)) throw;' is intended to prevent this issue, but it is incorrectly implemented, allowing users to increase their allowance, which can be exploited to steal funds.",
+                    "correctness": 5,
+                    "severity": 8,
+                    "profitability": 6,
+                },
+                {
+                    "function_name": "freezeAccount",
+                    "auditor_idx" : 0,
+                    "vulnerability": "Access Control",
+                    "criticism": "The function allows any user to freeze accounts, which can be exploited to freeze competitors' accounts, preventing them from trading. This is a severe vulnerability because it can be exploited to gain a competitive advantage, causing financial loss for competitors. However, the function is intended to be accessible only to the owner, but the incorrect 'InvalidCaller(msg.sender);' statement indicates it is accessible to any user, leading to a false sense of security.",
+                    "correctness": 4,
+                    "severity": 9,
+                    "profitability": 4,
+                },
+                {
+                    "function_name": "switchLiquidity",
+                    "auditor_idx" : 0,
+                    "vulnerability": "Access Control",
+                    "criticism": "The function allows the owner to switch liquidity on and off, which can be exploited to disable trade functionality, locking users' assets. This is a severe vulnerability because it can lead to unauthorized financial loss for users. However, the function is intended to be accessible only to the owner, but the incorrect 'InvalidCaller(msg.sender);' statement indicates it is accessible to any user, leading to a false sense of security.",
+                    "correctness": 4,
+                    "severity": 9,
+                    "profitability": 4,
+                }
+            ]
+        }
+    ]
+}

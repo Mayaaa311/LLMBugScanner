@@ -1,0 +1,267 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "description": "The mintToken function has an integer overflow in the calculation of the new total supply, causing an integer overflow."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow in the calculation of the new total supply, causing an integer overflow."}]}
+]}
+contract CryptoCoin is RemiCoin {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => uint256) public sellPriceInWei;
+    mapping (address => uint256) public buyPriceInWei;
+    uint256 public minBalanceForAccount;
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+    function CryptoCoin(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) RemiCoin(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function _transfer(address _from, address _to, uint _value) internal {
+        require(_to != 0x0);
+        require(balances[_from] >= _value);
+        require(balances[_to] + _value > balances[_to]);
+        uint previousBalances = balances[_from];
+        balances[_from] -= _value;
+        balances[_to] += _value;
+        Transfer(_from, _to, _value);
+        assert(balances[_from] + balances[_to] == previousBalances);
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        _transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(_value <= allowed[_from][msg.sender]);
+        allowed[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }
+    function balanceOf(address _owner) constant returns (uint256 balance) {
+        return balances[_owner];
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+        return allowed[_owner][_spender];
+    }
+    function () {
+        throw;
+    }
+}
+contract CryptoCoin is CryptoCoin {
+    uint256 public sellPrice = 0.0001 * 10 ** uint256(decimals);
+    uint256 public buyPrice = 0.001 * 10 ** uint256(decimals);
+    mapping (address => uint256) public balanceOf;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoCoin(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) RemiCoin(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function _sell(address _from, uint256 amount) internal {
+        require(amount <= balanceOf[_from]);
+        balanceOf[_from] -= amount;
+        uint256 amountToSell = amount * sellPrice;
+        balanceOf[owner] += amountToSell;
+        Transfer(_from, owner, amountToSell);
+    }
+    function _buy(address _from, uint256 amountWei) internal {
+        require(amountWei <= this.balance);
+        uint256 amountToBuy = amountWei / buyPrice;
+        require(amountToBuy <= balanceOf[owner]);
+        balanceOf[owner] -= amountToBuy;
+        balanceOf[_from] += amountToBuy;
+        Transfer(owner, _from, amountToBuy);
+    }
+    function sell() returns (uint256 revenue) {
+        require(this.balance >= sellPrice * balanceOf[msg.sender]);
+        _sell(msg.sender, balanceOf[msg.sender]);
+        revenue = balanceOf[msg.sender] / sellPrice;
+        return revenue;
+    }
+    function buy() payable returns (uint256 amount) {
+        require(msg.value >= buyPrice * amount);
+        _buy(msg.sender, msg.value);
+        amount = msg.value / buyPrice;
+        return amount;
+    }
+    function setMinBalance(uint256 minBalanceWei) onlyOwner {
+        minBalanceForAccount = minBalanceWei;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function setSellPrice(uint256 newSellPrice) onlyOwner {
+        sellPrice = newSellPrice;
+    }
+    function setBuyPrice(uint256 newBuyPrice) onlyOwner {
+        buyPrice = newBuyPrice;
+    }
+    function setSellPriceInWei(uint256 newSellPriceInWei) onlyOwner {
+        sellPriceInWei = newSellPriceInWei;
+    }
+    function setBuyPriceInWei(uint256 newBuyPriceInWei) onlyOwner {
+        buyPriceInWei = newBuyPriceInWei;
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+}
+contract CryptoCoinToken is CryptoCoin, SafeMath {
+    uint256 public sellFloor = 0.001 * 10 ** uint256(decimals);
+    uint256 public sellCeiling = 0.0001 * 10 ** uint256(decimals);
+    uint256 public buyFloor = 0.001 * 10 ** uint256(decimals);
+    uint256 public buyCeiling = 0.001 * 10 ** uint256(decimals);
+    uint256 public minBalanceForAccount = 0.01 * 10 ** uint256(decimals);
+    mapping (address => uint256) public sellPriceInWei;
+    mapping (address => uint256) public buyPriceInWei;
+    function CryptoCoinToken(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) CryptoCoin(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function _transfer(address _from, address _to, uint _value) internal {
+        require(!frozenAccount[_from]);
+        require(!frozenAccount[_to]);
+        require(balanceOf[_from] >= _value);
+        require(balanceOf[_to] + _value > balanceOf[_to]);
+        require(!(sellFloor > _value));
+        require(!(_value > sellCeiling));
+        require(!(minBalanceForAccount > balanceOf[_from] - _value));
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(_from, _to, _value);
+        uint256 amountInWei = _value * sellPriceInWei[_from];
+        uint256 amountToSell = amountInWei / sellPrice;
+        uint256 amountToRefund = amountInWei % sellPrice;
+        uint256 refund = amountToRefund * sellPrice;
+        uint256 amountToSellInWei = amountToSell * sellPriceInWei[_from];
+        uint256 amountToRefundInWei = amountToRefund * sellPriceInWei[_from];
+        uint256 refundInWei = refund * sellPriceInWei[_from];
+        if (amountToSell > 0) {
+            balanceOf[owner] += amountToSell;
+            Transfer(_from, owner, amountToSell);
+        }
+        if (amountToRefund > 0) {
+            balanceOf[_from] += amountToRefund;
+            Transfer(_from, _to, amountToRefund);
+        }
+        if (amountToRefundInWei > 0) {
+            balanceOf[_from] += amountToRefundInWei;
+            Transfer(_from, _to, amountToRefundInWei);
+        }
+        if (refundInWei > 0) {
+            balanceOf[_from] += refundInWei;
+            Transfer(_from, _to, refundInWei);
+        }
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        _transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[_from]);
+        require(!frozenAccount[_to]);
+        require(balanceOf[_from] >= _value);
+        require(balanceOf[_to] + _value > balanceOf[_to]);
+        require(!(sellFloor > _value));
+        require(!(_value > sellCeiling));
+        require(!(minBalanceForAccount > balanceOf[_from] - _value));
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(_from, _to, _value);
+        uint256 amountInWei = _value * sellPriceInWei[_from];
+        uint256 amountToSell = amountInWei / sellPrice;
+        uint256 amountToRefund = amountInWei % sellPrice;
+        uint256 refund = amountToRefund * sellPrice;
+        uint256 amountToSellInWei = amountToSell * sellPriceInWei[_from];
+        uint256 amountToRefundInWei = amountToRefund * sellPriceInWei[_from];
+        uint256 refundInWei = refund * sellPriceInWei[_from];
+        if (amountToSell > 0) {
+            balanceOf[owner] += amountToSell;
+            Transfer(_from, owner, amountToSell);
+        }
+        if (amountToRefund > 0) {
+            balanceOf[_from] += amountToRefund;
+            Transfer(_from, _to, amountToRefund);
+        }
+        if (amountToRefundInWei > 0) {
+            balanceOf[_from] += amountToRefundInWei;
+            Transfer(_from, _to, amountToRefundInWei);
+        }
+        if (refundInWei > 0) {
+            balanceOf[_from] += refundInWei;
+            Transfer(_from, _to, refundInWei);
+        }
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function setSellFloor(uint256 newSellFloor) onlyOwner {
+        sellFloor = newSellFloor;
+    }
+    function setSellCeiling(uint256 newSellCeiling) onlyOwner {
+        sellCeiling = newSellCeiling;
+    }
+    function setMinBalanceForAccount(uint256 newMinBalanceForAccount) onlyOwner {
+        minBalanceForAccount = newMinBalanceForAccount;
+    }
+    function setSellPrice(uint256 newSellPrice) onlyOwner {
+        sellPrice = newSellPrice;
+    }
+    function setBuyPrice(uint256 newBuyPrice) onlyOwner {
+        buyPrice = newBuyPrice;
+    }
+    function setSellPriceInWei(address _from, uint256 newSellPriceInWei) onlyOwner {
+        sellPriceInWei[_from] = newSellPriceInWei;
+    }
+    function setBuyPriceInWei(address _from, uint256 newBuyPriceInWei) onlyOwner {
+        buyPriceInWei[_from] = newBuyPriceInWei;
+    }
+}
+contract CryptoCoinCash is CryptoCoinToken {
+    uint256 public sellFloor = 0.001 * 10 ** uint256(decimals);
+    uint256 public sellCeiling = 0.001 * 10 ** uint256(decimals);
+    uint256 public minBalanceForAccount = 0.01 * 10 ** uint256(decimals);
+    uint256 public sellPrice = 0.001 * 10 ** uint256(decimals);
+    uint256 public buyPrice = 0.001 * 10 ** uint256(decimals);
+    mapping (address => uint256) public sellPriceInWei;
+    mapping (address => uint256) public buyPriceInWei;
+    function CryptoCoinCash(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) CryptoCoinToken(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function _transfer(address _from, address _to, uint _value) internal {
+        require(!frozenAccount[_from]);
+        require(!frozenAccount[_to]);
+        require(balanceOf[_from] >= _value);
+        require(balanceOf[_to] + _value > balanceOf[_to]);
+        require(!(sellFloor > _value));
+        require(!(_value > sellCeiling));
+        require(!(minBalanceForAccount > balanceOf[_from] - _value));
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(_from, _to, _value);
+        uint256 amountInWei = _value * sellPriceInWei[_from];
+        uint256 amountToSell = amountInWei / sellPrice;
+        uint256 amountToRefund = amountInWei % sellPrice;
+        uint256 refund = amountToRefund * sellPrice;
+        uint256 amountToSellInWei = amountToSell * sellPriceInWei[_from];
+        uint256 amountToRefundInWei = amountToRefund * sellPriceInWei[_from];
+        uint256 refundInWei = refund * sellPriceInWei[_from];
+        if (amountToSell > 0) {
+            balanceOf[owner] += amountToSell;
+            Transfer(_from, owner, amountToSell);
+        }
+        if (amountToRefund > 0) {
+            balanceOf[_from] += amountToRefund;
+            Transfer(_from, _to, amountToRefund);
+        }
+        if (amountToRefundInWei > 0) {
+            balanceOf[_from] += amountToRefundInWei;
+            Transfer(_from, _to, amountToRefundInWei);
+        }
+        if (refundInWei > 0) {
+            balanceOf[_from] += refundInWei;
+            Transfer(_from, _to, ref

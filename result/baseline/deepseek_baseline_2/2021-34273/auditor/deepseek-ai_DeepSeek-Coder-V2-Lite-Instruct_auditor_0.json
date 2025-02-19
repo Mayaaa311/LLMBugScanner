@@ -1,0 +1,55 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "if (balances[msg.sender] >= _value && _value > 0) {
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+} else { return false; }",
+            "reason": "The condition `balances[msg.sender] >= _value` does not prevent integer overflow. If `_value` is large, it can cause `balances[msg.sender]` to wrap around, leading to incorrect balance updates and potential loss of tokens."
+        },
+        {
+            "function_name": "distributeToken",
+            "vulnerability": "Access Control",
+            "function_code": "for (uint i = 0; i < addresses.length; i++) {
+    balances[msg.sender] -= _value;
+    balances[addresses[i]] += _value;
+    Transfer(msg.sender, addresses[i], _value);
+}",
+            "reason": "The `distributeToken` function does not check if the caller is the owner, allowing any user to distribute tokens. This can be exploited to give away tokens to anyone, potentially leading to token devaluation."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Wrong Logic",
+            "function_code": "allowed[msg.sender][_spender] = _value;
+Approval(msg.sender, _spender, _value);
+return true;",
+            "reason": "The `approve` function does not check if the allowance is being set to zero. This can lead to situations where an attacker can approve a spender for an amount but cannot later decrease it to zero, potentially locking tokens."
+        },
+        {
+            "function_name": "B2X",
+            "vulnerability": "Typo Constructor",
+            "function_code": "totalSupply = 21 * 10 ** 14;
+balances[msg.sender] = totalSupply;
+name = "BTC2X";
+decimals = 8;
+symbol = "B2X";",
+            "reason": "The constructor misspells "BTC" as "BTC2X". This typo does not directly introduce a vulnerability but can lead to confusion and potential errors in the code's functionality."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
+    balances[_to] += _value;
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+} else { return false; }",
+            "reason": "The `transferFrom` function does not check if the spender has been approved by the owner. An attacker can transfer tokens from any address without permission, leading to unauthorized token transfers."
+        }
+    ]
+}

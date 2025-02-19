@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) public { _transfer(msg.sender, _to, _value); }",
+            "reason": "The transfer function does not check if the recipient balance will overflow. If the recipient balance is greater than the maximum possible uint256 value, the transfer will fail and the sender's balance will remain unchanged. This can be exploited by a malicious contract that sends a large amount of tokens to the contract, then the contract attempts to transfer those tokens to the recipient, causing an integer overflow."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) { require(_value <= allowance[_from][msg.sender]);     allowance[_from][msg.sender] -= _value; _transfer(_from, _to, _value); return true; }",
+            "reason": "The transferFrom function does not check if the recipient balance will overflow. If the recipient balance is greater than the maximum possible uint256 value, the transfer will fail and the sender's balance will remain unchanged. This can be exploited by a malicious contract that sends a large amount of tokens to the contract, then the contract attempts to transfer those tokens to the recipient, causing an integer overflow."
+        },
+        {
+            "function_name": "burn",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function burn(uint256 _value) public returns (bool success) { require(balanceOf[msg.sender] >= _value);   balanceOf[msg.sender] -= _value;            totalSupply -= _value;                      Burn(msg.sender, _value); return true; }",
+            "reason": "The burn function does not check if the total supply will overflow. If the total supply is greater than the maximum possible uint256 value, the burn will fail and the sender's balance will remain unchanged. This can be exploited by a malicious contract that burns a large amount of tokens, then the contract attempts to burn those tokens, causing an integer overflow."
+        },
+        {
+            "function_name": "burnFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function burnFrom(address _from, uint256 _value) public returns (bool success) { require(balanceOf[_from] >= _value);                require(_value <= allowance[_from][msg.sender]);    balanceOf[_from] -= _value;            allowance[_from][msg.sender] -= _value;             totalSupply -= _value;                              Burn(_from, _value); return true; }",
+            "reason": "The burnFrom function does not check if the total supply will overflow. If the total supply is greater than the maximum possible uint256 value, the burn will fail and the sender's balance will remain unchanged. This can be exploited by a malicious contract that burns a large amount of tokens from another account, then the contract attempts to burn those tokens, causing an integer overflow."
+        },
+        {
+            "function_name": "setPrices",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public { sellPrice = newSellPrice; buyPrice = newBuyPrice; }",
+            "reason": "The setPrices function does not check if the new sell or buy price will overflow. If the new price is greater than the maximum possible uint256 value, the price will be set to the maximum possible value, causing an integer overflow. This can be exploited by a malicious contract that sets the price to a large value, then the contract attempts to set the price to a smaller value, causing an integer overflow."
+        }
+    ]
+}

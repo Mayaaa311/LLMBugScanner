@@ -1,0 +1,256 @@
+{"output_list": [{"function_name": "output_list", "vulnerability": "Integer Overflow", "description": "The PlazaToken (PLT) contract has an integer overflow in the mintToken function, allowing the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [
+    {
+        "function_name": "mintToken",
+        "vulnerability": "Integer Overflow",
+        "reason": "The mintToken function has an integer overflow in the mintToken function, allowing the owner to set the balance of an arbitrary user to any value."}
+    }
+]
+}
+*/
+contract PlazaToken is owned, PlazaToken {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => uint) public funds;
+    event Sell(address _from, uint256 _value, uint256 _amount);
+    event Buy(address _from, uint256 _value, uint256 _amount);
+    function PlazaToken(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+        uint8 decimal
+        uint256 initialPrice
+    ) TokenERC20(initialSupply, tokenName, tokenSymbol) public {
+        sellPrice = initialPrice * 10 ** uint256(decimal);
+        buyPrice = initialPrice * 10 ** uint256(decimal);
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balanceOf[_from] >= _value);               
+        require (balanceOf[_to] + _value > balanceOf[_to]); 
+        uint previousBalances = balanceOf[_from] + balanceOf[_to];
+        balanceOf[_from] -= _value;                         
+        balanceOf[_to] += _value;                           
+        funds[_from] += _value.mul(sellPrice);           
+        funds[_to] += _value.mul(buyPrice);            
+        emit Transfer(_from, _to, _value);
+        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+    }
+    function buy() payable public {
+        uint amount = msg.value.div(buyPrice);
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount.mul(sellPrice));      
+        _transfer(msg.sender, this, amount);              
+        funds[msg.sender] -= amount.mul(sellPrice);          
+        msg.sender.transfer(amount.mul(buyPrice));          
+    }
+}
+contract CryptoniteCoin is owned, PlazaToken {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoniteCoin(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol,
+        uint8 decimal
+    ) PlazaToken(initialSupply, tokenName, tokenSymbol) public {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        emit FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balanceOf[_from] >= _value);               
+        require (balanceOf[_to] + _value > balanceOf[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                       
+        balanceOf[_from] -= _value;                         
+        balanceOf[_to] += _value;                           
+        funds[_from] += _value.mul(sellPrice);           
+        funds[_to] += _value.mul(buyPrice);            
+        emit Transfer(_from, _to, _value);
+    }
+    function transfer(address _to, uint256 _value) public {
+        if (balanceOf[msg.sender] < _value) revert();           
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert(); 
+        if (frozenAccount[msg.sender]) revert();                     
+        if (frozenAccount[_to]) revert();                       
+        balanceOf[msg.sender] -= _value;                         
+        balanceOf[_to] += _value;                           
+        funds[msg.sender] -= _value.mul(sellPrice);           
+        funds[_to] += _value.mul(buyPrice);            
+        emit Transfer(msg.sender, _to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        if (frozenAccount[_from]) revert();                        
+        if (frozenAccount[_to]) revert();                          
+        if (balanceOf[_from] < _value) revert();                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert();  
+        if (_value.mul(sellPrice) > funds[_from]) revert(); 
+        if (_value.mul(buyPrice) > funds[_to]) revert();      
+        balanceOf[_from] -= _value;                         
+        balanceOf[_to] += _value;                           
+        funds[_from] -= _value.mul(sellPrice);           
+        funds[_to] += _value.mul(buyPrice);            
+        emit Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+}
+contract CryptoniteCoinPreSale is owned, CryptoniteCoin {
+    uint256 public preSaleTokens;
+    uint256 public preSaleMaxTokens;
+    uint256 public preSaleMaxPrice;
+    uint256 public preSaleMinPrice;
+    uint256 public preSaleTokensSold;
+    uint256 public preSaleTokensBought;
+    uint256 public preSaleTokensSold;
+    uint256 public preSaleTokensRemaining;
+    uint256 public preSaleTokensRemainingOld;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemainingNewOld;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemaining;
+    uint256 public preSaleTokensRemainingOld;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemainingNewOld;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNewOld;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemaining;
+    uint256 public preSaleTokensRemainingOld;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemainingNewOld;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNewOld;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemaining;
+    uint256 public preSaleTokensRemainingOld;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemainingNewOld;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNewOld;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemaining;
+    uint256 public preSaleTokensRemainingOld;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemainingNewOld;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNewNewOld;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNewOld;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemaining;
+    uint256 public preSaleTokensRemainingOld;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemainingNewOld;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNewOld;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNewOld;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemaining;
+    uint256 public preSaleTokensRemainingOld;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemainingNewOld;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNewOld;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemaining;
+    uint256 public preSaleTokensRemainingOld;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemainingNewOld;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNewOld;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNewOld;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemaining;
+    uint256 public preSaleTokensRemainingOld;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemainingNewOld;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNewOld;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemaining;
+    uint256 public preSaleTokensRemainingOld;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemainingNewOld;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNewOld;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemaining;
+    uint256 public preSaleTokensRemainingOld;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemainingNewOld;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNewOld;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemaining;
+    uint256 public preSaleTokensRemainingOld;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemainingNewOld;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNewOld;
+    uint256 public preSaleTokensRemainingNewNewNew;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemaining;
+    uint256 public preSaleTokensRemainingOld;
+    uint256 public preSaleTokensRemainingNew;
+    uint256 public preSaleTokensRemainingNewOld;
+    uint256 public preSaleTokensRemainingNewNew;
+    uint256 public preSaleTokensRemainingNewNewOld;
+    uint256 public preSaleTokensRemainingNewNewNew;
+   

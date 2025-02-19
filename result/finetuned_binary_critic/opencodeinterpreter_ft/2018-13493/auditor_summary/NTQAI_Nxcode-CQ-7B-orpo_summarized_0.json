@@ -1,0 +1,17 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public returns (bool) {
+        mintedAmount = mintedAmount * 10**18;
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+        return true;
+      }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function has an integer overflow, allowing minted tokens to be retrieved arbitrarily by the contract owner."
+        }
+    ]
+}

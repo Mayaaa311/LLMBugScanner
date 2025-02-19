@@ -1,0 +1,60 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address holder, uint value) public {
+  require(msg.sender == ico);
+  require(value > 0);
+  require(totalSupply + value <= TOKEN_LIMIT);
+  balances[holder] += value;
+  totalSupply += value;
+  Transfer(0x0, holder, value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mint function does not check for overflow of the totalSupply, allowing the owner to mint arbitrary amounts of tokens."
+        },
+        {
+            "function_name": "migrate",
+            "code": "function migrate(uint value) external {
+  require(migrationAgent != 0);
+  require(value > 0);
+  require(value <= balances[msg.sender]);
+  balances[msg.sender] -= value;
+  totalSupply -= value;
+  totalMigrated += value;
+  MigrationAgent(migrationAgent).migrateFrom(msg.sender, value);
+  Migrate(msg.sender, migrationAgent, value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The migrate function does not check for overflow of totalSupply and balances, allowing the attacker to migrate arbitrary amounts of tokens."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _value) public returns (bool) {
+  require(_to != address(0));
+  require(!isFrozen);
+  return super.transfer(_to, _value);
+}",
+            "vulnerability": "Token Freeze",
+            "reason": "The transfer function does not check if the token is frozen, allowing the owner to disable the transfer function."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+  require(!isFrozen);
+  return super.transferFrom(_from, _to, _value);
+}",
+            "vulnerability": "Token Freeze",
+            "reason": "The transferFrom function does not check if the token is frozen, allowing the owner to disable the transfer function."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint _value) public returns (bool) {
+  require(!isFrozen);
+  return super.approve(_spender, _value);
+}",
+            "vulnerability": "Token Freeze",
+            "reason": "The approve function does not check if the token is frozen, allowing the owner to disable the approve function."
+        }
+    ]
+}

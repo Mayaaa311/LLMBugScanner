@@ -1,0 +1,66 @@
+{
+    "output_list": [
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) { revert(); }
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'approveAndCall' function allows the owner to approve an agent to spend tokens on their behalf, and also execute a function in the agent contract when the approval is used. However, the function does not check if the agent contract is a token contract, allowing a non-contract address to be specified, causing a denial of service to token holders."
+        },
+        {
+            "function_name": "approveAndCallcode",
+            "code": "function approveAndCallcode(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    if(!_spender.call(_extraData)) { revert(); }
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'approveAndCallcode' function is similar to 'approveAndCall', but it executes arbitrary code on the spender contract without verifying if the spender is a contract. This can be exploited to cause a denial of service to token holders, as arbitrary code can be executed, causing the spender contract to revert and consume all gas, blocking further transactions."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) {
+    require(_to != address(0));
+    require(_value <= balances[msg.sender]);
+    require(balances[_to] + _value > balances[_to]);
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function allows a user to send tokens to any address, including a smart contract. However, it does not check if the recipient is a smart contract, allowing a smart contract with a flawed 'fallback' function to be targeted, causing a denial of service to token holders."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    require(_to != address(0));
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    require(balances[_to] + _value > balances[_to]);
+    balances[_to] += _value;
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferFrom' function allows an agent to send tokens on behalf of a user, including to a smart contract. However, it does not check if the recipient is a smart contract, allowing a smart contract with a flawed 'fallback' function to be targeted, causing a denial of service to token holders."
+        },
+        {
+            "function_name": "GVE",
+            "code": "function GVE() {
+    founder = msg.sender;
+    totalSupply = 1000000000 * 10 ** uint256(decimals);
+    balances[founder] = totalSupply;
+}",
+            "vulnerability": "Initial Token Distribution",
+            "reason": "The 'GVE' constructor function allows the founder to set the total supply of tokens and assign them to their own address, without any restrictions or safeguards. This can be exploited to create a large amount of tokens and assign them to an attacker's address, leading to token devaluation and a denial of service to token holders."
+        }
+    ]
+}

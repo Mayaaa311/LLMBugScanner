@@ -1,0 +1,62 @@
+Based on the provided code, there are several potential vulnerabilities that can be exploited by attackers. Here are the five most severe vulnerabilities:
+
+1. Integer Overflow:
+   Function: `mintToken`
+   Code:
+   ```
+   function mintToken(address target, uint256 mintedAmount) onlyOwner {
+       balanceOf[target] += mintedAmount;
+       totalSupply += mintedAmount;
+       Transfer(0, this, mintedAmount);
+       Transfer(this, target, mintedAmount);
+   }
+   ```
+   Vulnerability: The `mintToken` function allows the owner to mint new tokens by adding the specified amount to the `balanceOf` and `totalSupply` of the target address. If the `mintedAmount` is greater than the maximum value that can be stored in a `uint256` variable, an integer overflow will occur.
+   Reason: The `mintToken` function does not check if the sum of `balanceOf[target]` and `mintedAmount` exceeds the maximum value that can be stored in a `uint256` variable. This can lead to an integer overflow, which can result in incorrect token balances and potential loss of funds.
+
+2. Wrong Logic:
+   Function: `setPrices`
+   Code:
+   ```
+   function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+       sellPrice = newSellPrice;
+       buyPrice = newBuyPrice;
+   }
+   ```
+   Vulnerability: The `setPrices` function allows the owner to set the sell and buy prices for the token. However, it does not check if the new prices are valid or if they are within a certain range.
+   Reason: The `setPrices` function does not have any checks to ensure that the new prices are valid or within a certain range. This can lead to incorrect prices and potential misuse by attackers.
+
+3. Bad Randomness:
+   Function: `buy`
+   Code:
+   ```
+   function buy() payable {
+       uint amount = msg.value / buyPrice;               
+       _transfer(this, msg.sender, amount);              
+   }
+   ```
+   Vulnerability: The `buy` function allows users to buy tokens by sending Ether to the contract. However, it does not implement any randomness or fairness checks.
+   Reason: The `buy` function does not have any randomness or fairness checks. This can lead to unfair trading practices and potential manipulation by attackers.
+
+4. Access Control:
+   Function: `freezeAccount`
+   Code:
+   ```
+   function freezeAccount(address target, bool freeze) onlyOwner {
+       frozenAccount[target] = freeze;
+       FrozenFunds(target, freeze);
+   }
+   ```
+   Vulnerability: The `freezeAccount` function allows the owner to freeze or unfreeze an account. However, it does not have any access control mechanisms in place to ensure that only the owner can call this function.
+   Reason: The `freezeAccount` function does not have any access control mechanisms in place. This can lead to unauthorized access and potential misuse by attackers.
+
+5. Typo Constructor:
+   Function: `INT`
+   Code:
+   ```
+   contract INT is INTToken(1000000000000000, "Internet Node Token", 6, "INT") {}
+   ```
+   Vulnerability: The `INT` contract is a constructor that inherits from the `INTToken` contract. However, it does not have any constructor parameters.
+   Reason: The `INT` contract inherits from the `INTToken` contract, but it does not have any constructor parameters. This can lead to incorrect initialization of the inherited contract and potential misuse by attackers.
+
+Please note that these vulnerabilities are exploitable in real-world scenarios and can be used by attackers to manipulate the contract's behavior and potentially steal funds. It is important to address these vulnerabilities by implementing appropriate security measures and updates to the contract code.

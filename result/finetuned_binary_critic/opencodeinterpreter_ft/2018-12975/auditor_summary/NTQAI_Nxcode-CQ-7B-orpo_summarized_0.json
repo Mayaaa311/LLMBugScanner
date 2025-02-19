@@ -1,0 +1,35 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address _to, uint32 _heroClassId) onlyAccessMint public returns (uint256) {
+    require(_to != address(0));
+    require(_heroClassId < numberOfHeroClasses);
+    var _heroClassInfo = heroClasses[_heroClassId];
+    _mint(_to, numberOfTokenIds);
+    uint32[5] memory _ivForStats;
+    uint32[5] memory _initialStats;
+    for (uint8 i = 0; i < 5; i++) {
+      _ivForStats[i] = (random(_heroClassInfo.maxIVForStats[i] + 1, _heroClassInfo.minIVForStats[i]));
+      _initialStats[i] = _heroClassInfo.baseStats[i] + _ivForStats[i];
+    }
+    HeroInstance memory _heroInstance = HeroInstance({
+      heroClassId: _heroClassId,
+      heroName: "",
+      currentLevel: 1,
+      currentExp: 0,
+      lastLocationId: 0,
+      availableAt: now,
+      currentStats: _initialStats,
+      ivForStats: _ivForStats
+    });
+    tokenIdToHeroInstance[numberOfTokenIds] = _heroInstance;
+    numberOfTokenIds ++;
+    _heroClassInfo.currentNumberOfInstancedHeroes ++;
+    return numberOfTokenIds - 1;
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in mint function allows the owner to set the number of minted tokens to any value."
+        }
+    ]
+}

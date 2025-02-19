@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) public { _transfer(msg.sender, _to, _value); }",
+            "reason": "The transfer function does not check if the recipient balance will overflow. If the recipient balance is greater than the maximum possible uint256 value, the transfer will fail. This can be exploited by an attacker to steal tokens from the contract."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) { require(_value <= allowance[_from][msg.sender]);     allowance[_from][msg.sender] -= _value; _transfer(_from, _to, _value); return true; }",
+            "reason": "The transferFrom function does not check if the recipient balance will overflow. If the recipient balance is greater than the maximum possible uint256 value, the transfer will fail. This can be exploited by an attacker to steal tokens from the contract."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public { balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0, this, mintedAmount); Transfer(this, target, mintedAmount); }",
+            "reason": "The mintToken function does not check if the recipient balance will overflow. If the recipient balance is greater than the maximum possible uint256 value, the minting will fail. This can be exploited by an attacker to steal tokens from the contract."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "function_code": "function transfer(address _to, uint256 _value) public { _transfer(msg.sender, _to, _value); }",
+            "reason": "The transfer function does not check if the sender has sufficient balance. If the sender does not have sufficient balance, the transfer will fail. This can be exploited by an attacker to steal tokens from the contract."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) { require(_value <= allowance[_from][msg.sender]);     allowance[_from][msg.sender] -= _value; _transfer(_from, _to, _value); return true; }",
+            "reason": "The transferFrom function does not check if the sender has sufficient allowance. If the sender does not have sufficient allowance, the transfer will fail. This can be exploited by an attacker to steal tokens from the contract."
+        }
+    ]
+}

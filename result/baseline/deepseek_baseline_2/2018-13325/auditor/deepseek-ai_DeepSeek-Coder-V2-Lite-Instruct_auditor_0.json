@@ -1,0 +1,74 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "function_code": "function transfer(address _to,uint256 _value) public{
+        require(!frozenAccount[msg.sender]);
+        if(_to == address(this)){
+          _sell(msg.sender,_value);
+        }else{
+            _transfer(msg.sender,_to,_value);
+        }
+    }",
+            "reason": "The `transfer` function does not check if the recipient is the contract itself before calling `_sell`. This allows any user to call `_sell` on behalf of the caller, potentially leading to unauthorized token sales."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "function transferFrom(address _from,address _to,uint256 _value) public returns (bool success){
+        require(!frozenAccount[_from]&&!frozenAccount[msg.sender]);
+        require(_value<=allowance[_from][msg.sender]);
+        allowance[_from][msg.sender] -= _value;
+        if(_to == address(this)){
+            _sell(_from,_value);
+        }else
+        {
+            _transfer(_from,_to,_value);
+        }
+        return true;
+    }",
+            "reason": "Similar to the `transfer` function, `transferFrom` does not check if the spender is allowed to transfer tokens to the contract itself before calling `_sell`. This allows any user to approve a spender to transfer tokens on their behalf and then call `_sell` on the contract, leading to unauthorized token sales."
+        },
+        {
+            "function_name": "_buy",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function _buy() internal returns (uint256 amount){
+        require(buyOpen);
+        require(buyPrice>0);
+        require(msg.value>0);
+        amount = msg.value / buyPrice;                    
+        _transfer(owner,msg.sender,amount);
+        BuyToken(msg.sender,buyPrice,amount,msg.value);
+        return amount;                                    
+    }",
+            "reason": "The calculation of `amount` in the `_buy` function can lead to an integer overflow. If `buyPrice` is very large, `msg.value / buyPrice` could overflow, causing unintended token transfers to the buyer."
+        },
+        {
+            "function_name": "_sell",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function _sell(address _from,uint256 amount) internal returns (uint256 revenue){
+        require(sellOpen);
+        require(!frozenAccount[_from]);
+        require(amount>0);
+        require(sellPrice>0);
+        require(_from!=owner);
+        _transfer(_from,owner,amount);
+        revenue = amount * sellPrice;    
+        _from.transfer(revenue);                      
+        SellToken(_from,sellPrice,amount,revenue);
+        return revenue;                                    
+    }",
+            "reason": "The calculation of `revenue` in the `_sell` function can lead to an integer overflow. If `sellPrice` is very large, `amount * sellPrice` could overflow, causing unintended token transfers or Ether transfers to the seller."
+        },
+        {
+            "function_name": "transferOwnership",
+            "vulnerability": "Access Control",
+            "function_code": "function transferOwnership(address newOwner) onlyOwner public{
+        _transfer(owner,newOwner,balanceOf[owner]);
+        owner = newOwner;
+    }",
+            "reason": "The `transferOwnership` function does not check if the new owner is the contract itself before calling `_transfer`. This allows any user to call `_transfer` on behalf of the caller, potentially leading to unauthorized token transfers."
+        }
+    ]
+}

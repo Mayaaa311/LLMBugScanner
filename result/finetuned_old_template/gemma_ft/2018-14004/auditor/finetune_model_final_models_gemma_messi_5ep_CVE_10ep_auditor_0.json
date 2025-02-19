@@ -1,0 +1,275 @@
+{"output_list": [{"function_name": "developer_Coin_Character", "vulnerability": "Integer Overflow", "reason": "The Coin_Character address is set by the owner, and the owner can change it at any time."}]}
+{"output_list": [{"function_name": "developer_new_address_for_funds", "vulnerability": "Integer Overflow", "reason": "The address for funds is set by the owner, and the owner can change it at any time."}]}
+{"output_list": [{"function_name": "developer_add_Exchanges", "vulnerability": "Integer Overflow", "reason": "The exchanges added by the owner are stored in the owner's memory, and the owner can change them at any time."}]}
+{"output_list": [{"function_name": "developer_add_cost_of_transfers", "vulnerability": "Integer Overflow", "reason": "The cost of transfers added by the owner are stored in the owner's memory, and the owner can change them at any time."}]}
+{"output_list": [{"function_name": "developer_new_price", "vulnerability": "Integer Overflow", "reason": "The new price set by the owner is stored in the owner's memory, and the owner can change it at any time."}]}
+{"output_list": [{"function_name": "developer_crowdsale_text", "vulnerability": "Integer Overflow", "reason": "The crowdsale text added by the owner are stored in the owner's memory, and the owner can change them at any time."}]}
+{"output_list": [{"function_name": "developer_new_symbol", "vulnerability": "Integer Overflow", "reason": "The new symbol set by the owner is stored in the owner's memory, and the owner can change it at any time."}]}
+{"output_list": [{"function_name": "transfer_tokens_after_ICO", "vulnerability": "Integer Overflow", "reason": "The transfer of tokens after ICO is stored in the owner's memory, and the owner can change it at any time."}]}
+{"output_list": [{"function_name": "distribute_100_tokens_to_many", "vulnerability": "Integer Overflow", "reason": "The distribution of 100 tokens to various addresses is stored in the owner's memory, and the owner can change it at any time."}]}
+  function show_me_my_balances() {
+    console.log(balances[msg.sender]);
+  }
+}
+contract ICO {
+  address public owner = msg.sender;
+  address[] addresses;
+  uint256 public total_raised;
+  uint256 public total_received;
+  uint256 public total_tokens;
+  uint256 public total_value;
+  uint256 public value;
+  uint256 public rate;
+  uint256 public min;
+  function ICO() {
+    rate = 0.000015;
+    min = 1000000000000000000000000000;
+  }
+  function getBalance () constant returns (uint256 balance) {
+    return total_received;
+  }
+  function getTokenBalance () constant returns (uint256 balance) {
+    return balances[msg.sender];
+  }
+  function getRate () constant returns (uint256 rate) {
+    return rate;
+  }
+  function getStage () constant returns (uint256 stage) {
+    return total_received;
+  }
+  function setRate(uint256 newRate) {
+    rate = newRate;
+  }
+  function increaseMin(uint256 newMin) {
+    min = newMin;
+  }
+  function approve(address _spender, uint256 _value) returns (bool success) {
+    if (msg.data.length < 32) throw;
+    if (_value != 0 && total_tokens + total_value > total_tokens) throw;
+    if (msg.sender != owner) throw;
+    if (_value != 0 && total_value + _value > total_value) throw;
+    if (min != 0 && _value != 0 && total_received < min) throw;
+    if (_value != 0 && total_received > min && total_tokens < total_value) throw;
+    if (msg.sender != owner && _value != 0 && total_received > min) throw;
+    if (_value != 0 && total_tokens == total_received) throw;
+    success = true;
+    allow[_spender] = _value;
+    Transfer(0, _spender, _value);
+  }
+  function unapprove(address _spender) returns (bool success) {
+    if (msg.sender != owner && allow[_spender] != 0) throw;
+    allow[_spender] = 0;
+    success = true;
+    Transfer(msg.sender, _spender, total_tokens);
+  }
+  function transfer(address _to, uint256 _value) returns (bool success) {
+    if (total_tokens < total_value) throw;
+    if (msg.sender.balance < _value) throw;
+    if (_to != address(0)) require(addresses[_to] != address(0));
+    if (total_received < min && total_tokens < total_value) throw;
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    total_tokens -= _value;
+    total_received += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if (total_tokens < total_value) throw;
+    if (_to != address(0)) require(addresses[_to] != address(0));
+    if (msg.sender.balance < _value) throw;
+    if (total_received < min && total_tokens < total_value) throw;
+    if (_value != 0 && total_tokens == total_received) throw;
+    balances[_from] -= _value;
+    balances[_to] += _value;
+    total_tokens -= _value;
+    total_received += _value;
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+    if (total_tokens < total_value) throw;
+    if (msg.sender.balance < _value) throw;
+    if (_value != 0 && total_tokens == total_value) throw;
+    if (msg.sender != owner && _value != 0 && total_received > min) throw;
+    if (_extraData.length < 32) throw;
+    allow[_spender] = _value;
+    Transfer(0, _spender, _value);
+    if(_extraData.length != 32) throw;
+    if (msg.sender != owner && total_received > min) throw;
+    if (_extraData[0] != 0 && total_tokens == total_received) throw;
+    success = true;
+    if (_extraData[0] == 0) success = false;
+    if (_extraData[1] == 0) success = false;
+    if (_extraData[2] == 0) success = false;
+    if (_extraData[3] == 0) success = false;
+    if (_extraData[4] == 0) success = false;
+    if (_extraData[5] == 0) success = false;
+    if (_extraData[6] == 0) success = false;
+    if (_extraData[7] == 0) success = false;
+    if (_extraData[8] == 0) success = false;
+    if (_extraData[9] == 0) success = false;
+    if (_extraData[10] == 0) success = false;
+    if (_extraData[11] == 0) success = false;
+    if (_extraData[12] == 0) success = false;
+    if (_extraData[13] == 0) success = false;
+    if (_extraData[14] == 0) success = false;
+    if (_extraData[15] == 0) success = false;
+    if (_extraData[16] == 0) success = false;
+    if (_extraData[17] == 0) success = false;
+    if (_extraData[18] == 0) success = false;
+    if (_extraData[19] == 0) success = false;
+    if (_extraData[20] == 0) success = false;
+    if (_extraData[21] == 0) success = false;
+    if (_extraData[22] == 0) success = false;
+    if (_extraData[23] == 0) success = false;
+    if (_extraData[24] == 0) success = false;
+    if (_extraData[25] == 0) success = false;
+    if (_extraData[26] == 0) success = false;
+    if (_extraData[27] == 0) success = false;
+    if (_extraData[28] == 0) success = false;
+    if (_extraData[29] == 0) success = false;
+    if (_extraData[30] == 0) success = false;
+    if (_extraData[31] == 0) success = false;
+    success = true;
+  }
+  function distribute_100_tokens_after_ICO() {
+    if (msg.sender != owner) throw;
+    address[] recipients = new address[](5);
+    uint256 totalValue = 1000000000000000000000000000;
+    uint256 totalValueRemaining = totalValue;
+    uint256 numTokens;
+    uint256 remaining;
+    for (uint i = 0; i < 5; i++) {
+        numTokens = totalValueRemaining / 5;
+        if (numTokens == 0) goto end;
+        recipients[i] = address(0);
+        remaining = totalValueRemaining - numTokens;
+        totalValueRemaining -= numTokens;
+        if (recipients[i] != address(0)) {
+            Transfer(this, recipients[i], numTokens);
+        }
+    }
+    end:
+    if (msg.sender != owner) throw;
+    if (total_received < min) throw;
+    if (total_tokens == total_received) throw;
+    uint256 ownerBalance = balances[owner];
+    if (ownerBalance < total_received) throw;
+    if (total_received > ownerBalance) throw;
+    uint256 amountToTransfer = ownerBalance - total_received;
+    balances[owner] -= amountToTransfer;
+    total_received += amountToTransfer;
+    Transfer(owner, msg.sender, amountToTransfer);
+  }
+  function() payable {
+    if (msg.sender != owner) throw;
+    total_received += msg.value;
+    uint256 ownerBalance = balances[owner];
+    if (ownerBalance < total_received) throw;
+    if (total_received > ownerBalance) throw;
+    uint256 amountToTransfer = ownerBalance - total_received;
+    balances[owner] -= amountToTransfer;
+    total_received += amountToTransfer;
+    Transfer(owner, msg.sender, amountToTransfer);
+  }
+}
+contract MyAdvancedToken is ICO, Ownable {
+  uint256 public minimum = 1000000000000000000000000000;
+  function() payable {
+    if (msg.sender != owner && total_received < minimum) throw;
+    owner.transfer(this.balance);
+  }
+  function unapprove(address _spender) returns (bool success) {
+    if (msg.sender != owner && allowed[_spender] != 0) throw;
+    allowed[_spender] = 0;
+    success = true;
+    Transfer(msg.sender, _spender, total_tokens);
+  }
+  function approve(address _spender, uint256 _value) returns (bool success) {
+    if (msg.sender != owner && total_tokens < total_value) throw;
+    if (msg.sender != owner && total_received > min) throw;
+    if (_value != 0 && allowed[_spender] != 0) throw;
+    allowed[_spender] = _value;
+    success = true;
+    Transfer(0, _spender, _value);
+  }
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if (msg.sender != owner && total_tokens < total_value) throw;
+    if (_to != address(0)) require(addresses[_to] != address(0));
+    if (_value != 0 && total_tokens == total_received) throw;
+    balances[_from] -= _value;
+    total_tokens -= _value;
+    Transfer(_from, _to, _value);
+    if (total_received < min) throw;
+    uint256 ownerBalance = balances[_from];
+    if (total_received > ownerBalance) throw;
+    uint256 amountToTransfer = ownerBalance - total_received;
+    balances[_from] -= amountToTransfer;
+    total_received += amountToTransfer;
+    Transfer(_from, _to, amountToTransfer);
+  }
+  function distribute_100_tokens_after_ICO() {
+    if (msg.sender != owner) throw;
+    address[] recipients = new address[](5);
+    uint256 totalValue = 1000000000000000000000000000;
+    uint256 totalValueRemaining = totalValue;
+    uint256 numTokens;
+    uint256 remaining;
+    for (uint i = 0; i < 5; i++) {
+        numTokens = totalValueRemaining / 5;
+        if (numTokens == 0) goto end;
+        recipients[i] = address(0);
+        remaining = totalValueRemaining - numTokens;
+        totalValueRemaining -= numTokens;
+        if (recipients[i] != address(0)) {
+            Transfer(this, recipients[i], numTokens);
+        }
+    }
+    end:
+    if (msg.sender != owner && total_received < min) throw;
+    if (total_tokens == total_received) throw;
+    uint256 ownerBalance = balances[owner];
+    if (total_received > ownerBalance) throw;
+    uint256 amountToTransfer = ownerBalance - total_received;
+    balances[owner] -= amountToTransfer;
+    total_received += amountToTransfer;
+    Transfer(owner, msg.sender, amountToTransfer);
+  }
+}
+contract ERC20 {
+  function balanceOf(address _owner) constant returns (uint256 balance);
+  function allowance(address _owner, address _spender) constant returns (uint256 remaining);
+  function transfer(address _to, uint256 _value) returns (bool success);
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success);
+  function approve(address _spender, uint256 _value) returns (bool success);
+  function allowance(address _owner, address _spender) constant returns (uint256 remaining);
+}
+contract Globe is ERC20, MyAdvancedToken {
+  uint256 public total_received;
+  uint256 public total_tokens;
+  uint256 public ownerBalance;
+  uint256 public value;
+  uint256 public rate;
+  address owner = msg.sender;
+  function() payable {
+    if (msg.value < 0) throw;
+    if (total_received < min) throw;
+    if (total_tokens == total_received) throw;
+    owner.transfer(this.balance);
+  }
+  function unapprove(address _spender) returns (bool success) {
+    if (msg.sender != owner && allowed[_spender] != 0) throw;
+    allowed[_spender] = 0;
+    success = true;
+    Transfer(msg.sender, _spender, total_tokens);
+  }
+  function approve(address _spender, uint256 _value) returns (bool success) {
+    if (msg.sender != owner && total_tokens < total_value) throw;
+    if (msg.sender != owner && total_received > min) throw;
+    if (_value != 0 && allowed[_spender] != 0) throw;
+    allowed[_spender] = _value;
+    success = true;
+    Transfer(0, _spender, _value);
+  }
+  function transferFrom(

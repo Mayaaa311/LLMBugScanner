@@ -1,0 +1,195 @@
+{"output_list": [
+    {
+        "function_name": "<function_name>",
+        "vulnerability": "<vulnerability>",
+        "reason": "<reason>"
+    }
+]
+}
+}
+}
+
+contract YLCToken is owned, token {
+  uint256 public sellPrice;
+  uint256 public buyPrice;
+  mapping (address => bool) public frozenAccount;
+  event FrozenFunds(address target, bool frozen);
+  function YLCToken(
+  uint256 initialSupply,
+  string tokenName,
+  uint8 decimalUnits,
+  string tokenSymbol
+  ) token(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+  function transfer(address _to, uint256 _value) {
+    assert (balanceOf[msg.sender] >= _value);            
+    assert (balanceOf[_to] + _value >= balanceOf[_to]);  
+    assert (!frozenAccount[msg.sender]);                
+    balanceOf[msg.sender] -= _value;                     
+    balanceOf[_to] += _value;                            
+    Transfer(msg.sender, _to, _value);                   
+  }
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    assert (balanceOf[_from] >= _value);                
+    assert (balanceOf[_to] + _value >= balanceOf[_to]);  
+    assert (_value <= allowance[_from][msg.sender]);     
+    assert (!frozenAccount[_from]);                
+    balanceOf[_from] -= _value;                          
+    balanceOf[_to] += _value;                            
+    allowance[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+  }
+  function freezeAccount(address target, bool freeze) onlyOwner {
+    frozenAccount[target] = freeze;
+    FrozenFunds(target, freeze);
+  }
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+  }
+  function buy() payable {
+    uint amount = msg.value / buyPrice;                
+    assert (balanceOf[this] >= amount);                
+    balanceOf[msg.sender] += amount;                   
+    balanceOf[this] -= amount;                         
+    Transfer(this, msg.sender, amount);                
+  }
+  function sell(uint256 amount) {
+    assert (balanceOf[msg.sender] >= amount );         
+    balanceOf[this] += amount;                         
+    balanceOf[msg.sender] -= amount;                   
+    assert (!frozenAccount[msg.sender]);                
+    amount * sellPrice;                         
+    Transfer(msg.sender, this, amount);                
+  }
+}
+contract CryptoniteCoin is owned, YLCToken {
+  uint256 public sellPrice;
+  uint256 public buyPrice;
+  mapping (address => bool) public frozenAccount;
+  event FrozenFunds(address target, bool frozen);
+  function CryptoniteCoin(
+  uint256 initialSupply,
+  string tokenName,
+  uint8 decimalUnits,
+  string tokenSymbol
+  ) YLCToken(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+  function transfer(address _to, uint256 _value) {
+    assert (balanceOf[msg.sender] >= _value);           
+    assert (balanceOf[_to] + _value >= balanceOf[_to]);  
+    assert (!frozenAccount[msg.sender]);                
+    balanceOf[msg.sender] -= _value;                     
+    balanceOf[_to] += _value;                            
+    Transfer(msg.sender, _to, _value);                   
+  }
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    assert (!frozenAccount[_from]);                      
+    assert (balanceOf[_from] >= _value);                 
+    assert (balanceOf[_to] + _value >= balanceOf[_to]);  
+    assert (_value <= allowance[_from][msg.sender]);     
+    balanceOf[_from] -= _value;                          
+    balanceOf[_to] += _value;                            
+    allowance[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+  }
+  function freezeAccount(address target, bool freeze) onlyOwner {
+    frozenAccount[target] = freeze;
+    FrozenFunds(target, freeze);
+  }
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+  }
+  function buy() payable {
+    uint amount = msg.value / buyPrice;                
+    assert (balanceOf[this] >= amount);                
+    balanceOf[msg.sender] += amount;                   
+    balanceOf[this] -= amount;                         
+    Transfer(this, msg.sender, amount);                
+  }
+  function sell(uint256 amount) {
+    assert (balanceOf[msg.sender] >= amount );         
+    balanceOf[this] += amount;                         
+    balanceOf[msg.sender] -= amount;                   
+    assert (!frozenAccount[msg.sender]);                
+    amount * sellPrice;                         
+    Transfer(msg.sender, this, amount);                
+  }
+}
+contract CryptoniteCoinPreSale is owned, YLCToken {
+  uint256 public totalTokens = 100000000000000000000000000;
+  uint256 public totalPreSaleTokens = 100000000000000000000000000;
+  uint256 public totalBountyTokens = 10000000000000000000000000000000000000000000;
+  uint256 public totalTeamTokens = 1000000000000000000000000000;
+  uint256 public totalReserveTokens = 100000000000000000000000000000;
+  uint256 public totalAirdropTokens = 100000000000000000000000000;
+  uint256 public totalPreSaleBountyTokens = 10000000000000000000000000;
+  uint256 public totalPreSaleTeamTokens = 10000000000000000000000000000;
+  uint256 public totalPreSaleReserveTokens = 100000000000000000000000000;
+  uint256 public totalPreSaleAirdropTokens = 100000000000000000000000000;
+  uint256 public totalPreSaleTokensSold = 0;
+  uint256 public totalPreSaleTokensDistributed = 0;
+  uint256 public totalPreSaleTokensRemaining = 0;
+  uint256 public totalPreSaleTokensRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWei = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemaining = 0;
+  uint256 public startTime = 15180853760000;
+  uint256 public endTime = 1518537600;
+  uint256 public totalPreSaleWei = 0;
+  uint256 public totalPreSaleWeiRemaining = 0;
+  uint256 public totalPreSaleWeiRemainingInWei = 0;
+  uint256 public totalPreSaleWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWei = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWei = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWei = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWei = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWei = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWei = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWei = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWei = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWei = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWei = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWei = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWei = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWei = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemaining = 0;
+  uint256 public totalPreSaleTokensRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWeiRemainingInWe

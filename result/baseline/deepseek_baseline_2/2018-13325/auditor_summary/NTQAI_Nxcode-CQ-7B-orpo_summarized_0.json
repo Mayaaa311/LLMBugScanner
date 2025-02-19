@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "reason": "The `transfer` function does not check if the recipient is the contract itself before calling `_sell`. This allows any user to call `_sell` on behalf of the caller, potentially leading to unauthorized token sales."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "reason": "Similar to the `transfer` function, `transferFrom` does not check if the spender is allowed to transfer tokens to the contract itself before calling `_sell`. This allows any user to approve a spender to transfer tokens on their behalf and then call `_sell` on the contract, leading to unauthorized token sales."
+        },
+        {
+            "function_name": "_buy",
+            "vulnerability": "Integer Overflow",
+            "reason": "The calculation of `amount` in the `_buy` function can lead to an integer overflow. If `buyPrice` is very large, `msg.value / buyPrice` could overflow, causing unintended token transfers to the buyer."
+        },
+        {
+            "function_name": "_sell",
+            "vulnerability": "Integer Overflow",
+            "reason": "The calculation of `revenue` in the `_sell` function can lead to an integer overflow. If `sellPrice` is very large, `amount * sellPrice` could overflow, causing unintended token transfers or Ether transfers to the seller."
+        },
+        {
+            "function_name": "transferOwnership",
+            "vulnerability": "Access Control",
+            "reason": "The `transferOwnership` function does not check if the new owner is the contract itself before calling `_transfer`. This allows any user to call `_transfer` on behalf of the caller, potentially leading to unauthorized token transfers."
+        }
+    ]
+}

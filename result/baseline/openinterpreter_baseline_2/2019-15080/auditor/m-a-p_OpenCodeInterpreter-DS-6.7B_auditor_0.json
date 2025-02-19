@@ -1,0 +1,74 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) public returns (bool) {
+        require(!isblacklistedAccount[msg.sender]);
+        require(!isblacklistedAccount[_to]);
+ttrequire(balanceOf[msg.sender] > 0);
+ttrequire(balanceOf[msg.sender] >= _value);
+ttrequire(_to != address(0));
+ttrequire(_value > 0);
+ttrequire(balanceOf[_to] .add(_value) >= balanceOf[_to]);
+ttrequire(_to != msg.sender);
+ttbalanceOf[msg.sender] = balanceOf[msg.sender].sub(_value);
+ttbalanceOf[_to] = balanceOf[_to].add(_value);
+ttTransfer(msg.sender, _to, _value);
+        return true;
+t}",
+            "reason": "In the transfer function, there is a possibility of integer overflow. The balanceOf[_to] .add(_value) >= balanceOf[_to] check does not ensure that the sum of _to's balance and _value does not exceed the maximum value of uint256. This can lead to an integer overflow, potentially causing the contract to behave unpredictably."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _amount) public returns (bool success) {
+         if (balanceOf[_from] >= _amount
+             && allowed[_from][msg.sender] >= _amount
+             && _amount > 0
+             && balanceOf[_to].add(_amount) > balanceOf[_to])
+        {
+             balanceOf[_from] = balanceOf[_from].sub(_amount);
+             allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+             balanceOf[_to] = balanceOf[_to].add(_amount);
+             return true;
+        } else {
+             return false;
+        }
+    }",
+            "reason": "In the transferFrom function, there is a possibility of integer overflow. The balanceOf[_to].add(_amount) > balanceOf[_to] check does not ensure that the sum of _to's balance and _amount does not exceed the maximum value of uint256. This can lead to an integer overflow, potentially causing the contract to behave unpredictably."
+        },
+        {
+            "function_name": "mintTokens",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintTokens(uint256 _mintedAmount) public onlyOwner {
+        balanceOf[owner] = balanceOf[owner].add(_mintedAmount);
+        totalSupply = totalSupply.add(_mintedAmount);
+        Transfer(0, owner, _mintedAmount);
+    }",
+            "reason": "In the mintTokens function, there is a possibility of integer overflow. The balanceOf[owner].add(_mintedAmount) and totalSupply.add(_mintedAmount) operations do not ensure that the sum of owner's balance and _mintedAmount does not exceed the maximum value of uint256. This can lead to an integer overflow, potentially causing the contract to behave unpredictably."
+        },
+        {
+            "function_name": "burn",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function burn(uint256 _value) public onlyOwner {
+      require(_value <= balanceOf[msg.sender]);
+      address burner = msg.sender;
+      balanceOf[burner] = balanceOf[burner].sub(_value);
+      totalSupply = totalSupply.sub(_value);
+      Burn(burner, _value);
+  }",
+            "reason": "In the burn function, there is a possibility of integer overflow. The balanceOf[burner].sub(_value) and totalSupply.sub(_value) operations do not ensure that the difference between burner's balance and _value does not go below zero. This can lead to an integer overflow, potentially causing the contract to behave unpredictably."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint256 _amount) public returns (bool success) {
+         allowed[msg.sender][_spender] = _amount;
+         Approval(msg.sender, _spender, _amount);
+         return true;
+    }",
+            "reason": "In the approve function, there is a possibility of integer overflow. The allowed[msg.sender][_spender] = _amount assignment does not ensure that _amount does not exceed the maximum value of uint256. This can lead to an integer overflow, potentially causing the contract to behave unpredictably."
+        }
+    ]
+}

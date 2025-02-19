@@ -1,0 +1,37 @@
+tput:
+{
+    "output_list": [
+        {
+            "function_name": "Shark.Buy()",
+            "vulnerability": "Weak Randomness",
+            "function_code": "this.Trade(msg.value/price,price,"",owner,msg.sender)",
+            "reason": "The function relies on the internal counter of the msg.sender which can be manipulated leading to potential money laundering and trade manipulation."
+        },
+        {
+            "function_name": "Shark.Sell()",
+            "vulnerability": "Weak Randomness",
+            "function_code": "this.Trade(_qty,price,"",msg.sender,owner)",
+            "reason": "The function relies on the internal counter of the msg.sender which can be manipulated leading to potential money laundering and trade manipulation."
+        },
+        {
+            "function_name": "Shark.airDrop()",
+            "vulnerability": "Access Control",
+            "function_code": "if(msg.value >= _adr.length * _val)
+    this.Buy()
+    batchTransfer(_adr,_val)",
+            "reason": "The function has no checks to prevent potential misuse by attackers. This can lead to unjustified distribution of tokens.",
+        },
+        {
+            "function_name": "Shark.cashOut()",
+            "vulnerability": "Integer Overflow",
+            "function_code": "owner.transfer(_am)",
+            "reason": "If the owner's balance is less than the amount being transferred, this will cause an integer overflow leading to potential loss of funds."
+        },
+        {
+            "function_name": "StandardToken.transferFrom()",
+            "vulnerability": "Incorrect logic",
+            "function_code": "if( _value > balanceOf[_from] || _value > allowance[_from][msg.sender] || (balanceOf[_to]+_value) < balanceOf[_to] ) return false;",
+            "reason": "The order of the conditions in the if statement is incorrect. An attacker can use this to bypass the access control check and transfer funds from another account."
+        }
+    ]
+}<eos>

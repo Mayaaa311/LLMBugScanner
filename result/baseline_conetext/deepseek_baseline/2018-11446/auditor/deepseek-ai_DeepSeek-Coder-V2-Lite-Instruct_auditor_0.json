@@ -1,0 +1,79 @@
+ {
+    "output_list": [
+        {
+            "function_name": "increaseTotalSupply",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function increaseTotalSupply (address target,  uint256 increaseBy )  onlyOwner {
+    balanceOf[target] += increaseBy;
+    totalSupply += increaseBy;
+    Transfer(0, owner, increaseBy);
+    Transfer(owner, target, increaseBy);
+}",
+            "reason": "The vulnerability exists in the line `balanceOf[target] += increaseBy;` and `totalSupply += increaseBy;`. If the sum exceeds the maximum value representable by the `uint` type (`2^256 - 1`), it causes an integer overflow. This bypasses the subsequent `require` check, leading to unauthorized deductions and logical inconsistencies."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function transfer(address _to, uint256 _value) notICO {
+    require(!frozen[_from]);                       
+    if (msg.sender.balance  < minBalanceForAccounts) {
+        sell((minBalanceForAccounts - msg.sender.balance) * sellPrice);
+    }
+    _transfer(msg.sender, _to, _value);
+}",
+            "reason": "The logic in the `transfer` function is flawed. It first checks if the sender's balance is less than the minimum balance required. If so, it calls `sell`, which could lead to incorrect state updates and financial loss."
+        },
+        {
+            "function_name": "reward",
+            "vulnerability": "Access Control",
+            "function_code": "function reward(address _to, uint256 _value, bool locked, string data) {
+    require(_to != 0x0);
+    require(!frozen[msg.sender]);                       
+    if (msg.sender.balance  < minBalanceForAccounts) {
+        sell((minBalanceForAccounts - msg.sender.balance) * sellPrice);
+    }
+    if(!locked) {
+        _transfer(msg.sender, _to, _value);
+    } else {
+        require(balanceOf[msg.sender] >= _value);
+        require(totalLockedRewardsOf[_to] + _value > totalLockedRewardsOf[_to]);
+        balanceOf[msg.sender] -= _value;
+        totalLockedRewardsOf[_to] += _value;
+        lockedRewardsOf[_to][msg.sender] += _value;
+        if(userRewardCount[_to][msg.sender]==0) {
+            userRewarderCount[_to] += 1;
+            userRewarders[_to][userRewarderCount[_to]]=msg.sender;
+        }
+        userRewardCount[_to][msg.sender]+=1;
+        totalRewardIssuedOut[msg.sender]+= _value;
+        Transfer(msg.sender, _to, _value);
+    }
+    Reward(msg.sender, _to, _value, data, now);
+}",
+            "reason": "The `reward` function lacks proper access control. It allows anyone to call it and reward themselves or others without any restrictions, which could lead to unauthorized rewards and financial loss."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Token Devalue",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+}",
+            "reason": "The `mintToken` function allows the owner to mint unlimited tokens, which can devalue the token and lead to financial losses for holders."
+        },
+        {
+            "function_name": "claimThrone",
+            "vulnerability": "Denial of Service",
+            "function_code": "function claimThrone() external payable {
+    require(msg.value > balance);
+    (bool sent,) = king.call{value: balance}("");
+    require(sent, "Failed to send Ether");
+    balance = msg.value;
+    king = msg.sender;
+}",
+            "reason": "The `claimThrone` function does not handle refunds properly, which could lead to a denial of service (DoS) attack if the contract is locked up due to insufficient balance."
+        }
+    ]
+}

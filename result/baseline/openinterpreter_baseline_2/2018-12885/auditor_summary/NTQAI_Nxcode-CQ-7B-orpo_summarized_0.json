@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "createChamp",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function uses the SafeMath library to perform arithmetic operations, but it does not handle the case where the addition operation would result in an overflow. This can be exploited by an attacker to create a new champ with an id that is larger than the current champ count, causing the contract to behave unexpectedly."
+        },
+        {
+            "function_name": "getChampReward",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function uses the SafeMath library to perform arithmetic operations, but it does not handle the case where the addition operation would result in an overflow. This can be exploited by an attacker to calculate the reward for a champ with a position that is larger than 800, causing the contract to behave unexpectedly."
+        },
+        {
+            "function_name": "randMod",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function uses the keccak256 hash of a nonce and the blockhash to generate a random number. However, the nonce is incremented without any synchronization mechanism, which can lead to the same nonce being used multiple times. This can result in the same random number being generated multiple times, making the randomness predictable and potentially exploitable."
+        },
+        {
+            "function_name": "withdrawChamp",
+            "vulnerability": "Access Control",
+            "reason": "The function allows an owner of a champ to withdraw a reward. However, it does not check if the champ is in the leaderboard before allowing withdrawal. This can be exploited by an attacker to withdraw rewards for a champ that is not in the leaderboard, causing the contract to behave unexpectedly."
+        },
+        {
+            "function_name": "withdrawToAddress",
+            "vulnerability": "Access Control",
+            "reason": "The function allows an owner to withdraw funds to a specified address. However, it does not check if the specified address is the owner of the champ. This can be exploited by an attacker to withdraw funds for a champ that they do not own, causing the contract to behave unexpectedly."
+        }
+    ]
+}

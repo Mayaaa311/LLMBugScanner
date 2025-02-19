@@ -1,0 +1,69 @@
+{
+    "output_list": [
+        {
+            "function_name": "AzurionToken",
+            "code": "function AzurionToken(uint256 initialSupply, address centralMinter) {
+        if(centralMinter != 0 ) owner = centralMinter;
+        balanceOf[msg.sender] = initialSupply;
+        totalSupply = initialSupply;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `AzurionToken` initializes the `totalSupply` variable with an initial value of `initialSupply`. However, this value is not checked for overflow. If `initialSupply` is too large, it could cause an integer overflow, leading to incorrect calculations and potentially loss of funds. This vulnerability is exploitable in real-world scenarios and is beneficial to attackers."
+        },
+        {
+            "function_name": "AzurionToken",
+            "code": "function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balanceOf[_from] > _value);                
+        require (balanceOf[_to] + _value > balanceOf[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                       
+        balanceOf[_from] -= _value;                         
+        balanceOf[_to] += _value;                           
+        Transfer(_from, _to, _value);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `_transfer` performs a subtraction operation on `balanceOf[_from]` and then an addition operation on `balanceOf[_to]`. If the value of `_value` is too large, it could cause an integer overflow, leading to incorrect calculations and potentially loss of funds. This vulnerability is exploitable in real-world scenarios and is beneficial to attackers."
+        },
+        {
+            "function_name": "AzurionToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `mintToken` adds `mintedAmount` to `balanceOf[target]` and then to `totalSupply`. If `mintedAmount` is too large, it could cause an integer overflow, leading to incorrect calculations and potentially loss of funds. This vulnerability is exploitable in real-world scenarios and is beneficial to attackers."
+        },
+        {
+            "function_name": "AzurionToken",
+            "code": "function burn(uint256 _value) onlyOwner public returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);   
+        balanceOf[msg.sender] -= _value;            
+        totalSupply -= _value;                      
+        Burn(msg.sender, _value);
+
+        return true;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `burn` subtracts `_value` from `balanceOf[msg.sender]` and then from `totalSupply`. If `_value` is too large, it could cause an integer overflow, leading to incorrect calculations and potentially loss of funds. This vulnerability is exploitable in real-world scenarios and is beneficial to attackers."
+        },
+        {
+            "function_name": "AzurionToken",
+            "code": "function burnFrom(address _from, uint256 _value) onlyOwner public returns (bool success) {
+        require(balanceOf[_from] >= _value);                
+
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        Burn(_from, _value);
+
+        return true;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `burnFrom` subtracts `_value` from `balanceOf[_from]` and then from `totalSupply`. If `_value` is too large, it could cause an integer overflow, leading to incorrect calculations and potentially loss of funds. This vulnerability is exploitable in real-world scenarios and is beneficial to attackers."
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "vulnerability": "Integer Overflow",
+            "reason": "The multiplication in the line `tokens = tokensPerEth.mul(msg.value) / 1 ether;` can lead to an integer overflow if `tokensPerEth` is very large and `msg.value` is sufficiently large, causing `tokens` to be a much smaller value than intended, leading to incorrect distribution of tokens."
+        },
+        {
+            "function_name": "distr",
+            "vulnerability": "Access Control",
+            "reason": "The `distr` function does not check if the totalDistributed amount exceeds the totalSupply, allowing anyone to call this function and distribute tokens beyond the intended supply, leading to a potential loss of tokens for legitimate holders."
+        },
+        {
+            "function_name": "doAirdrop",
+            "vulnerability": "Access Control",
+            "reason": "The `doAirdrop` function allows the owner to airdrop tokens to any address, without any checks or restrictions. This can be exploited by an attacker to airdrop tokens to their own address, effectively stealing tokens from the contract."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "reason": "The `transfer` function does not check if the sender has enough allowance for the spender, allowing any user to transfer tokens on behalf of another user without their consent, leading to potential unauthorized token transfers."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "reason": "Similar to the `transfer` function, the `transferFrom` function does not check if the sender has enough allowance for the spender, allowing any user to transfer tokens on behalf of another user without their consent, leading to potential unauthorized token transfers."
+        }
+    ]
+}

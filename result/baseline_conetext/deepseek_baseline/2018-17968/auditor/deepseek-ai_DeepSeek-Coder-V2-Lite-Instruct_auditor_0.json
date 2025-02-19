@@ -1,0 +1,89 @@
+ {
+    "output_list": [
+        {
+            "function_name": "createRoom",
+            "vulnerability": "Access Control",
+            "function_code": "function createRoom(string _name, uint256 _entryPrice) public onlyCTO{
+    address[] memory players;
+    Room memory _room = Room({
+      name: _name,
+      players: players,
+      balance: 0,
+      entryPrice: _entryPrice
+    });
+    allRooms.push(_room);
+  }",
+            "reason": "The function allows anyone to create a room without any access control checks, enabling unauthorized creation of rooms and potential exploitation."
+        },
+        {
+            "function_name": "enter",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function enter(uint256 _roomId) public payable {
+    Room storage room = allRooms[_roomId-1]; 
+    require(room.players.length < 6);
+    require(msg.value >= room.entryPrice);
+    room.players.push(msg.sender);
+    room.balance += room.entryPrice;
+    emit newPlayer(_roomId, msg.sender);
+    if(room.players.length == 6){
+        executeRoom(_roomId);
+    }
+}",
+            "reason": "The function does not check for integer overflow when updating the room's balance, allowing attackers to exploit this vulnerability to increase the balance and potentially cause a denial of service."
+        },
+        {
+            "function_name": "executeRoom",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function executeRoom(uint256 _roomId) public {
+    Room storage room = allRooms[_roomId-1]; 
+    require(room.players.length == 6);
+    uint256 halfFee = SafeMath.div(room.entryPrice, 20);
+    CTO.transfer(halfFee);
+    CEO.transfer(halfFee);
+    room.balance -= halfFee * 2;
+    uint256 deadSeat = random();
+    distributeFunds(_roomId, deadSeat);
+    delete room.players;
+}",
+            "reason": "The function contains logical errors in the distribution of fees and balance updates, which can lead to incorrect calculations and potential financial losses."
+        },
+        {
+            "function_name": "distributeFunds",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function distributeFunds(uint256 _roomId, uint256 _deadSeat) private returns(uint256) {
+    Room storage room = allRooms[_roomId-1]; 
+    uint256 balanceToDistribute = SafeMath.div(room.balance,5);
+    address victim = room.players[_deadSeat];
+    address[] memory winners = new address[](5);
+    uint256 j = 0; 
+    for (uint i = 0; i<6; i++) {
+        if(i != _deadSeat){
+           room.players[i].transfer(balanceToDistribute);
+           room.balance -= balanceToDistribute;
+           winners[j] = room.players[i];
+           j++;
+        }
+    }
+    emit partyOver(_roomId, victim, winners);
+    return address(this).balance;
+}",
+            "reason": "The function uses division to calculate the amount to distribute, which can lead to integer overflow if the balance is very large, causing incorrect distribution and potential financial losses."
+        },
+        {
+            "function_name": "refundPlayersInRoom",
+            "vulnerability": "Denial of Service",
+            "function_code": "function refundPlayersInRoom(uint256 _roomId) public onlyCTO{
+    Room storage room = allRooms[_roomId-1]; 
+    uint256 nbrOfPlayers = room.players.length;
+    uint256 balanceToRefund = SafeMath.div(room.balance,nbrOfPlayers);
+    for (uint i = 0; i<nbrOfPlayers; i++) {
+         room.players[i].transfer(balanceToRefund);
+         room.balance -= balanceToRefund;
+    }
+    emit roomRefunded(_roomId, room.players);
+    delete room.players;
+}",
+            "reason": "The function does not check for the state of the contract before attempting to refund players, which can lead to a denial of service if the contract's balance is insufficient or if the players' balances cannot be transferred."
+        }
+    ]
+}

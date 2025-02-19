@@ -1,0 +1,82 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "description": "The mintToken function has an integer overflow in the balanceOf function, allowing an attacker to set any user's balance to any value."}]}
+{"function_name": "mintToken", "vulnerability": "Integer Overflow", "description": "The mintToken function has an integer overflow in the balanceOf function, allowing an attacker to set any user's balance to any value."}]}
+{"output_list": [
+    {
+        "function_name": "mintToken",
+        "vulnerability": "Integer Overflow",
+        "description": "The mintToken function has an integer overflow in the balanceOf function, allowing an attacker to set any user's balance to any value."
+    }
+]
+}
+
+contract EnterCoin is owned, token {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address=>bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    uint256 public constant initialSupply = 2100000000 * 10**8;
+    uint8 public constant decimalUnits = 8;
+    string public tokenName = "ENTER 1.0";
+    string public tokenSymbol = "ENTR";
+    function EnterCoin() token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) throw;           
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+        if (frozenAccount[msg.sender]) throw;                
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (frozenAccount[_from]) throw;                        
+        if (balanceOf[_from] < _value) throw;                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+        if (_value > allowance[_from][msg.sender]) throw;   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;                   
+        totalSupply += mintedAmount;                            
+        Transfer(0, this, mintedAmount);                        
+        Transfer(this, target, mintedAmount);                       
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyPrice;                
+        if (balanceOf[this] < amount) throw;               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+    }
+    function sell(uint256 amount) {
+        if (balanceOf[msg.sender] < amount ) throw;        
+        balanceOf[this] += amount;                         
+        balanceOf[msg.sender] -= amount;                   
+        if (!msg.sender.send(amount * sellPrice)) {        
+            throw;                                         
+        } else {
+            Transfer(msg.sender, this, amount);            
+        }
+    }
+}
+contract EnterCoinPreSale is owned, EnterCoin {
+    uint256 public constant initialSupply = 21000000 * 10**8;
+    uint8 public constant decimalUnits = 8;
+    string public tokenName = "ENTER 1.0 PreSale";
+    string public tokenSymbol = "ENTR";
+    uint256 public constant preSaleTokens = 10000000 * 10**8;
+    uint256 public constant preSaleRate = 10000;
+    uint256 public constant preSaleMaxTokens = 10000000 * 10**8;
+    uint256 public constant preSaleMaxWei = 1000000000000000000000000;
+    uint256 public constant preSaleMinWei = 10.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

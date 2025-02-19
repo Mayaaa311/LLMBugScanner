@@ -1,0 +1,65 @@
+{
+    "output_list": [
+        {
+            "function_name": "isContract",
+            "code": "function isContract(address _addr) constant internal returns(bool) {
+        uint size;
+        if (_addr == 0) {
+            return false;
+        }
+        assembly {
+        size := extcodesize(_addr)
+        }
+        return size>0;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `isContract` takes an address as input and checks if it is a contract by getting the size of the code at that address. However, the size is stored as a uint256, which can overflow if the address is a contract with a large amount of code. This could lead to incorrect results and potentially allow for unauthorized access to the contract's code."
+        },
+        {
+            "function_name": "transferMulti",
+            "code": "function transferMulti(address[] _to, uint256[] _value) public returns (uint256 amount){
+        require(_to.length == _value.length);
+        uint8 len = uint8(_to.length);
+        for(uint8 j; j<len; j++){
+            amount += _value[j]*10**uint256(decimals);
+        }
+        require(balanceOf[msg.sender] >= amount);
+        for(uint8 i; i<len; i++){
+            address _toI = _to[i];
+            uint256 _valueI = _value[i]*10**uint256(decimals);
+            balanceOf[_toI] += _valueI;
+            balanceOf[msg.sender] -= _valueI;
+            emit Transfer(msg.sender, _toI, _valueI);
+        }
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `transferMulti` takes two arrays of addresses and values as input. It calculates the total amount of tokens to be transferred by multiplying each value by 10^decimals and summing them up. However, the calculation is not checked for overflow, which could lead to incorrect results and potentially allow for unauthorized access to the contract's balance."
+        },
+        {
+            "function_name": "changeTokensPerEther",
+            "code": "function changeTokensPerEther(uint256 _newRate) onlyController public {
+        tokensPerEther = _newRate;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `changeTokensPerEther` takes a new rate as input and updates the `tokensPerEther` variable. However, the new rate is not checked for overflow, which could lead to incorrect results and potentially allow for unauthorized access to the contract's state."
+        },
+        {
+            "function_name": "changeAirdropQty",
+            "code": "function changeAirdropQty(uint256 _airdropQty) onlyController public {
+        airdropQty = _airdropQty;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `changeAirdropQty` takes a new airdrop quantity as input and updates the `airdropQty` variable. However, the new quantity is not checked for overflow, which could lead to incorrect results and potentially allow for unauthorized access to the contract's state."
+        },
+        {
+            "function_name": "changeAirdropTotalQty",
+            "code": "function changeAirdropTotalQty(uint256 _airdropTotalQty) onlyController public {
+        uint256 _token =_airdropTotalQty*10**uint256(decimals);
+        require(balanceOf[owner] >= _token);
+        airdropTotalQty = _airdropTotalQty;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `changeAirdropTotalQty` takes a new airdrop total quantity as input and updates the `airdropTotalQty` variable. However, the new quantity is not checked for overflow, which could lead to incorrect results and potentially allow for unauthorized access to the contract's state."
+        }
+    ]
+}

@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "safeMul",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The safeMul function uses the * operator to multiply two unsigned integers, which can lead to an integer overflow if the result is greater than the maximum value that can be represented by the uint256 type. This can cause the require statement to fail, allowing an attacker to execute arbitrary code.",
+            "correctness": 9,
+            "severity": 9,
+            "profitability": 9
+        },
+        {
+            "function_name": "safeSub",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The safeSub function uses the require statement to check if the second argument is less than or equal to the first argument. However, this check is not sufficient to prevent an underflow attack, as the require statement only checks the condition at the time of the function call, and does not check the condition after the subtraction is performed. An attacker can exploit this vulnerability by calling the safeSub function with a large first argument and a small second argument, which can cause an underflow and lead to an incorrect result.",
+            "correctness": 8,
+            "severity": 8,
+            "profitability": 8
+        },
+        {
+            "function_name": "approveAndCall",
+            "auditor_idx": 0,
+            "vulnerability": "Bad Randomness",
+            "criticism": "The approveAndCall function uses the approve function to approve a transfer of tokens to a spender, and then calls the receiveApproval function on the spender. However, the approve function does not check if the spender is a valid recipient of the tokens, which can lead to an attacker approving a transfer of tokens to an invalid recipient. This can cause the receiveApproval function to fail, allowing an attacker to execute arbitrary code.",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 7
+        },
+        {
+            "function_name": "uploadBalances",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The uploadBalances function is only callable by the owner of the contract, but it does not check if the recipients of the balances are valid. An attacker can exploit this vulnerability by calling the uploadBalances function with a large number of recipients, which can cause the contract to run out of gas.",
+            "correctness": 6,
+            "severity": 6,
+            "profitability": 6
+        },
+        {
+            "function_name": "AURA",
+            "auditor_idx": 0,
+            "vulnerability": "Typo Constructor",
+            "criticism": "The AURA constructor sets the total supply of tokens to a large number, but it does not check if the msg.sender is a valid recipient of the tokens. An attacker can exploit this vulnerability by calling the AURA constructor with a large number of tokens, which can cause the contract to run out of gas.",
+            "correctness": 5,
+            "severity": 5,
+            "profitability": 5
+        }
+    ]
+}

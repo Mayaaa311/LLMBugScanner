@@ -1,0 +1,23 @@
+tput:
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Potential for Unchecked Transfer",
+            "function_code": "function transfer(address _to, uint256 _value) returns (bool success)",
+            "reason": "Transfer without checks could allow for unauthorized transfers and financial losses."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Potential for Unchecked Transfer",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success)",
+            "reason": "Transfer without checks could allow for unauthorized transfers and financial losses."
+        },
+        {
+            "function_name": "PayWinner",
+            "vulnerability": "Potential for Vulnerability to Contract Lockup",
+            "function_code": "function PayWinner(address winner) private { require(numtickets == maxTickets); uint ownerTax = 6 * totalBounty / 100; uint winnerPrice = totalBounty - ownerTax;  lottos = msg.sender;  lottos.transfer(ownerTax);  winner.transfer(winnerPrice);  balance = msg.value;  delete(lottos); }",
+            "reason": "The PayWinner function has potential for contract lockup, as the function is not checking for balance and the transfer within the function is not making any transfers to the owner. This can allow a potential attacker to exploit the function and cause a contract lockup."
+        }
+    ]
+}<eos>

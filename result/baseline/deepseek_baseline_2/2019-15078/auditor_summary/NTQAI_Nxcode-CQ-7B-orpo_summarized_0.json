@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "vulnerability": "Token Devalue",
+            "reason": "This function intentionally devalues the token by multiplying the value by 99999 instead of keeping it constant or reducing it appropriately, which can lead to a significant loss of token value for the users."
+        },
+        {
+            "function_name": "distr",
+            "vulnerability": "Wrong Logic",
+            "reason": "The logic in the distribution function is flawed. It checks if totalDistributed is greater than or equal to totalSupply to set distributionFinished to true, which can be bypassed if the totalDistributed amount is manipulated or if the totalSupply is reduced externally, allowing the distribution to continue even after it should have finished."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "reason": "The transfer function does not check if the contract is paused or in an emergency state, which could be exploited by an attacker to transfer tokens even when the contract is supposed to be frozen. This is a critical vulnerability if the contract is expected to handle emergency withdrawals."
+        },
+        {
+            "function_name": "burn",
+            "vulnerability": "Access Control",
+            "reason": "The burn function allows the owner to burn tokens, which reduces totalSupply and totalDistributed. However, there is no check to ensure that the tokens being burned are not needed for the distribution process. An attacker could exploit this by burning tokens to reduce the total supply, potentially making it easier to manipulate the distribution process."
+        },
+        {
+            "function_name": "constructor",
+            "vulnerability": "Typo Constructor",
+            "reason": "A typographical error in the constructor where 'totalSupply' is mistakenly used instead of 'totalDistributed' for initializing the owner's balance. This could lead to incorrect distribution of tokens and potential loss of tokens for the intended holders."
+        }
+    ]
+}

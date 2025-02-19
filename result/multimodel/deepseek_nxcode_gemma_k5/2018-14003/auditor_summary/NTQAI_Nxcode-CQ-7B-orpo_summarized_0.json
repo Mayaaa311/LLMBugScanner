@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "batchTransfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'batchTransfer' function has an integer overflow vulnerability. The vulnerability occurs because the total amount transferred to recipients is calculated by multiplying the number of recipients ('cnt') by the transfer amount ('_value'). If 'cnt' is sufficiently large, the resulting 'amount' will be smaller than intended, but overflows and becomes very large, allowing attackers to gain unintended tokens."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'transferFrom' function allows spender to transfer funds from user's accounts, which is a common vulnerability in many token systems. However, the function has a wrong logic: it decreases the allowance by _value, but it does not decrease the balanceOf of the from address, which can lead to potential issues."
+        },
+        {
+            "function_name": "burnFrom",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'burnFrom' function allows spender to burn user's tokens, which is a common vulnerability in many token systems. However, the function has a wrong logic: it decreases the allowance by _value, but it does not decrease the balanceOf of the from address, which can lead to potential issues."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function has an integer overflow vulnerability. The vulnerability occurs because it does not check if the balanceOf[_to] + _value is greater than balanceOf[_to], allowing attackers to overflow the balanceOf[_to] and set it to a very large value."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'transfer' function has a wrong logic: it decreases the balanceOf of the from address, but it does not check if the balanceOf[_from] < _value, allowing attackers to set the balanceOf[_from] to a negative value."
+        }
+    ]
+}

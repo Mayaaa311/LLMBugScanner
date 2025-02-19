@@ -1,0 +1,45 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+                balanceOf[target] += mintedAmount;
+                totalSupply += mintedAmount;
+                Transfer(0, this, mintedAmount);
+                Transfer(this, target, mintedAmount);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'mintToken' function has an integer overflow vulnerability. It adds a specified amount to the balance of a target address without ensuring that the total supply does not exceed the maximum possible value. This can be exploited to grant arbitrary amounts of tokens to any user."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal {
+                require (_to != 0x0);
+                require (balanceOf[_from] >= _value);
+                require (balanceOf[_to] + _value > balanceOf[_to]);
+                require(!frozenAccount[_from]);                     
+                require(!frozenAccount[_to]);                       
+                uint start = 1520956799;
+                uint256 SECtotalAmount = 1500000000 * 10 ** 18;
+                address teamaccount = 0xC32b1519A0d4E883FE136AbB3198cbC402b5503F;
+                uint256 amount = _value;
+                address sender = _from;
+                uint256 balance = balanceOf[_from];
+                if(teamaccount == sender){
+                    if (now < start + 365 * 1 days) {
+                        require((balance - amount) >= SECtotalAmount/10 * 3/4);
+                    } else if (now < start + (2*365+1) * 1 days){
+                        require((balance - amount) >= SECtotalAmount/10 * 2/4);
+                    }else if (now < start + (3*365+1) * 1 days){
+                        require((balance - amount) >= SECtotalAmount/10 * 1/4);
+                    }
+                }
+                balanceOf[_from] -= _value;                         
+                balanceOf[_to] += _value;                           
+                Transfer(_from, _to, _value);
+            }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The '_transfer' function in the provided smart contract has a wrong logic. It allows the team account to transfer tokens in a time-locked manner, which can be exploited to devalue the token. Attackers can exploit this vulnerability to transfer tokens from the team account to any address."
+        }
+    ]
+}

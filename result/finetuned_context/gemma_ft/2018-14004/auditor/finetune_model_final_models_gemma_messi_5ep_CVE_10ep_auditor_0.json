@@ -1,0 +1,366 @@
+{"output_list": [{"function_name": "distribute_100_tokens_to_many", "impact": "Financial Loss", "reason": "The distribute_100_tokens_to_many function allows the owner to set the balance of 100 tokens for each address in the list, reducing the owner's balance. This could be used to fund other projects or give refunds to investors."}]}
+{"output_list": [{"function_name": "transfer_tokens_after_ICO", "impact": "Financial Loss", "reason": "The transfer_tokens_after_ICO function allows the owner to set the balance of 100 tokens for the user who had previously agreed to a contract with the owner. This could be used to fund other projects or give refunds to investors."}]}
+{"output_list": [{"function_name": "developer_Coin_character", "impact": "No Impact", "reason": "The developer_Coin_character function allows the owner to change the character used to represent the coin in the balance of the contract. This change has no effect on the owner's other activities or the balance of the contract."}]}
+{"output_list": [{"function_name": "developer_new_address_for_funds", "impact": "No Impact", "reason": "The developer_new_address_for_funds function allows the owner to add a new address to the funds list. This addition has no effect on the owner's other activities or the balance of the contract."}]}
+{"output_list": [{"function_name": "developer_add_Excycles", "impact": "No Impact", "reason": "The developer_add_Excycles function allows the owner to add a new exchange to the exchange list. This addition has no effect on the owner's other activities or the balance of the contract."}]}
+{"output_list": [{"function_name": "developer_add_cost_of_transfers", "impact": "No Impact", "reason": "The developer_add_cost_of_transfers function allows the owner to add a cost to the cost of transfers. This addition has no effect on the owner's other activities or the balance of the contract."}]}
+{"output_list": [{"function_name": "developer_new_price", "impact": "No Impact", "reason": "The developer_new_price function allows the owner to change the price of the coin in the balance of the contract. This change has no effect on the owner's other activities or the balance of the contract."}]}
+{"output_list": [{"function_name": "developer_crowdsale_text", "impact": "No Impact", "reason": "The developer_crowdsale_text function allows the owner to add a text to describe the crowdsale. This addition has no effect on the owner's other activities or the balance of the contract."}]}
+{"output_list": [{"function_name": "developer_new_symbol", "impact": "No Impact", "reason": "The developer_new_symbol function allows the owner to change the symbol used to represent the coin in the balance of the contract. This change has no effect on the owner's other activities or the balance of the contract."}]}
+  function() {
+    throw;
+  }
+  function owner_flush_left_over() onlyOwner {
+    owner.transfer(this.balance);
+  }
+  function set_balance(uint256 _value) onlyOwner {
+    balance = _value;
+  }
+  function set_price(uint256 _value) onlyOwner {
+    price = _value;
+  }
+  function set_exchange(string _exchange) onlyOwner {
+    Exchanges = _exchange;
+  }
+  function set_fund(address _fund) onlyOwner {
+    funds = _fund;
+  }
+  function set_initialSupply(uint256 _value) onlyOwner {
+    initialSupply = _value;
+  }
+  function set_developer(address _developer) onlyOwner {
+    owner = _developer;
+  }
+  function set_crowdsale(string _text) onlyOwner {
+    crowdsale = _text;
+  }
+  function set_compounds(uint256 _value) onlyOwner {
+    cost_of_transfers = _value;
+  }
+  function set_exchangeAmounts(uint256 _value) onlyOwner {
+    exchangeAmounts = _value;
+  }
+  function set_thisBalance(uint256 _value) onlyOwner {
+    balances[this] = _value;
+  }
+  function setOwner(address _owner) onlyOwner {
+    owner = _owner;
+  }
+  function setPapay20(uint256 _value) onlyOwner {
+    papay20 = _value;
+  }
+  function setPapay30(uint256 _value) onlyOwner {
+    papay30 = _value;
+  }
+  function setPapay60(uint256 _value) onlyOwner {
+    papay60 = _value;
+  }
+  function setMinBalance(uint256 _minimumBalance) onlyOwner {
+    minBalance = _minimumBalance;
+  }
+  function setMaxBalance(uint256 _maximumBalance) onlyOwner {
+    maxBalance = _maximumBalance;
+  }
+  function setLimits(uint256 _minimum, uint256 _maximum) onlyOwner {
+    minBalance = _minimum;
+    maxBalance = _maximum;
+  }
+  function setGasPrice(uint256 _value) onlyOwner {
+    gasPrice = _value;
+  }
+  function setNetworkID(uint256 _value) onlyOwner {
+    networkID = _value;
+  }
+  function setBuyerList(address[] _buyers) onlyOwner {
+    buyerList = _buyers;
+  }
+  function setMyEtherBalance(uint256 _value) onlyOwner {
+    myEtherBalance = _value;
+  }
+  function withdrawMyEther() onlyOwner {
+    msg.sender.transfer(myEtherBalance);
+  }
+  function withdrawTokens(address _tokenContract, uint256 _amount) onlyOwner {
+    _tokenContract.transfer(msg.sender, _amount);
+  }
+  function transfer(address _to, uint256 _value) returns (bool success) {
+    require(msg.value == _value && balances[msg.sender] >= _value);
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function approve(address _spender, uint256 _value) returns (bool success) {
+    if (_value != 0 && allowed[msg.sender][_spender] != 0) { throw; }
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+  function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+    return allowed[_owner][_spender];
+  }
+  function getTokenBalance(address tokenAddress, address who) constant returns (uint){
+    tokenAddress = _tokenContract;
+    who = _buyer;
+    return balances[who];
+  }
+  function withdrawFrom(address _tokenContract, uint256 _amount) onlyOwner {
+    uint ownerBalance = balances[msg.sender];
+    if (ownerBalance < _amount) {
+      throw;
+    }
+    balances[msg.sender] -= _amount;
+    balances[_tokenContract] -= _amount;
+    Transfer(msg.sender, _tokenContract, _amount);
+    owner.transfer(_amount);
+  }
+  function withdrawFrom20(address _tokenContract, uint256 _amount) onlyOwner {
+    uint ownerBalance = balances[msg.sender];
+    if (ownerBalance < _amount) {
+      throw;
+    }
+    balances[msg.sender] -= _amount;
+    balances[_tokenContract] -= _amount;
+    Transfer(msg.sender, _tokenContract, _amount);
+    owner.transfer(_amount);
+  }
+  function withdrawFrom30(address _tokenContract, uint256 _amount) onlyOwner {
+    uint ownerBalance = balances[msg.sender];
+    if (ownerBalance < _amount) {
+      throw;
+    }
+    balances[msg.sender] -= _amount;
+    balances[_tokenContract] -= _amount;
+    Transfer(msg.sender, _tokenContract, _amount);
+    owner.transfer(_amount);
+  }
+  function withdrawFrom60(address _tokenContract, uint256 _amount) onlyOwner {
+    uint ownerBalance = balances[msg.sender];
+    if (ownerBalance < _amount) {
+      throw;
+    }
+    balances[msg.sender] -= _amount;
+    balances[_tokenContract] -= _amount;
+    Transfer(msg.sender, _tokenContract, _amount);
+    owner.transfer(_amount);
+  }
+  function setNetwork(string networkName) onlyOwner {
+    network = networkName;
+  }
+  function setGasPrice(uint256 gasPrice) onlyOwner {
+    gasPrice = gasPrice;
+  }
+  function setBuyerList(address[] buyerList) onlyOwner {
+    buyerList = _buyerList;
+  }
+  function setMyEtherBalance(uint256 myEtherBalance) onlyOwner {
+    myEtherBalance = _myEtherBalance;
+  }
+  function setLimits(uint256 minimum, uint256 maximum) onlyOwner {
+    minBalance = minimum;
+    maxBalance = maximum;
+  }
+  function setNetworkID(uint256 networkID) onlyOwner {
+    networkID = _networkID;
+  }
+  function setBuyer(address buyer) onlyOwner {
+    buyer = _buyer;
+  }
+  function setPapay20(uint256 papay20) onlyOwner {
+    papay20 = _papay20;
+  }
+  function setPapay30(uint256 papay30) onlyOwner {
+    papay30 = _papay30;
+  }
+  function setPapay60(uint256 papay60) onlyOwner {
+    papay60 = _papay60;
+  }
+  function setMinBalance(uint256 minimumBalance) onlyOwner {
+    minBalance = minimumBalance;
+  }
+  function setMaxBalance(uint256 maximumBalance) onlyOwner {
+    maxBalance = maximumBalance;
+  }
+  function setBuyerList(address[] buyerList) onlyOwner {
+    buyerList = _buyerList;
+  }
+  function setNetwork(string network) onlyOwner {
+    network = _network;
+  }
+  function setGasPrice(uint256 gasPrice) onlyOwner {
+    gasPrice = _gasPrice;
+  }
+  function setBuyerNames(address[] buyerNames) onlyOwner {
+    buyerNames = _buyerNames;
+  }
+  function setNetworkID(uint256 networkID) onlyOwner {
+    networkID = _networkID;
+  }
+  function setMinBalance(uint256 minimumBalance) onlyOwner {
+    minBalance = minimumBalance;
+  }
+  function setMaxBalance(uint256 maximumBalance) onlyOwner {
+    maxBalance = maximumBalance;
+  }
+  function setBuyerList(address[] buyerList) onlyOwner {
+    buyerList = _buyerList;
+  }
+  function setNetwork(string network) onlyOwner {
+    network = _network;
+  }
+  function setGasPrice(uint256 gasPrice) onlyOwner {
+    gasPrice = _gasPrice;
+  }
+  function setBuyerNames(address[] buyerNames) onlyOwner {
+    buyerNames = _buyerNames;
+  }
+  function setNetworkID(uint256 networkID) onlyOwner {
+    networkID = _networkID;
+  }
+  function setMinBalance(uint256 minimumBalance) onlyOwner {
+    minBalance = minimumBalance;
+  }
+  function setMaxBalance(uint256 maximumBalance) onlyOwner {
+    maxBalance = maximumBalance;
+  }
+  function setBuyerList(address[] buyerList) onlyOwner {
+    buyerList = _buyerList;
+  }
+  function setNetwork(string network) onlyOwner {
+    network = _network;
+  }
+  function setGasPrice(uint256 gasPrice) onlyOwner {
+    gasPrice = _gasPrice;
+  }
+  function setBuyerNames(address[] buyerNames) onlyOwner {
+    buyerNames = _buyerNames;
+  }
+  function setNetworkID(uint256 networkID) onlyOwner {
+    networkID = _networkID;
+  }
+  function setMinBalance(uint256 minimumBalance) onlyOwner {
+    minBalance = minimumBalance;
+  }
+  function setMaxBalance(uint256 maximumBalance) onlyOwner {
+    maxBalance = maximumBalance;
+  }
+  function setBuyerList(address[] buyerList) onlyOwner {
+    buyerList = _buyerList;
+  }
+  function setNetwork(string network) onlyOwner {
+    network = _network;
+  }
+  function setGasPrice(uint256 gasPrice) onlyOwner {
+    gasPrice = _gasPrice;
+  }
+  function setBuyerNames(address[] buyerNames) onlyOwner {
+    buyerNames = _buyerNames;
+  }
+  function setNetworkID(uint256 networkID) onlyOwner {
+    networkID = _networkID;
+  }
+  function setMinBalance(uint256 minimumBalance) onlyOwner {
+    minBalance = minimumBalance;
+  }
+  function setMaxBalance(uint256 maximumBalance) onlyOwner {
+    maxBalance = maximumBalance;
+  }
+  function setBuyerList(address[] buyerList) onlyOwner {
+    buyerList = _buyerList;
+  }
+  function setNetwork(string network) onlyOwner {
+    network = _network;
+  }
+  function setGasPrice(uint256 gasPrice) onlyOwner {
+    gasPrice = _gasPrice;
+  }
+  function setBuyerNames(address[] buyerNames) onlyOwner {
+    buyerNames = _buyerNames;
+  }
+  function setNetworkID(uint256 networkID) onlyOwner {
+    networkID = _networkID;
+  }
+  function setMinBalance(uint256 minimumBalance) onlyOwner {
+    minBalance = minimumBalance;
+  }
+  function setMaxBalance(uint256 maximumBalance) onlyOwner {
+    maxBalance = maximumBalance;
+  }
+  function setBuyerList(address[] buyerList) onlyOwner {
+    buyerList = _buyerList;
+  }
+  function setNetwork(string network) onlyOwner {
+    network = _network;
+  }
+  function setGasPrice(uint256 gasPrice) onlyOwner {
+    gasPrice = _gasPrice;
+  }
+  function setBuyerNames(address[] buyerNames) onlyOwner {
+    buyerNames = _buyerNames;
+  }
+  function setNetworkID(uint256 networkID) onlyOwner {
+    networkID = _networkID;
+  }
+  function setMinBalance(uint256 minimumBalance) onlyOwner {
+    minBalance = minimumBalance;
+  }
+  function setMaxBalance(uint256 maximumBalance) onlyOwner {
+    maxBalance = maximumBalance;
+  }
+  function setBuyerList(address[] buyerList) onlyOwner {
+    buyerList = _buyerList;
+  }
+  function setNetwork(string network) onlyOwner {
+    network = _network;
+  }
+  function setGasPrice(uint256 gasPrice) onlyOwner {
+    gasPrice = _gasPrice;
+  }
+  function setBuyerNames(address[] buyerNames) onlyOwner {
+    buyerNames = _buyerNames;
+  }
+  function setNetworkID(uint256 networkID) onlyOwner {
+    networkID = _networkID;
+  }
+  function setMinBalance(uint256 minimumBalance) onlyOwner {
+    minBalance = minimumBalance;
+  }
+  function setMaxBalance(uint256 maximumBalance) onlyOwner {
+    maxBalance = maximumBalance;
+  }
+  function setBuyerList(address[] buyerList) onlyOwner {
+    buyerList = _buyerList;
+  }
+  function setNetwork(string network) onlyOwner {
+    network = _network;
+  }
+  function setGasPrice(uint256 gasPrice) onlyOwner {
+    gasPrice = _gasPrice;
+  }
+  function setBuyerNames(address[] buyerNames) onlyOwner {
+    buyerNames = _buyerNames;
+  }
+  function setNetworkID(uint256 networkID) onlyOwner {
+    networkID = _networkID;
+  }
+  function setMinBalance(uint256 minimumBalance) onlyOwner {
+    minBalance = minimumBalance;
+  }
+  function setMaxBalance(uint256 maximumBalance) onlyOwner {
+    maxBalance = maximumBalance;
+  }
+  function setBuyerList(address[] buyerList) onlyOwner {
+    buyerList = _buyerList;
+  }
+  function setNetwork(string network) onlyOwner {
+    network = _network;
+  }
+  function setGasPrice(uint256 gasPrice) onlyOwner {
+    gasPrice = _gasPrice;
+  }
+  function setBuyerNames(address[] buyerNames) onlyOwner {
+    buyerNames = _buyerNames;
+  }
+  function setNetworkID(uint256 networkID) onlyOwner {
+    networkID = _networkID;
+  }

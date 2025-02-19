@@ -1,0 +1,309 @@
+{"output_list": [{"function_name": "batchTransfer", "vulnerability": "Integer Overflow", "description": "The batchTransfer function in the ExtendeddToken contract allows an attacker to transfer a large amount of tokens to multiple recipients, allowing the attacker to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "batchTransfer", "vulnerability": "Integer Overflow", "reason": "The batchTransfer function in the ExtendeddToken contract allows an attacker to transfer a large amount of tokens to multiple recipients, allowing the attacker to set the balance of an arbitrary user to any value."}]}
+
+
+pragma solidity ^0.4;
+contract owned {
+    address public owner;
+    function owned() public {
+        owner = msg.sender;
+    }
+    function transferOwnership(address newOwner) onlyOwner public {
+        owner = newOwner;
+    }
+}
+contract tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData); }
+contract token { 
+    uint256 public totalSupply;
+    function balanceOf(address _owner) constant public returns (uint256 balance);
+    function transfer(address _to, uint256 _value) public returns (bool success);
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
+    function approve(address _spender, uint256 _value) public returns (bool success);
+    function allowance(address _owner, address _spender) constant public returns (uint256 remaining);
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+}
+contract StandardToken is token {
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        if (balances[msg.sender] >= _value && _value > 0) {
+            balances[msg.sender] -= _value;
+            balances[_to] += _value;
+            Transfer(msg.sender, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
+            balances[_to] += _value;
+            balances[_from] -= _value;
+            allowed[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function balanceOf(address _owner) constant public returns (uint256 balance) {
+        return balances[_owner];
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant public returns (uint256 remaining) {
+        return allowed[_owner][_spender];
+    }
+    mapping (address => uint256) balances;
+    mapping (address => mapping (address => uint256)) allowed;
+}
+contract Shark is owned, StandardToken {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function Shark(uint256 _sellPrice, uint256 _buyPrice) public {
+        sellPrice = _sellPrice;
+        buyPrice = _buyPrice;
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require(_to != 0x0);
+        require(balances[_from] >= _value);
+        require(balances[_to] + _value > balances[_to]);
+        require(!frozenAccount[_from]);
+        require(!frozenAccount[_to]);
+        balances[_from] -= _value;
+        balances[_to] += _value;
+        Transfer(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);      
+    }
+}
+contract CryptonCoin is Shark {
+    uint256 public sellPrice = 0.00001 * 1 ether;
+    uint256 public buyPrice = 0.00001 * 1 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);      
+    }
+}
+contract CryptonCoinToken is owned, StandardToken {
+    uint256 public sellPrice = 0.0001 * 1 ether;
+    uint256 public buyPrice = 0.0001 * 1 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);      
+    }
+}
+contract CryptonCoinCash is owned, StandardToken {
+    uint256 public sellPrice = 0.0001 * 1 ether;
+    uint256 public buyPrice = 0.0001 * 1 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);      
+    }
+}
+contract CryptonCoinToken is owned, StandardToken {
+    uint256 public sellPrice = 0.0001 * 1 ether;
+    uint256 public buyPrice = 0.0001 * 1 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);      
+    }
+}
+contract CryptonCoinCashToken is owned, StandardToken {
+    uint256 public sellPrice = 0.0001 * 1 ether;
+    uint256 public buyPrice = 0.00001 * 1 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);      
+    }
+}
+contract CryptonCoinCashToken2 is owned, StandardToken {
+    uint256 public sellPrice = 0.00001 * 1 ether;
+    uint256 public buyPrice = 0.00001 * 1 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);      
+    }
+}
+contract CryptonCoinToken2 is owned, StandardToken {
+    uint256 public sellPrice = 0.0001 * 1 ether;
+    uint256 public buyPrice = 0.0001 * 1 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);      
+    }
+}
+contract CryptonCoinToken3 is owned, StandardToken {
+    uint256 public sellPrice = 0.00001 * 1 ether;
+    uint256 public buyPrice = 0.0001 * 1 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }

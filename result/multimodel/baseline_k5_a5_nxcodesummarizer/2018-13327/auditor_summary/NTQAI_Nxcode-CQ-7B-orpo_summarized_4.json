@@ -1,0 +1,66 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
+            balances[_to] += _value;
+            balances[_from] -= _value;
+            allowed[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        } else { return false; }
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check if the transfer operation will cause an integer overflow. If the balances[_from] or allowed[_from][msg.sender] is too large, the transfer operation may result in an overflow, leading to incorrect balances and potentially loss of funds."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The approve function does not check if the msg.sender is the owner of the tokens. If the msg.sender is not the owner, they can approve any address to spend their tokens, potentially leading to unauthorized spending."
+        },
+        {
+            "function_name": "allowance",
+            "code": "function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+      return allowed[_owner][_spender];
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The allowance function does not check if the msg.sender is the owner of the tokens. If the msg.sender is not the owner, they can view the allowance of any address, potentially leading to unauthorized spending."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);        
+
+if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) { throw; }
+        return true;
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The approveAndCall function does not check if the msg.sender is the owner of the tokens. If the msg.sender is not the owner, they can approve any address to spend their tokens and call a function on that address, potentially leading to unauthorized spending."
+        },
+        {
+            "function_name": "ChuCunLingAIGO",
+            "code": "function ChuCunLingAIGO(
+        uint256 _initialAmount,
+        string _tokenName,
+        uint8 _decimalUnits,
+        string _tokenSymbol
+        ) {
+        balances[msg.sender] = _initialAmount;               
+
+totalSupply = _initialAmount;                        
+        name = _tokenName;                                   
+        decimals = _decimalUnits;                            
+        symbol = _tokenSymbol;                               
+    }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor has a typo in the variable name _initialAmount. It should be initialAmount instead of _initialAmount."
+        }
+    ]
+}

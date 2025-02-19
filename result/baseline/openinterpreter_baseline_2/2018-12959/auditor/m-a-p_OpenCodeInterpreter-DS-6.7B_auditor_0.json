@@ -1,0 +1,67 @@
+Based on the provided smart contract code, there are several vulnerabilities that can be identified. Here are the five most severe vulnerabilities:
+
+1. Integer Overflow:
+   - Function: `transferFrom`
+   - Vulnerability: The `transferFrom` function allows the transfer of tokens from one address to another. However, there is a potential integer overflow vulnerability in this function. If the `_value` parameter is greater than the balance of the `_from` address, it can cause the balance of the `_from` address to overflow and result in incorrect token transfers.
+   - Function Code:
+     ```
+     function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+         if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
+             balances[_to] += _value;
+             balances[_from] -= _value;
+             allowed[_from][msg.sender] -= _value;
+             Transfer(_from, _to, _value);
+             return true;
+         } else { return false; }
+     }
+     ```
+   - Reason: The condition `balances[_from] >= _value` checks if the balance of the `_from` address is greater than or equal to the `_value` parameter. However, if the `_value` parameter is greater than the balance of the `_from` address, it can cause the balance of the `_from` address to overflow and result in incorrect token transfers.
+
+2. Wrong Logic:
+   - Function: `approve`
+   - Vulnerability: The `approve` function allows the approval of tokens for a spender. However, there is a potential wrong logic vulnerability in this function. The `_value` parameter is directly assigned to the `allowed` mapping without any validation or checks. This can lead to incorrect token approvals and potential misuse.
+   - Function Code:
+     ```
+     function approve(address _spender, uint256 _value) returns (bool success) {
+         allowed[msg.sender][_spender] = _value;
+         Approval(msg.sender, _spender, _value);
+         return true;
+     }
+     ```
+   - Reason: The `approve` function directly assigns the `_value` parameter to the `allowed` mapping without any validation or checks. This can lead to incorrect token approvals and potential misuse.
+
+3. Bad Randomness:
+   - Function: None
+   - Vulnerability: The provided smart contract does not seem to have any functions that involve randomness. However, if there are any functions that rely on randomness, it is important to ensure that the randomness source is secure and cannot be influenced by external factors.
+
+4. Access Control:
+   - Function: `approveAndCall`
+   - Vulnerability: The `approveAndCall` function allows the approval of tokens for a spender and then calls a function on the spender with the approved tokens. However, there is a potential access control vulnerability in this function. The `_spender` address is directly called using the `call` function, which can lead to potential re-entrancy attacks and potential security risks.
+   - Function Code:
+     ```
+     function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+         allowed[msg.sender][_spender] = _value;
+         Approval(msg.sender, _spender, _value);
+         if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) { throw; }
+         return true;
+     }
+     ```
+   - Reason: The `approveAndCall` function allows the approval of tokens for a spender and then calls a function on the spender with the approved tokens. However, the `_spender` address is directly called using the `call` function, which can lead to potential re-entrancy attacks and potential security risks.
+
+5. Typo Constructor:
+   - Function: `AditusToken`
+   - Vulnerability: The `AditusToken` constructor function has a typo in the function name. The function name should be `AditusToken` instead of `AditusToken(`. This can lead to potential confusion and errors in the code.
+   - Function Code:
+     ```
+     function AditusToken(
+         ) {
+         balances[msg.sender] = 1000000000000000000000000000;               
+         totalSupply = 1000000000000000000000000000;                        
+         name = "Aditus";                                   
+         decimals = 18;                            
+         symbol = "ADI";                               
+     }
+     ```
+   - Reason: The function name `AditusToken(` is a typo and should be `AditusToken`. This can lead to potential confusion and errors in the code.
+
+Please note that these vulnerabilities are exploitable in real-world scenarios and can be used by attackers to manipulate the smart contract's behavior and potentially steal or manipulate tokens. It is important to address these vulnerabilities by implementing appropriate security measures and code reviews.

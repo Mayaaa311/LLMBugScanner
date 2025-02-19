@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to,uint256 _tokenId) public { require(_to != address(0)); require(_to != address(this)); require(_owns(msg.sender, _tokenId)); _transfer(msg.sender, _to, _tokenId); }",
+            "reason": "The transfer function does not check if the new owner's balance will overflow. If the new owner's balance is greater than the maximum possible value for a uint256, the transfer will fail. This can be exploited by a malicious contract that has a balance greater than the maximum possible value for a uint256."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from,address _to,uint256 _tokenId) external { require(_to != address(0)); require(_to != address(this)); require(_approvedFor(msg.sender, _tokenId)); require(_owns(_from, _tokenId)); _transfer(_from, _to, _tokenId); }",
+            "reason": "The transferFrom function does not check if the new owner's balance will overflow. If the new owner's balance is greater than the maximum possible value for a uint256, the transfer will fail. This can be exploited by a malicious contract that has a balance greater than the maximum possible value for a uint256."
+        },
+        {
+            "function_name": "mint",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mint(bytes32 _image,address _owner) public onlyOwner returns (uint){ uint256 newId = _mint(_image); _transfer(0, _owner, newId); Mint(items[newId].image,tokenIndexToOwner[newId],newId); return newId; }",
+            "reason": "The mint function does not check if the new owner's balance will overflow. If the new owner's balance is greater than the maximum possible value for a uint256, the mint will fail. This can be exploited by a malicious contract that has a balance greater than the maximum possible value for a uint256."
+        },
+        {
+            "function_name": "mintBatch",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintBatch(bytes32 _image1,bytes32 _image2,bytes32 _image3,bytes32 _image4,bytes32 _image5,address _owner) public onlyOwner returns (bool){ uint256 newId = _mint(_image1); _transfer(0, _owner, newId); Mint(_image1,tokenIndexToOwner[newId],newId); newId=_mint(_image2); _transfer(0, _owner, newId); Mint(_image2,tokenIndexToOwner[newId],newId); newId=_mint(_image3); _transfer(0, _owner, newId); Mint(_image3,tokenIndexToOwner[newId],newId); newId=_mint(_image4); _transfer(0, _owner, newId); Mint(_image4,tokenIndexToOwner[newId],newId); newId=_mint(_image5); _transfer(0, _owner, newId); Mint(_image5,tokenIndexToOwner[newId],newId); return true; }",
+            "reason": "The mintBatch function does not check if the new owner's balance will overflow. If the new owner's balance is greater than the maximum possible value for a uint256, the mintBatch will fail. This can be exploited by a malicious contract that has a balance greater than the maximum possible value for a uint256."
+        },
+        {
+            "function_name": "mintPack",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintPack(uint256 _price,bytes32 _image1,bytes32 _image2,bytes32 _image3,bytes32 _image4,bytes32 _image5,bytes32 _image6,bytes32 _image7,bytes32 _image8,bytes32 _image9,bytes32 _image10) public onlyOwner returns (bool){ uint256[10] memory tokens; tokens[0] = _mint(_image1); tokens[1] = _mint(_image2); tokens[2] = _mint(_image3); tokens[3] = _mint(_image4); tokens[4] = _mint(_image5); tokens[5] = _mint(_image6); tokens[6] = _mint(_image7); tokens[7] = _mint(_image8); tokens[8] = _mint(_image9); tokens[9] = _mint(_image10); Pack memory _pack = Pack({ tokens: tokens, price: _price }); MintPack(packs.push(_pack) - 1, _price,tokens[0],tokens[1],tokens[2],tokens[3],tokens[4],tokens[5],tokens[6],tokens[7],tokens[8],tokens[9]); return true; }",
+            "reason": "The mintPack function does not check if the new owner's balance will overflow. If the new owner's balance is greater than the maximum possible value for a uint256, the mintPack will fail. This can be exploited by a malicious contract that has a balance greater than the maximum possible value for a uint256."
+        }
+    ]
+}

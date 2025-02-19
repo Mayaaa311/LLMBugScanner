@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The vulnerability is due to the unchecked addition of `_mintedAmount` to `_totalSupply` in the `mintToken` function. This can lead to an integer overflow, allowing an attacker to mint an arbitrary large amount of tokens, effectively draining the contract's supply. The lack of overflow checks is a severe issue as it can lead to significant financial loss.",
+            "correctness": 9,
+            "severity": 9,
+            "profitability": 8
+        },
+        {
+            "function_name": "mine",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "Similar to the `mintToken` function, the `mine` function does not check for overflow when updating `balanceOf[_target]` and `miningStorage`. This can be exploited to overflow the storage variables, leading to a denial of service or the ability to mint unlimited tokens. The absence of overflow checks is a critical flaw.",
+            "correctness": 9,
+            "severity": 9,
+            "profitability": 8
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The `transferFrom` function returns `false` only if the sender does not have enough balance or allowance, which is incorrect. It should return `false` if either condition is not met, ensuring the transfer only proceeds if both balance and allowance are sufficient. This logic error can lead to incorrect functioning of the contract.",
+            "correctness": 7,
+            "severity": 6,
+            "profitability": 5
+        },
+        {
+            "function_name": "approve",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The `approve` function does not check for overflow when setting the allowance, which can be exploited to approve a very large allowance. This is a significant vulnerability as it allows an attacker to approve an arbitrary large amount of tokens for spending, leading to potential theft.",
+            "correctness": 8,
+            "severity": 8,
+            "profitability": 7
+        },
+        {
+            "function_name": "ToOwner",
+            "auditor_idx": 0,
+            "vulnerability": "Typo Constructor",
+            "criticism": "The function `ToOwner` is mistakenly named as a constructor due to a typo. While this might not directly lead to vulnerabilities, it increases the risk of unintended function exposure and confusion among users and developers. It would be better to rename this function to avoid confusion.",
+            "correctness": 5,
+            "severity": 4,
+            "profitability": 3
+        }
+    ]
+}

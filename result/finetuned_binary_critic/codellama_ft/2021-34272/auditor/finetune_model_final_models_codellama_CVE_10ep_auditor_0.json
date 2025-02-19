@@ -1,0 +1,262 @@
+{"output_list": [{"output_list": [{"function_name": "mintToken", "code": "function mintToken(uint256 _initialSupply, uint8 _tokenDecimal, uint _tokenNameLength, uint _tokenSymbolLength, bytes _name, bytes _symbol) public {
+        totalSupply = _initialSupply * 10 ** uint256(_tokenDecimal);  
+        balanceOf[msg.sender] = totalSupply;                
+        name = _name;                                   
+        symbol = _symbol;                               
+    }
+}
+]
+}
+}
+
+
+contract SafeMath {
+  function safeAdd(uint a, uint b) public pure returns (uint c) {
+    uint c = a + b;
+    require(c >= a);
+    return c;
+  }
+  function safeSub(uint a, uint b) public pure returns (uint) {
+    require(b <= a);
+    return a - b;
+  }
+  function safeMul(uint a, uint b) public pure returns (uint c) {
+    uint c = a * b;
+    require(a == 0 || c / a == b);
+    return c;
+  }
+  function safeDiv(uint a, uint b) public pure returns (uint c) {
+    require(b > 0);
+    uint c = a / b;
+    require(a == b * c + a % b == 0);
+    return c;
+  }
+}
+contract ERC20Safe is ERC20, SafeMath {
+  function safeAdd(uint a, uint b) public returns (uint) {
+    uint c = a + b;
+    require(c >= a);
+    return c;
+  }
+  function safeSub(uint a, uint b) public returns (uint) {
+    require(b <= a);
+    return a - b;
+  }
+  function safeMul(uint a, uint b) public returns (uint) {
+    uint c = a * b;
+    require(a == 0 || c / a == b);
+    return c;
+  }
+  function safeDiv(uint a, uint b) public returns (uint) {
+    require(b > 0);
+    uint c = a / b;
+    require(a == b * c + a % b == 0);
+    return c;
+  }
+}
+contract CryptoniteCoin is ERC20Safe {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    bool public isOpened = false;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoniteCoin(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) ERC20Safe(initialSupply, tokenName, tokenSymbol) public {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function setExchange(bool isOpen) onlyOwner public {
+        isOpened = isOpen;
+    }
+    function buy() payable public {
+        require(isOpened);
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        require(isOpened);
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CryptoniteCoinPreSale is CryptoniteCoin {
+    uint256 public preSaleTokens = 0;
+    uint256 public preSaleMaxTokens = 10000000000000000000000000;
+    uint256 public preSaleMaxAmount = 100000000000000000000000000;
+    uint256 public preSaleMinAmount = 100000000000000000000000000;
+    uint256 public preSaleTokensSold = 0;
+    uint256 public preSaleTokensRemaining = 0;
+    uint256 public preSaleStartTime = 0;
+    uint256 public preSaleEndTime = 0;
+    mapping (address => uint256) public preSaleTokensRemaining;
+    mapping (address => uint256) public preSaleTokensSold;
+    mapping (address => uint256) public preSaleTokensBought;
+    mapping (address => uint256) public preSaleTokensRefunded;
+    event PreSaleTokensSold(address indexed from, uint256 amount);
+    event PreSaleTokensRefunded(address indexed to, uint256 amount);
+    function CryptoniteCoinPreSale(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) CryptoniteCoin(initialSupply, tokenName, tokenSymbol) public {}
+    function mintPreSaleTokens(address target, uint256 mintedAmount) onlyOwner public {
+        require(preSaleTokensRemaining[target] >= mintedAmount);
+        require(preSaleTokensSold + mintedAmount <= preSaleMaxTokens);
+        require(preSaleTokensSold + mintedAmount <= preSaleTokensRemaining[target]);
+        preSaleTokensRemaining[target] -= mintedAmount;
+        preSaleTokensSold += mintedAmount;
+        preSaleTokensBought[target] += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function refundPreSaleTokens(address target) onlyOwner public {
+        require(preSaleTokensSold > 0);
+        require(preSaleTokensRefunded[target] == 0);
+        uint256 refundAmount = preSaleTokensBought[target];
+        preSaleTokensRefunded[target] = refundAmount;
+        preSaleTokensBought[target] = 0;
+        target.transfer(refundAmount * sellPrice);
+        PreSaleTokensRefunded(target, refundAmount);
+    }
+    function setPreSaleStartTime(uint256 newPreSaleStartTime) onlyOwner public {
+        preSaleStartTime = newPreSaleStartTime;
+    }
+    function setPreSaleEndTime(uint256 newPreSaleEndTime) onlyOwner public {
+        preSaleEndTime = newPreSaleEndTime;
+    }
+    function setPreSaleMaxTokens(uint256 newPreSaleMaxTokens) onlyOwner public {
+        preSaleMaxTokens = newPreSaleMaxTokens;
+    }
+    function setPreSaleMaxAmount(uint256 newPreSaleMaxAmount) onlyOwner public {
+        preSaleMaxAmount = newPreSaleMaxAmount;
+    }
+    function setPreSaleMinAmount(uint256 newPreSaleMinAmount) onlyOwner public {
+        preSaleMinAmount = newPreSaleMinAmount;
+    }
+    function setPreSaleTokensRemaining(address target, uint256 newPreSaleTokensRemaining) onlyOwner public {
+        preSaleTokensRemaining[target] = newPreSaleTokensRemaining;
+    }
+    function setPreSaleTokensSold(address target, uint256 newPreSaleTokensSold) onlyOwner public {
+        preSaleTokensSold[target] = newPreSaleTokensSold;
+    }
+    function setPreSaleTokensBought(address target, uint256 newPreSaleTokensBought) onlyOwner public {
+        preSaleTokensBought[target] = newPreSaleTokensBought;
+    }
+    function setPreSaleTokensRefunded(address target, uint256 newPreSaleTokensRefunded) onlyOwner public {
+        preSaleTokensRefunded[target] = newPreSaleTokensRefunded;
+    }
+    function setPreSaleTokensRemaining(uint256 newPreSaleTokensRemaining) onlyOwner public {
+        preSaleTokensRemaining = newPreSaleTokensRemaining;
+    }
+    function setPreSaleTokensSold(uint256 newPreSaleTokensSold) onlyOwner public {
+        preSaleTokensSold = newPreSaleTokensSold;
+    }
+    function setPreSaleTokensRemaining(address target, uint256 newPreSaleTokensRemaining) onlyOwner public {
+        preSaleTokensRemaining[target] = newPreSaleTokensRemaining;
+    }
+    function setPreSaleTokensBought(address target, uint256 newPreSaleTokensBought) onlyOwner public {
+        preSaleTokensBought[target] = newPreSaleTokensBought;
+    }
+    function setPreSaleTokensRefunded(address target, uint256 newPreSaleTokensRefunded) onlyOwner public {
+        preSaleTokensRefunded[target] = newPreSaleTokensRefunded;
+    }
+    function setPreSaleTokensBought(uint256 newPreSaleTokensBought) onlyOwner public {
+        preSaleTokensBought = newPreSaleTokensBought;
+    }
+    function setPreSaleTokensRefunded(uint256 newPreSaleTokensRefunded) onlyOwner public {
+        preSaleTokensRefunded = newPreSaleTokensRefunded;
+    }
+    function setPreSaleTokensRemaining(uint256 newPreSaleTokensRemaining) onlyOwner public {
+        preSaleTokensRemaining = newPreSaleTokensRemaining;
+    }
+    function setPreSaleTokensSold(uint256 newPreSaleTokensSold) onlyOwner public {
+        preSaleTokensSold = newPreSaleTokensSold;
+    }
+    function setPreSaleTokensRemaining(address target, uint256 newPreSaleTokensRemaining) onlyOwner public {
+        preSaleTokensRemaining[target] = newPreSaleTokensRemaining;
+    }
+    function setPreSaleTokensSold(address target, uint256 newPreSaleTokensSold) onlyOwner public {
+        preSaleTokensSold[target] = newPreSaleTokensSold;
+    }
+    function setPreSaleTokensBought(address target, uint256 newPreSaleTokensBought) onlyOwner public {
+        preSaleTokensBought[target] = newPreSaleTokensBought;
+    }
+    function setPreSaleTokensRefunded(address target, uint256 newPreSaleTokensRefunded) onlyOwner public {
+        preSaleTokensRefunded[target] = newPreSaleTokensRefunded;
+    }
+    function setPreSaleStartTime(uint256 newPreSaleStartTime) onlyOwner public {
+        preSaleStartTime = newPreSaleStartTime;
+    }
+    function setPreSaleEndTime(uint256 newPreSaleEndTime) onlyOwner public {
+        preSaleEndTime = newPreSaleEndTime;
+    }
+    function setPreSaleMaxTokens(uint256 newPreSaleMaxTokens) onlyOwner public {
+        preSaleMaxTokens = newPreSaleMaxTokens;
+    }
+    function setPreSaleMaxAmount(uint256 newPreSaleMaxAmount) onlyOwner public {
+        preSaleMaxAmount = newPreSaleMaxAmount;
+    }
+    function setPreSaleMinAmount(uint256 newPreSaleMinAmount) onlyOwner public {
+        preSaleMinAmount = newPreSaleMinAmount;
+    }
+    function setPreSaleTokensRemaining(uint256 newPreSaleTokensRemaining) onlyOwner public {
+        preSaleTokensRemaining = newPreSaleTokensRemaining;
+    }
+    function setPreSaleTokensSold(uint256 newPreSaleTokensSold) onlyOwner public {
+        preSaleTokensSold = newPreSaleTokensSold;
+    }
+    function setPreSaleTokensBought(uint256 newPreSaleTokensBought) onlyOwner public {
+        preSaleTokensBought = newPreSaleTokensBought;
+    }
+    function setPreSaleTokensRefunded(uint256 newPreSaleTokensRefunded) onlyOwner public {
+        preSaleTokensRefunded = newPreSaleTokensRefunded;
+    }
+    function setPreSaleTokensRemaining(address target, uint256 newPreSaleTokensRemaining) onlyOwner public {
+        preSaleTokensRemaining[target] = newPreSaleTokensRemaining;
+    }
+    function setPreSaleTokensSold(address target, uint256 newPreSaleTokensSold) onlyOwner public {
+        preSaleTokensSold[target] = newPreSaleTokensSold;
+    }
+    function setPreSaleTokensBought(address target, uint256 newPreSaleTokensBought) onlyOwner public {
+        preSaleTokensBought[target] = newPreSaleTokensBought;
+    }
+    function setPreSaleTokensRefunded(address target, uint256 newPreSaleTokensRefunded) onlyOwner public {
+        preSaleTokensRefunded[target] = newPreSaleTokensRefunded;
+    }
+    function setPreSaleStartTime(uint256 newPreSaleStartTime) onlyOwner public {
+        preSaleStartTime = newPreSaleStartTime;
+    }
+    function setPreSaleEndTime(uint256 newPreSaleEndTime) onlyOwner public {
+        preSaleEndTime = newPreSaleEndTime;
+    }
+    function setPreSaleMaxTokens(uint256 newPreSaleMaxTokens) onlyOwner public {
+        preSaleMaxTokens = newPreSaleMaxTokens;
+    }
+    function setPreSaleMaxAmount(uint256 newPreSaleMaxAmount) onlyOwner public {
+        preSaleMaxAmount = newPreSaleMaxAmount;
+    }
+    function setPreSaleMinAmount(uint256 newPreSaleMinAmount) onlyOwner public {
+        preSaleMinAmount = newPreSaleMinAmount;
+    }
+    function buyPreSaleTokens(uint256 amount) payable public {
+        require(amount >= preSaleMinAmount);
+        require(amount <= preSaleMaxAmount);
+        require(preSaleTokensRemaining >= amount);
+        require(preSaleStartTime <= now);
+        require(preSaleEndTime >= now);
+        uint256 tokens = amount * 1

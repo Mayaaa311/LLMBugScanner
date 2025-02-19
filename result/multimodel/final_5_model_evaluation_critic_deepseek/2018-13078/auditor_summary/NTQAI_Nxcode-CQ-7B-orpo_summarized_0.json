@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function has an integer overflow vulnerability. The initial check 'if (balanceOf[msg.sender] < _value) revert();' is correct, but the subsequent check 'if (balanceOf[_to] + _value < balanceOf[_to]) revert();' is redundant and can be bypassed. An attacker can set the balance of the target to a very high value, and then transfer funds from the target to the attacker's account. This is exploitable in real world and beneficial to attackers."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferFrom' function has an integer overflow vulnerability. The initial check 'if (balanceOf[_from] < _value) revert();' is correct, but the subsequent check 'if (balanceOf[_to] + _value < balanceOf[_to]) revert();' is redundant and can be bypassed. An attacker can set the balance of the target to a very high value, and then transfer funds from the target to the attacker's account. This is exploitable in real world and beneficial to attackers."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'mintToken' function has a wrong logic vulnerability. It allows the owner to set the balance of any account to a very high value, and then transfer funds from the owner's account to the attacker's account. This is exploitable in real world and beneficial to attackers."
+        },
+        {
+            "function_name": "freezeAccount",
+            "vulnerability": "Access Control",
+            "reason": "The 'freezeAccount' function has an access control vulnerability. It allows the owner to set the 'frozenAccount' mapping to true for any account, and then transfer funds from the target account to the attacker's account. This is exploitable in real world and beneficial to attackers."
+        },
+        {
+            "function_name": "constructor",
+            "vulnerability": "Typo Constructor",
+            "reason": "The 'constructor' function has a typo, it should be 'function owned() public' instead of 'function owned() public'. This is exploitable in real world and beneficial to attackers."
+        }
+    ]
+}

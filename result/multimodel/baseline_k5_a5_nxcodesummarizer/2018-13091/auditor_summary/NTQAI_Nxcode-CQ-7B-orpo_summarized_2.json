@@ -1,0 +1,40 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {tbalanceOf[target] += mintedAmount;ttotalSupply += mintedAmount;tTransfer(0, owner, mintedAmount);tTransfer(owner, target, mintedAmount);}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function has an integer overflow vulnerability. The totalSupply variable is not properly checked for overflow. This can lead to a situation where the totalSupply variable overflows and the contract stops functioning."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public {t_transfer(msg.sender, _to, _value);t}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The transfer function has a wrong logic. The _transfer function checks if the sender has enough balance to transfer the amount. However, it does not check if the recipient has enough balance to receive the amount. This can lead to a situation where the sender has enough balance but the recipient does not have enough balance to receive the amount."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {trequire(_value <= allowance[_from][msg.sender]);tallowance[_from][msg.sender] -= _value;t_transfer(_from, _to, _value);treturn true;t}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The transferFrom function has a wrong logic. The function checks if the allowance of the sender is greater than the value to be transferred. However, it does not check if the recipient has enough balance to receive the amount. This can lead to a situation where the sender has enough allowance but the recipient does not have enough allowance to receive the amount."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData)tpublictreturns (bool success) {ttokenRecipient spender = tokenRecipient(_spender);tif (approve(_spender, _value)) {ttspender.receiveApproval(msg.sender, _value, this, _extraData);ttreturn true;t}t}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The approveAndCall function has a wrong logic. The function checks if the approve function is successful. However, it does not check if the spender has enough allowance to receive the amount. This can lead to a situation where the sender has enough allowance but the spender does not have enough allowance to receive the amount."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) {trequire(balanceOf[msg.sender] >= _value);tbalanceOf[msg.sender] -= _value;ttotalSupply -= _value;tBurn(msg.sender, _value);treturn true;t}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function has an integer overflow vulnerability. The totalSupply variable is not properly checked for overflow. This can lead to a situation where the totalSupply variable overflows and the contract stops functioning."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) public returns (bool success) {trequire(balanceOf[_from] >= _value);trequire(_value <= allowance[_from][msg.sender]);tbalanceOf[_from] -= _value;tallowance[_from][msg.sender] -= _value;ttotalSupply -= _value;tBurn(_from, _value);treturn true;t}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The burnFrom function has a wrong logic. The function checks if the sender has enough balance to burn the amount. However, it does not check if the recipient has enough balance to receive the amount. This can lead to a situation where the sender has enough balance but the recipient does not have enough balance to receive the amount."
+        }
+    ]
+}

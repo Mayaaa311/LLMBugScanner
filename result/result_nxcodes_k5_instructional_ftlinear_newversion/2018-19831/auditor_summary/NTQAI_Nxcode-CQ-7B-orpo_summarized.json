@@ -1,0 +1,161 @@
+{
+    "output_list": [
+        {
+            "function_name": "Mining24",
+            "code": "    function Mining24 (uint256 _value, uint256 _minReq) public {
+        owner = msg.sender;
+        value = _value;
+        minReq = _minReq;
+        balances[msg.sender] = totalDistributed;
+    }
+     function setParameters (uint256 _value, uint256 _minReq) onlyOwner public {
+        value = _value;
+        minReq = _minReq;
+    }
+    function transferOwnership(address newOwner) onlyOwner public {
+        if (newOwner != address(0)) {
+            owner = newOwner;
+        }
+    }
+    function enableWhitelist(address[] addresses) onlyOwner public {
+        for (uint i = 0; i < addresses.length; i++) {
+            blacklist[addresses[i]] = false;
+        }
+    }
+    function disableWhitelist(address[] addresses) onlyOwner public {
+        for (uint i = 0; i < addresses.length; i++) {
+            blacklist[addresses[i]] = true;
+        }
+    }
+    function finishDistribution() onlyOwner canDistr public returns (bool) {
+        distributionFinished = true;
+        DistrFinished();
+        return true;
+    }
+    function distr(address _to, uint256 _amount) canDistr private returns (bool) {
+        totalDistributed = totalDistributed.add(_amount);
+        totalRemaining = totalRemaining.sub(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        Distr(_to, _amount);
+        Transfer(address(0), _to, _amount);
+        return true;
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }
+    function airdrop(address[] addresses) onlyOwner canDistr public {
+        require(addresses.length <= 255);
+        require(value <= totalRemaining);
+        for (uint i = 0; i < addresses.length; i++) {
+            require(value <= totalRemaining);
+            distr(addresses[i], value);
+        }
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }
+    function distribution(address[] addresses, uint256 amount) onlyOwner canDistr public {
+        require(addresses.length <= 255);
+        require(amount <= totalRemaining);
+        for (uint i = 0; i < addresses.length; i++) {
+            require(amount <= totalRemaining);
+            distr(addresses[i], amount);
+        }
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }
+    function distributeAmounts(address[] addresses, uint256[] amounts) onlyOwner canDistr public {
+        require(addresses.length <= 255);
+        require(addresses.length == amounts.length);
+        for (uint8 i = 0; i < addresses.length; i++) {
+            require(amounts[i] <= totalRemaining);
+            distr(addresses[i], amounts[i]);
+            if (totalDistributed >= totalSupply) {
+                distributionFinished = true;
+            }
+        }
+    }
+    uint price = 0.000001 ether;
+    function() public payable {
+        uint toMint = msg.value/price;
+        balances[msg.sender]+=toMint;
+        Transfer(0,msg.sender,toMint);
+     }
+    function getTokens() payable canDistr onlyWhitelist public {
+        require(value <= totalRemaining);
+        address investor = msg.sender;
+        uint256 toGive = value;
+        if (msg.value < minReq){
+            toGive = value.sub(value);
+        }
+        distr(investor, toGive);
+        if (toGive > 0) {
+            blacklist[investor] = true;
+        }
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }
+    function balanceOf(address _owner) constant public returns (uint256) {
+t    return balances[_owner];
+    }
+    modifier onlyPayloadSize(uint size) {
+        assert(msg.data.length >= size + 4);
+        _;
+    }
+    function transfer(address _to, uint256 _amount) onlyPayloadSize(2 * 32) public returns (bool success) {
+        require(_to != address(0));
+        require(_amount <= balances[msg.sender]);
+        balances[msg.sender] = balances[msg.sender].sub(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        Transfer(msg.sender, _to, _amount);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _amount) onlyPayloadSize(3 * 32) public returns (bool success) {
+        require(_to != address(0));
+        require(_amount <= balances[_from]);
+        require(_amount <= allowed[_from][msg.sender]);
+        balances[_from] = balances[_from].sub(_amount);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        Transfer(_from, _to, _amount);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        if (_value != 0 && allowed[msg.sender][_spender] != 0) { return false; }
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant public returns (uint256) {
+        return allowed[_owner][_spender];
+    }
+    function getTokenBalance(address tokenAddress, address who) constant public returns (uint){
+        ForeignToken t = ForeignToken(tokenAddress);
+        uint bal = t.balanceOf(who);
+        return bal;
+    }
+    function withdraw() onlyOwner public {
+        uint256 etherBalance = this.balance;
+        owner.transfer(etherBalance);
+    }
+    function burn(uint256 _value) onlyOwner public {
+        require(_value <= balances[msg.sender]);
+        address burner = msg.sender;
+        balances[burner] = balances[burner].sub(_value);
+        totalSupply = totalSupply.sub(_value);
+        totalDistributed = totalDistributed.sub(_value);
+        Burn(burner, _value);
+    }
+    function withdrawForeignTokens(address _tokenContract) onlyOwner public returns (bool) {
+        ForeignToken token = ForeignToken(_tokenContract);
+        uint256 amount = token.balanceOf(address(this));
+        return token.transfer(owner, amount);
+    }
+",
+            "vulnerability": "None",
+            "reason": "The code snippet provided is a part of a Solidity smart contract. It contains various functions and modifiers used in the contract. There are no known vulnerabilities in this code."
+        }
+    ]
+}

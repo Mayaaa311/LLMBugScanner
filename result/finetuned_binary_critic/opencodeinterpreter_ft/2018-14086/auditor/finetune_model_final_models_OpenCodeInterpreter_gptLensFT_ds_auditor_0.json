@@ -1,0 +1,68 @@
+{
+  "output_list": [
+    {
+      "function_name": "mintToken",
+      "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+            balanceOf[target] += mintedAmount;
+            totalSupply += mintedAmount;
+            Transfer(0, owner, mintedAmount);
+            Transfer(owner, target, mintedAmount);
+        }",
+      "vulnerability": "Integer Overflow",
+      "reason": "The mintToken function has an integer overflow where 'mintedAmount' is added to 'totalSupply' without proper check, allowing owner to increase total supply arbitrarily."
+    },
+    {
+      "function_name": "sell",
+      "code": "function sell(uint amount) returns (uint revenue){
+            if (balanceOf[msg.sender] < amount ) throw;        
+            balanceOf[this] += amount;                         
+            balanceOf[msg.sender] -= amount;                   
+            revenue = amount * sellPrice;                      
+            msg.sender.send(revenue);                          
+            Transfer(msg.sender, this, amount);                
+            return revenue;                                    
+        }",
+      "vulnerability": "Integer Overflow",
+      "reason": "The sell function has an integer overflow where 'amount * sellPrice' can be zero, allowing owner to arbitrarily increase 'revenue'."
+    },
+    {
+      "function_name": "buy",
+      "code": "function buy() returns (uint amount){
+            amount = msg.value / buyPrice;                     
+            if (balanceOf[this] < amount) throw;               
+            balanceOf[msg.sender] += amount;                   
+            balanceOf[this] -= amount;                         
+            Transfer(this, msg.sender, amount);                
+            return amount;                                     
+        }",
+      "vulnerability": "Integer Overflow",
+      "reason": "The buy function has an integer overflow where 'amount * buyPrice' can be zero, allowing owner to arbitrarily increase 'amount'."
+    },
+    {
+      "function_name": "transfer",
+      "code": "function transfer(address _to, uint256 _value) {
+            if (frozenAccount[msg.sender]) throw;
+        if (balanceOf[msg.sender] < _value) throw;           
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+        if(msg.sender.balance<minBalanceForAccounts) sell((minBalanceForAccounts-msg.sender.balance)/sellPrice);
+        if(_to.balance<minBalanceForAccounts)      _to.send(sell((minBalanceForAccounts-_to.balance)/sellPrice));
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }",
+      "vulnerability": "Integer Overflow",
+      "reason": "The transfer function has an integer overflow where 'balanceOf[_to] + _value < balanceOf[_to]' can be true, allowing owner to arbitrarily increase 'balanceOf[_to]'."
+    },
+    {
+      "function_name": "mintToken",
+      "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+            balanceOf[target] += mintedAmount;
+            totalSupply += mintedAmount;
+            Transfer(0, owner, mintedAmount);
+            Transfer(owner, target, mintedAmount);
+        }",
+      "vulnerability": "Access Control",
+      "reason": "The mintToken function allows minting of tokens to any address, allowing owner to increase total supply arbitrarily."
+    }
+  ]
+}

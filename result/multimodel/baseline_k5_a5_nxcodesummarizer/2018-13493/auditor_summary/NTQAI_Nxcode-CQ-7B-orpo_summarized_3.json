@@ -1,0 +1,70 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public returns (bool) {
+    mintedAmount = mintedAmount * 10**18;
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+    return true;
+}",
+            "vulnerability": "Token Devalue",
+            "reason": "The function allows the owner to mint new tokens at will, which can lead to devaluation of the token's value as the total supply increases without corresponding increase in value."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+    sellTokenPerEther = newSellPrice;
+    buyTokenPerEther = newBuyPrice;
+}",
+            "vulnerability": "Token Devalue",
+            "reason": "The function allows the owner to set prices for buying and selling tokens, which can be manipulated to devalue the token by setting a very high sell price or a very low buy price."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public returns (bool) {
+    mintedAmount = mintedAmount * 10**18;
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+    return true;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The function allows the owner to mint new tokens at will, which can lead to devaluation of the token's value as the total supply increases without corresponding increase in value."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+    sellTokenPerEther = newSellPrice;
+    buyTokenPerEther = newBuyPrice;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The function allows the owner to set prices for buying and selling tokens, which can be manipulated to devalue the token by setting a very high sell price or a very low buy price."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public returns (bool) {
+    mintedAmount = mintedAmount * 10**18;
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function does not properly handle the multiplication of mintedAmount by 10**18, which can lead to an integer overflow and manipulation of the total supply."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+    sellTokenPerEther = newSellPrice;
+    buyTokenPerEther = newBuyPrice;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function does not properly handle the setting of prices, which can lead to an integer overflow and manipulation of the total supply."
+        }
+    ]
+}

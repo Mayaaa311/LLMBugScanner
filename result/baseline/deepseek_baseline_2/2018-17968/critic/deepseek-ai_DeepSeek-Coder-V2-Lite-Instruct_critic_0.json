@@ -1,0 +1,51 @@
+ ```json
+{
+    "output_list": [
+        {
+            "function_name": "enterWithReferral",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The function `enterWithReferral` allows users to enter a room by specifying a referrer, which can be exploited by attackers to gain access to privileged functions or manipulate the room creation process. The referrer's address is directly used in the room creation logic, allowing an attacker to specify a contract address as the referrer to control the room creation process. This vulnerability is severe because it bypasses the intended access control mechanisms and can lead to significant financial loss.",
+            "correctness": 8,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "executeRoom",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The function `executeRoom` transfers fees to the CTO and CEO before determining the dead seat, which can lead to the contract being drained of funds before the correct dead seat is calculated. This vulnerability can be exploited by attackers to manipulate the distribution of funds and potentially gain control over the contract's funds. The incorrect logic can result in significant financial loss and undermine the trust in the contract.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 6
+        },
+        {
+            "function_name": "distributeFunds",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function `distributeFunds` uses `SafeMath.div` to divide the room balance by 5, which can lead to an integer overflow if the room balance is large enough. This overflow can cause the division to return a much larger value than intended, leading to incorrect distribution of funds and potential theft of funds from the contract. The vulnerability is significant because it can result in substantial financial loss and can be exploited to manipulate the contract's financial outcomes.",
+            "correctness": 6,
+            "severity": 8,
+            "profitability": 5
+        },
+        {
+            "function_name": "random",
+            "auditor_idx": 0,
+            "vulnerability": "Bad Randomness",
+            "criticism": "The function `random` uses block.timestamp and block.difficulty directly in the keccak256 hash function to generate a random number, which is predictable and can be manipulated by attackers to influence the outcome. This vulnerability can lead to potential exploitation of other vulnerabilities in the contract, particularly in scenarios where the outcome of the random number is critical to the contract's logic.",
+            "correctness": 5,
+            "severity": 7,
+            "profitability": 4
+        },
+        {
+            "function_name": "RuletkaIo",
+            "auditor_idx": 0,
+            "vulnerability": "Typo Constructor",
+            "criticism": "There is a typo in the constructor function `RuletkaIo` where 'CEO' is assigned using 'msg.sender' instead of '_newCEO'. This typo can lead to incorrect initialization of the CEO address, potentially causing the contract to be controlled by an unintended party. The severity of this vulnerability is high because it can lead to unauthorized control over the contract and significant financial loss.",
+            "correctness": 4,
+            "severity": 9,
+            "profitability": 3
+        }
+    ]
+}
+```

@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0, owner, mintedAmount); Transfer(owner, target, mintedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function allows the owner to mint tokens to any address. However, the totalSupply is not checked for overflow. If the mintedAmount is too large, it will cause an integer overflow and the totalSupply will be incorrect."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal { require(_to != 0x0); require(balanceOf[_from] >= _value); require(balanceOf[_to] + _value > balanceOf[_to]); uint previousBalances = balanceOf[_from] + balanceOf[_to]; balanceOf[_from] -= _value; balanceOf[_to] += _value; Transfer(_from, _to, _value); assert(balanceOf[_from] + balanceOf[_to] == previousBalances); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The _transfer function is used to transfer tokens from one address to another. However, the balanceOf[_to] is not checked for overflow. If the balanceOf[_to] + _value is too large, it will cause an integer overflow and the balanceOf[_to] will be incorrect."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) { require(balanceOf[msg.sender] >= _value); balanceOf[msg.sender] -= _value; totalSupply -= _value; Burn(msg.sender, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function is used to burn tokens from the sender's balance. However, the totalSupply is not checked for overflow. If the balanceOf[msg.sender] - _value is too large, it will cause an integer overflow and the totalSupply will be incorrect."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) public returns (bool success) { require(balanceOf[_from] >= _value); require(_value <= allowance[_from][msg.sender]); balanceOf[_from] -= _value; allowance[_from][msg.sender] -= _value; totalSupply -= _value; Burn(_from, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burnFrom function is used to burn tokens from the sender's balance. However, the totalSupply is not checked for overflow. If the balanceOf[_from] - _value is too large, it will cause an integer overflow and the totalSupply will be incorrect."
+        },
+        {
+            "function_name": "distributeToken",
+            "code": "function distributeToken(address[] addresses, uint256 _value) onlyOwner { for (uint i = 0; i < addresses.length; i++) { balanceOf[owner] -= _value; balanceOf[addresses[i]] += _value; Transfer(owner, addresses[i], _value); } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The distributeToken function is used to distribute tokens to a list of addresses. However, the balanceOf[owner] is not checked for overflow. If the balanceOf[owner] - _value is too large, it will cause an integer overflow and the balanceOf[owner] will be incorrect."
+        }
+    ]
+}

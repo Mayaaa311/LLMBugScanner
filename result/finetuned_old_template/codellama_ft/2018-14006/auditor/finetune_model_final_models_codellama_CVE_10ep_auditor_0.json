@@ -1,0 +1,320 @@
+{"output_list": [
+    {
+        "function_name": "initialSupply",
+        "vulnerability": "Integer Overflow",
+        "description": "The initialSupply function returns an incorrect value, allowing an attacker to set the balance of an arbitrary user to any value.",
+        "severity": "High",
+        "recommendations": [
+            {
+                "function_name": "initialSupply",
+                "vulnerability": "Integer Overflow",
+                "description": "The initialSupply function returns an incorrect value, allowing an attacker to set the balance of an arbitrary user to any value."
+            }
+        ]
+    }
+]
+}
+
+pragma solidity ^0.4.18;
+contract NGToken {
+    string constant public name = "NEO Genesis Token";
+    string constant public symbol = "NGT";
+    uint8 constant public decimals = 18;
+    uint256 constant public totalSupply = 20000000 * (10 ** uint256(decimals));
+    uint256 private totalBurned;
+    mapping (address => uint256) balances;
+    mapping (address => mapping (address => uint256)) allowed;
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+    event Burn(address indexed burner, uint256 value, uint256 totalSupply, bytes data);
+    function NGToken() public {
+        balances[msg.sender] = totalSupply;
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require(_to != 0x0);
+        require(balances[_from] >= _value);
+        require(balances[_to] + _value > balances[_to]);
+        uint previousBalances = balances[_from];
+        balances[_from] -= _value;
+        balances[_to] += _value;
+        Transfer(_from, _to, _value);
+        assert(balances[_from] + balances[_to] == previousBalances);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        _transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowed[_from][msg.sender]);
+        allowed[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }
+    function balanceOf(address _owner) public view returns (uint256 balance) {
+        return balances[_owner];
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) public view returns (uint256 remaining) {
+        return allowed[_owner][_spender];
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        require(balances[msg.sender] >= _value);   
+        balances[msg.sender] -= _value;            
+        totalSupply -= _value;                      
+        Burn(msg.sender, _value, totalSupply);
+        return true;
+    }
+    function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(balances[_from] >= _value);                
+        balances[_from] -= _value;                      
+        totalSupply -= _value;                      
+        Burn(_from, _value, totalSupply);
+        return true;
+    }
+}
+contract Cryptonite is NGToken {
+    uint256 constant private RATE = 10000;
+    uint256 private totalDistributed = 0;
+    uint256 private totalRemaining = 0;
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+    event Distr(address indexed to, uint256 amount);
+    event DistrFinished();
+    event Burn(address indexed burner, uint256 value);
+    bool public distributionFinished = false;
+    modifier canDistr() {
+        require(!distributionFinished);
+        _;
+    }
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
+    function Cryptonite() public {
+        owner = msg.sender;
+        balances[msg.sender] = totalDistributed;
+    }
+    function transferOwnership(address newOwner) onlyOwner public {
+        if (newOwner != address(0)) {
+            owner = newOwner;
+        }
+    }
+    function finishDistribution() onlyOwner canDistr public returns (bool) {
+        distributionFinished = true;
+        DistrFinished();
+        return true;
+    }
+    function distr(address _to, uint256 _amount) canDistr private returns (bool) {
+        totalDistributed = totalDistributed.add(_amount);
+        totalRemaining = totalRemaining.sub(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        Distr(_to, _amount);
+        Transfer(address(0), _to, _amount);
+        return true;
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }
+    function airdrop(address[] addresses) onlyOwner canDistr public {
+        require(addresses.length <= 255);
+        require(value <= totalRemaining);
+        for (uint i = 0; i < addresses.length; i++) {
+            require(value <= totalRemaining);
+            distr(addresses[i], value);
+        }
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }
+    function distribution(address[] addresses, uint256 _value) onlyOwner canDistr public {
+        require(addresses.length <= 255);
+        require(_value <= totalRemaining);
+        for (uint i = 0; i < addresses.length; i++) {
+            require(_value <= totalRemaining);
+            distr(addresses[i], _value);
+        }
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }
+    function distributeAmounts(address[] addresses, uint256[] amounts) onlyOwner canDistr public {
+        require(addresses.length < 256);
+        require(addresses.length <= 2555);
+        require(amounts.length == addresses.length);
+        uint256 totalAmount = 0;
+        for (uint i = 0; i < addresses.length; i++) {
+            require(amounts[i] <= totalRemaining);
+            distr(addresses[i], amounts[i]);
+            totalAmount = totalAmount.add(amounts[i]);
+        }
+        require(totalAmount <= totalRemaining);
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }
+    function () public payable {
+        require(false);
+    }
+}
+contract CryptoniteCash is Cryptonite {
+    uint256 public sellPrice = 10000;
+    uint256 public buyPrice = 10000;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balances[_from] >= _value);               
+        require (balances[_to] + _value > balances[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                       
+        balances[_from] -= _value;                         
+        balances[_to] += _value;                           
+        Transfer(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract NGTokenPreSale is CryptoniteCash {
+    uint256 public preSaleRatio = 10000;
+    uint256 public preSaleMax = 10000000000000000000000000;
+    uint256 public preSaleMin = 1000000000000000000000000;
+    uint256 public preSaleTotal = 0;
+    mapping (address => bool) public preSaleBlacklist;
+    event PreSale(address indexed _from, uint256 _value);
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balances[_from] >= _value);               
+        require (balances[_to] + _value > balances[_to]); 
+        require(!preSaleBlacklist[_from]);                     
+        require(!preSaleBlacklist[_to]);                       
+        require(_value <= preSaleMax);
+        balances[_from] -= _value;                         
+        balances[_to] += _value;                           
+        Transfer(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function setPreSaleRatio(uint256 newRatio) onlyOwner public {
+        preSaleRatio = newRatio;
+    }
+    function setPreSaleMax(uint256 newMax) onlyOwner public {
+        preSaleMax = newMax;
+    }
+    function setPreSaleMin(uint256 newMin) onlyOwner public {
+        preSaleMin = newMin;
+    }
+    function setPreSaleBlacklist(address target, bool blacklist) onlyOwner public {
+        preSaleBlacklist[target] = blacklist;
+    }
+    function setPreSaleTotal(uint256 newTotal) onlyOwner public {
+        preSaleTotal = newTotal;
+    }
+    function preSale(uint256 amount) payable public {
+        require(amount <= preSaleMax);
+        require(amount >= preSaleMin);
+        require(preSaleTotal + amount <= preSaleMax);
+        balances[msg.sender] += amount;
+        preSaleTotal += amount;
+        PreSale(msg.sender, amount);
+    }
+}
+contract NGTokenICO is NGTokenPreSale {
+    uint256 public icoRatio = 10000;
+    uint256 public icoMax = 10000000000000000000000000;
+    uint256 public icoMin = 1000000000000000000000000;
+    uint256 public icoTotal = 0;
+    mapping (address => bool) public icoBlacklist;
+    event ICO(address indexed _from, uint256 _value);
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balances[_from] >= _value);               
+        require (balances[_to] + _value > balances[_to]); 
+        require(!icoBlacklist[_from]);                     
+        require(!icoBlacklist[_to]);                       
+        require(_value <= icoMax);
+        balances[_from] -= _value;                         
+        balances[_to] += _value;                           
+        Transfer(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function setICORatio(uint256 newRatio) onlyOwner public {
+        icoRatio = newRatio;
+    }
+    function setICOMax(uint256 newMax) onlyOwner public {
+        icoMax = newMax;
+    }
+    function setICOMin(uint256 newMin) onlyOwner public {
+        icoMin = newMin;
+    }
+    function setICOTotal(uint256 newTotal) onlyOwner public {
+        icoTotal = newTotal;
+    }
+    function setICOBlacklist(address target, bool blacklist) onlyOwner public {
+        icoBlacklist[target] = blacklist;
+    }
+    function ico(uint256 amount) payable public {
+        require(amount <= icoMax);
+        require(amount >= icoMin);
+        require(icoTotal + amount <= icoMax);
+        balances[msg.sender] += amount;
+        icoTotal += amount;
+        ICO(msg.sender, amount);
+    }
+}
+contract NGTokenCrowdsale is NGTokenICO {
+    uint256 public rate = 10000;
+    uint256 public weiRaised = 0;
+    uint256 public tokensSold = 0;
+    uint256 public preSaleTokensSold = 0;
+    uint256 public preSaleWeiRaised = 0;
+    uint256 public preSaleTokensRemaining = 0;
+    uint256 public preSaleWeiRemaining = 0;
+    uint256 public preSaleStartTime = 0;
+    uint256 public preSaleEndTime = 0;
+    uint256 public preSaleTokensSold = 0;
+    uint256 public preSaleWeiRaised = 0;
+    uint256 public preSaleTokensRemaining = 0;
+    uint256 public preSaleWeiRemaining = 0;
+    uint256 public preSaleStartTime = 0;
+    uint256 public preSaleEndTime = 0;
+    uint256 public preSaleTokensSold = 0;
+    uint256 public preSaleWeiRaised = 0;
+    uint256 public preSaleTokensRemaining = 0;
+    uint256 public preSaleWeiRemaining = 0;
+    uint256 public preSaleStartTime = 0;
+    uint256 public preSaleEndTime = 0;
+    uint256 public preSaleTokensSold = 0;
+    uint256 public preSaleWeiRaised = 0;
+    uint256 public preSaleTokensRemaining = 0;
+    uint256 public preS

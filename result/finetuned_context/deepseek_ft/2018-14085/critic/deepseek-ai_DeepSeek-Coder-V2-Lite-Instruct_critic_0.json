@@ -1,0 +1,51 @@
+ ```json
+{
+    "output_list": [
+        {
+            "function_name": "sweep",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The vulnerability arises from the unchecked subtraction of the token balance from the amount to be swept, which can lead to an integer overflow. This can be exploited by an attacker to cause a user to buy more tokens than they actually have, leading to a loss of funds. The code does not properly check for overflow conditions, which is a critical flaw.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 8
+        },
+        {
+            "function_name": "sweep",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The vulnerability is due to the incorrect logic in the check for the amount to be swept in ether. The condition `if (amountInWei > this.balance)` incorrectly compares the amount in wei to the contract's balance, which can be misleading. This can be exploited by an attacker to cause a user to withdraw more ether than is available in the contract, leading to a loss of funds. The logic error significantly weakens the security of the function.",
+            "correctness": 6,
+            "severity": 8,
+            "profitability": 7
+        },
+        {
+            "function_name": "tokenFallback",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The vulnerability is caused by the unchecked handling of the `_value` parameter, which can lead to an integer overflow. This can be exploited by an attacker to overflow the `value` variable, causing it to wrap around and become a very small number, allowing the attacker to steal funds from the user. The code does not include any overflow checks, making it susceptible to this attack.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 6
+        },
+        {
+            "function_name": "makeWallet",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The vulnerability is due to the lack of proper access control in the `makeWallet` function. The modifier `onlyAdmins` only checks against the `authorizedCaller` and `owner`, but does not prevent an attacker from creating a new wallet without the owner's permission. This can lead to unauthorized creation of wallets, compromising the system's integrity. The absence of a more stringent access control mechanism is a significant flaw.",
+            "correctness": 5,
+            "severity": 9,
+            "profitability": 4
+        },
+        {
+            "function_name": "LogSweep",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The vulnerability is similar to the one in the `sweep` function, where the event `LogSweep` does not properly handle the `amount` parameter, leading to an integer overflow. This can be exploited to cause a loss of funds due to overflow. The event should include checks to prevent such vulnerabilities, but it currently does not.",
+            "correctness": 6,
+            "severity": 8,
+            "profitability": 7
+        }
+    ]
+}
+```

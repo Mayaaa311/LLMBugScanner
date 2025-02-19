@@ -1,0 +1,29 @@
+ {
+    "output_list": [
+        {
+            "function_name": "getStats",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'getStats' function allows the owner to query the totalContribution, totalSupply, and totalBonusTokensIssued without any access control, leading to an integer overflow where the totalSupply can be arbitrarily increased."
+        },
+        {
+            "function_name": "()",
+            "vulnerability": "Integer Overflow",
+            "reason": "The payable fallback function allows users to buy tokens with Ether, where the tokensIssued is calculated as msg.value * 100, which can lead to an integer overflow where totalSupply is arbitrarily increased."
+        },
+        {
+            "function_name": "()",
+            "vulnerability": "Block Timestamp Manipulation",
+            "reason": "The payable fallback function uses the block.timestamp and block.coinbase as inputs to a cryptographic function (RIPEMD160), allowing the owner to manipulate the output and increase the bonus tokens."
+        },
+        {
+            "function_name": "withdrawForeignTokens",
+            "vulnerability": "Unrestricted Withdrawal",
+            "reason": "The 'withdrawForeignTokens' function allows the owner to withdraw any ERC20 token from the contract, without any access control, leading to a loss of funds."
+        },
+        {
+            "function_name": "enablePurchasing",
+            "vulnerability": "Access Control Issue",
+            "reason": "The 'enablePurchasing' function is only protected by a simple owner check, allowing it to be called at any time, even after purchasing has been disabled."
+        }
+    ]
+}

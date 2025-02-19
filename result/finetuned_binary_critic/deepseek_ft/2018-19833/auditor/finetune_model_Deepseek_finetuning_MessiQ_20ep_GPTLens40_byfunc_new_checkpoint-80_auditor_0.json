@@ -1,0 +1,58 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public{
+tbalanceOf[target] += mintedAmount;
+ttotalSupply += mintedAmount;
+}",
+            "vulnerability": "Token Issuance Control",
+            "reason": "The mintToken function allows the owner to increase the balance of any user, effectively allowing the owner to issue new tokens at will, without restriction or justification."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+t_transfer(msg.sender, _to, _value);
+treturn true;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The transfer function does not check if the target address is frozen, allowing the owner to transfer tokens to a frozen address, effectively locking the tokens."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) onlyOwner public returns (bool success) {
+trequire(balanceOf[msg.sender] >= _value);
+tbalanceOf[msg.sender] -= _value;
+ttotalSupply -= _value;
+temit Burn(msg.sender, _value);
+treturn true;
+}",
+            "vulnerability": "Token Issuance Control",
+            "reason": "The burn function allows the owner to decrease the balance of any user, effectively allowing the owner to destroy tokens at will, without restriction or justification."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal {
+trequire (_to != 0x0);
+trequire (balanceOf[_from] >= _value);
+trequire (balanceOf[_to] + _value >= balanceOf[_to]); 
+trequire(!frozenAccount[_from]);
+trequire(!frozenAccount[_to]);
+tbalanceOf[_from] -= _value;
+tbalanceOf[_to] += _value;
+temit Transfer(_from, _to, _value);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The _transfer function does not check if the target address is frozen, allowing the owner to transfer tokens to a frozen address, effectively locking the tokens."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner public {
+tfrozenAccount[target] = freeze;
+temit FrozenFunds(target, freeze);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The freezeAccount function allows the owner to freeze any user's account, effectively locking the tokens of the target user."
+        }
+    ]
+}

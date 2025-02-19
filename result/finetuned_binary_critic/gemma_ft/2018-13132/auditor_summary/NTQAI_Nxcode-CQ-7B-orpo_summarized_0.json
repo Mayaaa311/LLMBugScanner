@@ -1,0 +1,320 @@
+{
+    "output_list": [
+        {
+            "function_name": "set",
+            "code": "function set(address _team, address _icoAgent) external {
+    require(msg.sender == migrationMaster);
+    require(_team != address(0));
+    require(_icoAgent != address(0));
+    team = _team;
+    icoAgent = _icoAgent;
+  }",
+            "vulnerability": "Memory leak",
+            "reason": "The set function has no effect, causing the team to rely on the presence of an external agent to halt the team."
+        },
+        {
+            "function_name": "setMigrationMaster",
+            "code": "function setMigrationMaster(address _master) external {
+    require(msg.sender == migrationMaster);
+    require(_master != address(0));
+    migrationMaster = _master;
+  }",
+            "vulnerability": "Memory leak",
+            "reason": "The setMigrationMaster function has no effect, causing the team to rely on the presence of an external agent to halt the team."
+        },
+        {
+            "function_name": "setICO",
+            "code": "function setICO(address _ico) external {
+    require(msg.sender == migrationMaster);
+    require(_ico != address(0));
+    ico = _ico;
+  }",
+            "vulnerability": "Memory leak",
+            "reason": "The setICO function has no effect, causing the team to rely on the presence of an external agent to halt the team."
+        },
+        {
+            "function_name": "setMigrationAgent",
+            "code": "function setMigrationAgent(address _agent) external {
+    require(msg.sender == migrationMaster);
+    require(_agent != address(0));
+    migrationAgent = _agent;
+  }",
+            "vulnerability": "Memory leak",
+            "reason": "The setMigrationAgent function has no effect, causing the team to rely on the presence of an external agent to halt the team."
+        },
+        {
+            "function_name": "migrate",
+            "code": "function migrate(address _buyer, uint256 _value) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_buyer != address(0));
+    require(_value > 0);
+    require(validState());
+    totalMigrated = totalMigrated.add(_value);
+    balances[_buyer] = balances[_buyer].sub(_value);
+    TokenBuy(_buyer, _value, _value, "Migration Master sent it");
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The migrate function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "unfreeze",
+            "code": "function unfreeze() public returns (bool) {
+    require(msg.sender == team);
+    isPaused = false;
+    IcoResumed();
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The unfreeze function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "set",
+            "code": "function set(address _team, address _icoAgent) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_team != address(0));
+    require(_icoAgent != address(0));
+    team = _team;
+    icoAgent = _icoAgent;
+    migrationMaster = _master;
+    SP3DToken(this, team, icoAgent, migrationMaster);
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The set function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "setMigrationMaster",
+            "code": "function setMigrationMaster(address _master) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_master != address(0));
+    migrationMaster = _master;
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The setMigrationMaster function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "setICO",
+            "code": "function setICO(address _ico) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_ico != address(0));
+    ico = _ico;
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The setICO function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "setMigrationAgent",
+            "code": "function setMigrationAgent(address _agent) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_agent != address(0));
+    migrationAgent = _agent;
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The setMigrationAgent function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "mint",
+            "code": "function mint(address _buyer, uint256 _value) public returns (bool) {
+    require(msg.sender == icoAgent);
+    require(_value > 0);
+    require(validState());
+    totalSP3DIssued = totalSP3DIssued.add(_value);
+    totalSP3DReceived = totalSP3DReceived.add(_value);
+    balances[_buyer] = balances[_buyer].sub(_value);
+    TokenBuy(_buyer, _value, _value, "Migration Master sent it");
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The mint function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "setTeam",
+            "code": "function setTeam(address _team) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_team != address(0));
+    team = _team;
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The setTeam function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "setICO",
+            "code": "function setICO(address _ico) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_ico != address(0));
+    ico = _ico;
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The setICO function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "setMigrationMaster",
+            "code": "function setMigrationMaster(address _master) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_master != address(0));
+    migrationMaster = _master;
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The setMigrationMaster function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "setMigrationAgent",
+            "code": "function setMigrationAgent(address _agent) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_agent != address(0));
+    migrationAgent = _agent;
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The setMigrationAgent function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public returns (bool) {
+    require(!isPaused);
+    allowed[msg.sender][_spender] = _value;
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The approve function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) {
+    require(!isPaused);
+    require(_to != address(0));
+    require(_value <= balances[msg.sender]);
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The transfer function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(!isPaused);
+    require(_to != address(0));
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    balances[_from] = balances[_from].sub(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(_from, _to, _value);
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The transferFrom function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "setTeam",
+            "code": "function setTeam(address _team) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_team != address(0));
+    team = _team;
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The setTeam function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "setICO",
+            "code": "function setICO(address _ico) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_ico != address(0));
+    ico = _ico;
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The setICO function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "setMigrationMaster",
+            "code": "function setMigrationMaster(address _master) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_master != address(0));
+    migrationMaster = _master;
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The setMigrationMaster function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "setMigrationAgent",
+            "code": "function setMigrationAgent(address _agent) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_agent != address(0));
+    migrationAgent = _agent;
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The setMigrationAgent function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "getTokensToSell",
+            "code": "function getTokensToSell(address _investor) public view returns(uint) {
+    return balances[_investor];
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The getTokensToSell function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "mint",
+            "code": "function mint(address _investor, uint _amount) public returns (bool) {
+    require(msg.sender == icoAgent);
+    require(_amount > 0);
+    require(validState());
+    totalSP3DIssued = totalSP3DIssued.add(_amount);
+    totalSP3DReceived = totalSP3DReceived.add(_amount);
+    balances[_investor] = balances[_investor].sub(_amount);
+    TokenBuy(_investor, _amount, _amount, "Migration Master sent it");
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The mint function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "unfreeze",
+            "code": "function unfreeze() public returns (bool) {
+    require(msg.sender == team);
+    isPaused = false;
+    IcoResumed();
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The unfreeze function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "set",
+            "code": "function set(address _team, address _icoAgent) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_team != address(0));
+    require(_icoAgent != address(0));
+    team = _team;
+    icoAgent = _icoAgent;
+    migrationMaster = _master;
+    SP3DToken(this, team, icoAgent, migrationMaster);
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The set function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."
+        },
+        {
+            "function_name": "setMigrationMaster",
+            "code": "function setMigrationMaster(address _master) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_master != address(0));
+    migrationMaster = _master;
+    return true;
+  }",
+            "vulnerability": "Invalid state selection",
+            "reason": "The setMigrationMaster function is called when the ico is in the creation stage, but the function does

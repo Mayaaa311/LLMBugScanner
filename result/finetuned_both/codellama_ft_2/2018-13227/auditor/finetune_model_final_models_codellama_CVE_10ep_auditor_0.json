@@ -1,0 +1,191 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "description": "The mintToken function has an integer overflow in the sell function, allowing an attacker to set the balance of an arbitrary user to any value."}]}
+{"function_name": "mintToken", "vulnerability": "Integer Overflow", "description": "The mintToken function has an integer overflow in the sell function, allowing an attacker to set the balance of an arbitrary user to any value."}]}
+{"output_list": [
+    {
+        "function_name": "mintToken",
+        "vulnerability": "Integer Overflow",
+        "description": "The mintToken function has an integer overflow in the sell function, allowing an attacker to set the balance of an arbitrary user to any value."
+    }
+]
+}
+
+contract MoneyChainNet is owned, tokenRecipient {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function MoneyChainNet() tokenRecipient(0, "MoneyChainNet", "MCN", 18) {}
+    function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) throw;           
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+        if (frozenAccount[msg.sender]) throw;                
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (frozenAccount[_from]) throw;                        
+        if (balanceOf[_from] < _value) throw;                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+        if (_value > allowance[_from][msg.sender]) throw;   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyPrice;                
+        if (balanceOf[this] < amount) throw;               
+        if (balanceOf[msg.sender] + amount < balanceOf[msg.sender]) throw; 
+        balanceOf[this] -= amount;                         
+        balanceOf[msg.sender] += amount;                   
+        Transfer(this, msg.sender, amount);                
+    }
+    function sell(uint256 amount) {
+        if (balanceOf[msg.sender] < amount ) throw;        
+        balanceOf[this] += amount;                         
+        balanceOf[msg.sender] -= amount;                   
+        if (!msg.sender.send(amount * sellPrice)) {        
+            throw;                                         
+        } else {
+            Transfer(msg.sender, this, amount);            
+        }
+    }
+}
+contract CrypticBounty is owned {
+    uint256 public totalTokens = 10000000 * 10**18;
+    uint256 public totalBounty = 10000000 * 10**18;
+    uint256 public bountyTokens = 0;
+    uint256 public bountyStartTime = 0;
+    uint256 public bountyEndTime = 0;
+    uint256 public bountyPeriod = 0;
+    uint256 public bountyRate = 0;
+    uint256 public bountyTokensPerDay = 0;
+    uint256 public bountyTokensPerWeek = 0;
+    uint256 public bountyTokensPerMonth = 0;
+    uint256 public bountyTokensPerYear = 0;
+    uint256 public bountyTokensPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemaining = 0;
+    uint256 public bountyTokensPerBountyRemainingPerDay = 0;
+    uint256 public bountyTokensPerBountyRemainingPerWeek = 0;
+    uint256 public bountyTokensPerBountyRemainingPerMonth = 0;
+    uint256 public bountyTokensPerBountyRemainingPerYear = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerDay = 0;
+    uint256 public bountyTokensPerBountyRemainingPerWeek = 0;
+    uint256 public bountyTokensPerBountyRemainingPerMonth = 0;
+    uint256 public bountyTokensPerBountyRemainingPerYear = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerDay = 0;
+    uint256 public bountyTokensPerBountyRemainingPerWeek = 0;
+    uint256 public bountyTokensPerBountyRemainingPerMonth = 0;
+    uint256 public bountyTokensPerBountyRemainingPerYear = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerDay = 0;
+    uint256 public bountyTokensPerBountyRemainingPerWeek = 0;
+    uint256 public bountyTokensPerBountyRemainingPerMonth = 0;
+    uint256 public bountyTokensPerBountyRemainingPerYear = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerDay = 0;
+    uint256 public bountyTokensPerBountyRemainingPerWeek = 0;
+    uint256 public bountyTokensPerBountyRemainingPerMonth = 0;
+    uint256 public bountyTokensPerBountyRemainingPerYear = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerDay = 0;
+    uint256 public bountyTokensPerBountyRemainingPerWeek = 0;
+    uint256 public bountyTokensPerBountyRemainingPerMonth = 0;
+    uint256 public bountyTokensPerBountyRemainingPerYear = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerDay = 0;
+    uint256 public bountyTokensPerBountyRemainingPerWeek = 0;
+    uint256 public bountyTokensPerBountyRemainingPerMonth = 0;
+    uint256 public bountyTokensPerBountyRemainingPerYear = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerDay = 0;
+    uint256 public bountyTokensPerBountyRemainingPerWeek = 0;
+    uint256 public bountyTokensPerBountyRemainingPerMonth = 0;
+    uint256 public bountyTokensPerBountyRemainingPerYear = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerDay = 0;
+    uint256 public bountyTokensPerBountyRemainingPerWeek = 0;
+    uint256 public bountyTokensPerBountyRemainingPerMonth = 0;
+    uint256 public bountyTokensPerBountyRemainingPerYear = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerDay = 0;
+    uint256 public bountyTokensPerBountyRemainingPerWeek = 0;
+    uint256 public bountyTokensPerBountyRemainingPerMonth = 0;
+    uint256 public bountyTokensPerBountyRemainingPerYear = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerDay = 0;
+    uint256 public bountyTokensPerBountyRemainingPerWeek = 0;
+    uint256 public bountyTokensPerBountyRemainingPerMonth = 0;
+    uint256 public bountyTokensPerBountyRemainingPerYear = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerDay = 0;
+    uint256 public bountyTokensPerBountyRemainingPerWeek = 0;
+    uint256 public bountyTokensPerBountyRemainingPerMonth = 0;
+    uint256 public bountyTokensPerBountyRemainingPerYear = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerDay = 0;
+    uint256 public bountyTokensPerBountyRemainingPerWeek = 0;
+    uint256 public bountyTokensPerBountyRemainingPerMonth = 0;
+    uint256 public bountyTokensPerBountyRemainingPerYear = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerDay = 0;
+    uint256 public bountyTokensPerBountyRemainingPerWeek = 0;
+    uint256 public bountyTokensPerBountyRemainingPerMonth = 0;
+    uint256 public bountyTokensPerBountyRemainingPerYear = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerDay = 0;
+    uint256 public bountyTokensPerBountyRemainingPerWeek = 0;
+    uint256 public bountyTokensPerBountyRemainingPerMonth = 0;
+    uint256 public bountyTokensPerBountyRemainingPerYear = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerDay = 0;
+    uint256 public bountyTokensPerBountyRemainingPerWeek = 0;
+    uint256 public bountyTokensPerBountyRemainingPerMonth = 0;
+    uint256 public bountyTokensPerBountyRemainingPerYear = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRemainingPerDay = 0;
+    uint256 public bountyTokensPerBountyRemainingPerWeek = 0;
+    uint256 public bountyTokensPerBountyRemainingPerMonth = 0;
+    uint256 public bountyTokensPerBountyRemainingPerYear = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBountyPeriod = 0;
+    uint256 public bountyTokensPerBountyRemainingPerBounty = 0;
+    uint256 public bountyTokensPerBountyRem

@@ -1,0 +1,63 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) {
+        require(balances[msg.sender] > _value);
+        require(balances[_to] + _value > balances[_to]);
+        balances[msg.sender] -= _value;
+        balances[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+    }",
+            "reason": "In the transfer function, there is a possibility of integer overflow. If the amount to be transferred is greater than the balance of the sender, it will result in an integer overflow error."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }",
+            "reason": "In the mintToken function, there is a possibility of integer overflow. If the mintedAmount is greater than the maximum value of uint256, it will result in an integer overflow error."
+        },
+        {
+            "function_name": "setPrices",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }",
+            "reason": "In the setPrices function, there is no randomness involved. The newSellPrice and newBuyPrice are directly assigned to the sellPrice and buyPrice variables without any randomness or other form of validation."
+        },
+        {
+            "function_name": "buy",
+            "vulnerability": "Access Control",
+            "function_code": "function buy() payable returns (uint amount) {
+        amount = msg.value / buyPrice;
+        if (balances[this] < amount) throw;
+        balances[msg.sender] += amount;
+        balances[this] -= amount;
+        Transfer(this, msg.sender, amount);
+    }",
+            "reason": "In the buy function, there is a possibility of re-entrancy attack. The function allows the contract to accept Ether as payment, but it does not check if the contract has sufficient balance before transferring the payment to the sender. An attacker could potentially exploit this to drain the contract's balance."
+        },
+        {
+            "function_name": "sell",
+            "vulnerability": "Access Control",
+            "function_code": "function sell(uint256 amount) {
+        if (balances[msg.sender] < amount ) throw;
+        balances[this] += amount;
+        balances[msg.sender] -= amount;
+        if (!msg.sender.send(amount * sellPrice)) {
+            throw;
+        } else {
+            Transfer(msg.sender, this, amount);
+        }
+    }",
+            "reason": "In the sell function, there is a possibility of re-entrancy attack. The function allows the contract to send Ether to the sender, but it does not check if the contract has sufficient balance before transferring the payment to the sender. An attacker could potentially exploit this to drain the contract's balance."
+        }
+    ]
+}

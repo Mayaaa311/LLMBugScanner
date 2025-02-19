@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "sweep",
+            "code": "function sweep(address _token, uint _amount) canSweep returns (bool) { ... }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function does not properly check the balance of the token before transferring it, which can lead to an integer overflow attack. If the balance of the token is very high, the multiplication operation `amount * 10^18` can overflow and result in a very low `_amount` value being used, allowing the attacker to sweep a much larger amount of tokens than intended."
+        },
+        {
+            "function_name": "sweep",
+            "code": "function sweep(address _token, uint _amount) canSweep returns (bool) { ... }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function does not handle the case where the token transfer fails, which can lead to incorrect state updates. If the transfer fails, the function should revert or return a specific error code, but it currently returns `false` regardless of the failure, which can be misleading."
+        },
+        {
+            "function_name": "DefaultSweeper",
+            "code": "function DefaultSweeper(address controller) AbstractSweeper(controller) {}",
+            "vulnerability": "Access Control",
+            "reason": "The constructor of `DefaultSweeper` does not perform any authorization check, allowing anyone to deploy a `DefaultSweeper` contract with the controller's address. This can lead to unauthorized access and potential misuse of the contract."
+        },
+        {
+            "function_name": "makeWallet",
+            "code": "function makeWallet() onlyAdmins returns (address wallet) { ... }",
+            "vulnerability": "Access Control",
+            "reason": "The `makeWallet` function does not check if the caller is an admin, allowing any user to create a new wallet, which can be exploited to create wallets that can be used for unauthorized transactions."
+        },
+        {
+            "function_name": "Controller",
+            "code": "function Controller() { ... }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor of `Controller` is missing a check to ensure that the creator is the owner, which can lead to the contract being deployed with an incorrect owner address, potentially compromising control over the contract."
+        }
+    ]
+}

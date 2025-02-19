@@ -1,0 +1,125 @@
+{
+    "output_list": [
+        {
+            "function_name": "createRoom",
+            "code": "function createRoom(string _name, uint256 _entryPrice) public onlyCTO{
+    address[] memory players;
+    Room memory _room = Room({
+      name: _name,
+      players: players,
+      balance: 0,
+      entryPrice: _entryPrice
+    });
+    allRooms.push(_room);
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function createRoom has an integer overflow vulnerability. The variable _entryPrice is used in the calculation of the room entry price without any bounds checking. This means that if the value of _entryPrice is too large, it can cause an overflow and result in incorrect calculations."
+        },
+        {
+            "function_name": "enter",
+            "code": "function enter(uint256 _roomId) public payable {
+        Room storage room = allRooms[_roomId-1]; 
+        require(room.players.length < 6);
+        require(msg.value >= room.entryPrice);
+        room.players.push(msg.sender);
+        room.balance += room.entryPrice;
+        emit newPlayer(_roomId, msg.sender);
+        if(room.players.length == 6){
+            executeRoom(_roomId);
+        }
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function enter has wrong logic. The function checks if the room is full before executing the room. However, the function does not check if the room is full before adding the player to the room. This means that the function can add a player to a full room, resulting in incorrect calculations."
+        },
+        {
+            "function_name": "enterWithReferral",
+            "code": "function enterWithReferral(uint256 _roomId, address referrer) public payable {
+        Room storage room = allRooms[_roomId-1]; 
+        require(room.players.length < 6);
+        require(msg.value >= room.entryPrice);
+        uint256 referrerCut = SafeMath.div(room.entryPrice, 100); 
+        referrer.transfer(referrerCut);
+        room.players.push(msg.sender);
+        room.balance += room.entryPrice - referrerCut;
+        emit newPlayer(_roomId, msg.sender);
+        if(room.players.length == 6){
+            emit fullRoom(_roomId);
+            executeRoom(_roomId);
+        }
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function enterWithReferral has wrong logic. The function checks if the room is full before executing the room. However, the function does not check if the room is full before adding the player to the room. This means that the function can add a player to a full room, resulting in incorrect calculations."
+        },
+        {
+            "function_name": "executeRoom",
+            "code": "function executeRoom(uint256 _roomId) public {
+        Room storage room = allRooms[_roomId-1]; 
+        require(room.players.length == 6);
+        uint256 halfFee = SafeMath.div(room.entryPrice, 20);
+        CTO.transfer(halfFee);
+        CEO.transfer(halfFee);
+        room.balance -= halfFee * 2;
+        uint256 deadSeat = random();
+        distributeFunds(_roomId, deadSeat);
+        delete room.players;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function executeRoom has wrong logic. The function checks if the room is full before executing the room. However, the function does not check if the room is full before adding the player to the room. This means that the function can add a player to a full room, resulting in incorrect calculations."
+        },
+        {
+            "function_name": "distributeFunds",
+            "code": "function distributeFunds(uint256 _roomId, uint256 _deadSeat) private returns(uint256) {
+        Room storage room = allRooms[_roomId-1]; 
+        uint256 balanceToDistribute = SafeMath.div(room.balance,5);
+        address victim = room.players[_deadSeat];
+        address[] memory winners = new address[](5);
+        uint256 j = 0; 
+        for (uint i = 0; i<6; i++) {
+            if(i != _deadSeat){
+               room.players[i].transfer(balanceToDistribute);
+               room.balance -= balanceToDistribute;
+               winners[j] = room.players[i];
+               j++;
+            }
+        }
+        emit partyOver(_roomId, victim, winners);
+        return address(this).balance;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function distributeFunds has wrong logic. The function checks if the room is full before executing the room. However, the function does not check if the room is full before adding the player to the room. This means that the function can add a player to a full room, resulting in incorrect calculations."
+        },
+        {
+            "function_name": "random",
+            "code": "function random() private view returns (uint256) {
+        return uint256(uint256(keccak256(block.timestamp, block.difficulty))%6);
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function random uses a random number generation algorithm that is not secure. The function uses the keccak256 hash function to generate a random number. However, the function does not use any additional security measures to ensure the randomness of the number. This means that the function can be predictable, resulting in incorrect calculations."
+        },
+        {
+            "function_name": "getRoom",
+            "code": "function getRoom(uint256 _roomId) public view returns (
+    string name,
+    address[] players,
+    uint256 entryPrice,
+    uint256 balance
+  ) {
+    Room storage room = allRooms[_roomId-1];
+    name = room.name;
+    players = room.players;
+    entryPrice = room.entryPrice;
+    balance = room.balance;
+  }",
+            "vulnerability": "Access Control",
+            "reason": "The function getRoom does not have access control. The function allows anyone to view the details of a room. This means that an attacker can view the details of a room without any restrictions, resulting in incorrect calculations."
+        },
+        {
+            "function_name": "payout",
+            "code": "function payout(address _to) public onlyCTO {
+    _payout(_to);
+  }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The function payout has a typo in the constructor. The function should be called onlyCTO, not onlyCTO(). This means that the function can be called by anyone, resulting in incorrect calculations."
+        }
+    ]
+}

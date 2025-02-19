@@ -1,0 +1,56 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transferAUTOtokens10",
+            "code": "function transferAUTOtokens10(address[] addresses) {
+    for (uint i = 0; i < addresses.length; i++) {
+    require(balances[msg.sender] >= 0);
+      balances[msg.sender] -= 10000;
+      balances[addresses[i]] += 10000;
+      Transfer(msg.sender, addresses[i], 10000);
+    }
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferAUTOtokens10' function allows users to transfer a large amount of tokens to other users, causing an integer overflow in the balances of the users, allowing them to withdraw more tokens than they have."
+        },
+        {
+            "function_name": "transferAUTOtokens5",
+            "code": "function transferAUTOtokens5(address[] addresses) {
+    for (uint i = 0; i < addresses.length; i++) {
+    require(balances[msg.sender] >= 0);
+      balances[msg.sender] -= 5000;
+      balances[addresses[i]] += 5000;
+      Transfer(msg.sender, addresses[i], 5000);
+    }
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferAUTOtokens5' function allows users to transfer a large amount of tokens to other users, causing an integer overflow in the balances of the users, allowing them to withdraw more tokens than they have."
+        },
+        {
+            "function_name": "transferAUTOtoken1",
+            "code": "function transferAUTOtoken1(address[] addresses) {
+    require(balances[msg.sender] >= 0);
+    for (uint i = 0; i < addresses.length; i++) {
+      balances[msg.sender] -= 1000;
+      balances[addresses[i]] += 1000;
+      Transfer(msg.sender, addresses[i], 1000);
+    }
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferAUTOtoken1' function allows users to transfer a large amount of tokens to other users, causing an integer overflow in the balances of the users, allowing them to withdraw more tokens than they have."
+        },
+        {
+            "function_name": "transferAny",
+            "code": "function transferAny(address[] addresses, uint256 _value) {
+       require(_value <= balances[msg.sender]);
+    for (uint i = 0; i < addresses.length; i++) {
+   balances[msg.sender] -= _value;
+   balances[addresses[i]] += _value;
+   Transfer(msg.sender, addresses[i], _value);
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferAny' function allows users to transfer a large amount of tokens to other users, causing an integer overflow in the balances of the users, allowing them to withdraw more tokens than they have."
+        }
+    ]
+}

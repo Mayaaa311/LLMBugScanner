@@ -1,0 +1,106 @@
+ Here are the 5 most severe vulnerabilities in the provided smart contract, along with their associated functions and reasons:
+
+1. Integer Overflow Vulnerability in the `transfer` Function
+
+Function Name: `transfer`
+
+Vulnerability: Integer Overflow
+
+Function Code:
+```
+function transfer(address _to, uint256 _value) public returns (bool) {
+    require(!isblacklistedAccount[msg.sender]);                 
+    require(!isblacklistedAccount[_to]);                        
+    require(balanceOf[msg.sender] > 0);                     
+    require(balanceOf[msg.sender] >= _value);                   
+    require(_to != address(0));                                 
+    require(_value > 0);
+    require(balanceOf[_to] .add(_value) >= balanceOf[_to]);     
+    require(_to != msg.sender);                                 
+    balanceOf[msg.sender] = balanceOf[msg.sender].sub(_value);  
+    balanceOf[_to] = balanceOf[_to].add(_value);                
+    Transfer(msg.sender, _to, _value);                          
+    return true;
+}
+```
+Reason: The `transfer` function uses the `SafeMath` library to perform arithmetic operations, but it does not check for integer overflows. If the `_value` parameter is too large, it can cause an integer overflow, which can lead to a loss of funds.
+
+2. Wrong Logic Vulnerability in the `transferFrom` Function
+
+Function Name: `transferFrom`
+
+Vulnerability: Wrong Logic
+
+Function Code:
+```
+function transferFrom(
+     address _from,
+     address _to,
+     uint256 _amount
+ ) public returns (bool success)
+ {
+     if (balanceOf[_from] >= _amount
+         && allowed[_from][msg.sender] >= _amount
+         && _amount > 0
+         && balanceOf[_to].add(_amount) > balanceOf[_to])
+    {
+         balanceOf[_from] = balanceOf[_from].sub(_amount);
+         allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+         balanceOf[_to] = balanceOf[_to].add(_amount);
+         return true;
+    } else {
+         return false;
+    }
+}
+```
+Reason: The `transferFrom` function uses the `SafeMath` library to perform arithmetic operations, but it does not check for integer overflows. If the `_amount` parameter is too large, it can cause an integer overflow, which can lead to a loss of funds. Additionally, the function does not check if the `_from` address has enough funds to transfer, which can also lead to a loss of funds.
+
+3. Bad Randomness Vulnerability in the `mintTokens` Function
+
+Function Name: `mintTokens`
+
+Vulnerability: Bad Randomness
+
+Function Code:
+```
+function mintTokens(uint256 _mintedAmount) public onlyOwner {
+    balanceOf[owner] = balanceOf[owner].add(_mintedAmount);
+    totalSupply = totalSupply.add(_mintedAmount);
+    Transfer(0, owner, _mintedAmount);      
+}
+```
+Reason: The `mintTokens` function does not use a secure random number generator, which can lead to a loss of funds. Additionally, the function does not check if the `_mintedAmount` parameter is too large, which can also lead to a loss of funds.
+
+4. Access Control Vulnerability in the `burn` Function
+
+Function Name: `burn`
+
+Vulnerability: Access Control
+
+Function Code:
+```
+function burn(uint256 _value) public onlyOwner {
+    require(_value <= balanceOf[msg.sender]);
+    address burner = msg.sender;
+    balanceOf[burner] = balanceOf[burner].sub(_value);
+    totalSupply = totalSupply.sub(_value);
+    Burn(burner, _value);
+}
+```
+Reason: The `burn` function is only accessible to the contract owner, which can lead to a loss of funds if the owner is compromised. Additionally, the function does not check if the `_value` parameter is too large, which can also lead to a loss of funds.
+
+5. Typo Constructor Vulnerability in the `MorphToken` Constructor
+
+Function Name: `MorphToken` Constructor
+
+Vulnerability: Typo Constructor
+
+Function Code:
+```
+function MorphToken() 
+ERC20 (tokenSupply,"MORPH","MORPH") public
+{
+    owner = msg.sender;
+}
+```
+Reason: The `MorphToken` constructor does not use the `ERC20` constructor correctly, which can lead to a loss of funds. Additionally, the constructor does not check if the `tokenSupply` parameter is too large, which can also lead to a loss of funds.

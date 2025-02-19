@@ -1,0 +1,35 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool)",
+            "reason": "The function does not check for the possibility of an integer overflow. This can allow an attacker to transfer more tokens than the actual balance of the account, thus creating a false positive."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool)",
+            "reason": "The function does not check if the value to be transferred is greater than the balance of the account. This can allow an attacker to transfer more tokens than the actual balance of the account, thus creating a false positive."
+        },
+        {
+            "function_name": "increaseApproval",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function increaseApproval(address _spender, uint _addedValue) public returns (bool)",
+            "reason": "The function does not use a secure random number generator. This can allow an attacker to manipulate the approval process by inputting a predetermined value, thus creating a vulnerability."
+        },
+        {
+            "function_name": "transferAUTOtokens1",
+            "vulnerability": "Access Control",
+            "function_code": "function transferAUTOtokens1(address[] addresses) { ... }",
+            "reason": "The function does not check if the sender has sufficient balance before transferring tokens. This can allow an attacker to transfer more tokens than the actual balance of the account, thus creating a false positive."
+        },
+        {
+            "function_name": "transferAny",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function transferAny(address[] addresses, uint256 _value) { ... }",
+            "reason": "The function does not properly handle the case where the value is greater than the balance of the sender. This can allow an attacker to transfer more tokens than the actual balance of the account, thus creating a false positive."
+        }
+    ]
+}<eos>

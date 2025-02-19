@@ -1,0 +1,63 @@
+{
+  "output_list": [
+    {
+      "function_name": "mintToken",
+      "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        emit Transfer(0, this, mintedAmount);
+        emit Transfer(this, target, mintedAmount);
+    }",
+      "vulnerability": "Integer Overflow",
+      "reason": "The mintToken function has an integer overflow, allowing minted tokens to be retrieved arbitrarily by the contract owner."
+    },
+    {
+      "function_name": "transferFrom",
+      "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);     
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }",
+      "vulnerability": "Wrong Logic",
+      "reason": "The transferFrom function allows a user to transfer tokens to arbitrary addresses, allowing a potential attacker to steal all tokens from a contract."
+    },
+    {
+      "function_name": "approveAndCall",
+      "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+        public
+        returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }",
+      "vulnerability": "Access Control",
+      "reason": "The approveAndCall function allows a potential attacker to change the allowance of arbitrary addresses, allowing a potential attacker to steal all tokens from a contract."
+    },
+    {
+      "function_name": "burnFrom",
+      "code": "function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(balanceOf[_from] >= _value);                
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        emit Burn(_from, _value);
+        return true;
+    }",
+      "vulnerability": "Access Control",
+      "reason": "The burnFrom function allows a potential attacker to burn arbitrary tokens of any user, allowing a potential attacker to destroy all tokens in a contract."
+    },
+    {
+      "function_name": "freezeAccount",
+      "code": "function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        emit FrozenFunds(target, freeze);
+    }",
+      "vulnerability": "Access Control",
+      "reason": "The freezeAccount function allows a potential attacker to freeze arbitrary accounts, allowing a potential attacker to prevent transfers of tokens."
+    }
+  ]
+}

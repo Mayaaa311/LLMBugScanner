@@ -1,0 +1,74 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+        if (_to == 0x0) revert();
+        if (balanceOf[msg.sender] < _value) revert();
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert();
+        if (frozenAccount[msg.sender]) revert();
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function does not check for overflow of '_to' in the condition 'balanceOf[_to] + _value < balanceOf[_to]'. This can be exploited to make the contract become unusable."
+        },
+        {
+            "function_name": "lend",
+            "code": "function lend(address _to, uint256 _value, uint256 _duration_in_days) {
+        if (_to == 0x0) revert();
+        if (balanceOf[msg.sender] < _value) revert();
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert();
+        if (frozenAccount[msg.sender]) revert();
+        if (_duration_in_days > 36135) revert();
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
+        InterestFreeLending(msg.sender, _to, _value, _duration_in_days);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'lend' function does not check for overflow of '_to' in the condition 'balanceOf[_to] + _value < balanceOf[_to]'. This can be exploited to make the contract become unusable."
+        },
+        {
+            "function_name": "repayLoan",
+            "code": "function repayLoan(address _to, uint256 _value, string _reference) {
+        if (_to == 0x0) revert();
+        if (balanceOf[msg.sender] < _value) revert();
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert();
+        if (frozenAccount[msg.sender]) revert();
+        if (bytes(_reference).length != 66) revert();
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
+        LoanRepaid(msg.sender, _to, _value, _reference);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'repayLoan' function does not check for overflow of '_to' in the condition 'balanceOf[_to] + _value < balanceOf[_to]'. This can be exploited to make the contract become unusable."
+        },
+        {
+            "function_name": "settlVlement",
+            "code": "function settlVlement(address _from, uint256 _value, address _to, string _notes, string _reference) onlyOwner {
+        if (_from == plutocrat) revert();
+        if (_to == 0x0) revert();
+        if (balanceOf[_from] < _value) revert();
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert();
+        if (bytes(_reference).length != 66) revert();
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        Settlement( _from, _to, _value, _notes, _reference);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'settlVlement' function does not check for overflow of '_to' in the condition 'balanceOf[_to] + _value < balanceOf[_to]'. This can be exploited to make the contract become unusable."
+        },
+        {
+            "function_name": "mintlVToken",
+            "code": "function mintlVToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }",
+            "vulnerability": "Unrestricted Minting",
+            "reason": "The 'mintlVToken' function allows the owner to mint arbitrary amount of tokens, which can be exploited to create unlimited tokens."
+        }
+    ]
+}

@@ -1,0 +1,67 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+ttbalanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function allows the owner to mint more tokens than the total supply. This can lead to an integer overflow, where the total supply exceeds the maximum value that can be stored in a uint256 variable. This can be exploited by malicious actors to cause the contract to behave unexpectedly or even revert transactions."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal {
+        require(_to != 0x0);
+        require(balanceOf[_from] >= _value);
+        require(balanceOf[_to] + _value > balanceOf[_to]);
+        uint previousBalances = balanceOf[_from] + balanceOf[_to];
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(_from, _to, _value);
+        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The _transfer function allows users to transfer more tokens than they have in their balance. This can lead to an integer overflow, where the balance of the recipient exceeds the maximum value that can be stored in a uint256 variable. This can be exploited by malicious actors to cause the contract to behave unexpectedly or even revert transactions."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);   
+        balanceOf[msg.sender] -= _value;            
+        totalSupply -= _value;                      
+        Burn(msg.sender, _value);
+        return true;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function allows users to burn more tokens than they have in their balance. This can lead to an integer overflow, where the total supply of tokens is reduced beyond the maximum value that can be stored in a uint256 variable. This can be exploited by malicious actors to cause the contract to behave unexpectedly or even revert transactions."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(balanceOf[_from] >= _value);                
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        Burn(_from, _value);
+        return true;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burnFrom function allows users to burn more tokens than they have in their balance, even if they have been approved to spend those tokens. This can lead to an integer overflow, where the total supply of tokens is reduced beyond the maximum value that can be stored in a uint256 variable. This can be exploited by malicious actors to cause the contract to behave unexpectedly or even revert transactions."
+        },
+        {
+            "function_name": "distributeToken",
+            "code": "function distributeToken(address[] addresses, uint256 _value) onlyOwner {
+     for (uint i = 0; i < addresses.length; i++) {
+         balanceOf[owner] -= _value;
+         balanceOf[addresses[i]] += _value;
+         Transfer(owner, addresses[i], _value);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The distributeToken function allows the owner to distribute tokens to multiple addresses. This can lead to an integer overflow, where the total supply of tokens is reduced beyond the maximum value that can be stored in a uint256 variable. This can be exploited by malicious actors to cause the contract to behave unexpectedly or even revert transactions."
+        }
+    ]
+}

@@ -1,0 +1,16 @@
+ ```json
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'mint' function in the DSPXToken contract does not properly prevent integer overflow. The check `require(totalSupply + value <= TOKEN_LIMIT);` is incorrect because it does not account for the possibility of overflow. Even if the sum of `totalSupply` and `value` is less than or equal to `TOKEN_LIMIT`, the addition itself could still overflow. This oversight could lead to the minting of an arbitrary number of tokens, potentially exceeding the maximum allowed supply.",
+            "correctness": 4,
+            "severity": 9,
+            "profitability": 2,
+            "recommendation": "To fix this vulnerability, the 'mint' function should use SafeMath's 'add' function to safely add `totalSupply` and `value`. This ensures that the addition does not overflow, thereby preventing the minting of more tokens than allowed."
+        }
+    ]
+}
+```

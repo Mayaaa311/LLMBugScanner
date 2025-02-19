@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "setBettingCondition",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function setBettingCondition(uint _contenders, uint _bettingprice) { if(msg.sender != developer) return; arraysize  = _contenders; if(arraysize>1000) arraysize = 1000; bettingprice = _bettingprice; }",
+            "reason": "The function setBettingCondition takes two parameters: _contenders and _bettingprice. The value of _contenders is assigned to arraysize, but there is no check to ensure that arraysize does not exceed 1000. This could lead to an integer overflow if _contenders is greater than 1000. This vulnerability can be exploited by an attacker to cause the contract to behave unexpectedly or to steal funds from the contract."
+        },
+        {
+            "function_name": "addguess",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function addguess() inState(State.Started) payable { _addguess(); } function _addguess() private inState(State.Started) { require(msg.value >= bettingprice); curhash = sha256(block.timestamp, block.coinbase, block.difficulty, curhash); if((uint)(numguesses+1)<=arraysize) { guesses[numguesses++].addr = msg.sender; if((uint)(numguesses)>=arraysize){ _finish(); } } }",
+            "reason": "The function addguess is called when a user sends a transaction to the contract. The function _addguess is called internally by addguess. The function _addguess increments the value of numguesses by 1. However, there is no check to ensure that numguesses does not exceed the maximum value of 1000. This could lead to an integer overflow if the number of guesses exceeds 1000. This vulnerability can be exploited by an attacker to cause the contract to behave unexpectedly or to steal funds from the contract."
+        },
+        {
+            "function_name": "getBettingPrice",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function getBettingPrice() constant returns(uint){ return bettingprice; }",
+            "reason": "The function getBettingPrice is a constant function that returns the value of bettingprice. However, the function name is misspelled as getBettingPrice instead of getBettingPrice(). This typo could lead to confusion and misuse of the function. This vulnerability can be exploited by an attacker to cause the contract to behave unexpectedly or to steal funds from the contract."
+        },
+        {
+            "function_name": "getDeveloperFee",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function getDeveloperFee() constant returns(uint) { uint developerfee = this.balance/100; return developerfee; }",
+            "reason": "The function getDeveloperFee is a constant function that returns the developer fee. However, the function name is misspelled as getDeveloperFee instead of getDeveloperFee(). This typo could lead to confusion and misuse of the function. This vulnerability can be exploited by an attacker to cause the contract to behave unexpectedly or to steal funds from the contract."
+        },
+        {
+            "function_name": "getBalance",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function getBalance() constant returns(uint) { return this.balance; }",
+            "reason": "The function getBalance is a constant function that returns the balance of the contract. However, the function name is misspelled as getBalance instead of getBalance(). This typo could lead to confusion and misuse of the function. This vulnerability can be exploited by an attacker to cause the contract to behave unexpectedly or to steal funds from the contract."
+        }
+    ]
+}

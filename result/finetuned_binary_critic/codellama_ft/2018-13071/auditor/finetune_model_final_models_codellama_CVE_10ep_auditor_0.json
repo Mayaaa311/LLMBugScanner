@@ -1,0 +1,256 @@
+{"output_list": [{"output_list": [{"function_name": "transfer", "code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+        if (balanceOf[msg.sender] < _value) throw;           
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+        if (_value == 0) {
+            return false;
+        }
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+        return true;                                         
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (frozenAccount[_from]) throw;                        
+        if (balanceOf[_from] < _value) throw;                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+        if (_value == 0) {
+            return false;
+        }
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function balanceOf(address _owner) constant returns (uint256 balance) {
+        return balanceOf[_owner];
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+        return allowance[_owner][_spender];
+    }
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+}
+contract CCToken is owned, CCToken {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CCToken(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+        ) CCToken(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) throw;           
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+        if (frozenAccount[msg.sender]) throw;                
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+        if(_value > 0){
+            if(balanceOf[msg.sender] == 0){
+                addresses[1] = _to;
+                indexes[msg.sender] = 1;
+            }
+            if(balanceOf[_to] == 0){
+                lastIndex = 1;
+            }
+        }
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (frozenAccount[_from]) throw;                        
+        if (balanceOf[_from] < _value) throw;                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+        if (_value > allowance[_from][msg.sender]) throw;   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;                   
+        Transfer(0, this, mintedAmount);                
+        Transfer(this, target, mintedAmount);            
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyPrice;                
+        if (balanceOf[this] < amount) throw;               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+    }
+    function sell(uint256 amount) {
+        if (balanceOf[msg.sender] < amount ) throw;        
+        balanceOf[this] += amount;                         
+        balanceOf[msg.sender] -= amount;                   
+        if (!msg.sender.send(amount * sellPrice)) {        
+            throw;                                         
+        } else {
+            Transfer(msg.sender, this, amount);            
+        }
+    }
+}
+contract CCTokenPreSale is owned, CCToken {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CCTokenPreSale(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+        ) CCToken(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) throw;           
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+        if (frozenAccount[msg.sender]) throw;                
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+        if(_value > 0){
+            if(balanceOf[msg.sender] == 0){
+                addresses[indexes[msg.sender]] = addresses[lastIndex];
+                indexes[addresses[lastIndex]] = indexes[msg.sender];
+                indexes[msg.sender] = 0;
+                delete addresses[lastIndex];
+                lastIndex--;
+            }
+            if(indexes[_to]==0){
+                lastIndex++;
+                addresses[lastIndex] = _to;
+                indexes[_to] = lastIndex;
+            }
+        }
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (frozenAccount[_from]) throw;                        
+        if (balanceOf[_from] < _value) throw;                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+        if (_value > allowance[_from][msg.sender]) throw;   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;                   
+        Transfer(0, this, mintedAmount);                
+        Transfer(this, target, mintedAmount);            
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyPrice;                
+        if (balanceOf[this] < amount) throw;               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                   
+    }
+    function sell(uint256 amount) {
+        if (balanceOf[msg.sender] < amount ) throw;        
+        balanceOf[this] += amount;                         
+        balanceOf[msg.sender] -= amount;                   
+        if (!msg.sender.send(amount * sellPrice)) {        
+            throw;                                         
+        } else {
+            Transfer(msg.sender, this, amount);            
+        }
+    }
+}
+contract CCTokenSale is owned, CCTokenPreSale {
+    uint256 public totalTokensSold;
+    uint256 public totalTokensDistributed;
+    uint256 public totalTokensRemaining;
+    uint256 public totalTokensRemainingForSale;
+    uint256 public totalTokensRemainingForPreSale;
+    uint256 public totalTokensRemainingForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreSale;
+    uint256 public totalTokensRemainingForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForPreSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForPreDistributionForPreSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForPreSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForPreDistributionForPreSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForPreDistribution;
+    uint256 public totalTokensRemainingForPreDistributionForPreDistributionForPreDistributionForSale;
+    uint256 public totalTokensRemainingForPre

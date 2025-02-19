@@ -1,0 +1,61 @@
+ {
+    "output_list": [
+        {
+            "function_name": "GoodTo",
+            "code": "function GoodTo(uint256 initialSupply, string tokenName, string tokenSymbol) public {
+    totalSupply = initialSupply * 10 ** uint256(decimals);
+    balanceOf[msg.sender] = totalSupply;
+    name = tokenName;
+    symbol = tokenSymbol;
+}",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor function 'GoodTo' has a typo in its name, which can lead to confusion and potential issues. This typo can be exploited by attackers to mistakenly deploy a different contract, leading to potential security risks."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'mintToken' function allows the owner (onlyOwner modifier) to mint new tokens and assign them to any address. This can lead to the creation of tokens out of thin air, potentially devaluing the token and causing financial loss for holders."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) {
+    require(balanceOf[msg.sender] >= _value);
+    balanceOf[msg.sender] -= _value;
+    totalSupply -= _value;
+    Burn(msg.sender, _value);
+    return true;
+}",
+            "vulnerability": "Token Devalue",
+            "reason": "The 'burn' function allows any user to burn their own tokens, reducing the total supply. This can lead to a direct devaluation of the token as the remaining tokens are worth less per unit, potentially causing financial loss for holders."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    require(_value <= allowance[_from][msg.sender]);
+    allowance[_from][msg.sender] -= _value;
+    _transfer(_from, _to, _value);
+    return true;
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'transferFrom' function does not check if the allowance is sufficient, which can lead to a transfer of tokens that the spender is not actually approved to transfer. This can be exploited to drain tokens from other accounts."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) public returns (bool success) {
+    tokenRecipient spender = tokenRecipient(_spender);
+    if (approve(_spender, _value)) {
+        spender.receiveApproval(msg.sender, _value, this, _extraData);
+        return true;
+    }
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'approveAndCall' function allows an attacker to call a recipient contract's function with the approval. If the recipient contract does not properly validate the call, it can lead to unauthorized actions being performed, compromising the security of the contract."
+        }
+    ]
+}

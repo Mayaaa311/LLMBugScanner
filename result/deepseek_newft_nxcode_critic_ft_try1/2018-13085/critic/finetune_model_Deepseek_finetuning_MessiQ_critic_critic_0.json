@@ -1,0 +1,76 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "auditor_idx" : 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The mintToken function has an integer overflow vulnerability. The initialSupply parameter is provided by the user, and the totalSupply is increased by this amount. If initialSupply is sufficiently large, the totalSupply value wraps around upon increment, causing an overflow in the balances mapping, where the owner's balance is set to a very large value. This can be exploited to grant arbitrary tokens to any user.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 4
+        },
+        {
+            "function_name": "mintToken",
+            "auditor_idx" : 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The mintToken function has a wrong logic vulnerability. The mintedAmount parameter is provided by the caller, and it is added to the balances mapping of the target address. If the caller is a hacked contract, it can mint arbitrary large amounts of tokens to any user, causing token devaluation.",
+            "correctness": 6,
+            "severity": 7,
+            "profitability": 5
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx" : 0,
+            "vulnerability": "Unprotected msg.sender",
+            "criticism": "The msg.sender is not protected in the transferFrom function. This can be exploited to grant arbitrary tokens to any user by calling the transferFrom function with a spender that is a hacked contract. This is a serious vulnerability as it can lead to loss of tokens for the owner of the token.",
+            "correctness": 8,
+            "severity": 6,
+            "profitability": 3
+        },
+        {
+            "function_name": "burn",
+            "auditor_idx" : 0,
+            "vulnerability": "Unprotected burn",
+            "criticism": "The burn function is not protected, which can be exploited to burn arbitrary amount of tokens from any user. This is a serious vulnerability as it can lead to loss of tokens for the user. The burn function is called by burnFrom function, but the msg.sender is not protected in the burnFrom function, which can be a potential attack vector.",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 4
+        },
+        {
+            "function_name": "burnFrom",
+            "auditor_idx" : 0,
+            "vulnerability": "Unprotected burnFrom",
+            "criticism": "The burnFrom function is not protected, which can be exploited to burn arbitrary amount of tokens from any user. This is a serious vulnerability as it can lead to loss of tokens for the user. The burn function is called by burnFrom function, but the msg.sender is not protected in the burnFrom function, which can be a potential attack vector.",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 4
+        },
+        {
+            "function_name": "setPrices",
+            "auditor_idx" : 0,
+            "vulnerability": "Unprotected setPrices",
+            "criticism": "The setPrices function is not protected, which can be exploited to change the sellPrice and buyPrice values. This is a serious vulnerability as it can lead to loss of funds for the users. This function can be called by any user, not just the owner, which can be a potential attack vector.",
+            "correctness": 6,
+            "severity": 7,
+            "profitability": 3
+        },
+        {
+            "function_name": "buy",
+            "auditor_idx" : 0,
+            "vulnerability": "Unprotected buy",
+            "criticism": "The buy function is not protected, which can be exploited to buy tokens at a price defined by the owner. This is a serious vulnerability as it can lead to loss of funds for the users. This function can be called by any user, not just the owner, which can be a potential attack vector.",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 3
+        },
+        {
+            "function_name": "sell",
+            "auditor_idx" : 0,
+            "vulnerability": "Unprotected sell",
+            "criticism": "The sell function is not protected, which can be exploited to sell tokens at a price defined by the owner. This is a serious vulnerability as it can lead to loss of funds for the users. This function can be called by any user, not just the owner, which can be a potential attack vector.",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 3
+        }
+    ]
+}

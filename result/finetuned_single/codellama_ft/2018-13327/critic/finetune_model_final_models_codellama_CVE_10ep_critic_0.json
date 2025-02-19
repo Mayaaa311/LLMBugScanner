@@ -1,0 +1,269 @@
+{"output_list": [{"function_name": "totalSupply", "vulnerability": "Integer Overflow", "description": "The totalSupply function returns an incorrect value."}]}
+{"function_name": "transfer", "vulnerability": "Integer Overflow", "description": "The transfer function has an integer overflow in the calculation of _value * _to.balance."}]}
+{"function_name": "transferFrom", "vulnerability": "Integer Overflow", "description": "The transferFrom function has an integer overflow in the calculation of _value * _to.balance."}]}
+{"function_name": "approve", "vulnerability": "Integer Overflow", "description": "The approve function has an integer overflow in the calculation of _value * _extraData."}]}
+{"function_name": "allowance", "vulnerability": "Integer Overflow", "description": "The allowance function has an integer overflow in the calculation of _owner * _spender."}]}
+{"function_name": "transfer", "vulnerability": "Wrong Logic", "description": "The transfer function has a wrong logic in the calculation of _value * _to.balance."}]}
+{"function_name": "transferFrom", "vulnerability": "Wrong Logic", "description": "The transferFrom function has a wrong logic in the calculation of _value * _to.balance."}]}
+{"function_name": "approve", "vulnerability": "Wrong Logic", "description": "The approve function has a wrong logic in the calculation of _value * _extraData."}]}
+{"function_name": "allowance", "vulnerability": "Wrong Logic", "description": "The allowance function has a wrong logic in the calculation of _owner * _spender."}]}
+{"function_name": "transfer", "vulnerability": "Bad Randomness", "description": "The transfer function has a bad randomness in the calculation of _value * _to.balance."}]}
+{"function_name": "transferFrom", "vulnerability": "Bad Randomness", "description": "The transferFrom function has a bad randomness in the calculation of _value * _to.balance."}]}
+{"function_name": "approve", "vulnerability": "Bad Randomness", "description": "The approve function has a bad randomness in the calculation of _value * _extraData."}]}
+{"function_name": "allowance", "vulnerability": "Bad Randomness", "description": "The allowance function has a bad randomness in the calculation of _owner * _spender."}]}
+{"function_name": "transfer", "vulnerability": "Typo Constructor", "description": "The transfer function has a typo constructor vulnerability in the calculation of _value * _to.balance."}]}
+{"function_name": "transferFrom", "vulnerability": "Typo Constructor", "description": "The transferFrom function has a typo constructor vulnerability in the calculation of _value * _to.balance."}]}
+{"function_name": "approve", "vulnerability": "Typo Constructor", "description": "The approve function has a typo constructor vulnerability in the calculation of _value * _extraData."}]}
+{"function_name": "allowance", "vulnerability": "Typo Constructor", "description": "The allowance function has a typo constructor vulnerability in the calculation of _owner * _spender."}]}
+
+contract owned {
+    address public owner;
+    function owned() {
+        owner = msg.sender;
+    }
+    modifier onlyOwner {
+        if (msg.sender != owner) revert();
+        _;
+    }
+    function transferOwnership(address newOwner) onlyOwner {
+        owner = newOwner;
+    }
+}
+contract tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData); }
+contract token {
+    string public name;
+    string public symbol;
+    uint8 public decimals;
+    uint256 public totalSupply;
+    mapping (address => uint256) public balanceOf;
+    mapping (address => mapping (address => uint256)) public allowance;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Burn(address indexed from, uint256 value);
+    function token(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) {
+        balanceOf[msg.sender] = initialSupply;              
+        totalSupply = initialSupply;                        
+        name = tokenName;                                   
+        symbol = tokenSymbol;                               
+        decimals = decimalUnits;                            
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if (balanceOf[msg.sender] < _value) revert();           
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert();  
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+        return true;                                          
+    }
+    function approve(address _spender, uint256 _value)
+        returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+        returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (balanceOf[_from] < _value) revert();                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert();  
+        if (_value > allowance[_from][msg.sender]) revert();   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function burn(uint256 _value) returns (bool success) {
+        if (balanceOf[msg.sender] < _value) revert();           
+        balanceOf[msg.sender] -= _value;                     
+        totalSupply -= _value;                              
+        Burn(msg.sender, _value);
+        return true;
+    }
+    function burnFrom(address _from, uint256 _value) returns (bool success) {
+        if (balanceOf[_from] < _value) revert();                 
+        if (_value > allowance[_from][msg.sender]) revert();   
+        balanceOf[_from] -= _value;                          
+        allowance[_from][msg.sender] -= _value;
+        totalSupply -= _value;                              
+        Burn(_from, _value);
+        return true;
+    }
+}
+contract MyAdvancedToken is owned, token {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function MyAdvancedToken(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balanceOf[_from] > _value);               
+        require (balanceOf[_to] + _value > balanceOf[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                       
+        balanceOf[_from] -= _value;                         
+        balanceOf[_to] += _value;                           
+        Transfer(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) {
+        if (balanceOf[msg.sender] < amount ) revert();        
+        _transfer(msg.sender, this, amount);              
+        msg.sender.send(amount * sellPrice);          
+    }
+}
+contract Cryptonite is MyAdvancedToken { 
+    uint256 public sellPrice = 0.00001 ether;
+    uint256 public buyPrice = 0.0001 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function Cryptonite(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) MyAdvancedToken(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) {
+        if (balanceOf[msg.sender] < amount ) revert();        
+        _transfer(msg.sender, this, amount);              
+        msg.sender.send(amount * sellPrice);          
+    }
+}
+
+contract CryptonitePreSale is owned, token { 
+    uint256 public sellPrice = 0.0001 ether;
+    uint256 public buyPrice = 0.0001 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptonitePreSale(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) {
+        if (balanceOf[msg.sender] < amount ) revert();        
+        _transfer(msg.sender, this, amount);              
+        msg.sender.send(amount * sellPrice);          
+    }
+    function withdrawToOwner(uint256 amountWei) onlyOwner {
+        owner.send(amountWei);
+    }
+}
+contract CryptoniteICO is owned, token { 
+    uint256 public sellPrice = 0.0001 ether;
+    uint256 public buyPrice = 0.0001 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoniteICO(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) {
+        if (balanceOf[msg.sender] < amount ) revert();        
+        _transfer(msg.sender, this, amount);              
+        msg.sender.send(amount * sellPrice);          
+    }
+    function withdrawToOwner(uint256 amountWei) onlyOwner {
+        owner.send(amountWei);
+    }
+    function withdrawToFunds(address target, uint256 amountWei) onlyOwner {
+        target.send(amountWei);
+    }
+}
+contract CryptonitePreICO is owned, token { 
+    uint256 public sellPrice = 0.0001 ether;
+    uint256 public buyPrice = 0.0001 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptonitePreICO(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) {
+        if (balanceOf[msg.sender] < amount ) revert();        
+        _transfer(msg.sender, this, amount);              
+        msg.sender.send(amount * sellPrice);          
+    }
+    function withdrawToOwner(uint256 amountWei) onlyOwner {
+        owner.send(amountWei);
+    }
+    function withdrawToFunds(address target, uint256 amountWei) onlyOwner {
+        target.send(amountWei);
+    }
+}
+contract CryptoniteICO2 is owned, token { 
+    uint256 public sellPrice =

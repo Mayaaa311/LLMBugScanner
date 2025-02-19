@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address _holder, uint _value) external { require(msg.sender == presale); require(_value > 0); require(totalSupply + _value <= TOKEN_LIMIT); balances[_holder] += _value; totalSupply += _value; Transfer(0x0, _holder, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mint function allows the presale contract to mint tokens to any address. The totalSupply variable is not checked for overflow, which could lead to an integer overflow if the totalSupply is close to the TOKEN_LIMIT. This could allow the presale contract to mint more tokens than the total supply limit, potentially leading to a loss of tokens for the presale contract and the team."
+        },
+        {
+            "function_name": "buyTokens",
+            "code": "function buyTokens(address _buyer, uint256 _value) internal returns (uint) { require(_buyer != address(0)); require(_value > 0); require(preSaleState == PreSaleState.PreSaleStarted); require(!isPaused); uint256 boughtTokens = _value / pricePerToken; require(boughtTokens > 0); token.mint(_buyer, boughtTokens); TokenBuy(_buyer, boughtTokens); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The buyTokens function allows anyone to buy tokens at a fixed price. The pricePerToken variable is not checked for overflow, which could lead to an integer overflow if the pricePerToken is set to a very high value. This could allow anyone to buy an extremely large amount of tokens at a low price, potentially leading to a loss of tokens for the presale contract and the team."
+        },
+        {
+            "function_name": "mint",
+            "code": "function mint(address _holder, uint _value) external { require(msg.sender == presale); require(_value > 0); require(totalSupply + _value <= TOKEN_LIMIT); balances[_holder] += _value; totalSupply += _value; Transfer(0x0, _holder, _value); }",
+            "vulnerability": "Access Control",
+            "reason": "The mint function is only callable by the presale contract. This is a good practice to ensure that only authorized addresses can mint tokens. However, the function does not check if the msg.sender is the presale contract. This could allow anyone to mint tokens on behalf of the presale contract, potentially leading to a loss of tokens for the presale contract and the team."
+        },
+        {
+            "function_name": "mint",
+            "code": "function mint(address _holder, uint _value) external { require(msg.sender == presale); require(_value > 0); require(totalSupply + _value <= TOKEN_LIMIT); balances[_holder] += _value; totalSupply += _value; Transfer(0x0, _holder, _value); }",
+            "vulnerability": "Access Control",
+            "reason": "The mint function is only callable by the presale contract. This is a good practice to ensure that only authorized addresses can mint tokens. However, the function does not check if the msg.sender is the presale contract. This could allow anyone to mint tokens on behalf of the presale contract, potentially leading to a loss of tokens for the presale contract and the team."
+        },
+        {
+            "function_name": "mint",
+            "code": "function mint(address _holder, uint _value) external { require(msg.sender == presale); require(_value > 0); require(totalSupply + _value <= TOKEN_LIMIT); balances[_holder] += _value; totalSupply += _value; Transfer(0x0, _holder, _value); }",
+            "vulnerability": "Access Control",
+            "reason": "The mint function is only callable by the presale contract. This is a good practice to ensure that only authorized addresses can mint tokens. However, the function does not check if the msg.sender is the presale contract. This could allow anyone to mint tokens on behalf of the presale contract, potentially leading to a loss of tokens for the presale contract and the team."
+        }
+    ]
+}

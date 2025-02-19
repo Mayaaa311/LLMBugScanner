@@ -1,0 +1,332 @@
+{"output_list": [{"function_name": "Multiple Functions", "code": "<copy the function code here>", "vulnerability": "<vulnerability_type>", "reason": "<vulnerability_reason>"}]}
+</CodeApp>
+contract MyAdvancedToken is StableYieldCredit, _getChainId() {
+    string public name = "MyAdvancedToken";
+    string public symbol = "yCT";
+    uint8 public decimals = 18;  
+    uint256 public totalSupply = 0;
+    mapping(address => uint256) internal balances;
+    mapping(address => mapping(address => uint256)) internal allowed;
+    event Burn(address indexed burner, uint256 value);
+    function MyAdvancedToken() public {
+        balances[msg.sender] = 10000000000000000000000000000;
+        totalSupply = 10000000000000000000000000000;
+        emit Transfer(0x0, msg.sender, 10000000000000000000000000000);
+    }
+    function _transferTokens(address src, address dst, uint amount) internal {
+        require(dst != address(0), "dset");
+        balances[src] -= amount;
+        balances[dst] += amount;
+        emit Transfer(src, dst, amount);
+        if (allowed[src][msg.sender] < amount) {
+            allowed[src][msg.sender] -= amount;
+            _freezeTokens(src, msg.sender, amount);
+        }
+        if (allowed[dst][msg.sender] < amount) {
+            allowed[dst][msg.sender] -= amount;
+            _freezeTokens(dst, msg.sender, amount);
+        }
+    }
+    function _freezeTokens(address target, address owner, uint amount) internal {
+        allowed[target][msg.sender] -= amount;
+        allowed[owner][msg.sender] += amount;
+        emit Freeze(target, owner, amount);
+    }
+    function setUserData(address user, uint256 amount) public {
+        _freezeTokens(user, msg.sender, amount);
+    }
+    function burn(uint256 amount) public returns (bool success) {
+        require(balances[msg.sender] >= amount, "balance");
+        address burner = msg.sender;
+        balances[burner] -= amount;
+        totalSupply -= amount;
+        emit Burn(burner, amount);
+        return true;
+    }
+    function burnFrom(address target, uint256 amount) public returns (bool success) {
+        require(allowed[target][msg.sender] >= amount, "remaining");
+        require(balances[target] >= amount, "balance");
+        if (msg.sender == target) {
+            _freezeTokens(target, msg.sender, amount);
+        } else {
+            allowed[target][msg.sender] -= amount;
+            _freezeTokens(target, msg.sender, amount);
+        }
+        totalSupply -= amount;
+        emit Burn(target, msg.sender, amount);
+        return true;
+    }
+    function approveAndCall(address spender, uint256 amount, bytes extraData) public returns (bool success) {
+        allowed[msg.sender][spender] = amount;
+        if(_call(spender, amount, extraData)) {
+            return true;
+        }
+    }
+    function _call(address target, uint256 amount, bytes extraData) internal view returns (bool success) {
+        require(amount <= balances[msg.sender], "amount");
+        address256 target256 = address256(target);
+        assembly {
+            let result := delegatecall(sub(gas, 10000), target256, add(extraData, 0x20), mload(extraData), 0, 0)
+            success := iszero(result)
+        }
+        return success;
+    }
+    function setChainId(uint256 chainId) public {
+        require(chainId == 0, "chainId not set");
+        chainId = chainId;
+    }
+    function setMarket(address market, bool enabled) public {
+        _markets[msg.sender] = market;
+    }
+    function setBalances(address[] users, uint256[] balances) public {
+        require(users.length <= 255, "users array must not exceed 255 members");
+        require(users.length == balances.length, "length mismatch");
+        for (uint i = 0; i < users.length; i++) {
+            balances[i] += users[i] * balances[i] / 100;
+            _transferTokens(address(this), users[i], balances[i]);
+        }
+    }
+    function skim(address user, uint256 amount) public {
+        require(amount <= balances[user], "amount");
+        require(amount <= allowed[user][msg.sender], "remaining");
+        _transferTokens(address(this), user, amount);
+        _freePool(user, amount);
+    }
+    function freeSkim(address user, uint256 amount) public {
+        require(amount <= balances[user], "amount");
+        require(amount <= allowed[user][msg.sender], "remaining");
+        _transferTokens(address(this), user, amount);
+        _freePool(user, amount);
+    }
+    function _freePool(address target, uint amount) internal {
+        uint256 poolBalance = _getPoolBalance(target);
+        require(poolBalance > amount, "not enough pool funds");
+        balances[target] += amount;
+        totalSupply -= amount;
+        emit Transfer(address(this), target, amount);
+        _transferTokens(address(this), target, poolBalance - amount);
+    }
+    function _getPoolBalance(address target) internal view returns (uint256) {
+        address pool = _markets[target];
+        return _getBalance(pool, target);
+    }
+    function _getBalance(address pool, address target) internal view returns (uint256) {
+        return balances[pool] + totalBalanceOf(pool, target);
+    }
+    function totalBalanceOf(address pool, address target) internal view returns (uint256) {
+        return balances[pool] + totalBalanceIn(pool, target);
+    }
+    function totalBalanceIn(address pool, address target) internal view returns (uint256) {
+        return balances[pool] + balances[target];
+    }
+}
+contract MyAdvancedTokenFactory {
+    function create(address _owner, uint256 _value) public returns (bool) {
+        MyAdvancedToken token = new MyAdvancedToken();
+        token.setUserData(_owner, _value);
+        return true;
+    }
+}
+contract MyAdvancedToken2 is MyAdvancedToken {
+    function merge(address target, uint256 amount) public {
+        _transferTokens(address(this), target, amount);
+        _freePool(target, amount);
+    }
+}
+contract MyAdvancedToken3 is MyAdvancedToken {
+    function split(address target, uint256 amount) public {
+        _transferTokens(address(this), target, amount);
+        _freePool(target, amount);
+        uint256 splitFee = amount * FEE / BASE;
+        _transferTokens(address(this), target, splitFee);
+    }
+}
+contract MyAdvancedToken4 is MyAdvancedToken {
+    function skim(address user, uint256 amount) public {
+        require(amount <= balances[user], "amount");
+        require(amount <= allowed[user][msg.sender], "remaining");
+        _transferTokens(address(this), user, amount);
+        _freePool(user, amount);
+        if (user == address(this)) {
+            _freePool(msg.sender, amount);
+        }
+    }
+}
+contract MyAdvancedToken5 is MyAdvancedToken {
+    function freeSkim(address user, uint256 amount) public {
+        require(amount <= balances[user], "amount");
+        require(amount <= allowed[user][msg.sender], "remaining");
+        _transferTokens(address(this), user, amount);
+        _freePool(user, amount);
+        if (user == address(this)) {
+            _freePool(msg.sender, amount);
+        }
+    }
+}
+contract _FreePool {
+    function payOut(address owner, uint256 amount) internal {
+        owner.transfer(amount);
+    }
+}
+contract IAdvancedToken {
+    function burn(uint256 amount) public returns (bool);
+    function burnFrom(address target, uint256 amount) public returns (bool);
+    function approve(address spender, uint256 amount) public returns (bool);
+    function setChainId(uint256 chainId) public;
+    function setMarket(address market, bool enabled) public;
+    function setBalances(address[] users, uint256[] balances) public;
+    function skim(address user, uint256 amount) public;
+    function freeSkim(address user, uint256 amount) public;
+    function _freePool(address target, uint amount) internal;
+    function _getPoolBalance(address target) internal view returns (uint256);
+    function _getBalance(address pool, address target) internal view returns (uint256);
+    function totalBalanceOf(address pool, address target) internal view returns (uint256);
+    function totalBalanceIn(address pool, address target) internal view returns (uint256);
+}
+contract ERC20 {
+    function balanceOf(address owner) public view returns (uint256);
+    function allowance(address owner, address spender) public view returns (uint256);
+    function transfer(address to, uint256 value) public returns (bool);
+    function transferFrom(address from, address to, uint256 value) public returns (bool);
+    function approve(address spender, uint256 value) public returns (bool);
+    function burn(uint256 value) public returns (bool);
+    function burnFrom(address from, uint256 value) public returns (bool);
+}
+contract ERC223 is ERC20 {
+    function approveAndCall(address target, uint256 amount, bytes extraData) public returns (bool);
+}
+contract ERC223Factory {
+    function create(address owner, uint256 amount, address spender, uint256 fee) public returns (bool);
+}
+contract ERC20Factory {
+    function build(address target, address factory, uint256 fee) public returns (bool);
+}
+contract Owned {
+    address public owner;
+    function Owned() public {
+        owner = msg.sender;
+    }
+    function setOwner(address _owner) public returns (bool) {
+        owner = _owner;
+        return true;
+    }
+    function setFactory(address _factory) public returns (bool) {
+        if (msg.sender != owner) throw;
+        ERC20Factory factory = ERC20Factory(_factory);
+        if (!factory.build(target, this, fee)) throw;
+        return true;
+    }
+    function create(address target, uint256 amount, address spender, uint256 fee) public returns (bool) {
+        if (msg.sender != owner) throw;
+        ERC223Factory factory = ERC223Factory(_factory);
+        if (!factory.create(target, amount, msg.sender, fee)) throw;
+        return true;
+    }
+    function skim(address user, uint256 amount) public returns (bool) {
+        if (msg.sender != owner) throw;
+        _freePool(user, amount);
+        return true;
+    }
+    function freeSkim(address user, uint256 amount) public returns (bool) {
+        if (msg.sender != owner) throw;
+        _freePool(user, amount);
+        return true;
+    }
+    function _freePool(address target, uint amount) internal {
+        _getBalance(target, amount);
+        uint256 poolBalance = _getPoolBalance(target);
+        target.transfer(poolBalance - amount);
+    }
+}
+contract YLCToken is ERC20, Owned {
+    string public name = "YLCToken";
+    string public symbol = "YLC";
+    uint8 public decimals = 18;  
+    uint256 public totalSupply = 0;
+    mapping(address => uint256) balances;
+    mapping(address => mapping(address => uint256)) allowed;
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    function mint(address target, uint256 amount) public returns (bool) {
+        balances[target] += amount;
+        totalSupply += amount;
+        Transfer(0, target, amount);
+        return true;
+    }
+    function unfreeze(address target, uint256 amount) public returns (bool) {
+        balances[target] += amount;
+        totalSupply += amount;
+        Transfer(0, target, amount);
+        return true;
+    }
+    function freeze(address target, uint256 amount) public returns (bool) {
+        balances[target] -= amount;
+        totalSupply -= amount;
+        Transfer(target, 0);
+        return true;
+    }
+    function setChainId(uint256 chainId) public returns (bool) {
+        owner.setChainId(chainId);
+        return true;
+    }
+    function setMarket(address market, bool enabled) public returns (bool) {
+        owner.setMarket(market, enabled);
+        return true;
+    }
+    function setBalances(address[] users, uint256[] balancesIn) public returns (bool) {
+        address user;
+        uint256 balance;
+        for (uint i = 0; i < users.length; i++) {
+            user = users[i];
+            balance = balancesIn[i];
+            balances[user] += balance;
+            totalSupply += balance;
+            Transfer(0, theExc, user, amount);
+        }
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public returns (bool) {
+        allowed[msg.sender][_spender] = _value;
+        return true;
+    }
+    function transfer(address _to, userDummy) public returns (bool) {
+        return transfer(msg.sender, userDummy);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+        address user = msg.sender;
+        uint256 amount = _value;
+        if (_to != address(0)) throw;
+        allowed[_from][msg.sender] -= _value;
+        Transfer(_from, _to, amount);
+        return true;
+    }
+    function burn(address target, uint256 amount) public returns (bool) {
+        if (target != address(0)) throw;
+        uint256 t_fee = _value;
+        if (msg.sender != owner) throw;
+        owner.transfer(t_fee);
+        target.transfer(amount);
+        return true;
+    }
+    function _getTokensBalance(address _owner, user) internal view returns (uint256);
+    function _freePool(_owner) internal view returns (bool);
+    function _getUint256(_owner) internal view returns (uint256);
+    function _free(_owner) internal view returns (bool);
+    function _toOwner(address _owner) internal view returns (bool);
+    function _setChainId(uint256 chainId) internal view returns (bool);
+    function _setMarket(address _market, bool) internal view returns (bool);
+    function _setBalances(address[], uint256[] _value) internal view returns (bool);
+    function _approve(address, uint256) internal view returns (bool);
+    function _transferFrom(address, uint256) internal view returns (bool);
+    function _burn(address, uint256) internal view returns (bool);
+    function _setOwner(address) internal view returns (bool);
+}
+    function setOwner(address, uint256) internal view returns (bool);
+    function setParams(address, uint256) internal view returns (bool);
+    function setBalances(address, uint256) internal view returns (bool);
+    function set setBalance(address, uint256) internal view returns (bool);
+    function setMyParam(address, chainId) internal view returns (bool);
+    function setMyParam2(address) internal view returns (bool);
+    function setMyToken(address, uint256) internal view returns (bool);
+    function setUser(address, uint256) internal view returns (bool);
+    function set_my_address(address) internal view returns (bool);
+    function userBalance

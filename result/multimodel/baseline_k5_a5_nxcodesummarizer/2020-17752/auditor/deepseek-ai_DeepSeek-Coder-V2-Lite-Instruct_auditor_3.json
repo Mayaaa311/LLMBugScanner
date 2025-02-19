@@ -1,0 +1,72 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address _to, uint256 _amount) canMint internal returns (bool) {
+    _amount = _amount.div(10**10);
+    if(totalSupply.add(_amount)<maxTokenSupply){
+      super.mint(_to,_amount.mul(75).div(100));
+      super.mint(address(beneficiary),_amount.mul(25).div(100));
+      return true;
+    }
+    else{
+        return false; 
+    }
+    return true;
+  }",
+            "vulnerability": "Token Devalue",
+            "reason": "The function 'mint' divides the '_amount' by 10**10 before minting tokens, which can lead to token devaluation if an attacker can manipulate the '_amount' value. This is particularly dangerous if the '_amount' is used in subsequent calculations or transfers, as it can result in tokens being minted at a devalued rate."
+        },
+        {
+            "function_name": "mintCoins",
+            "code": "function mintCoins(address _to, uint256 _amount)  canMint internal returns (bool) {
+    _amount = _amount.div(10**10);
+    if(totalSupply.add(_amount)<maxTokenSupply){
+      super.mint(_to,_amount.mul(75).div(100));
+      super.mint(address(beneficiary),_amount.mul(25).div(100));
+      return true;
+    }
+    else{
+        return false; 
+    }
+    return true;
+  }",
+            "vulnerability": "Token Devalue",
+            "reason": "Similar to the 'mint' function, 'mintCoins' also divides the '_amount' by 10**10 before minting tokens. This can lead to token devaluation if an attacker can manipulate the '_amount' value, potentially causing tokens to be minted at a devalued rate."
+        },
+        {
+            "function_name": "MON",
+            "code": "function MON(address _benef,uint256 _start,uint256 _sumMul,uint256 _period) public{
+     beneficiary = _benef;
+     if(_start==0){
+         start = GetNow();
+     }
+     else{
+         start = _start;
+     }
+     if(_period!=0){
+         period = _period;
+     }
+     if(_sumMul!=0){
+         sumMultiplayer = _sumMul;
+     }
+     stageDataStore.push(StageData(uint128(start+period*151),uint64(50*sumMultiplayer),uint64(5000)));
+     stageDataStore.push(StageData(uint128(start+period*243),uint64(60*sumMultiplayer),uint64(3000)));
+     stageDataStore.push(StageData(uint128(start+period*334),uint64(50*sumMultiplayer),uint64(1666)));
+     stageDataStore.push(StageData(uint128(start+period*455),uint64(60*sumMultiplayer),uint64(1500)));
+     stageDataStore.push(StageData(uint128(start+period*548),uint64(65*sumMultiplayer),uint64(1444)));
+     stageDataStore.push(StageData(uint128(start+period*641),uint64(55*sumMultiplayer),uint64(1000)));
+ }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The constructor 'MON' allows for the manipulation of the 'start' and 'period' variables, which can lead to incorrect logic in the contract. For example, if an attacker can set _start to a value before the current time, it can bypass the intended timing logic for stages, potentially allowing for front-running or other malicious activities."
+        },
+        {
+            "function_name": "GetNow",
+            "code": "function GetNow() public constant returns(uint256){
+    return now; 
+}",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function 'GetNow' relies on the 'now' keyword, which is susceptible to manipulation by miners and can be influenced by attackers to manipulate the timestamp. This can lead to unpredictable behavior in the contract, especially in timing-dependent functions."
+        }
+    ]
+}

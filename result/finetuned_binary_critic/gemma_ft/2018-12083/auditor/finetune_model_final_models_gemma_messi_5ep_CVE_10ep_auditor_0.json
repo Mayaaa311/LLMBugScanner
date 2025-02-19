@@ -1,0 +1,369 @@
+{"output_list": [{"function_name": "mintToken", "code": "mintToken function", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+</Code Input: 
+pragma solidity ^0.4.18;
+contract owned {
+taddress public owner;
+tfunction owned() {
+ttowner = msg.sender;
+t}
+tfunction changeOwner(address newOwner) onlyOwner {
+ttowner = newOwner;
+t}
+tmodifier onlyOwner {
+ttrequire(msg.sender == owner);
+tt_;
+t}
+}
+contract tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData); }
+contract GoalToken is owned {
+    string public name = "GOAL Bonanza";
+    string public symbol = "GOAL";
+    uint8 public decimals = 18;
+    uint256 public totalSupply = 0;
+    mapping (address => uint256) public balanceOf;
+    mapping (address => mapping (address => uint256)) public allowance;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Burn(address indexed from, uint256 value);
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balanceOf[_from] > _value);                
+        require (balanceOf[_to] + _value > balanceOf[_to]); 
+        require(msg.sender.balance>10000);                
+        balanceOf[_from] -= _value;                         
+        balanceOf[_to] += _value;                            
+        Transfer(_from, _to, _value);
+    }
+    function transfer(address _to, uint256 _value) {
+        _transfer(msg.sender, _to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(msg.sender.balance>10000);                
+        require(_value <= allowance[_from][msg.sender]);    
+        allowance[_from][msg.sender] -= _value;             
+        _transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value)
+        returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+        returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }        
+    function burn(uint256 _value) returns (bool success) {
+        require(balanceOf[msg.sender] > _value);            
+        balanceOf[msg.sender] -= _value;                      
+        totalSupply -= _value;                              
+        Burn(msg.sender, _value);
+        return true;
+    }
+    function burnFrom(address _from, uint256 _value) returns (bool success) {
+        require(balanceOf[_from] >= _value);                
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        Burn(_from, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(this, target, mintedAmount);
+    }
+}
+
+contract GZSToken is owned, GoalToken {
+    uint public buyRate = 46000; 
+    bool public isSelling = true;
+    mapping (address => uint256) public totalGZSToken;
+    event Burn(address indexed from, uint256 value);
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        totalGZSToken[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(this, target, mintedAmount);
+    }
+    function burn(address target, uint256 value) onlyOwner {
+        totalGZSToken[target] -= value;
+        totalSupply -= value;
+        Burn(target, value);
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(isSelling==true);                       
+        uint ownerBalance = totalGZSToken[msg.sender];
+        require(balanceOf[msg.sender] > _value);          
+        require(balanceOf[_to] + _value > balanceOf[_to]); 
+        require(totalGZSToken[msg.sender] > _value);       
+        balanceOf[msg.sender] -= _value;                 
+        balanceOf[_to] += _value;                       
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(isSelling==true);                       
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalGZSToken[_to] += _value;                      
+        totalSupply -= _value;                              
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        require(!isSelling);                           
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+        require(!isSelling);                           
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function setBuyRate(uint newBuyRate) onlyOwner {
+        buyRate = newBuyRate;
+    }
+    function setSelling(bool newStatus) onlyOwner {
+        isSelling = newStatus;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyRate;                  
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+    }
+    function withdraw() onlyOwner {
+        uint256 etherBalance = this.balance;               
+        owner.transfer(etherBalance);                      
+    }
+}
+contract GRZSToken is owned, GZSToken {
+    uint256 public sellPrice = 46000;
+    uint256 public buyRate = 46000;
+    bool public isSelling = true;
+    mapping (address => uint256) public totalGRZSToken;
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        totalGRZSToken[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(this, target, mintedAmount);
+    }
+    function burn(address target, uint256 value) onlyOwner {
+        totalGRZSToken[target] -= value;
+        totalSupply -= value;
+        Burn(target, value);
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(isSelling==true);                       
+        require(totalGRZSToken[msg.sender] > _value);       
+        balanceOf[msg.sender] -= _value;                 
+        balanceOf[_to] += _value;                       
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(isSelling==true);                       
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalGRZSToken[_to] += _value;                      
+        totalSupply -= _value;                              
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        require(!isSelling);                           
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+        require(!isSelling);                           
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function setSellPrice(uint newSellPrice) onlyOwner {
+        sellPrice = newSellPrice;
+    }
+    function setBuying(bool newStatus) onlyOwner {
+        isSelling = newStatus;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyRate;                  
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+    }
+    function withdraw() onlyOwner {
+        uint256 etherBalance = this.balance;               
+        owner.transfer(etherBalance);                      
+    }
+}
+contract GRZSToken is owned, GRZSToken {
+    uint256 public buyRate = 46000;
+    uint256 public sellPrice = 46000;
+    bool public isSelling = true;
+    mapping (address => uint256) public totalGRZSToken;
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        totalGRZSToken[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(this, target, mintedAmount);
+    }
+    function burn(address target, uint256 value) onlyOwner {
+        totalGRZSToken[target] -= value;
+        totalSupply -= value;
+        Burn(target, value);
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(isSelling==true);                       
+        require(totalGRZSToken[msg.sender] > _value);       
+        balanceOf[msg.sender] -= _value;                 
+        balanceOf[_to] += _value;                       
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(isSelling==true);                       
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalGRZSToken[_to] += _value;                      
+        totalSupply -= _value;                              
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        require(!isSelling);                           
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+        require(!isSelling);                           
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function setSellPrice(uint newSellPrice) onlyOwner {
+        sellPrice = newSellPrice;
+    }
+    function setBuying(bool newStatus) onlyOwner {
+        isSelling = newStatus;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyRate;                  
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+    }
+    function withdraw() onlyOwner {
+        uint256 etherBalance = this.balance;               
+        owner.transfer(etherBalance);                      
+    }
+}
+contract owned {
+    address public owner;
+    function owned() {
+        owner = msg.sender;
+    }
+    function setOwner(address newOwner) onlyOwner {
+        owner = newOwner;
+    }
+}
+contract tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData); }
+contract token {
+    string public name;
+    string public symbol;
+    uint8 public decimals;
+    uint256 public totalSupply;
+    mapping (address => uint256) public balanceOf;
+    mapping (address => mapping (address => uint256)) public allowance;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Burn(address indexed from, uint256 value);
+    function token(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) {
+        balanceOf[msg.sender] = initialSupply;              
+        totalSupply = initialSupply;                        
+        name = tokenName;                                   
+        symbol = tokenSymbol;                               
+        decimals = decimalUnits;                            
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(balanceOf[msg.sender] > _value);           
+        require(balanceOf[_to] + _value > balanceOf[_to]); 
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                           
+        Transfer(msg.sender, _to, _value);                   
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(balanceOf[_from] >= _value);                 
+        require(allowance[_from][msg.sender] >= _value);     
+        balanceOf[_to] += _value;                          
+        balanceOf[_from] -= _value;                          
+        allowance[_from][msg.sender] -= _value;            
+        Transfer(_from, _to, _value);                       
+        return true;
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function burn(uint256 _value) returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);           
+        balanceOf[msg.sender] -= _value;                     
+        totalSupply -= _value;                              
+        Burn(msg.sender, _value);
+        return true;
+    }
+    function burnFrom(address _from, uint256 _value) returns (bool success) {
+        require(balanceOf[_from] >= _value);                 
+        require(_value <= allowance[_from][msg.sender]);     
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;            
+        totalSupply -= _value;                              
+        Burn(_from, _value);
+        return true;
+    }
+}
+contract GZSToken is owned, GRZSToken {
+    uint256 public sellPrice = 46000;
+    uint256 public buyRate = 46000;
+    bool public isSelling = true;
+    mapping (address => uint256) public totalGRZSToken;
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        totalGRZSToken[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(this, target, mintedAmount);
+    }
+    function burn(address target, uint256 value) onlyOwner {
+        totalGRZSToken[target] -= value;
+        totalSupply -= value;
+        Burn(target, value);
+    }
+    function setSellPrice(uint newSellPrice) onlyOwner {
+        sellPrice = newSellPrice;
+    }
+    function setBuying(bool newStatus) onlyOwner {
+        isSelling = new

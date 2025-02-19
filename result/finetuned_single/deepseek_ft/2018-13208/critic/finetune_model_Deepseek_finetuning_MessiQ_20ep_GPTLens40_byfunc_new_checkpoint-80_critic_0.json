@@ -1,0 +1,60 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "auditor_idx" : 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The mintToken function does not have a check to prevent overflow of the total supply, allowing the owner to mint an arbitrary amount of tokens to an arbitrary user account, causing a buy price of 0 and locking funds.",
+            "correctness": 8,
+            "severity": 7,
+            "profitability": 6,
+            "explanation": [
+                    "Correctness: The function lacks an overflow check, which can lead to incorrect token distribution. This is a critical issue as it can be exploited by the owner to mint an excessive amount of tokens, causing severe financial loss to the users."
+                    "Severity: The vulnerability is highly severe as it can result in a complete loss of funds for users, making the token essentially unusable. The exploitable nature of the issue also increases its severity."
+                    "Profitability: While the issue can be exploited by the owner to cause financial loss, it is not very profitable in the traditional sense, as it primarily affects the usability of the token rather than providing a direct financial gain to an attacker."
+                ]
+        },
+        {
+            "function_name": "sell",
+            "auditor_idx" : 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The sell function uses msg.sender.send(), which can fail due to out of gas, causing the amount * sellPrice to be lost forever.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 5,
+            "explanation": [
+                    "Correctness: The function does not check if the msg.sender has enough gas to execute the send function, which can lead to a denial of service attack, causing the tokens to be locked in the contract forever."
+                    "Severity: The vulnerability is of high severity as it can prevent users from being able to sell their tokens, leading to a complete loss of funds for the affected users."
+                    "Profitability: The issue is not very profitable in the traditional sense, as it primarily affects the usability of the token rather than providing a direct financial gain to an attacker."
+                ]
+        },
+        {
+            "function_name": "buy",
+            "auditor_idx" : 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The buy function uses a buyPrice that is not checked against balanceOf[this], allowing users to buy tokens at a price of 0, draining funds.",
+            "correctness": 8,
+            "severity": 7,
+            "profitability": 6,
+            "explanation": [
+                    "Correctness: The function does not check if the contract has enough tokens to sell, allowing users to buy tokens at a price of 0, draining funds from the contract."
+                    "Severity: The vulnerability is of high severity as it can lead to a complete loss of funds for the contract owner, making the token unusable."
+                    "Profitability: While the issue can be exploited to drain funds from the contract, it is not very profitable in the traditional sense, as it primarily affects the usability of the token rather than providing a direct financial gain to an attacker."
+                ]
+        },
+        {
+            "function_name": "transfer",
+            "auditor_idx" : 0,
+            "vulnerability": "Access Control",
+            "criticism": "The transfer function does not check if the target address is a smart contract, allowing users to transfer funds to a smart contract address, which can be exploited if the smart contract has a fallback function.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 5,
+            "explanation": [
+                    "Correctness: The function does not check if the target address is a smart contract, allowing users to transfer funds to a smart contract address, which can be exploited if the smart contract has a fallback function."
+                    "Severity: The vulnerability is of high severity as it can lead to a complete loss of funds for users, making the token unusable."
+                    "Profitability: The issue is not very profitable in the traditional sense, as it primarily affects the usability of the token rather than providing a direct financial gain to an attacker."
+                ]
+        }
+    ]
+}

@@ -1,0 +1,71 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "function_code": "require(!locked);
+require(balanceOf[msg.sender] >= _amount);
+require(balanceOf[_to] + _amount >= balanceOf[_to]);
+balanceOf[msg.sender] -= _amount;
+uint256 preBalance = balanceOf[_to];
+balanceOf[_to] += _amount;
+bool alreadyMax = preBalance >= singleIDXMQty;
+if (!alreadyMax) {
+    if (now >= validAfter[_to].ts + mustHoldFor) validAfter[_to].last = preBalance;
+    validAfter[_to].ts = now;
+}
+if (validAfter[msg.sender].last > balanceOf[msg.sender]) validAfter[msg.sender].last = balanceOf[msg.sender];
+Transfer(msg.sender, _to, _amount);
+return true;",
+            "reason": "The 'transfer' function does not check if the token transfer is locked, allowing any user to transfer tokens regardless of the 'locked' state set by the owner. This can be exploited by anyone to transfer tokens even when the token transfer is restricted."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "require(!locked);
+require(balanceOf[_from] >= _amount);
+require(balanceOf[_to] + _amount >= balanceOf[_to]);
+require(_amount <= allowance[_from][msg.sender]);
+balanceOf[_from] -= _amount;
+uint256 preBalance = balanceOf[_to];
+balanceOf[_to] += _amount;
+allowance[_from][msg.sender] -= _amount;
+bool alreadyMax = preBalance >= singleIDXMQty;
+if (!alreadyMax) {
+    if (now >= validAfter[_to].ts + mustHoldFor) validAfter[_to].last = preBalance;
+    validAfter[_to].ts = now;
+}
+if (validAfter[_from].last > balanceOf[_from]) validAfter[_from].last = balanceOf[_from];
+Transfer(_from, _to, _amount);
+return true;",
+            "reason": "Similar to the 'transfer' function, the 'transferFrom' function does not check if the token transfer is locked, allowing any user to transfer tokens from other accounts regardless of the 'locked' state set by the owner. This can be exploited by anyone to transfer tokens from other users even when the token transfer is restricted."
+        },
+        {
+            "function_name": "IDXM",
+            "vulnerability": "Typo Constructor",
+            "function_code": "totalSupply = 200000000000;
+balanceOf[msg.sender] = totalSupply;
+exportFee[0x00000000000000000000000000000000000000ff] = 100000000;
+precalculate();",
+            "reason": "The constructor 'IDXM' has a typo in the line initializing 'totalSupply'. This typo does not affect the functionality of the contract but is misleading and could lead to confusion during development or audit."
+        },
+        {
+            "function_name": "precalculate",
+            "vulnerability": "Wrong Logic",
+            "function_code": "baseFeeDivisor = pow10(1, feeDecimals);
+feeDivisor = pow10(1, feeDecimals + decimals);
+singleIDXMQty = pow10(1, decimals);
+return true;",
+            "reason": "The 'precalculate' function incorrectly calculates the 'singleIDXMQty' by using 'pow10(1, decimals)' instead of 'pow10(1, decimals - feeDecimals)'. This logic error can lead to incorrect fee calculations and potentially significant financial loss."
+        },
+        {
+            "function_name": "div10",
+            "vulnerability": "Integer Overflow",
+            "function_code": "for (uint8 i = 0; i < b; i++) {
+    a /= 10;
+}
+return a;",
+            "reason": "The 'div10' function performs integer division by 10 in a loop without checking for potential overflow, which could lead to unexpected behavior or exploitation if 'a' is large enough."
+        }
+    ]
+}

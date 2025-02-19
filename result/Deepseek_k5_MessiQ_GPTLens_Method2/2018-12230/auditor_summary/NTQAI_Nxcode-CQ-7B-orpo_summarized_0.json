@@ -1,0 +1,75 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address to, uint value) returns (bool success) {
+                if (frozenAccount[msg.sender]) return false;
+                if(balances[msg.sender] < value) return false;
+                if(balances[to] + value < balances[to]) return false;
+                balances[msg.sender] -= value;
+                balances[to] += value;
+                Transfer(msg.sender, to, value);
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function has an integer overflow vulnerability. The function checks if balances[msg.sender] < value, but it does not check if balances[to] + value < balances[to]. If balances[msg.sender] is at its maximum value, adding any value will cause an overflow, allowing attackers to transfer more tokens than the sender actually has."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address from, address to, uint value) returns (bool success) {
+                if (frozenAccount[msg.sender]) return false;
+                if(balances[from] < value) return false;
+                if( allowed[from][msg.sender] >= value ) return false;
+                if(balances[to] + value < balances[to]) return false;
+                balances[from] -= value;
+                allowed[from][msg.sender] -= value;
+                balances[to] += value;
+                Transfer(from, to, value);
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferFrom' function has an integer overflow vulnerability. The function checks if balances[from] < value, but it does not check if balances[to] + value < balances[to]. If balances[from] is at its maximum value, adding any value will cause an overflow, allowing attackers to transfer more tokens than the sender actually has."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner{
+                balances[target] += mintedAmount;
+                totalSupply += mintedAmount;
+                Transfer(0,owner,mintedAmount);
+                Transfer(owner,target,mintedAmount);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'mintToken' function has an integer overflow vulnerability. The function adds mintedAmount to balances[target] without checking if balances[target] + mintedAmount < balances[target]. If balances[target] is at its maximum value, adding any amount will cause an overflow, allowing attackers to mint an arbitrary amount of tokens."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address to, uint value) returns (bool success) {
+                if (frozenAccount[msg.sender]) return false;
+                if(balances[msg.sender] < value) return false;
+                if(balances[to] + value < balances[to]) return false;
+                balances[msg.sender] -= value;
+                balances[to] += value;
+                Transfer(msg.sender, to, value);
+                return true;
+            }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'transfer' function has a wrong logic vulnerability. The function checks if balances[msg.sender] < value, but it does not check if balances[msg.sender] >= value. If balances[msg.sender] is at its maximum value, attackers can make the sender's balance incorrect, allowing attackers to transfer more tokens than the sender actually has."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address from, address to, uint value) returns (bool success) {
+                if (frozenAccount[msg.sender]) return false;
+                if(balances[from] < value) return false;
+                if( allowed[from][msg.sender] >= value ) return false;
+                if(balances[to] + value < balances[to]) return false;
+                balances[from] -= value;
+                allowed[from][msg.sender] -= value;
+                balances[to] += value;
+                Transfer(from, to, value);
+                return true;
+            }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'transferFrom' function has a wrong logic vulnerability. The function checks if balances[from] < value, but it does not check if balances[from] >= value. If balances[from] is at its maximum value, attackers can make the sender's balance incorrect, allowing attackers to transfer more tokens than the sender actually has."
+        }
+    ]
+}

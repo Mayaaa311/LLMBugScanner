@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "buyHeart()",
+            "auditor_idx": "0",
+            "vulnerability": "Integer overflow in the calculation of the number of hearts that can be bought with a given amount of Ether.",
+            "criticism": "The function uses the SafeMath library to perform arithmetic operations, but it does not check for integer overflow. This means that if the number of hearts that can be bought exceeds the maximum value that can be represented by a uint256, the function will overflow and the result will be incorrect.",
+            "correctness": 0,
+            "severity": 9,
+            "profitability": 9
+        },
+        {
+            "function_name": "buyHeart()",
+            "auditor_idx": "0",
+            "vulnerability": "Wrong logic in the calculation of the number of hearts that can be bought with a given amount of Ether.",
+            "criticism": "The function uses the following formula to calculate the number of hearts that can be bought: _hearts = (RoundETH[Round]).keysRec(msg.value); where RoundETH[Round] is a uint256 variable that stores the current round's Ether balance, and msg.value is the amount of Ether sent by the user. The keysRec() function from the GreedyHeartCalcLong library is used to calculate the number of hearts that can be bought with the given amount of Ether. However, this function uses a formula that is not correct, as it does not take into account the current round's Ether balance.",
+            "correctness": 0,
+            "severity": 9,
+            "profitability": 9
+        },
+        {
+            "function_name": "luckyBuy()",
+            "auditor_idx": "0",
+            "vulnerability": "Bad randomness in the calculation of the lucky buy.",
+            "criticism": "The function uses the following formula to calculate the lucky buy: uint256 seed = uint256(keccak256(abi.encodePacked((block.timestamp).add(block.difficulty).add((uint256(keccak256(abi.encodePacked(block.coinbase)))) / (now)).add(block.gaslimit).add((uint256(keccak256(abi.encodePacked(msg.sender)))) / (now)).add(block.number)))); where block.timestamp is the current block timestamp, block.difficulty is the current block difficulty, block.coinbase is the current block coinbase, block.gaslimit is the current block gas limit, and block.number is the current block number. However, this formula does not generate a truly random number, as it uses the current block's timestamp, difficulty, coinbase, gas limit, and number, which are all predictable values.",
+            "correctness": 0,
+            "severity": 9,
+            "profitability": 9
+        },
+        {
+            "function_name": "withdraw()",
+            "auditor_idx": "0",
+            "vulnerability": "Access control vulnerability in the withdraw function.",
+            "criticism": "The function allows any user to withdraw their revenue from any round, regardless of whether they participated in that round or not.",
+            "correctness": 0,
+            "severity": 9,
+            "profitability": 9
+        },
+        {
+            "function_name": "Owned()",
+            "auditor_idx": "0",
+            "vulnerability": "Typo constructor vulnerability in the Owned contract.",
+            "criticism": "The contract has a typo constructor, which means that it can be initialized with a different address than the intended owner. This means that the contract's owner can be changed to any address, which can lead to unauthorized access to the contract's functions.",
+            "correctness": 0,
+            "severity": 9,
+            "profitability": 9
+        }
+    ]
+}

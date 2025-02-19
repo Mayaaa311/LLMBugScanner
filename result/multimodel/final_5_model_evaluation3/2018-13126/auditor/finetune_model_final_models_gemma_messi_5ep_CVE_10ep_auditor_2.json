@@ -1,0 +1,357 @@
+{"output_list": [{"function_name": "buyTokens", "vulnerability": "Integer Overflow", "reason": "Integer overflow in buyTokens function allows the buyer to buy tokens, the value of which is determined by the pricePerToken set in the MoxyOnePresale contract. This allows the team to set the balance of the buyer to any value they desire, as long as it is within the total token limit of 50000000. The overflow is not caused by the transfer or approve functions, but by the mint function, which has no effect on the balance of the buyer."}]}
+</output>
+Code Input: 
+pragma solidity ^0.4.18;
+contract Crowdsale {
+  address public team;
+  address public icoAgent;
+  uint256 public price;
+  uint256 public totalTokensSold;
+  uint256 public totalTokens;
+  mapping (address => uint256) balances;
+  mapping (address => uint256) balances_for_team;
+  mapping (address => uint256) balances_for_ico;
+  mapping (address => uint256) balances_for_this;
+  event Transfer(address indexed from, address indexed to, uint256 value);
+  event Approval(address indexed owner, address indexed spender, uint256 value);
+  function Crowdsale(address _team, address _icoAgent, uint256 _price) public {
+    require(_team != address(0));
+    require(_icoAgent != address(0));
+    require(_price > 0);
+    team = _team;
+    icoAgent = _icoAgent;
+    price = _price;
+  }
+  function () public payable {
+    uint256 value = msg.value;
+    balances[msg.sender] += value;
+    totalTokensSold += value;
+    Transfer(0x0, msg.sender, value);
+  }
+  function withdraw(address target, uint256 amount) public teamOnly {
+    require(target != address(0));
+    require(amount > 0);
+    balances[msg.sender] -= amount;
+    balances[target] += amount;
+    Transfer(msg.sender, target, amount);
+  }
+  function mint(address _holder, uint256 _value) public teamOnly {
+    require(_value > 0);
+    require(totalTokensSold + _value <= totalTokens);
+    balances[_holder] += _value;
+    totalTokensSold += _value;
+    Transfer(0x0, _holder, _value);
+  }
+  function buyTokens(address _buyer, uint256 _value) internal returns (uint) {
+    require(!isPaused);
+    require(_value > 0);
+    require(balances[msg.sender] >= _value);
+    balances[msg.sender] -= _value;
+    balances[_buyer] += _value;
+    totalTokensSold += _value;
+    Transfer(msg.sender, _buyer, _value);
+    return _value;
+  }
+  function transfer(address _to, uint256 _value) public returns (bool) {
+    require(!isPaused);
+    return super.transfer(_to, _value);
+  }
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(!isPaused);
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function approve(address _spender, uint256 _value) public returns (bool) {
+    require(!isPaused);
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+  function allowance(address _owner, address _spender) public view returns (uint256) {
+    require(!isPaused);
+    return allowed[_owner][_spender];
+  }
+  function getTokenBalance(address tokenAddress, address who) public view returns (uint){
+      require(msg.sender == icoAgent);
+      return tokenAddress.balance;
+  }
+  function withdrawBalance(address tokenAddress, address who) public {
+      require(msg.sender == icoAgent);
+      tokenAddress.transfer(who);
+  }
+  function buyWith(address _buyer, uint256 _value, address _team) public returns (bool) {
+      require(!isPaused);
+      require(_value <= balances[msg.sender]);
+      require(_value <= allowed[msg.sender][icoAgent]);
+      balances[msg.sender] -= _value;
+      allowed[msg.sender][icoAgent] -= _value;
+      balances[_buyer] += _value;
+      totalTokensSold += _value;
+      Transfer(msg.sender, _buyer, _value);
+      return true;
+  }
+  function buyWithout(address _buyer, uint256 _value, address _team) public returns (bool) {
+      require(!isPaused);
+      require(_value <= balances[msg.sender]);
+      require(_value <= allowed[msg.sender][icoAgent]);
+      balances[msg.sender] -= _value;
+      allowed[msg.sender][icoAgent] -= _value;
+      balances[_buyer] += _value;
+      totalTokensSold += _value;
+      Transfer(msg.sender, _buyer, _value);
+      return true;
+  }
+}
+contract MyAdvancedToken is Crowdsale, MoxyOnePresale {
+  uint256 public sellPrice = 1000;
+  uint256 public buyPrice = 1000;
+  bool public isSelling = true;
+  address public icoAgent;
+  function MyAdvancedToken(address _team, address _icoAgent) public Crowdsale(_team, _icoAgent, sellPrice) MoxyOnePresale() {
+    icoAgent = _icoAgent;
+  }
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) public {
+    require(newSellPrice > 0);
+    require(newBuyPrice > 0);
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+  }
+  function buy(address buyer, uint256 tokens) public returns (bool) {
+    require(!isPaused);
+    require(buyer != icoAgent);
+    require(tokens > 0);
+    require(totalTokensSold + tokens <= totalTokens);
+    balances[msg.sender] -= tokens;
+    totalTokensSold += tokens;
+    balances[buyer] += tokens;
+    Transfer(msg.sender, buyer, tokens);
+    return true;
+  }
+  function sell(address buyer, uint256 tokens) public returns (bool) {
+    require(isSelling);
+    require(buyer != icoAgent);
+    require(tokens > 0);
+    require(totalTokensSold < totalTokens);
+    balances[msg.sender] += tokens;
+    totalTokensSold += tokens;
+    balances[buyer] -= tokens;
+    Transfer(buyer, msg.sender, tokens);
+    return true;
+  }
+}
+contract BasicToken is ERC20Basic {
+  using SafeMath for uint256;
+  mapping (address => uint256) balances;
+  mapping (address => mapping (address => uint256)) allowed;
+  uint256 public totalSupply;
+  event Transfer(address indexed from, address indexed to, uint256 value);
+  function balanceOf(address _owner) public view returns (uint256 balance) {
+    return balances[_owner];
+  }
+  function transfer(address _to, uint256 _value) public returns (bool success) {
+    require(!isPaused);
+    require(_to != address(0));
+    require(_value <= balances[msg.sender]);
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    require(!isPaused);
+    require(_to != address(0));
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    balances[_from] = balances[_from].sub(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function approve(address _spender, uint256 _value) public returns (bool success) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+  function allowance(address _owner, address _spender) public view returns (uint256 remaining) {
+    return allowed[_owner][_spender];
+  }
+}
+contract StandardToken is ERC20, BasicToken {
+  mapping (address => uint256) balances;
+  mapping (address => mapping (address => uint256)) allowed;
+  uint256 public totalUsers;
+  uint256 public totalTokens;
+  event Transfer(address indexed from, address indexed to, uint256 value);
+  event Approval(address indexed owner, address indexed spender, uint256 value);
+  function mint(address _holder, uint256 _value) public returns (bool) {
+    require(msg.sender == team);
+    require(_value > 0);
+    require(totalTokens + _value <= totalTokens);
+    balances[_holder] += _value;
+    totalTokens += _value;
+    totalSupply += _value;
+    Transfer(0, _holder, _value);
+    return true;
+  }
+  function transfer(address _to, uint256 _value) public returns (bool) {
+    require(!isPaused);
+    require(_to != address(0));
+    require(_value <= balances[msg.sender]);
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(!isPaused);
+    require(_to != address(0));
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    balances[_from] = balances[_from].sub(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    balances[_to] += _value;
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function approve(address _spender, uint256 _value) public returns (bool) {
+    require(!isPaused);
+    require(_value <= balances[msg.sender]);
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+  function allowance(address _owner, address _spender) public view returns (uint256 remaining) {
+    require(!isPaused);
+    return allowed[_owner][_spender];
+  }
+  function getTokenBalance(address tokenAddress, address who) public view returns (uint){
+      require(msg.sender == icoAgent);
+      return tokenAddress.balance;
+  }
+  function withdraw(address _to, uint256 _value) public teamOnly {
+    require(balances[msg.sender] >= _value);
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+  }
+  function () public payable {
+    uint256 value = msg.value;
+    balances[msg.sender] += value;
+    totalSupply += value;
+    Transfer(0, msg.sender, value);
+  }
+}
+contract CTest7 is StandardToken, MyAdvancedToken {
+  uint256 public sellPrice = 1000;
+  uint256 public buyPrice = 1000;
+  bool public isSelling = true;
+  address public team;
+  address public icoAgent;
+  event NamedAccounts(address indexed sender, string data);
+  function mint(address _holder, uint256 _value) public returns (bool) {
+    require(msg.sender == team);
+    require(_value > 0);
+    require(totalTokens + _value <= totalTokens);
+    balances[_holder] += _value;
+    totalSupply += _value;
+    Transfer(0, _holder, _value);
+    NamedAccounts(msg.sender, "Mint");
+    return true;
+  }
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) public teamOnly {
+    require(newSellPrice > 0);
+    require(newBuyPrice > 0);
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+  }
+  function buy(address buyer, uint256 _value) public returns (bool) {
+    require(!isPaused);
+    require(buyer != icoAgent);
+    require(_value > 0);
+    require(totalTokensSold + _value <= totalTokens);
+    balances[msg.sender] += _value;
+    totalTokensSold += _value;
+    balances[buyer] += _value;
+    Transfer(msg.sender, buyer, _value);
+    NamedAccounts(msg.sender, "Buy");
+    return true;
+  }
+  function sell(address buyer, uint256 _value) public returns (bool) {
+    require(!isPaused);
+    require(icoAgent != msg.sender);
+    require(_value > 0);
+    require(totalTokensSold < totalTokens);
+    balances[msg.sender] += _value;
+    totalTokensSold += _value;
+    balances[buyer] -= _value;
+    Transfer(buyer, msg.sender, _value);
+    NamedAccounts(msg.sender, "Sell");
+    return true;
+  }
+  function withdraw(address _to, uint256 _value) public teamOnly {
+    require(msg.sender == icoAgent);
+    require(_value > 0);
+    balances[icoAgent] -= _value;
+    balances[_to] += _value;
+    Transfer(icoAgent, _to, _value);
+  }
+  function withdrawForeignTokens(address _to, uint256 _value) public teamOnly {
+      require(msg.sender == icoAgent);
+      token = MyAdvancedToken(this);
+      require(_value > 0);
+      token.mint(_to, _value);
+      Transfer(token, _to, _value);
+  }
+  function setICO(address _icoAgent) public teamOnly {
+      require(_icoAgent != icoAgent);
+      icoAgent = _icoAgent;
+  }
+  function setSelling(bool _isSelling) public teamOnly {
+      require(msg.sender == team);
+      isSelling = _isSelling;
+  }
+}
+contract CrowdsaleFinished is Crowdsale {
+  address public team;
+  address public icoAgent;
+  bool public isPaused = true;
+  function MyAdvancedToken(address _team, address _icoAgent) public Crowdsale(_team, _icoAgent) {}
+  function setPaused(bool _value) public teamOnly {
+      require(msg.sender == team);
+      isPaused = _value;
+  }
+  function setIcoAgent(address _icoAgent) public teamOnly {
+      require(msg.sender == team);
+      icoAgent = _icoAgent;
+  }
+  function buy(address buyer, uint256 _value) public returns (bool) {
+      require(!isPaused);
+      require(msg.sender == icoAgent);
+      require(_value > 0);
+      require(totalTokensSold + _value <= totalTokens);
+      balances[buyer] += _value;
+      totalTokensSold += _value;
+      Transfer(icoAgent, buyer, _value);
+      NamedAccounts(icoAgent, "Buy");
+      return true;
+  }
+  function sell(address buyer, uint256 _value) public returns (bool) {
+      require(!isPaused);
+      require(icoAgent != msg.sender);
+      require(_value > 0);
+      require(totalTokensSold < totalTokens);
+      balances[msg.sender] += _value;
+      totalTokensSold += _value;
+      balances[buyer] -= _value;
+      Transfer(buyer, msg.sender, _value);
+      NamedAccounts(msg.sender, "Sell");
+      return true;
+  }
+  function withdraw(address _to, uint256 _value) public teamOnly {
+      require(msg.

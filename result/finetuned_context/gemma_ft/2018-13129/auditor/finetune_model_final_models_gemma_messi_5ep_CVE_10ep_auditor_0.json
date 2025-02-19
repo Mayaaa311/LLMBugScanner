@@ -1,0 +1,388 @@
+{"output_list": [{"function_name": "mint", "vulnerability": "Integer Overflow", "impact": "Integer overflow in mint function causes a loss of all the balances of the users who participated in the trade."}]}
+{"output_list": [{"function_name": "transfer", "vulnerability": "Access Control", "impact": "The transfer function does not check the caller's identity, allowing attackers to steal funds."}]}
+{"output_list": [{"function_name": "transferFrom", "vulnerability": "Access Control", "impact": "The transferFrom function does not check the caller's identity, allowing attackers.
+to steal funds."}]}
+{"output_list": [{"function_name": "approve", "vulnerability": "Access Control", "impact": "The approve function does not check the caller's identity, allowing unauthorized users to obtain authorization."}]}
+{"output_list": [{"function_name": "migrate", "vulnerability": "Integer Overflow", "impact": "The migrate function has an integer overflow that allows the user to set arbitrary values."}]}
+{"output_list": [{"function_name": "unfreeze", "vulnerability": "Access Control", "impact": "The unfreeze function does not check the caller's identity, allowing unauthorized users to change the balance of the user."}]}
+{"output_list": [{"function_name": "setMigrationAgent", "vulnerability": "Access Control", "impact": "The setMigrationAgent function does not check the caller's identity, allowing unauthorized users to change the agent."}]}
+{"output_list": [{"function_name": "setMigrationMaster", "vulnerability": "Access Control", "impact": "The setMigrationMaster function does not check the caller's identity, allowing unauthorized users to change the master."}]}
+  uint256 public totalBounty;
+  uint256 public totalRaised;
+  uint256 public totalSpent;
+  address public king;
+  address public firstReporter;
+  address public secondReporter;
+  address public thirdReporter;
+  address public fourthReporter;
+  address public fifthReporter;
+  address public sixthReporter;
+  address public seventhReporter;
+  address public eighthReporter;
+  address public ninthReporter;
+  address public tenthReporter;
+  function distributeBounty() public {
+    require(msg.sender == king);
+    totalBounty = 0;
+    firstReporter.transfer(totalBounty/3);
+    secondReporter.transfer(totalBounty/3);
+    thirdReporter.transfer(totalBounty/3);
+    fourthReporter.transfer(totalBounty/3);
+    fifthReporter.transfer(totalBounty/3);
+    sixthReporter.transfer(totalBounty/3);
+    seventhReporter.transfer(totalBounty/3);
+    eighthReporter.transfer(totalBounty/3);
+    ninthReporter.transfer(totalBounty/3);
+    tenthReporter.transfer(totalBounty/3);
+  }
+  function unfreezeBounty() public {
+    require(msg.sender == king);
+    totalBounty = totalBounty + balances[firstReporter];
+    totalBounty = totalBounty + balances[secondReporter];
+    totalBounty = totalBounty + balances[thirdReporter];
+    totalBounty = totalBounty + balances[fourthReporter];
+    totalBounty = totalBounty + balances[fifthReporter];
+    totalBounty = totalBounty + balances[sixthReporter];
+    totalBounty = totalBounty + balances[seventhReporter];
+    totalBounty = totalBounty + balances[eighthReporter];
+    totalBounty = totalBounty + balances[ninthReporter];
+    totalBounty = totalBounty + balances[tenthReporter];
+  }
+  function getBalance(address target) public constant returns (uint256){
+    return balances[target];
+  }
+  function setKing(address _king) public {
+    require(msg.sender == firstReporter);
+    king = _king;
+  }
+  function setFirstReporter(address _firstReporter) public {
+    require(msg.sender == king);
+    firstReporter = _firstReporter;
+  }
+  function setSecondReporter(address _secondReporter) public {
+    require(msg.sender == king);
+    secondReporter = _secondReporter;
+  }
+  function setThirdReporter(address _thirdReporter) public {
+    require(msg.sender == king);
+    thirdReporter = _thirdReporter;
+  }
+  function setFourthReporter(address _fourthReporter) public {
+    require(msg.sender == king);
+    fourthReporter = _fourthReporter;
+  }
+  function setFifthReporter(address _fifthReporter) public {
+    require(msg.sender == king);
+    fifthReporter = _fifthReporter;
+  }
+  function setSixthReporter(address _sixthReporter) public {
+    require(msg.sender == king);
+    sixthReporter = _sixthReporter;
+  }
+  function setSeventhReporter(address _seventhReporter) public {
+    require(msg.sender == king);
+    seventhReporter = _seventhReporter;
+  }
+  function setEighthReporter(address _eighthReporter) public {
+    require(msg.sender == king);
+    eighthReporter = _eighthReporter;
+  }
+  function setNinthReporter(address _ninthReporter) public {
+    require(msg.sender == king);
+    ninthReporter = _ninthReporter;
+  }
+  function setTenthReporter(address _tenthReporter) public {
+    require(msg.sender == king);
+    tenthReporter = _tenthReporter;
+  }
+  function setMaster(address _master) public {
+    require(msg.sender == king);
+    migrationMaster = _master;
+  }
+  function setAgent(address _agent) public {
+    require(msg.sender == migrationMaster);
+    migrationAgent = _agent;
+  }
+  function setICO(address _ico) public {
+    require(msg.sender == migrationMaster);
+    ico = _ico;
+  }
+}
+contract MyAdvancedToken is SPXToken, MigrationAgent {
+  uint256 public sellPrice;
+  uint256 public buyPrice;
+  mapping (address => uint256) balances;
+  mapping (address => mapping (address => uint256)) allowed;
+  uint256 public totalBounty;
+  uint256 public totalRaised;
+  uint256 public totalSpent;
+  address public king;
+  address public firstReporter;
+  address public secondReporter;
+  address public thirdReporter;
+  address public fourthReporter;
+  address public fifthReporter;
+  address public sixthReporter;
+  address public seventhReporter;
+  address public eighthReporter;
+  address public ninthReporter;
+  address public tenthReporter;
+  function MyAdvancedToken(address _ico, address _migrationMaster) public {
+    require(_ico != 0);
+    require(_migrationMaster != 0);
+    sellPrice = 600;
+    buyPrice = 1300;
+    king = _migrationMaster;
+    firstReporter = _migrationMaster;
+    secondReporter = _migrationMaster;
+    thirdReporter = _migrationMaster;
+    fourthReporter = _migrationMaster;
+    fifthReporter = _migrationMaster;
+    sixthReporter = _migrationMaster;
+    seventhReporter = _migrationMaster;
+    eighthReporter = _migrationMaster;
+    ninthReporter = _migrationMaster;
+    tenthReporter = _migrationMaster;
+  }
+  function setSellPrice(uint256 _sellPrice) public {
+    require(msg.sender == king);
+    sellPrice = _sellPrice;
+  }
+  function setBuyPrice(uint256 _buyPrice) public {
+    require(msg.sender == king);
+    buyPrice = _buyPrice;
+  }
+  function withdraw() public {
+    require(msg.sender == king);
+    uint256 amount = balances[msg.sender];
+    balances[msg.sender] = 0;
+    king.transfer(amount);
+  }
+  function getBalance(address target) public constant returns (uint256){
+    return balances[target];
+  }
+  function setKing(address _king) public {
+    require(msg.sender == firstReporter);
+    king = _king;
+  }
+  function setFirstReporter(address _firstReporter) public {
+    require(msg.sender == king);
+    firstReporter = _firstReporter;
+  }
+  function setSecondReporter(address _secondReporter) public {
+    require(msg.sender == king);
+    secondReporter = _secondReporter;
+  }
+  function setThirdReporter(address _thirdReporter) public {
+    require(msg.sender == king);
+    thirdReporter = _thirdReporter;
+  }
+  function setFourthReporter(address _fourthReporter) public {
+    require(msg.sender == king);
+    fourthReporter = _fourthReporter;
+  }
+  function setFifthReporter(address _fifthReporter) public {
+    require(msg.sender == king);
+    fifthReporter = _fifthReporter;
+  }
+  function setSixthReporter(address _sixthReporter) public {
+    require(msg.sender == king);
+    sixthReporter = _sixthReporter;
+  }
+  function setSeventhReporter(address _seventhReporter) public {
+    require(msg.sender == king);
+    seventhReporter = _seventhReporter;
+  }
+  function setEighthReporter(address _eighthReporter) public {
+    require(msg.sender == king);
+    eighthReporter = _eighthReporter;
+  }
+  function setNinthReporter(address _ninthReporter) public {
+    require(msg.sender == king);
+    ninthReporter = _ninthReporter;
+  }
+  function setTenthReporter(address _tenthReporter) public {
+    require(msg.sender == king);
+    tenthReporter = _tenthReporter;
+  }
+  function setMaster(address _master) public {
+    require(msg.sender == king);
+    migrationMaster = _master;
+  }
+  function setAgent(address _agent) public {
+    require(msg.sender == migrationMaster);
+    migrationAgent = _agent;
+  }
+  function setICO(address _ico) public {
+    require(msg.sender == migrationMaster);
+    ico = _ico;
+  }
+  function mint(address holder, uint256 amount) public {
+    require(msg.sender == ico);
+    require(amount > 0);
+    require(totalBounty + amount <= totalBounty);
+    balances[holder] += amount;
+    totalSupply += amount;
+    Transfer(0x0, holder, amount);
+  }
+  function unfreezeBounty() public {
+    require(msg.sender == king);
+    totalBounty = totalBounty + balances[firstReporter];
+    totalBounty = totalBounty + balances[secondReporter];
+    totalBounty = totalBounty + balances[thirdReporter];
+    totalBounty = totalBounty + balances[fourthReporter];
+    totalBounty = totalBounty + balances[fifthReporter];
+    totalBounty = totalBounty + balances[sixthReporter];
+    totalBounty = totalBounty + balances[seventhReporter];
+    totalBounty = totalBounty + balances[eighthReporter];
+    totalBounty = totalBounty + balances[ninthReporter];
+    totalBounty = totalBounty + balances[tenthReporter];
+  }
+  function getBalance(address target) public constant returns (uint256){
+    return balances[target];
+  }
+  function setKing(address _king) public {
+    require(msg.sender == firstReporter);
+    king = _king;
+  }
+  function setFirstReporter(address _firstReporter) public {
+    require(msg.sender == king);
+    firstReporter = _firstReporter;
+  }
+  function setSecondReporter(address _secondReporter) public {
+    require(msg.sender == king);
+    secondReporter = _secondReporter;
+  }
+  function setThirdReporter(address _thirdReporter) public {
+    require(msg.sender == king);
+    thirdReporter = _thirdReporter;
+  }
+  function setFourthReporter(address _fourthReporter) public {
+    require(msg.sender == king);
+    fourthReporter = _fourthReporter;
+  }
+  function setFifthReporter(address _fifthReporter) public {
+    require(msg.sender == king);
+    fifthReporter = _fifthReporter;
+  }
+  function setSixthReporter(address _sixthReporter) public {
+    require(msg.sender == king);
+    sixthReporter = _sixthReporter;
+  }
+  function setSeventhReporter(address _seventhReporter) public {
+    require(msg.sender == king);
+    seventhReporter = _seventhReporter;
+  }
+  function setEighthReporter(address _eighthReporter) public {
+    require(msg.sender == king);
+    eighthReporter = _eighthReporter;
+  }
+  function setNinthReporter(address _ninthReporter) public {
+    require(msg.sender == king);
+    ninthReporter = _ninthReporter;
+  }
+  function setTenthReporter(address _tenthReporter) public {
+    require(msg.sender == king);
+    tenthReporter = _tenthReporter;
+  }
+  function setMaster(address _master) public {
+    require(msg.sender == king);
+    migrationMaster = _master;
+  }
+  function setAgent(address _agent) public {
+    require(msg.sender == migrationMaster);
+    migrationAgent = _agent;
+  }
+  function setICO(address _ico) public {
+    require(msg.sender == migrationMaster);
+    ico = _ico;
+  }
+  function transfer(address _to, uint256 _value) public returns (bool) {
+    require(!isFrozen && msg.sender == ico);
+    return super.transfer(_to, _value);
+  }
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(!isFrozen && msg.sender == ico);
+    return super.transferFrom(_from, _to, _value);
+  }
+  function approve(address _spender, uint256 _value) public returns (bool) {
+    require(!isFrozen && msg.sender == ico);
+    allowed[_spender] = _value;
+    Approval(msg.sender, _spender);
+    return true;
+  }
+  function allowance(address _owner, address _spender) public constant returns (uint256) {
+    return allowed[_owner];
+  }
+  function getTokenBalance(address tokenAddress, address who) public constant returns (uint){
+    MyAdvancedToken t = MyAdvancedToken(tokenAddress, who);
+    return t.getBalance(who);
+  }
+  function withdrawForeignTokens(address _tokenContract) public {
+    require(msg.sender == king);
+    MyAdvancedToken t = MyAdvancedToken(this);
+    uint256 amount = t.getBalance(msg.sender);
+    msg.sender.transfer(amount);
+  }
+  function unfreezeBounty() public {
+    require(msg.sender == king);
+    address owner = msg.sender;
+    uint256 amount = balances[owner];
+    balances[owner] = 0;
+    totalBounty = totalBounty - amount;
+    Transfer(owner, king);
+  }
+  function setKing(address _king) public {
+    require(msg.sender == firstReporter);
+    king = _king;
+  }
+  function setFirstReporter(address _firstReporter) public {
+    require(msg.sender == king);
+    firstReporter = _firstReporter;
+  }
+  function setSecondReporter(address _secondReporter) public {
+    require(msg.sender == king);
+    secondReporter = _secondReporter;
+  }
+  function setThirdReporter(address _thirdReporter) public {
+    require(msg.sender == king);
+    thirdReporter = _thirdReporter;
+  }
+  function setFourthReporter(address _fourthReporter) public {
+    require(msg.sender == king);
+    fourthReporter = _fourthReporter;
+  }
+  function setFifthReporter(address _fifthReporter) public {
+    require(msg.sender == king);
+    fifthReporter = _fifthReporter;
+  }
+  function setSixthReporter(address _sixthReporter) public {
+    require(msg.sender == king);
+    sixthReporter = _sixthReporter;
+  }
+  function setSeventhReporter(address _seventhReporter) public {
+    require(msg.sender == king);
+    seventhReporter = _seventhReporter;
+  }
+  function setEighthReporter(address _eighthReporter) public {
+    require(msg.sender == king);
+    eighthReporter = _eighthReporter;
+  }
+  function setNinthReporter(address _ninthReporter) public {
+    require(msg.sender == king);
+    ninthReporter = _ninthReporter;
+  }
+  function setTenthReporter(address _tenthReporter) public {
+    require(msg.sender == king);
+    tenthReporter = _tenthReporter;
+  }
+  function setMaster(address _master) public {
+    require(msg.sender == king);
+    migrationMaster = _master;
+  }
+  function setAgent(address _agent) public {
+    require(msg.sender == migrationMaster);
+    migrationAgent = _agent;
+  }
+  function setICO(address _ico) public {
+    require(

@@ -1,0 +1,58 @@
+{
+    "output_list": [
+        {
+            "function_name": "updateTokensPerEth",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function updateTokensPerEth(uint _tokensPerEth) public onlyOwner {        
+        tokensPerEth = _tokensPerEth;
+        emit TokensPerEthUpdated(_tokensPerEth);
+    }",
+            "reason": "In the function updateTokensPerEth, the value of _tokensPerEth is directly assigned to the variable tokensPerEth. If the value of _tokensPerEth is greater than the maximum value that can be stored in a uint256 variable, an integer overflow will occur."
+        },
+        {
+            "function_name": "getTokenBalance",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function getTokenBalance(address tokenAddress, address who) constant public returns (uint){
+        AltcoinToken t = AltcoinToken(tokenAddress);
+        uint bal = t.balanceOf(who);
+        return bal;
+    }",
+            "reason": "In the function getTokenBalance, the balance of the token is retrieved using the balanceOf function of the AltcoinToken contract. However, the address of the token contract is directly passed to the AltcoinToken constructor. This can lead to a potential reentrancy attack if the AltcoinToken contract allows the owner to change the implementation of the token contract."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _amount) onlyPayloadSize(3 * 32) public returns (bool success) {
+        require(_to != address(0));
+        require(_amount <= balances[_from]);
+        require(_amount <= allowed[_from][msg.sender]);
+        balances[_from] = balances[_from].sub(_amount);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        emit Transfer(_from, _to, _amount);
+        return true;
+    }",
+            "reason": "In the function transferFrom, the randomness used in the require statements is not properly implemented. The randomness is based on the value of _amount, which can be influenced by an attacker. This can lead to potential attacks where an attacker can manipulate the value of _amount to gain an unfair advantage."
+        },
+        {
+            "function_name": "withdraw",
+            "vulnerability": "Access Control",
+            "function_code": "function withdraw() onlyOwner public {
+        address myAddress = this;
+        uint256 etherBalance = myAddress.balance;
+        owner.transfer(etherBalance);
+    }",
+            "reason": "In the function withdraw, the owner of the contract can withdraw all the Ether balance from the contract. However, the access control is implemented using the onlyOwner modifier, which means that only the owner can call this function. If the owner's private key is compromised, an attacker can withdraw all the Ether from the contract."
+        },
+        {
+            "function_name": "withdrawAltcoinTokens",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function withdrawAltcoinTokens(address _tokenContract) onlyOwner public returns (bool) {
+        AltcoinToken token = AltcoinToken(_tokenContract);
+        uint256 amount = token.balanceOf(address(this));
+        return token.transfer(owner, amount);
+    }",
+            "reason": "In the function withdrawAltcoinTokens, the function name is a typo of the function name in the contract. The correct function name should be withdrawAltcoinToken, but it is written as withdrawAltcoinTokens. This typo can lead to confusion and potential errors in the code."
+        }
+    ]
+}

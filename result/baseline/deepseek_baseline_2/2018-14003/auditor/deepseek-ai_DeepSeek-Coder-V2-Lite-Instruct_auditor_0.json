@@ -1,0 +1,62 @@
+ {
+    "output_list": [
+        {
+            "function_name": "batchTransfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "uint cnt = _receivers.length;
+uint256 amount = uint256(cnt) * _value;
+require(cnt > 0 && cnt <= 10);
+require(_value > 0 && balanceOf[msg.sender] >= amount);
+require(!frozenAccount[msg.sender]);
+balanceOf[msg.sender] -= amount;
+for (uint i = 0; i < cnt; i++) {
+    balanceOf[_receivers[i]] += _value;
+    Transfer(msg.sender, _receivers[i], _value);
+}",
+            "reason": "The function 'batchTransfer' calculates the amount to deduct from the sender's balance using `uint256(cnt) * _value`. If `cnt` is sufficiently large, this can lead to an integer overflow, causing the subtraction operation to not properly reduce the sender's balance, leading to a potential loss of tokens for the sender."
+        },
+        {
+            "function_name": "TokenERC20.transfer",
+            "vulnerability": "Access Control",
+            "function_code": "function transfer(address _to, uint256 _value) public {
+    _transfer(msg.sender, _to, _value);
+}",
+            "reason": "The 'transfer' function does not perform any access control check before transferring tokens. This means that any user can transfer tokens to any address, even if the target address is a contract that might be vulnerable to reentrancy attacks. This can lead to unauthorized token transfers."
+        },
+        {
+            "function_name": "WMCToken.freezeAccount",
+            "vulnerability": "Access Control",
+            "function_code": "function freezeAccount(address target, bool freeze) onlyOwner public {
+    frozenAccount[target] = freeze;
+    FrozenFunds(target, freeze);
+}",
+            "reason": "The 'freezeAccount' function allows the owner to freeze any account. However, there is no check to ensure that the 'target' address is not the zero address (0x0), which could lead to unintended consequences such as freezing the owner's own account, locking funds."
+        },
+        {
+            "function_name": "TokenERC20.burn",
+            "vulnerability": "Token Devalue",
+            "function_code": "function burn(uint256 _value) public returns (bool success) {
+    require(balanceOf[msg.sender] >= _value);
+    balanceOf[msg.sender] -= _value;
+    totalSupply -= _value;
+    Burn(msg.sender, _value);
+    return true;
+}",
+            "reason": "The 'burn' function allows any user to burn their own tokens, reducing the total supply. However, there is no check to prevent users from burning tokens that they do not own, which could lead to token devaluation or even loss of funds if a user mistakenly believes they are burning their own tokens."
+        },
+        {
+            "function_name": "TokenERC20.burnFrom",
+            "vulnerability": "Access Control",
+            "function_code": "function burnFrom(address _from, uint256 _value) public returns (bool success) {
+    require(balanceOf[_from] >= _value);
+    require(_value <= allowance[_from][msg.sender]);
+    balanceOf[_from] -= _value;
+    allowance[_from][msg.sender] -= _value;
+    totalSupply -= _value;
+    Burn(_from, _value);
+    return true;
+}",
+            "reason": "The 'burnFrom' function allows an approved spender to burn tokens from the owner's account. However, there is no check to ensure that the spender is actually allowed to burn tokens on behalf of the owner, which could lead to unauthorized token burning."
+        }
+    ]
+}

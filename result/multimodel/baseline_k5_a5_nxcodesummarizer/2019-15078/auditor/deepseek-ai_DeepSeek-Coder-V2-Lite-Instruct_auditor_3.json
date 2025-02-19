@@ -1,0 +1,77 @@
+ {
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr onlyWhitelist public {
+    if (value > totalRemaining) {
+        value = totalRemaining;
+    }
+    require(value <= totalRemaining);
+    address investor = msg.sender;
+    uint256 toGive = value;
+    distr(investor, toGive);
+    if (toGive > 0) {
+        blacklist[investor] = true;
+    }
+    if (totalDistributed >= totalSupply) {
+        distributionFinished = true;
+    }
+    value = value.div(100000).mul(99999);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function 'getTokens' uses multiplication and division operations that can lead to integer overflow, allowing an attacker to manipulate the value of 'value' and potentially gain more tokens than intended."
+        },
+        {
+            "function_name": "distr",
+            "code": "function distr(address _to, uint256 _amount) canDistr private returns (bool) {
+    totalDistributed = totalDistributed.add(_amount);
+    totalRemaining = totalRemaining.sub(_amount);
+    balances[_to] = balances[_to].add(_amount);
+    emit Distr(_to, _amount);
+    emit Transfer(address(0), _to, _amount);
+    return true;
+    if (totalDistributed >= totalSupply) {
+        distributionFinished = true;
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function 'distr' uses addition and subtraction operations that can lead to integer overflow, allowing an attacker to manipulate the totalDistributed and totalRemaining variables and potentially gain more tokens than intended."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _amount) onlyPayloadSize(2 * 32) public returns (bool success) {
+    require(_to != address(0));
+    require(_amount <= balances[msg.sender]);
+    balances[msg.sender] = balances[msg.sender].sub(_amount);
+    balances[_to] = balances[_to].add(_amount);
+    emit Transfer(msg.sender, _to, _amount);
+    return true;
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function 'transfer' does not check for the possibility of a transfer to a blacklisted address, which could be exploited to block funds by adding the recipient to the blacklist."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) onlyOwner public {
+    require(_value <= balances[msg.sender]);
+    address burner = msg.sender;
+    balances[burner] = balances[burner].sub(_value);
+    totalSupply = totalSupply.sub(_value);
+    totalDistributed = totalDistributed.sub(_value);
+    emit Burn(burner, _value);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The function 'burn' allows the owner to burn tokens, which can be exploited if the owner's account is compromised or if the owner's private key is stolen, leading to a loss of tokens."
+        },
+        {
+            "function_name": "withdrawForeignTokens",
+            "code": "function withdrawForeignTokens(address _tokenContract) onlyOwner public returns (bool) {
+    ForeignToken token = ForeignToken(_tokenContract);
+    uint256 amount = token.balanceOf(address(this));
+    return token.transfer(owner, amount);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The function 'withdrawForeignTokens' allows the owner to transfer any ERC20 tokens held by the contract to their own address, which can be exploited if the owner's account is compromised or if the owner's private key is stolen, leading to a loss of tokens."
+        }
+    ]
+}

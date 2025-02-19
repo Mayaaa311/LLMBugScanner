@@ -1,0 +1,367 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "impact": "Integer overflow in mintToken function allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "freezeAccount", "vulnerability": "Access Control", "impact": "freezeAccount function allows the owner to freeze the account of any user, which removes the owner's only access control mechanism."}]}
+{"output_list": [{"function_name": "setPrices", "vulnerability": "Access Control", "impact": "setPrices function is public, allowing any user to change the prices used to buy and sell tokens."}]}
+{"output_list": [{"function_name": "buy", "vulnerability": "Integer Overflow", "impact": "Integer overflow in buy function allows the owner to set the balance of the buyer to any value."}]}
+{"output_list": [{"function_name": "sell", "vulnerability": "Integer Overflow", "impact": "Integer overflow in sell function allows the owner to set the balance of the seller to any value."}]}
+{"output_list": [{"function_name": "setBalance", "vulnerability": "Integer Overflow", "impact": "Integer overflow in setBalance function allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "toOwner", "vulnerability": "Access Control", "impact": "toOwner function is public, allowing any user to change the owner of the contract."}]}
+{"output_list": [{"function_name": "destruct", "vulnerability": "Access Control", "impact": "destruct function is public, allowing any user to destroy the contract."}]}
+}
+  
+---
+  
+### Master Copy:
+pragma solidity ^0.4.18;
+contract owned {
+    address public owner;
+    function owned() public {
+        owner = msg.sender;
+    }
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+    function transferOwnership(address newOwner) onlyOwner public {
+        owner = newOwner;
+    }
+    function destruct() onlyOwner public {
+        selfdestruct(owner);
+    }
+}
+contract tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public; }
+contract TokenERC20 {
+    string public name;
+    string public symbol;
+    uint8 public decimals;
+    uint256 public totalSupply;
+    mapping (address => uint256) public balanceOf;
+    mapping (address => mapping (address => uint256)) public allowance;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Burn(address indexed from, uint256 value);
+    function TokenERC20(
+        uint256 initialSupply,
+        string tokenName,
+        uint256 decimalUnits,
+        string tokenSymbol
+    ) public {
+        decimals = decimalUnits;
+        totalSupply = initialSupply * 10 ** uint256(decimals);  
+        balanceOf[msg.sender] = totalSupply;                
+        name = tokenName;                                   
+        symbol = tokenSymbol;                               
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balanceOf[_from] >= _value);               
+        require (balanceOf[_to] + _value > balanceOf[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                       
+        balanceOf[_from] -= _value;                         
+        balanceOf[_to] += _value;                           
+        Transfer(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+    function setMinBalance(uint minimumBalanceInFinney) public onlyOwner {
+        minBalanceForAccounts = minimumBalanceInFinney * 1 finney;
+    }
+    function toOwner(address ownerAddress) public onlyOwner {
+        owner = ownerAddress;
+    }
+    function destruct() public onlyOwner {
+        selfdestruct(owner);
+    }
+}
+contract CarbonExchangeCoinToken is owned, tokenRecipient, TokenERC20 {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+tuint256 public minBalance;
+    function CarbonExchangeCoinToken() public {
+        decimals = 18;
+        totalSupply = 5000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;                
+        name = "Carbon Exchange Coin Token";                   
+        symbol = "CEC";                               
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balanceOf[_from] >= _value);               
+        require (balanceOf[_to] + _value > balanceOf[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                       
+        balanceOf[_from] -= _value;                         
+        balanceOf[_to] += _value;                           
+        Transfer(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+        minBalance = target;
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+    function setMinBalance(uint minimumBalanceInFinney) public onlyOwner {
+        minBalance = minimumBalanceInFinney * 1 finney;
+    }
+    function toOwner(address ownerAddress) public onlyOwner {
+        owner = ownerAddress;
+    }
+    function destruct() public onlyOwner {
+        selfdestruct(owner);
+    }
+}
+contract MyAdvancedToken is owned, TokenERC20, owned {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+tuint256 public minBalance;
+    function MyAdvancedToken() public {
+        decimals = 18;
+        totalSupply = 5000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;                
+        name = "My Advanced Token";                   
+        symbol = "MAT";                               
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balanceOf[_from] >= _value);               
+        require (balanceOf[_to] + _value > balanceOf[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                       
+        balanceOf[_from] -= _value;                         
+        balanceOf[_to] += _value;                           
+        Transfer(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+        minBalance = target;
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+    function setMinBalance(uint minimumBalanceInFinney) public onlyOwner {
+        minBalance = minimumBalanceInFinney * 1 finney;
+    }
+    function toOwner(address ownerAddress) public onlyOwner {
+        owner = ownerAddress;
+    }
+    function destruct() public onlyOwner {
+        selfdestruct(owner);
+    }
+}
+contract MAT2 is MyAdvancedToken {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+tuint256 public minBalance;
+    function MAT2() public {
+        decimals = 18;
+        totalSupply = 5000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;                
+        name = "My Advanced Token 2";                   
+        symbol = "MAT2";                               
+    }
+    function setSellPrice(uint256 newSellPrice) public onlyOwner {
+        sellPrice = newSellPrice;
+    }
+    function setBuyPrice(uint256 newBuyPrice) public onlyOwner {
+        buyPrice = newBuyPrice;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+        minBalance = target;
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+    function setMinBalance(uint minimumBalanceInFinney) public onlyOwner {
+        minBalance = minimumBalanceInFinney * 1 finney;
+    }
+    function toOwner(address ownerAddress) public onlyOwner {
+        owner = ownerAddress;
+    }
+    function destruct() public onlyOwner {
+        selfdestruct(owner);
+    }
+}
+contract MAT3 is owned, TokenERC20, owned {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+tuint256 public minBalance;
+    function MAT3() public {
+        decimals = 18;
+        totalSupply = 5000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;                
+        name = "My Advanced Token 3";                   
+        symbol = "MAT3";                               
+    }
+    function setSellPrice(uint256 newSellPrice) public onlyOwner {
+        sellPrice = newSellPrice;
+    }
+    function setBuyPrice(uint256 newBuyPrice) public onlyOwner {
+        buyPrice = newBuyPrice;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+        minBalance = target;
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+    function setMinBalance(uint minimumBalanceInFinney) public onlyOwner {
+        minBalance = minimumBalanceInFinney * 1 finney;
+    }
+    function toOwner(address ownerAddress) public onlyOwner {
+        owner = ownerAddress;
+    }
+    function destruct() public onlyOwner {
+        selfdestruct(owner);
+    }
+}
+contract MAT4 is owned, TokenERC20, owned {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+tuint256 public minBalance;
+    function MAT4() public {
+        decimals = 18;
+        totalSupply = 5000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;                
+        name = "My Advanced Token 4";                   
+        symbol = "MAT4";                               
+    }
+    function setSellPrice(uint256 newSellPrice) public onlyOwner {
+        sellPrice = newSellPrice;
+    }
+    function setBuyPrice(uint256 newBuyPrice) public onlyOwner {
+        buyPrice = newBuyPrice;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+        minBalance = target;
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+    function setMinBalance(uint minimumBalanceInFinney) public onlyOwner {
+        minBalance = minimumBalanceInFinney * 1 finney;
+    }
+    function toOwner(address ownerAddress) public onlyOwner {
+        owner = ownerAddress;
+    }
+    function destruct() public onlyOwner {
+        selfdestruct(owner);
+    }
+}
+contract MAT5 is owned, TokenERC20, owned {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+tuint256 public minBalance;
+    function MAT5() public {
+        decimals = 18;
+        totalSupply = 5000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;                
+        name = "My Advanced Token 5";                   
+        symbol = "MAT5";                               
+    }
+    function setSellPrice(uint256 newSellPrice) public onlyOwner {
+        sellPrice = newSellPrice;
+    }
+    function setBuyPrice

@@ -1,0 +1,89 @@
+{
+    "output_list": [
+        {
+            "function_name": "getProtocolFeeStats",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function getProtocolFeeStats() public view returns (uint accumulatedFees, uint accumulatedBurn, uint accumulatedDAOFund, uint accumulatedReward, uint remainingFees, uint remainingBurn, uint remainingDAOFund, uint remainingReward) {
+                remainingFees = ERC20(lrcAddress).balanceOf(address(this));
+                accumulatedFees = remainingFees.add(claimedReward).add(claimedDAOFund).add(claimedBurn);
+                accumulatedReward = accumulatedFees.mul(REWARD_PERCENTAGE) / 100;
+                accumulatedDAOFund = accumulatedFees.mul(DAO_PERDENTAGE) / 100;
+                accumulatedBurn = accumulatedFees.sub(accumulatedReward).sub(accumulatedDAOFund);
+                remainingReward = accumulatedReward.sub(claimedReward);
+                remainingDAOFund = accumulatedDAOFund.sub(claimedDAOFund);
+                remainingBurn = accumulatedBurn.sub(claimedBurn);
+            }",
+            "reason": "The function `getProtocolFeeStats` calculates the remaining fees by subtracting the claimed reward, DAO fund, and burn from the total balance of LRC in the contract. However, if the total balance of LRC is very large, the calculation may cause an integer overflow. This vulnerability can be exploited by an attacker who has enough LRC in the contract to cause the calculation to overflow and result in incorrect remaining fees."
+        },
+        {
+            "function_name": "sellTokenForLRC",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function sellTokenForLRC(address token, uint amount) external nonReentrant {
+                require(amount > 0, "ZERO_AMOUNT");
+                require(token != lrcAddress, "PROHIBITED");
+                address recipient = tokenSellerAddress == address(0) ? owner : tokenSellerAddress;
+                if (token == address(0)) {
+                    recipient.sendETHAndVerify(amount, gasleft());
+                } else {
+                    token.safeTransferAndVerify(recipient, amount);
+                }
+                require(
+                    tokenSellerAddress == address(0) ||
+                    ITokenSeller(tokenSellerAddress).sellToken(token, lrcAddress),
+                    "SELL_FAILURE"
+                );
+                emit TokenSold(token, amount);
+            }",
+            "reason": "The function `sellTokenForLRC` calculates the remaining fees by subtracting the claimed reward, DAO fund, and burn from the total balance of LRC in the contract. However, if the total balance of LRC is very large, the calculation may cause an integer overflow. This vulnerability can be exploited by an attacker who has enough LRC in the contract to cause the calculation to overflow and result in incorrect remaining fees."
+        },
+        {
+            "function_name": "claimStakingReward",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function claimStakingReward(uint amount) external nonReentrant {
+                require(amount > 0, "ZERO_VALUE");
+                require(msg.sender == userStakingPoolAddress, "UNAUTHORIZED");
+                lrcAddress.safeTransferAndVerify(userStakingPoolAddress, amount);
+                claimedReward = claimedReward.add(amount);
+                emit LRCClaimed(amount);
+            }",
+            "reason": "The function `claimStakingReward` calculates the remaining fees by subtracting the claimed reward, DAO fund, and burn from the total balance of LRC in the contract. However, if the total balance of LRC is very large, the calculation may cause an integer overflow. This vulnerability can be exploited by an attacker who has enough LRC in the contract to cause the calculation to overflow and result in incorrect remaining fees."
+        },
+        {
+            "function_name": "fundDAO",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function fundDAO() external nonReentrant {
+                uint amountDAO;
+                uint amountBurn;
+                (, , , , , amountBurn, amountDAO, ) = getProtocolFeeStats();
+                address recipient = daoAddress == address(0) ? owner : daoAddress;
+                if (amountDAO > 0) {
+                    lrcAddress.safeTransferAndVerify(recipient, amountDAO);
+                }
+                if (amountBurn > 0) {
+                    require(BurnableERC20(lrcAddress).burn(amountBurn), "BURN_FAILURE");
+                }
+                claimedBurn = claimedBurn.add(amountBurn);
+                claimedDAOFund = claimedDAOFund.add(amountDAO);
+                emit DAOFunded(amountDAO, amountBurn);
+            }",
+            "reason": "The function `fundDAO` calculates the remaining fees by subtracting the claimed reward, DAO fund, and burn from the total balance of LRC in the contract. However, if the total balance of LRC is very large, the calculation may cause an integer overflow. This vulnerability can be exploited by an attacker who has enough LRC in the contract to cause the calculation to overflow and result in incorrect remaining fees."
+        },
+        {
+            "function_name": "updateSettings",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function updateSettings(address _userStakingPoolAddress, address _tokenSellerAddress, address _daoAddress) external nonReentrant onlyOwner {
+                require(
+                    userStakingPoolAddress != _userStakingPoolAddress ||
+                    tokenSellerAddress != _tokenSellerAddress ||
+                    daoAddress != _daoAddress,
+                    "SAME_ADDRESSES"
+                );
+                userStakingPoolAddress = _userStakingPoolAddress;
+                tokenSellerAddress = _tokenSellerAddress;
+                daoAddress = _daoAddress;
+                emit SettingsUpdated(now);
+            }",
+            "reason": "The function `updateSettings` has a typo in the function name. The correct function name should be `updateSettings`. This typo can be exploited by an attacker who can call the wrong function name and cause the contract to behave unexpectedly."
+        }
+    ]
+}

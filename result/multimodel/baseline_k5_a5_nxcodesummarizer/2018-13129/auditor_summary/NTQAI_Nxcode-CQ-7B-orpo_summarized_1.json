@@ -1,0 +1,59 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address holder, uint value) public {
+  require(msg.sender == ico);
+  require(value > 0);
+  require(totalSupply + value <= TOKEN_LIMIT);
+  balances[holder] += value;
+  totalSupply += value;
+  Transfer(0x0, holder, value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The absence of a check for the sum of totalSupply and value exceeding TOKEN_LIMIT is a critical vulnerability."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _value) public returns (bool) {
+  require(_to != address(0));
+  require(!isFrozen);
+  return super.transfer(_to, _value);
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The absence of a check for the sender's balance being sufficient to transfer the specified _value is a critical vulnerability."
+        },
+        {
+            "function_name": "unfreeze",
+            "code": "function unfreeze() public {
+  require(msg.sender == ico);
+  isFrozen = false;
+}",
+            "vulnerability": "Bad Randomness",
+            "reason": "The absence of additional security measures to ensure the correct and secure unfreeze operation is a critical vulnerability."
+        },
+        {
+            "function_name": "migrate",
+            "code": "function migrate(uint value) external {
+  require(migrationAgent != 0);
+  require(value > 0);
+  require(value <= balances[msg.sender]);
+  balances[msg.sender] -= value;
+  totalSupply -= value;
+  totalMigrated += value;
+  MigrationAgent(migrationAgent).migrateFrom(msg",
+            "vulnerability": "Access Control",
+            "reason": "The absence of a check for the sender's balance being sufficient to migrate the specified value is a critical vulnerability."
+        },
+        {
+            "function_name": "SPXToken",
+            "code": "function SPXToken(address _ico, address _migrationMaster) public {
+  require(_ico != 0);
+  ico = _ico;
+  migrationMaster = _migrationMaster;
+}",
+            "vulnerability": "Typo Constructor",
+            "reason": "The absence of the constructor keyword in the constructor function is a minor but important typo."
+        }
+    ]
+}

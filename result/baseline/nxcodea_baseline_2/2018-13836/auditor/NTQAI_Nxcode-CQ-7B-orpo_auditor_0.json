@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "balanceOf",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function balanceOf(address _owner) public constant returns (uint256 balance) { return balances[_owner]; }",
+            "reason": "The function balanceOf does not check if the balance of an address exceeds the maximum value of uint256. This can lead to integer overflow, where the balance of an address is greater than the maximum value of uint256. This can be exploited by an attacker to steal all the tokens of a victim."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _amount) public returns (bool success) { require(balances[msg.sender] >= _amount && _amount > 0); balances[msg.sender] -= _amount; balances[_to] += _amount; Transfer(msg.sender, _to, _amount); return true; }",
+            "reason": "The function transfer does not check if the balance of the sender is greater than or equal to the amount being transferred. This can lead to integer overflow, where the balance of the sender is greater than the maximum value of uint256. This can be exploited by an attacker to steal all the tokens of a victim."
+        },
+        {
+            "function_name": "multiTransfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function multiTransfer(address[] _addresses, uint[] _amounts) public returns (bool success) { require(_addresses.length <= 100 && _addresses.length == _amounts.length); uint totalAmount; for (uint a = 0; a < _amounts.length; a++) { totalAmount += _amounts[a]; } require(totalAmount > 0 && balances[msg.sender] >= totalAmount); balances[msg.sender] -= totalAmount; for (uint b = 0; b < _addresses.length; b++) { if (_amounts[b] > 0) { balances[_addresses[b]] += _amounts[b]; Transfer(msg.sender, _addresses[b], _amounts[b]); } } return true; }",
+            "reason": "The function multiTransfer does not check if the balance of the sender is greater than or equal to the total amount being transferred. This can lead to integer overflow, where the balance of the sender is greater than the maximum value of uint256. This can be exploited by an attacker to steal all the tokens of a victim."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _amount) public returns (bool success) { require(balances[_from] >= _amount && allowed[_from][msg.sender] >= _amount && _amount > 0); balances[_from] -= _amount; allowed[_from][msg.sender] -= _amount; balances[_to] += _amount; Transfer(_from, _to, _amount); return true; }",
+            "reason": "The function transferFrom does not check if the balance of the sender is greater than or equal to the amount being transferred. This can lead to integer overflow, where the balance of the sender is greater than the maximum value of uint256. This can be exploited by an attacker to steal all the tokens of a victim."
+        },
+        {
+            "function_name": "setupAirDrop",
+            "vulnerability": "Access Control",
+            "function_code": "function setupAirDrop(bool _status, uint _amount, uint _Gwei) public returns (bool success) { require(msg.sender == owner); airDropStatus = _status; airDropAmount = _amount * 10 ** decimals; airDropGasPrice = _Gwei * 10 ** 9; return true; }",
+            "reason": "The function setupAirDrop does not check if the caller is the owner of the contract. This can lead to access control vulnerability, where an attacker can change the air drop status, amount, and gas price without the owner's permission. This can be exploited by an attacker to manipulate the air drop and steal all the tokens of a victim."
+        }
+    ]
+}

@@ -1,0 +1,69 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        emit Transfer(0, owner, mintedAmount);
+        emit Transfer(owner, target, mintedAmount);
+    }",
+            "vulnerability": "Token Issuance Manipulation",
+            "reason": "The mintToken function allows the owner to increase arbitrary amounts of tokens for any user, potentially leading to severe inflation and loss of value for token holders."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint amount) public returns (uint revenue) {
+        require(balanceOf[msg.sender] >= amount);
+        balanceOf[this] += amount;
+        balanceOf[msg.sender] -= amount;
+        revenue = amount * sellPrice;
+        msg.sender.transfer(revenue);
+        emit Transfer(msg.sender, this, amount);
+        return revenue;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The sell function does not check for overflow, allowing users to sell an arbitrary large amount of tokens, leading to a denial of service to the contract owner."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public {
+        require(!frozenAccount[msg.sender]);
+        if (msg.sender.balance<minBalanceForAccounts) {
+            sell((minBalanceForAccounts-msg.sender.balance)/sellPrice);
+        }
+        _transfer(msg.sender, _to, _value);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not check for overflow, allowing users to transfer an arbitrary large amount of tokens, leading to a denial of service to the contract owner."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable public returns (uint amount) {
+        amount = msg.value / buyPrice;
+        require(balanceOf[this] >= amount);
+        balanceOf[msg.sender] += amount;
+        balanceOf[this] -= amount;
+        emit Transfer(this, msg.sender, amount);
+        return amount;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The buy function does not check for overflow, allowing users to buy an arbitrary large amount of tokens, leading to a denial of service to the contract owner."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                                
+        require (balanceOf[_from] >= _value);              
+        require (balanceOf[_to] + _value > balanceOf[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                      
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        emit Transfer(_from, _to, _value);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The _transfer function does not check for overflow, allowing users to transfer an arbitrary large amount of tokens, leading to a denial of service to the contract owner."
+        }
+    ]
+}

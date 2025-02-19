@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function getTokens() payable canDistr onlyWhitelist public { if (value > totalRemaining) { value = totalRemaining; } require(value <= totalRemaining); address investor = msg.sender; uint256 toGive = value; distr(investor, toGive); if (toGive > 0) { blacklist[investor] = true; } if (totalDistributed >= totalSupply) { distributionFinished = true; } value = value.div(100000).mul(99999); }",
+            "reason": "In the `getTokens` function, the variable `value` is being modified in a way that could potentially cause an integer overflow. The value is being divided by 100000 and then multiplied by 99999, which could potentially result in an overflow if `value` is very large. This could lead to incorrect calculations and potentially incorrect behavior of the contract."
+        },
+        {
+            "function_name": "distr",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function distr(address _to, uint256 _amount) canDistr private returns (bool) { totalDistributed = totalDistributed.add(_amount); totalRemaining = totalRemaining.sub(_amount); balances[_to] = balances[_to].add(_amount); emit Distr(_to, _amount); emit Transfer(address(0), _to, _amount); return true; if (totalDistributed >= totalSupply) { distributionFinished = true; } }",
+            "reason": "In the `distr` function, the variables `totalDistributed` and `totalRemaining` are being modified in a way that could potentially cause an integer overflow. The `totalDistributed` variable is being increased by `_amount`, and the `totalRemaining` variable is being decreased by `_amount`. If `_amount` is very large, this could result in an overflow, leading to incorrect calculations and potentially incorrect behavior of the contract."
+        },
+        {
+            "function_name": "burn",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function burn(uint256 _value) onlyOwner public { require(_value <= balances[msg.sender]); address burner = msg.sender; balances[burner] = balances[burner].sub(_value); totalSupply = totalSupply.sub(_value); totalDistributed = totalDistributed.sub(_value); emit Burn(burner, _value); }",
+            "reason": "In the `burn` function, the variables `totalSupply` and `totalDistributed` are being modified in a way that could potentially cause an integer overflow. The `totalSupply` variable is being decreased by `_value`, and the `totalDistributed` variable is being decreased by `_value`. If `_value` is very large, this could result in an overflow, leading to incorrect calculations and potentially incorrect behavior of the contract."
+        },
+        {
+            "function_name": "getTokens",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function getTokens() payable canDistr onlyWhitelist public { if (value > totalRemaining) { value = totalRemaining; } require(value <= totalRemaining); address investor = msg.sender; uint256 toGive = value; distr(investor, toGive); if (toGive > 0) { blacklist[investor] = true; } if (totalDistributed >= totalSupply) { distributionFinished = true; } value = value.div(100000).mul(99999); }",
+            "reason": "In the `getTokens` function, the variable `value` is being modified in a way that could potentially cause a wrong logic. The value is being divided by 100000 and then multiplied by 99999, which could potentially result in an incorrect value. This could lead to incorrect calculations and potentially incorrect behavior of the contract."
+        },
+        {
+            "function_name": "getTokens",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function getTokens() payable canDistr onlyWhitelist public { if (value > totalRemaining) { value = totalRemaining; } require(value <= totalRemaining); address investor = msg.sender; uint256 toGive = value; distr(investor, toGive); if (toGive > 0) { blacklist[investor] = true; } if (totalDistributed >= totalSupply) { distributionFinished = true; } value = value.div(100000).mul(99999); }",
+            "reason": "In the `getTokens` function, there is a typo in the function name. The function name is `getTokens`, but it should be `getTokens`. This typo could potentially cause confusion and errors in the code."
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+ ```json
+{
+    "output_list": [
+        {
+            "function_name": "distribute",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The code does not correctly handle the addition of amounts to balances, which can lead to integer overflow. The conditions for overflow checking in the 'transfer' and 'transferFrom' functions are incorrect. Specifically, the check 'bool overflowed = balances[_to] + _value < balances[_to];' is flawed because it does not account for the possibility of overflow correctly. This can allow attackers to exploit the contract by manipulating the input values to cause unexpected behavior, such as stealing tokens from other users.",
+            "correctness": 6,
+            "severity": 8,
+            "profitability": 7
+        },
+        {
+            "function_name": "distribute",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "Similar to the first vulnerability, the code does not properly prevent integer overflow when updating balances. The line 'uint256 tokensIssued = (msg.value / 1e10) * ICORatio + AIRDROPBounce * 1e8;' is susceptible to overflow because the multiplication and addition operations are not protected against overflow. This can lead to significant financial loss for the contract owner and its users.",
+            "correctness": 5,
+            "severity": 9,
+            "profitability": 6
+        }
+    ]
+}
+```

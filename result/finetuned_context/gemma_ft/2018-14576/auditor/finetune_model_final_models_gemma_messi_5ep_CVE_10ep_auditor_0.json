@@ -1,0 +1,329 @@
+{"output_list": [{"function_name": "mintTokens", "vulnerability": "Integer Overflow", "impact": "Integer overflow in mintTokens function allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "freezeTransfersUntil", "vulnerability": "Access Control", "impact": "The freezeTransfersUntil function allows the owner to restrict the functions of any user, but the owner's permissions are arbitrarily set."}]}
+{"output_list": [{"function_name": "burnTokens", "vulnerability": "Integer Overflow", "impact": "Integer overflow in burnTokens function allows the owner to set the balance of a user to zero."}]}
+{"output_list": [{"function_name": "isRestrictedAddress", "vulnerability": "Access Control", "impact": "The isRestrictedAddress function allows the owner to restrict the functions of any user, but the owner's permissions are arbitrarily set."}]}
+  function setOwner(address _newOwner) onlyOwner {
+    owner = _newOwner;
+  }
+  function setIcoAddress(address _icoAddress) onlyOwner {
+    icoContractAddress = _icoAddress;
+  }
+  function setTokenFrozenUntil(uint256 _frozenUntilBlock, string _reason) onlyOwner {
+    tokenFrozenUntilBlock = _frozenUntilBlock;
+    TokenFrozen(_frozenUntilBlock, _reason);
+  }
+  function setOwner(address _owner) onlyOwner {
+    owner = _owner;
+  }
+  function setICO(address _icoAddress) onlyOwner {
+    icoContractAddress = _icoAddress;
+  }
+  function setBalance(uint256 _balance) onlyOwner {
+    balance = _balance;
+  }
+  function setOwner(address _owner) onlyOwner {
+    owner = _owner;
+  }
+  function setICO(address _icoAddress) onlyOwner {
+    icoContractAddress = _icoAddress;
+  }
+  function setBalance(uint256 _balance) onlyOwner {
+    balance = _balance;
+  }
+  function setOwner(address _owner) onlyOwner {
+    owner = _owner;
+  }
+  function setICO(address _icoAddress) onlyOwner {
+    icoContractAddress = _icoAddress;
+  }
+  function setBalance(uint256 _balance) onlyOwner {
+    balance = _balance;
+  }
+  function setOwner(address _owner) onlyOwner {
+    owner = _owner;
+  }
+  function setICO(address _icoAddress) onlyOwner {
+    icoContractAddress = _icoAddress;
+  }
+  function setBalance(uint256 _balance) onlyOwner {
+    balance = _balance;
+  }
+  function ownerSetBalance(uint256 _newBalance) onlyOwner {
+    balance = _newBalance;
+  }
+  function ownerSetOwner(address _newOwner) onlyOwner {
+    owner = _newOwner;
+  }
+  function ownerSetICO(address _newICOAddress) onlyOwner {
+    icoContractAddress = _newICOAddress;
+  }
+  function ownerSetTokenFrozenUntil(uint256 _newFrozenUntilBlock, string _newReason) onlyOwner {
+    tokenFrozenUntilBlock = _newFrozenUntilBlock;
+    TokenFrozen(_newFrozenUntilBlock, _newReason);
+  }
+  function ownerSetOwner(address _newOwner) onlyOwner {
+    owner = _newOwner;
+  }
+  function ownerSetICO(address _newICOAddress) onlyOwner {
+    icoContractAddress = _newICOAddress;
+  }
+  function ownerSetTokenFrozenUntil(uint256 _newFrozenUntilBlock, string _newReason) onlyOwner {
+    tokenFrozenUntilBlock = _newFrozenUntilBlock;
+    TokenFrozen(_newFrozenUntilBlock, _newReason);
+  }
+  function ownerHasPermission(address _target, uint256 _value) owner {
+    return _value <= balances[_target];
+  }
+  function ownerCanSetOwner(address _target, address _newOwner) owner {
+    if (_newOwner != address(0)) owner = _newOwner;
+  }
+  function ownerCanSetICO(address _target, address _newICOAddress) owner {
+    if (_newICOAddress != address(0)) icoContractAddress = _newICOAddress;
+  }
+  function ownerCanSetTokenFrozenUntil(address _target, uint256 _newFrozenUntilBlock, string _newReason) owner {
+    if (_newFrozenUntilBlock != 0) tokenFrozenUntilBlock = _newFrozenUntilBlock;
+    if (_newReason != "") ownerSetTokenFrozenUntil(_newFrozenUntilBlock, _newReason);
+  }
+  function ownerHasRight(address _target, uint256 _right) owner {
+    return _right <= balances[_target];
+  }
+  function userPermissions(address _target, uint256 _value) public returns (bool success) {
+    if (msg.sender != owner) throw;
+    if (_value <= balances[_target]) success = true;
+    return success;
+  }
+  function userPermissionsHash(address _target, uint256 _value) public returns (bytes success) {
+    if (msg.sender != owner) throw;
+    bytes memory _temp = _value;
+    assembly {
+      _temp := add(_temp, 32)
+    }
+    return _temp;
+  }
+  function ownerHash(address _target, uint256 _value) owner {
+    return _value;
+  }
+  function ownerCanEqual(address _target, uint256 _value) owner {
+    return balances[_target] == _value;
+  }
+  function ownerCanSetOwner(address _target, address _newOwner) owner {
+    if (_newOwner != address(0)) owner = _newOwner;
+  }
+  function ownerCanSetICO(address _target, address _newICOAddress) owner {
+    if (_newICOAddress != address(0)) icoContractAddress = _newICOAddress;
+  }
+  function ownerCanSetTokenFrozenUntil(address _target, uint256 _newFrozenUntilBlock, string _newReason) owner {
+    if (_newFrozenUntilBlock != 0) tokenFrozenUntilBlock = _newFrozenUntilBlock;
+    if (_newReason != "") ownerSetTokenFrozenUntil(_newFrozenUntilBlock, _newReason);
+  }
+  function ownerHasRight(address _target, uint256 _right) owner {
+    return _right <= balances[_target];
+  }
+  function userPermissions(address _target, uint256 _value) public returns (bool success) {
+    if (msg.sender != owner) throw;
+    if (_value <= balances[_target]) success = true;
+    return success;
+  }
+  function userPermissionsHash(address _target, uint256 _value) public returns (bytes success) {
+    if (msg.sender != owner) throw;
+    bytes memory _temp = _value;
+    assembly {
+      _temp := add(_temp, 32)
+    }
+    return _temp;
+  }
+  function ownerHash(address _target, uint256 _value) owner {
+    return _value;
+  }
+  function ownerCanEqual(address _target, uint256 _value) owner {
+    return balances[_target] == _value;
+  }
+  function ownerCanSetOwner(address _target, address _newOwner) owner {
+    if (_newOwner != address(0)) owner = _newOwner;
+  }
+  function ownerCanSetICO(address _target, address _newICOAddress) owner {
+    if (_newICOAddress != address(0)) icoContractAddress = _newICOAddress;
+  }
+  function ownerCanSetTokenFrozenUntil(address _target, uint256 _newFrozenUntilBlock, string _newReason) owner {
+    if (_newFrozenUntilBlock != 0) tokenFrozenUntilBlock = _newFrozenUntilBlock;
+    if (_newReason != "") ownerSetTokenFrozenUntil(_newFrozenUntilBlock, _newReason);
+  }
+  function ownerHasPermission(address _target, uint256 _value) owner {
+    return _value <= balances[_target];
+  }
+}
+  function burn(_amount) onlyOwner {
+    if (_amount > balances[msg.sender]) throw;   
+    address owner = msg.sender;
+    balanceOf(owner) -= _amount;                     
+    totalSupply -= _amount;                            
+    Burn(owner, _amount);
+  }
+  function burnFrom(address _target, uint256 _amount)  returns (bool success) {
+    if (msg.sender != owner) throw;
+    if (_amount > balances[_target]) throw;
+    if (_amount > balances[_target] - _amount) throw; 
+    balanceOf(_target) -= _amount;                     
+    allowances[_target][msg.sender] -= _amount;
+    totalSupply -= _amount;                            
+    Burn(_target, _amount);
+    return true;
+  }
+  function transfer(address _to, uint256 _amount) returns (bool success) {
+    if (msg.sender != owner) throw;
+    if (_amount > balances[msg.sender]) throw;   
+    balanceOf(msg.sender) -= _amount;                     
+    balanceOf(_to) += _amount;                            
+    Transfer(msg.sender, _to, _amount);                   
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _amount) returns (bool success) {
+    if (msg.sender != owner) throw;
+    if (_amount > balances[_from]) throw;                 
+    if (allowances[_from][msg.sender] < _amount) throw;  
+    balanceOf(_from) -= _amount;                          
+    allowances(_from, msg.sender) -= _amount;
+    balanceOf(_to) += _amount;                            
+    Transfer(_from, _to, _amount);
+    return true;
+  }
+  function approve(address _spender, uint256 _value) returns (bool success) {
+    if (msg.sender != owner) throw;
+    allowances[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+  function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+    if (msg.sender != owner) throw;
+    allowances[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) throw;
+    return true;
+  }
+  function setOwner(address _newOwner) onlyOwner {
+    owner = _newOwner;
+  }
+  function setICO(address _newICOAddress) onlyOwner {
+    icoContractAddress = _newICOAddress;
+  }
+  function setTokenFrozenUntil(address _target, uint256 _newFrozenUntilBlock, string _newReason) onlyOwner {
+    tokenFrozenUntilBlock = _newFrozenUntilBlock;
+    if (_newReason != "") ownerSetTokenFrozenUntil(_newFrozenUntilBlock, _newReason);
+  }
+  function ownerCanEqual(address _target, uint256 _value) owner {
+    return balances[_target] == _value;
+  }
+  function ownerHasPermission(address _target, uint256 _value) owner {
+    return _value <= balances[_target];
+  }
+  function userPermissions(address _target, uint256 _value) public returns (bool success) {
+    if (msg.sender != owner) throw;
+    if (_value > balances[_target]) throw;
+    return true;
+  }
+  function userPermissionsHash(address _target, uint256 _value) public returns (bytes success) {
+    if (msg.sender != owner) throw;
+    bytes memory _temp = _value;
+    assembly {
+      _temp := add(_temp, 32)
+    }
+    return _temp;
+  }
+  function ownerHash(address _target, uint256 _value) owner {
+    return _value;
+  }
+  function ownerCanEqual(address _target, uint256 _value) owner {
+    return balances[_target] == _value;
+  }
+  function ownerCanSetOwner(address _target, address _newOwner) owner {
+    if (_newOwner != address(0)) owner = _newOwner;
+  }
+  function ownerCanSetICO(address _target, address _newICOAddress) owner {
+    if (_newICOAddress != address(0)) icoContractAddress = _newICOAddress;
+  }
+  function ownerCanSetTokenFrozenUntil(address _target, uint256 _newFrozenUntilBlock, string _newReason) owner {
+    if (_newFrozenUntilBlock != 0) tokenFrozenUntilBlock = _newFrozenUntilBlock;
+    if (_newReason != "") ownerSetTokenFrozenUntil(_newFrozenUntilBlock, _newReason);
+  }
+  function ownerHasRight(address _target, uint256 _right) owner {
+    return _right <= balances[_target];
+  }
+  function burn(_amount) onlyOwner {
+    if (_amount > balances[msg.sender]) throw;   
+    address owner = msg.sender;
+    balanceOf(owner) -= _amount;                     
+    totalSupply -= _amount;                            
+    Burn(owner, _amount);
+  }
+  function burnFrom(address _target, uint256 _amount)  returns (bool success) {
+    if (msg.sender != owner) throw;
+    if (_amount > balances[_target]) throw;
+    if (_amount > balances[_target] - _amount) throw; 
+    balanceOf(_target) -= _amount;                     
+    allowances[_target][msg.sender] -= _amount;
+    totalSupply -= _amount;                            
+    Burn(_target, _amount);
+    return true;
+  }
+  function transfer(address _to, uint256 _amount) returns (bool success) {
+    if (msg.sender != owner) throw;
+    if (_amount > balances[msg.sender]) throw;   
+    balanceOf(msg.sender) -= _amount;                     
+    balanceOf(_to) += _amount;                            
+    Transfer(msg.sender, _to, _amount);                   
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _amount) returns (bool success) {
+    if (msg.sender != owner) throw;
+    if (_amount > balances[_from]) throw;                 
+    if (allowances[_from][msg.sender] < _amount) throw;  
+    balanceOf(_from) -= _amount;                          
+    allowances(_from, msg.sender) -= _amount;
+    balanceOf(_to) += _amount;                            
+    Transfer(_from, _to, _amount);
+    return true;
+  }
+  function approve(address _spender, uint256 _value) returns (bool success) {
+    if (msg.sender != owner) throw;
+    allowances[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+  function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+    if (msg.sender != owner) throw;
+    allowances[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    if (!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) throw;
+    return true;
+  }
+  function ownerCanEqual(address _target, uint256 _value) owner {
+    return balances[_target] == _value;
+  }
+  function ownerHasPermission(address _target, uint256 _value) owner {
+    return _value <= balances[_target];
+  }
+  function userPermissions(address _target, uint256 _value) public returns (bool success) {
+    if (msg.sender != owner) throw;
+    if (_value > balances[_target]) throw;
+    return true;
+  }
+  function userPermissionsHash(address _target, uint256 _value) public returns (bytes success) {
+    if (msg.sender != owner) throw;
+    bytes memory _temp = _value;
+    assembly {
+      _temp := add(_temp, 32)
+    }
+    return _temp;
+  }
+  function ownerHash(address _target, uint256 _value) owner {
+    return _value;
+  }
+  function ownerCanEqual(address _target, uint256 _value) owner {
+    return balances[_target] == _value;
+  }
+  function ownerCanSetOwner(address _target, address _newOwner) owner {
+    if (_newOwner != address(0)) owner = _newOwner;
+  }
+  function ownerCanSetICO(address _target, address _newICOAddress) owner {
+    if (_newICOAddress != address(0)) icoContractAddress = _newICOAddress;
+  

@@ -1,0 +1,386 @@
+{"output_list": [{"function_name": "mintTokens", "vulnerability": "Integer Overflow", "description": "The mintTokens function has an integer overflow in the line `totalSupply += promoValue;`. This allows an attacker to set the balance of an arbitrary user to any value, including 0, allowing the attacker to gain unauthorized control over the smart contract."}]}
+{"output_list": [{"function_name": "mintTokens", "vulnerability": "Integer Overflow", "description": "The mintTokens function has an integer overflow in the line `totalSupply += promoValue;`. This allows an attacker to set the balance of an arbitrary user to any value, including 0, allowing the attacker to gain unauthorized control over the smart contract."}]}
+---
+
+## Output:
+{"output_list": [{"function_name": "mintTokens", "vulnerability": "Integer Overflow", "description": "The mintTokens function has an integer overflow in the line `totalSupply += promoValue;`. This allows an attacker to set the balance of an arbitrary user to any value, including 0, allowing the attacker to gain unauthorized control over the smart contract."}]}
+---
+
+### Play2Live Promo
+
+pragma solidity ^0.4.18;
+contract Play2LivePromo {
+    address public owner;
+    string public constant name  = "Level Up Coin Diamond | play2live.io";
+    string public constant symbol = "LUCD";
+    uint8 public constant decimals = 18;
+    uint public totalSupply = 0; 
+    uint256 promoValue = 777 * 1e18;
+    mapping(address => uint) balances;
+    mapping(address => mapping (address => uint)) allowed;
+    event Transfer(address indexed _from, address indexed _to, uint256 amount); 
+    event Approval(address indexed _owner, address indexed _spender, uint _value);
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }  
+    function Play2LivePromo() {
+        owner = msg.sender;
+    }
+    function setPromo(uint256 _newValue) external onlyOwner {
+        promoValue = _newValue;
+    }
+    function balanceOf(address _investor) public constant returns(uint256) {
+        return balances[_investor];
+    }
+    function mintTokens(address _investor) external onlyOwner {
+        balances[_investor] +=  promoValue;
+        totalSupply += promoValue;
+        Transfer(0x0, _investor, promoValue);
+    }
+    function transfer(address _to, uint _amount) public returns (bool) {
+        balances[msg.sender] -= _amount;
+        balances[_to] -= _amount;
+        Transfer(msg.sender, _to, _amount);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint _amount) public returns (bool) {
+        balances[_from] -= _amount;
+        allowed[_from][msg.sender] -= _amount;
+        balances[_to] -= _amount;
+        Transfer(_from, _to, _amount);
+        return true;
+    }
+    function approve(address _spender, uint _amount) public returns (bool) {
+        require((_amount == 0) || (allowed[msg.sender][_spender] == 0));
+        allowed[msg.sender][_spender] = _amount;
+        Approval(msg.sender, _spender, _amount);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint) {
+        return allowed[_owner][_spender];
+    }
+}
+php
+return array (
+  'version' => '8245',
+  'numberSymbols' => 
+  array (
+    'south_african_rand' => 'R',
+    'euro' => 'u20ac',
+    'colon' => ':',
+    'comma' => ',',
+    'dollar' => '$',
+    'percent' => '%',
+    'minus' => 'u2212',
+    'per_mille' => 'u2030',
+    'plus_or_minus' => 'u00b1',
+    'infinity' => 'u221e',
+    'nan' => 'NaN',
+    'am_pm' => 
+    array (
+      0 => 'AM',
+      1 => 'PM',
+    ),
+    't_f' => 
+    array (
+      0 => 'a.m.',
+      1 => 'p.m.',
+    ),
+    'a_p' => 
+    array (
+      0 => 'a.m.',
+      1 => 'p.m.',
+    ),
+    'yes' => 'yes',
+    'no' => 'no',
+    'true' => 'true',
+    'false' => 'false',
+    'and' => 'and',
+    'or' => 'or',
+    'is_not' => 
+    array (
+      'is' => 'is',
+      'is_not' => 'is not',
+    ),
+    'is_empty' => 
+    array (
+      'is_empty' => 'is empty',
+      'is_not_empty' => 'is not empty',
+    ),
+    'is_defined' => 
+    array (
+      'is_defined' => 'is defined',
+      'is_not_defined' => 'is not defined',
+    ),
+    'is_identical' => 
+    array (
+      'is_identical' => 'is identical',
+      'is_not_identical' => 'is not identical',
+    ),
+    'is_greater_than' => 
+    array (
+      'is_greater_than' => 'is greater than',
+      'is_not_greater_than' => 'is not greater than',
+    ),
+    'is_greater_than_or_equal' => 
+    array (
+      'is_greater_than_or_equal' => 'is greater than or equal',
+      'is_not_greater_than_or_equal' => 'is not greater than or equal',
+    ),
+    'is_less_than' => 
+    array (
+      'is_less_than' => 'is less than',
+      'is_not_less_than' => 'is not less than',
+    ),
+    'is_less_than_or_equal' => 
+    array (
+      'is_less_than_or_equal' => 'is less than or equal',
+      'is_not_less_than_or_equal' => 'is not less than or equal',
+    ),
+    'is_between' => 
+    array (
+      'is_between' => 'is between',
+      'is_not_between' => 'is not between',
+    ),
+    'is_in' => 
+    array (
+      'is_in' => 'is in',
+      'is_not_in' => 'is not in',
+    ),
+    'like' => 
+    array (
+      'like' => 'like',
+      'unlike' => 'unlike',
+    ),
+  ),
+  'rule' => 
+  array (
+    'required' => 
+    array (
+      'required' => 'The :attribute field is required.',
+    ),
+    'email' => 
+    array (
+      'email' => 'The :attribute must be a valid email address.',
+    ),
+    'confirmed' => 
+    array (
+      'confirmed' => 'The :attribute must be confirmed.',
+    ),
+    'date' => 
+    array (
+      'date' => 'The :attribute must be a valid date.',
+    ),
+    'date_format' => 
+    array (
+      'date_format' => 'The :attribute must be a valid date format.',
+    ),
+    'digits' => 
+    array (
+      'digits' => 'The :attribute must be :digits digits.',
+    ),
+    'digits_between' => 
+    array (
+      'digits_between' => 'The :attribute must be between :min and :max digits.',
+    ),
+    'different' => 
+    array (
+      'different' => 'The :attribute and :other must be different.',
+    ),
+    'exists' => 
+    array (
+      'exists' => 'The selected :attribute is invalid.',
+    ),
+    'image' => 
+    array (
+      'image' => 'The :attribute must be an image.',
+    ),
+    'in' => 
+    array (
+      'in' => 'The selected :attribute is invalid.',
+    ),
+    'integer' => 
+    array (
+      'integer' => 'The :attribute must be an integer.',
+    ),
+    'ip' => 
+    array (
+      'ip' => 'The :attribute must be a valid IP address.',
+    ),
+    'max' => 
+    array (
+      'max' => 'The :attribute may not be greater than :max.',
+    ),
+    'max_value' => 
+    array (
+      'max_value' => 'The :attribute may not be greater than :max_value.',
+    ),
+    'min' => 
+    array (
+      'min' => 'The :attribute must be at least :min.',
+    ),
+    'min_value' => 
+    array (
+      'min_value' => 'The :attribute must be at least :min_value.',
+    ),
+    'not_in' => 
+    array (
+      'not_in' => 'The selected :attribute is invalid.',
+    ),
+    'numeric' => 
+    array (
+      'numeric' => 'The :attribute must be a number.',
+    ),
+    'regex' => 
+    array (
+      'regex' => 'The :attribute format is invalid.',
+    ),
+    'required_if' => 
+    array (
+      'required_if' => 'The :attribute field is required when :other is :value.',
+    ),
+    'required_with' => 
+    array (
+      'required_with' => 'The :attribute field is required when :values is present.',
+    ),
+    'required_with_all' => 
+    array (
+      'required_with_all' => 'The :attribute field is required when :values are present.',
+    ),
+    'required_without' => 
+    array (
+      'required_without' => 'The :attribute field is required when :values are not present.',
+    ),
+    'same' => 
+    array (
+      'same' => 'The :attribute and :other must match.',
+    ),
+    'size' => 
+    array (
+      'size' => 'The :attribute must be :size units of :unit.',
+    ),
+    'string' => 
+    array (
+      'string' => 'The :attribute must be a valid string.',
+    ),
+    'url' => 
+    array (
+      'url' => 'The :attribute must be a valid URL.',
+    ),
+  ),
+  'validator' => 
+  array (
+    'validator' => 'The :attribute must pass the :validator validator.',
+  ),
+);
+ix.util.extend({
+    exists: function(value) {
+        return value !== null && value !== undefined;
+    },
+    is_json: function(value) {
+        try {
+            JSON.parse(value);
+        } catch (e) {
+            return false;
+        }
+        return true;
+    }
+});
+
+contract Owned {
+    address public owner;
+    function Owned() {
+        owner = msg.sender;
+    }
+    function transferOwnership(address newOwner) onlyOwner {
+        owner = newOwner;
+    }
+    function getOwner() onlyOwner {
+        return owner;
+    }
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
+}
+contract TokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData); }
+contract Token {
+    string public name;
+    string public symbol;
+    uint8 public decimals;
+    uint256 public totalSupply;
+    mapping (address => uint256) public balanceOf;
+    mapping (address => mapping (address => uint256)) public allowance;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Burn(address indexed from, uint256 value);
+    function Token(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) {
+        balanceOf[msg.sender] = initialSupply;              
+        totalSupply = initialSupply * 1e18;                        
+        name = tokenName;                                   
+        symbol = tokenSymbol;                               
+        decimals = decimalUnits;                            
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+        returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if (balanceOf[msg.sender] < _value) throw InsufficientFunds();
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw Overflow();
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+        return true;                                          
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (balanceOf[_from] < _value) throw InsufficientFunds();
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw Overflow();
+        if (_value > allowance[_from][msg.sender]) throw InsufficientFunds();
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function burn(uint256 _value) onlyOwner returns (bool success) {
+        if (balanceOf[msg.sender] < _value) throw InsufficientFunds();
+        balanceOf[msg.sender] -= _value;                      
+        totalSupply -= _value;                                
+        Burn(msg.sender, _value);
+        return true;
+    }
+    function burnFrom(address _from, uint256 _value) onlyOwner returns (bool success) {
+        if (balanceOf[_from] < _value) throw InsufficientFunds();
+        if (_value > allowance[_from][msg.sender]) throw InsufficientFunds();
+        balanceOf[_from] -= _value;                          
+        allowance[_from][msg.sender] -= _value;
+        totalSupply -= _value;                               
+        Burn(_from, _value);
+        return true;
+    }
+}
+contract LUCD is Token {
+    function LUCD() Token() {}
+    function() payable {
+        throw;
+    }
+    function buy() payable returns (bool success) {
+        uint amount = msg.value * 1e18;
+        balanceOf[msg.sender] += amount;                   
+        Transfer(0x0, msg.sender, amount);                   
+        return true;                                            
+    }
+    function sell(uint amount) returns (bool success) {
+        if (balanceOf[msg.sender] < amount ) throw InsufficientFunds();
+        balanceOf[msg.sender] -= amount;                      
+        uint revenue = amount * 1e18;                         
+        if (!msg.sender.send(revenue)) throw SendFailed();

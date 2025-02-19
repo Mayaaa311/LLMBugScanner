@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "randMod",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function randMod(uint256 _modulus) internal returns(uint256) { randNonce++; return uint256(keccak256(randNonce, blockhash(block.number - 1))) % _modulus; }",
+            "reason": "The function randMod is used to generate a random number within a given range. However, the modulus is not checked for overflow. If the modulus is too large, the function may return an incorrect result. This can be exploited by an attacker to cause the contract to behave unexpectedly. The fix is to add a check for overflow before returning the result."
+        },
+        {
+            "function_name": "createChamp",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function createChamp(address _affiliateAddress) external payable whenNotPaused isPaid(createChampFee) distributeInput(_affiliateAddress) { uint256 id = champs.push(Champ(0, 2 + randMod(4), 1 + randMod(4), uint256(1 days)  - uint256(randMod(9) * 1 hours), 0, 0, 0, leaderboard.length + 1, 0, uint256(block.timestamp), 0,0,0, false)) - 1; champs[id].id = id; leaderboard.push(id); champToOwner[id] = msg.sender; addressInfo[msg.sender].champsCount++; emit NewChamp(id, msg.sender); }",
+            "reason": "The function createChamp is used to create a new champ. It uses the randMod function to generate random values for the attackPower, defencePower, and cooldownTime. However, the generated values are not checked for overflow. If the generated values are too large, the function may cause the contract to behave unexpectedly. The fix is to add a check for overflow before using the generated values."
+        },
+        {
+            "function_name": "openLootbox",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function openLootbox(address _affiliateAddress) external payable whenNotPaused isPaid(lootboxFee) distributeInput(_affiliateAddress) { uint256 pointToCooldownReduction; uint256 randNum = randMod(1001); uint256 pointsToShare; uint256 itemID; Item memory item = Item({ itemType: uint8(uint256(randMod(3) + 1)), itemRarity: uint8(0), attackPower: 0, defencePower: 0, cooldownReduction: 0, price: 0, onChampId: 0, onChamp: false, forSale: false }); if(450 > randNum){ pointsToShare = 25 + randMod(9); item.itemRarity = uint8(1); }else if(720 > randNum){ pointsToShare = 42 + randMod(17); item.itemRarity = uint8(2); }else if(910 > randNum){ pointsToShare = 71 + randMod(25); item.itemRarity = uint8(3); }else if(980 > randNum){ pointsToShare = 119 + randMod(33); item.itemRarity = uint8(4); }else{ pointsToShare = 235 + randMod(41); item.itemRarity = uint8(5); } if(item.itemType == uint8(1)){ item.attackPower = pointsToShare / 10 * 7; pointsToShare -= item.attackPower; item.defencePower = pointsToShare / 10 * randMod(6); pointsToShare -= item.defencePower; item.cooldownReduction = pointsToShare * uint256(1 minutes); item.itemType = uint8(1); } if(item.itemType == uint8(2)){ item.defencePower = pointsToShare / 10 * 7; pointsToShare -= item.defencePower; item.attackPower = pointsToShare / 10 * randMod(6); pointsToShare -= item.attackPower; item.cooldownReduction = pointsToShare * uint256(1 minutes); item.itemType = uint8(2); } if(item.itemType == uint8(3)){ pointToCooldownReduction = pointsToShare / 10 * 7; item.cooldownReduction = pointToCooldownReduction * uint256(1 minutes); pointsToShare -= pointToCooldownReduction; item.attackPower = pointsToShare / 10 * randMod(6); pointsToShare -= item.attackPower; item.defencePower = pointsToShare; item.itemType = uint8(3); } itemID = items.push(item) - 1; itemToOwner[itemID] = msg.sender; addressInfo[msg.sender].itemsCount++; emit NewItem(itemID, msg.sender); }",
+            "reason": "The function openLootbox is used to open a lootbox. It uses the randMod function to generate random values for the pointsToShare and randNum. However, the generated values are not checked for overflow. If the generated values are too large, the function may cause the contract to behave unexpectedly. The fix is to add a check for overflow before using the generated values."
+        },
+        {
+            "function_name": "getChampStats",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function getChampStats(uint256 _champId) public view returns(uint256,uint256,uint256){ Champ storage champ = champs[_champId]; Item storage sword = items[champ.eq_sword]; Item storage shield = items[champ.eq_shield]; Item storage helmet = items[champ.eq_helmet]; uint256 totalAttackPower = champ.attackPower + sword.attackPower + shield.attackPower + helmet.attackPower; uint256 totalDefencePower = champ.defencePower + sword.defencePower + shield.defencePower + helmet.defencePower; uint256 totalCooldownReduction = sword.cooldownReduction + shield.cooldownReduction + helmet.cooldownReduction; return (totalAttackPower, totalDefencePower, totalCooldownReduction); }",
+            "reason": "The function getChampStats is used to get the stats of a champ. It uses the randMod function to generate random values for the pointsToShare and randNum. However, the generated values are not checked for overflow. If the generated values are too large, the function may cause the contract to behave unexpectedly. The fix is to add a check for overflow before using the generated values."
+        },
+        {
+            "function_name": "getPoints",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function _getPoints(uint256 _pointsGiven) private returns (uint256 pointsGiven, uint256 pointsToAttackPower){ return (_pointsGiven, randMod(_pointsGiven+1)); }",
+            "reason": "The function getPoints is used to get the points given and points to attack power. It uses the randMod function to generate random values for the pointsToShare and randNum. However, the generated values are not checked for overflow. If the generated values are too large, the function may cause the contract to behave unexpectedly. The fix is to add a check for overflow before using the generated values."
+        }
+    ]
+}

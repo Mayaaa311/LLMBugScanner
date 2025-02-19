@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The condition `balances[msg.sender] >= _value` does not prevent integer overflow. If `_value` is large, `balances[msg.sender]` will be decremented beyond the minimum value, leading to an integer overflow and potentially allowing an attacker to transfer more tokens than they should."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "reason": "The `transferFrom` function does not properly check if the spender has been approved by the owner. An attacker can use this to transfer tokens on behalf of another user without their consent, if they can trick the user into approving them first."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Wrong Logic",
+            "reason": "The `approve` function does not reset the allowance if the new allowance is smaller than the old allowance. This can lead to a situation where the owner has approved a large amount, but the contract does not allow a smaller amount to be spent, effectively locking funds."
+        },
+        {
+            "function_name": "HashnodeTestCoin",
+            "vulnerability": "Typo Constructor",
+            "reason": "There is a typo in the constructor where `totalSupply` is assigned twice, which is unnecessary and could be a mistake. However, this does not directly lead to a vulnerability but is worth noting for clarity."
+        },
+        {
+            "function_name": "()",
+            "vulnerability": "Token Devalue",
+            "reason": "The contract allows anyone to buy tokens with Ether, which can lead to the tokens being devalued if the price is set too high. Attackers can manipulate the price by sending very small amounts of Ether, acquiring a large number of tokens at a low price, and then dumping them on the market."
+        }
+    ]
+}

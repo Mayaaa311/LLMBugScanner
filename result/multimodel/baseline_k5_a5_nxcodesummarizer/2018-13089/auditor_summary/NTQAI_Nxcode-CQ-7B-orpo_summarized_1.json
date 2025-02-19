@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "balanceOf[target] += mintedAmount;",
+            "vulnerability": "Integer Overflow",
+            "reason": "The addition of `mintedAmount` to `balanceOf[target]` can result in an integer overflow if `mintedAmount` is greater than the maximum value that can be stored in the `balanceOf` mapping."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "require(!frozenAccount[_from]);",
+            "vulnerability": "Wrong Logic",
+            "reason": "The contract allows transfers from frozen accounts, which can be exploited by attackers to drain funds from frozen accounts."
+        },
+        {
+            "function_name": "buy",
+            "code": "uint amount = msg.value / buyPrice;",
+            "vulnerability": "Bad Randomness",
+            "reason": "The contract uses a fixed division to calculate the amount of tokens to be transferred, which can lead to incorrect calculations if the `buyPrice` is not an integer."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "sellPrice = newSellPrice;",
+            "vulnerability": "Access Control",
+            "reason": "The contract allows anyone to set the sell price, which can be exploited by attackers to manipulate the price."
+        },
+        {
+            "function_name": "UCoinToken",
+            "code": "TokenERC20(5000000000, "Universal Coin", "UCOIN") public {}",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor should be named `UCoinToken`, not `UCoinToken`."
+        }
+    ]
+}

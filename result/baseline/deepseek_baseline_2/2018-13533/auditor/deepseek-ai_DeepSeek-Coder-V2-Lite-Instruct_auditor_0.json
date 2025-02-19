@@ -1,0 +1,77 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "function_code": "function transfer(address _to, uint256 _value) public {
+        uint market_value = _value * sellPrice;
+        uint commission = market_value * 4 / 1000;
+        if (commission < minimumCommission){ commission = minimumCommission; }
+        address contr = this;
+        require(contr.balance >= commission);
+        commissionGetter.transfer(commission);
+        _transfer(msg.sender, _to, _value);
+    }",
+            "reason": "The `transfer` function does not check if the `_to` address is not the zero address, which can lead to tokens being transferred to the zero address. Additionally, it allows anyone to transfer tokens, regardless of whether they are the owner or have been frozen. This can be exploited by anyone to drain tokens from the contract."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);
+        uint market_value = _value * sellPrice;
+        uint commission = market_value * 4 / 1000;
+        if (commission < minimumCommission){ commission = minimumCommission; }
+        address contr = this;
+        require(contr.balance >= commission);
+        commissionGetter.transfer(commission);
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }",
+            "reason": "Similar to the `transfer` function, the `transferFrom` function does not check if the `_to` address is not the zero address. Furthermore, it allows allowance holders to transfer tokens on behalf of other users, which can be abused if the allowance is not properly managed or if the user's account is compromised."
+        },
+        {
+            "function_name": "sell",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function sell(uint256 amount) public {
+    trequire(!closeSell);
+        address contr = this;
+        uint market_value = amount * sellPrice;
+        uint commission = market_value * 4 / 1000;
+        if (commission < minimumCommission){ commission = minimumCommission; }
+        uint amount_weis = market_value + commission;
+        require(contr.balance >= amount_weis);
+        commissionGetter.transfer(commission);
+        _transfer(msg.sender, this, amount);
+        msg.sender.transfer(market_value);
+    }",
+            "reason": "The `sell` function calculates the `market_value` and `amount_weis` using the `amount` and `sellPrice`. If `sellPrice` is set to a very high value, an attacker can manipulate the `amount` parameter to cause an integer overflow, leading to a large amount of tokens being transferred to the attacker without paying the corresponding commission. This can significantly devalue the token and drain the contract."
+        },
+        {
+            "function_name": "buy",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function buy() payable public {
+        require(!closeBuy);
+        uint amount = msg.value / buyPrice;
+        uint market_value = amount * buyPrice;
+        uint commission = market_value * 4 / 1000;
+        if (commission < minimumCommission){ commission = minimumCommission; }
+        address contr = this;
+        require(contr.balance >= commission);
+        commissionGetter.transfer(commission);
+        _transfer(this, msg.sender, amount);
+    }",
+            "reason": "The `buy` function calculates the `amount` of tokens to be bought using `msg.value` and `buyPrice`. If `buyPrice` is set to a very low value, an attacker can manipulate `msg.value` to cause an integer overflow, leading to a large number of tokens being transferred to the attacker without paying the corresponding commission. This can significantly devalue the token and drain the contract."
+        },
+        {
+            "function_name": "setPrices",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }",
+            "reason": "The `setPrices` function allows the owner to set the `sellPrice` and `buyPrice`. If these prices are not properly validated, an attacker can set them to extremely high or low values, leading to integer overflows or underflows in the `buy` and `sell` functions, allowing them to manipulate the token balance and devalue the token significantly."
+        }
+    ]
+}

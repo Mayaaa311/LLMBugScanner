@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "auditor_idx": 0,
+            "vulnerability": "Token Devalue",
+            "criticism": "The 'mintToken' function allows the owner to increase the total supply of tokens and assign them to any address without any checks. This can lead to token devaluation as the supply increases without a corresponding increase in value or utility. Attackers can exploit this to manipulate the token's market value and potentially drain liquidity from the contract.",
+            "correctness": 8,
+            "severity": 7,
+            "profitability": 6
+        },
+        {
+            "function_name": "_transfer",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The '_transfer' function does not check for integer overflow when subtracting and adding token balances. If an attacker can manipulate the 'balanceOf[_from]' or 'balanceOf[_to]' values, they can cause an integer overflow, leading to incorrect balance updates and potentially freezing funds or allowing unauthorized transfers.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 5
+        },
+        {
+            "function_name": "transfer",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The 'transfer' function does not handle the return value of '_transfer', which can be false if '_transfer' reverts due to invalid conditions. This can lead to incorrect logic in the calling function, potentially causing unexpected behavior or loss of funds.",
+            "correctness": 6,
+            "severity": 5,
+            "profitability": 7
+        },
+        {
+            "function_name": "constructor",
+            "auditor_idx": 0,
+            "vulnerability": "Typo Constructor",
+            "criticism": "There is a typo in the constructor function where 'totalSupply' is assigned before 'decimals' is set. This can lead to incorrect initialization of the token's total supply and potentially other unintended consequences.",
+            "correctness": 5,
+            "severity": 6,
+            "profitability": 6
+        },
+        {
+            "function_name": "burn",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The 'burn' function only requires the owner to burn tokens, which can be risky if there are no other mechanisms in place to prevent malicious users from manipulating the burning process. This can lead to significant token devaluation without proper oversight.",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 5
+        }
+    ]
+}

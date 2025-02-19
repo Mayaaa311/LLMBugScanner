@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "SECToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function SECToken(uint256 initialSupply, string tokenName, string tokenSymbol) TokenERC20(initialSupply, tokenName, tokenSymbol) public {}",
+            "reason": "The function SECToken initializes the totalSupply variable with a value that is not checked for overflow. If the initialSupply is too large, it may cause an integer overflow, leading to incorrect results and potentially loss of funds."
+        },
+        {
+            "function_name": "_transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function _transfer(address _from, address _to, uint _value) internal {",
+            "reason": "The function _transfer is responsible for transferring tokens from one address to another. It checks that the sender has sufficient balance and that the recipient's balance will not overflow. However, it does not check if the recipient's balance will exceed the maximum possible value for a uint256. If the recipient's balance is close to the maximum possible value, an integer overflow could occur, leading to incorrect results and potentially loss of funds."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {",
+            "reason": "The function mintToken is responsible for minting new tokens and adding them to the recipient's balance. It checks that the recipient's balance will not overflow. However, it does not check if the recipient's balance will exceed the maximum possible value for a uint256. If the recipient's balance is close to the maximum possible value, an integer overflow could occur, leading to incorrect results and potentially loss of funds."
+        },
+        {
+            "function_name": "buy",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function buy() payable public {",
+            "reason": "The function buy is responsible for allowing users to buy tokens by paying a certain amount of Ether. It checks that the contract has enough Ether to cover the purchase. However, it does not check if the contract's balance will overflow. If the contract's balance is close to the maximum possible value for a uint256, an integer overflow could occur, leading to incorrect results and potentially loss of funds."
+        },
+        {
+            "function_name": "sell",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function sell(uint256 amount) public {",
+            "reason": "The function sell is responsible for allowing users to sell tokens by exchanging them for Ether. It checks that the contract has enough tokens to cover the sale. However, it does not check if the contract's balance will overflow. If the contract's balance is close to the maximum possible value for a uint256, an integer overflow could occur, leading to incorrect results and potentially loss of funds."
+        }
+    ]
+}

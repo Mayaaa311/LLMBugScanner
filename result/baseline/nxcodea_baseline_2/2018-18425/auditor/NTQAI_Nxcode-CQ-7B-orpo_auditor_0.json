@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function getTokens() payable canDistr  public { uint256 tokens = 0; require( msg.value >= minContribution ); require( msg.value > 0 ); tokens = tokensPerEth.mul(msg.value) / 1 ether; address investor = msg.sender; if (tokens > 0) { distr(investor, tokens); } if (totalDistributed >= totalSupply) { distributionFinished = true; } }",
+            "reason": "In the `getTokens` function, the calculation of `tokens` is vulnerable to integer overflow. The multiplication of `tokensPerEth` and `msg.value` may result in an overflow if `msg.value` is large enough. This can be exploited by sending a large amount of Ether to the contract, causing the contract to mint more tokens than the total supply, leading to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "distr",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function distr(address _to, uint256 _amount) canDistr private returns (bool) { totalDistributed = totalDistributed.add(_amount); balances[_to] = balances[_to].add(_amount); emit Distr(_to, _amount); emit Transfer(address(0), _to, _amount); return true; }",
+            "reason": "In the `distr` function, the addition of `totalDistributed` and `_amount` may result in an overflow if the sum exceeds the maximum value that can be stored in a `uint256` variable. This can be exploited by sending a large amount of tokens to the contract, causing the contract to mint more tokens than the total supply, leading to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "burn",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function burn(uint256 _value) onlyOwner public { require(_value <= balances[msg.sender]); address burner = msg.sender; balances[burner] = balances[burner].sub(_value); totalSupply = totalSupply.sub(_value); totalDistributed = totalDistributed.sub(_value); emit Burn(burner, _value); }",
+            "reason": "In the `burn` function, the subtraction of `_value` from `balances[msg.sender]`, `totalSupply`, and `totalDistributed` may result in an overflow if the subtraction results in a negative value. This can be exploited by burning a large amount of tokens, causing the contract to mint more tokens than the total supply, leading to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "withdraw",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function withdraw() onlyOwner public { address myAddress = this; uint256 etherBalance = myAddress.balance; owner.transfer(etherBalance); }",
+            "reason": "In the `withdraw` function, the subtraction of `etherBalance` from `owner.balance` may result in an overflow if the subtraction results in a negative value. This can be exploited by withdrawing a large amount of Ether from the contract, causing the contract to mint more Ether than the total supply, leading to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "withdrawAltcoinTokens",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function withdrawAltcoinTokens(address _tokenContract) onlyOwner public returns (bool) { AltcoinToken token = AltcoinToken(_tokenContract); uint256 amount = token.balanceOf(address(this)); return token.transfer(owner, amount); }",
+            "reason": "In the `withdrawAltcoinTokens` function, the subtraction of `amount` from `token.balanceOf(address(this))` may result in an overflow if the subtraction results in a negative value. This can be exploited by withdrawing a large amount of tokens from the contract, causing the contract to mint more tokens than the total supply, leading to a loss of funds for the contract owner."
+        }
+    ]
+}

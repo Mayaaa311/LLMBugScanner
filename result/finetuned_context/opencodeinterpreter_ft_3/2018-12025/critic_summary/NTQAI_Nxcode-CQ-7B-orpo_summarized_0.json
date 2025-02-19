@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function does not check for integer overflow when updating the recipient's balance. This can lead to an incorrect balance calculation and potentially loss of funds. The condition `if(balances[to] + value < balances[to]) return false;` is flawed because it incorrectly checks for overflow. A correct check should involve comparing the new balance with the sum of the old balance and the transferred value. The current implementation fails to prevent overflow, which can result in unexpected behavior and potential loss of funds.",
+            "correctness": 6,
+            "severity": 8,
+            "profitability": 5
+        },
+        {
+            "function_name": "approve",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function does not check for integer overflow when updating the allowance mapping. This can lead to an incorrect allowance calculation and potentially loss of funds. The condition `if( allowed[from][msg.sender] >= value ) return false;` is flawed because it does not account for the possibility of overflow. A correct check should involve ensuring that the new allowance does not exceed the maximum possible value of uint256. The current implementation fails to prevent overflow, which can result in unexpected behavior and potential loss of funds.",
+            "correctness": 5,
+            "severity": 7,
+            "profitability": 6
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function does not check for integer overflow when updating the sender's balance and the recipient's balance. This can lead to an incorrect balance calculation and potentially loss of funds. The condition `if(balances[to] + value < balances[to]) return false;` is flawed because it incorrectly checks for overflow. A correct check should involve comparing the new balance with the sum of the old balance and the transferred value. The current implementation fails to prevent overflow, which can result in unexpected behavior and potential loss of funds.",
+            "correctness": 5,
+            "severity": 7,
+            "profitability": 6
+        },
+        {
+            "function_name": "burn",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function does not check for integer overflow when updating the sender's balance and the total supply. This can lead to an incorrect balance calculation and potentially loss of funds. The condition `if(balances[msg.sender] < value) return false;` and `if(totalSupply + value < totalSupply) return false;` are flawed because they do not account for the possibility of overflow. A correct check should involve ensuring that the new balance and total supply do not exceed the maximum possible value of uint256. The current implementation fails to prevent overflow, which can result in unexpected behavior and potential loss of funds.",
+            "correctness": 4,
+            "severity": 8,
+            "profitability": 5
+        },
+        {
+            "function_name": "mint",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function does not check for integer overflow when updating the recipient's balance and the total supply. This can lead to an incorrect balance calculation and potentially loss of funds. The condition `if(balances[target] + mintedAmount < balances[target]) return false;` and `if(totalSupply + mintedAmount < totalSupply) return false;` are flawed because they do not account for the possibility of overflow. A correct check should involve ensuring that the new balance and total supply do not exceed the maximum possible value of uint256. The current implementation fails to prevent overflow, which can result in unexpected behavior and potential loss of funds.",
+            "correctness": 4,
+            "severity": 8,
+            "profitability": 5
+        }
+    ]
+}

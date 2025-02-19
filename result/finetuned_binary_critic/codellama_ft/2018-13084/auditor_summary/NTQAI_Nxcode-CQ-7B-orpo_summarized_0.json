@@ -1,0 +1,16 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(uint256 _value) public returns (bool success) {
+                require(_value >= minValue && _value <= maxValue);
+                totalSupply = safeAdd(totalSupply, _value);
+                balances[msg.sender] = safeAdd(balances[msg.sender], _value);
+                emit Transfer(address(0), msg.sender, _value);
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in mintToken function allows an attacker to set an arbitrary balance of an arbitrary user."
+        }
+    ]
+}

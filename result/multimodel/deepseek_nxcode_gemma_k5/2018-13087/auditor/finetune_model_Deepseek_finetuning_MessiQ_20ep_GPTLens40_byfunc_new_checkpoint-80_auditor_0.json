@@ -1,0 +1,29 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function has an integer overflow vulnerability. The initial supply is set in the constructor, minted to the contract owner, and can be minted to any target address by the owner. The initial supply is in the units of 10^decimals, and can be set to a very large value, causing an overflow in the totalSupply variable."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "reason": "The transfer function has a wrong logic vulnerability. The _transfer function is called by the transfer and transferFrom functions, and it does not check if the target address is a smart contract. If a user transfers tokens to a smart contract, the smart contract can call the tokenFallback function, which is not safe and can cause unexpected issues."
+        },
+        {
+            "function_name": "burnFrom",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burnFrom function has an integer overflow vulnerability. The _value parameter is not checked to ensure it is not zero, and the balanceOf[_from] -= _value; line can underflow, causing a denial of service to the _from account."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function has an integer overflow vulnerability. The mintedAmount parameter is not checked to ensure it is not zero, and the totalSupply += mintedAmount; line can overflow, causing a denial of service to the token owner."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Token Devalue",
+            "reason": "The mintToken function has a token devalue vulnerability. The mintToken function can be exploited to devalue the token, allowing the owner to mint additional tokens and sell them at the inflated price, causing a decrease in token value."
+        }
+    ]
+}

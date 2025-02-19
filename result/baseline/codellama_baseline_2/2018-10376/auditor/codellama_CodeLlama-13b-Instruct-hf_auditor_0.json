@@ -1,0 +1,78 @@
+ Here are the 5 most severe vulnerabilities in the provided smart contract, along with their associated functions and reasons:
+
+1. Integer Overflow:
+
+Function: `transferProxy`
+
+Vulnerability: Integer overflow in the `transfer` function, which can cause the contract to lose control of its funds.
+
+Reason: The `transfer` function uses the `+` operator to add the `_value` and `_feeSmt` parameters, which can cause an integer overflow if the sum exceeds the maximum value of a uint256. This can lead to the contract losing control of its funds, as the `transfer` function will not be able to transfer the correct amount of tokens.
+
+2. Wrong Logic:
+
+Function: `approveProxy`
+
+Vulnerability: Wrong logic in the `approve` function, which can cause the contract to approve the wrong address.
+
+Reason: The `approve` function uses the `keccak256` function to hash the `_from`, `_spender`, and `_value` parameters, but it does not include the `nonce` parameter in the hash. This means that the `approve` function can approve the wrong address if the `nonce` parameter is not included in the hash.
+
+3. Bad Randomness:
+
+Function: `allocateTokens`
+
+Vulnerability: Bad randomness in the `allocateTokens` function, which can cause the contract to allocate tokens to the wrong addresses.
+
+Reason: The `allocateTokens` function uses the `keccak256` function to hash the `_owners` and `_values` parameters, but it does not include the `allocateEndTime` parameter in the hash. This means that the `allocateTokens` function can allocate tokens to the wrong addresses if the `allocateEndTime` parameter is not included in the hash.
+
+4. Access Control:
+
+Function: `transferProxy`
+
+Vulnerability: Access control in the `transferProxy` function, which can allow unauthorized users to transfer tokens.
+
+Reason: The `transferProxy` function uses the `transferAllowed` modifier to check if the `_from` address is allowed to transfer tokens. However, this modifier does not check if the `_to` address is allowed to receive tokens. This means that an attacker can use the `transferProxy` function to transfer tokens to an unauthorized address.
+
+5. Typo Constructor:
+
+Function: `SMT`
+
+Vulnerability: Typo in the `SMT` constructor, which can cause the contract to lose control of its funds.
+
+Reason: The `SMT` constructor uses the `allocateEndTime` parameter to set the end time for token allocation. However, it does not check if the `allocateEndTime` parameter is set correctly. This means that an attacker can use the `SMT` constructor to set the `allocateEndTime` parameter to a past date, which can cause the contract to lose control of its funds.
+
+Here is the output in the required JSON format:
+
+{
+    "output_list": [
+        {
+            "function_name": "transferProxy",
+            "vulnerability": "Integer Overflow",
+            "function_code": "if(balances[_from] < _feeSmt + _value) revert();",
+            "reason": "The `transfer` function uses the `+` operator to add the `_value` and `_feeSmt` parameters, which can cause an integer overflow if the sum exceeds the maximum value of a uint256."
+        },
+        {
+            "function_name": "approveProxy",
+            "vulnerability": "Wrong Logic",
+            "function_code": "bytes32 hash = keccak256(_from,_spender,_value);",
+            "reason": "The `approve` function uses the `keccak256` function to hash the `_from`, `_spender`, and `_value` parameters, but it does not include the `nonce` parameter in the hash."
+        },
+        {
+            "function_name": "allocateTokens",
+            "vulnerability": "Bad Randomness",
+            "function_code": "for(uint256 i = 0; i < _owners.length ; i++){",
+            "reason": "The `allocateTokens` function uses the `keccak256` function to hash the `_owners` and `_values` parameters, but it does not include the `allocateEndTime` parameter in the hash."
+        },
+        {
+            "function_name": "transferProxy",
+            "vulnerability": "Access Control",
+            "function_code": "function transferProxy(address _from, address _to, uint256 _value, uint256 _feeSmt, uint8 _v,bytes32 _r, bytes32 _s) public transferAllowed(_from) returns (bool){",
+            "reason": "The `transferProxy` function uses the `transferAllowed` modifier to check if the `_from` address is allowed to transfer tokens. However, this modifier does not check if the `_to` address is allowed to receive tokens."
+        },
+        {
+            "function_name": "SMT",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function SMT() public {",
+            "reason": "The `SMT` constructor uses the `allocateEndTime` parameter to set the end time for token allocation. However, it does not check if the `allocateEndTime` parameter is set correctly."
+        }
+    ]
+}

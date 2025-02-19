@@ -1,0 +1,70 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+  balanceOf[target] += mintedAmount;
+  totalSupply += mintedAmount;
+  Transfer(0, this, mintedAmount);
+  Transfer(this, target, mintedAmount);
+}",
+            "vulnerability": "Unrestricted Minting",
+            "reason": "The mintToken function allows the owner to mint additional tokens and assign them to any user account, including user accounts that may have been frozen. This can lead to severe financial loss for the token holders, as the owner can arbitrarily create large amounts of tokens and transfer them to attacker's accounts."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 amount) onlyOwner returns (bool success) {
+  if (balanceOf[msg.sender] < amount) throw;             
+  balanceOf[msg.sender] -= amount;                        
+  totalSupply -= amount;                                  
+  Burn(msg.sender, amount);
+  return true;
+}",
+            "vulnerability": "Unrestricted Token Destruction",
+            "reason": "The burn function allows the owner to burn any user's tokens, which can lead to severe financial loss for the token holders, as the owner can arbitrarily destroy large amounts of tokens from user's accounts."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+  if (balanceOf[_from] < _value) throw;                   
+  if (balanceOf[_to] + _value < balanceOf[_to]) throw;    
+  if (_value > allowance[_from][msg.sender]) throw;     
+  balanceOf[_from] -= _value;                            
+  balanceOf[_to] += _value;                              
+  allowance[_from][msg.sender] -= _value;              
+  Transfer(_from, _to, _value);
+  return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check if the subtraction of the transferred value from the balance of the 'from' address underflows, causing an integer overflow. This vulnerability can be exploited to allow attackers to transfer more tokens than they have, leading to severe financial loss for the token holders."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) {
+  if (balanceOf[msg.sender] < amount ) throw;
+  balanceOf[this] += amount;
+  balanceOf[msg.sender] -= amount;
+  if (!msg.sender.send(amount * sellPrice)) {
+    throw;
+  } else {
+    Transfer(msg.sender, this, amount);
+  }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The sell function does not check if the subtraction of the sold amount from the balance of the 'msg.sender' address underflows, causing an integer overflow. This vulnerability can be exploited to allow attackers to sell more tokens than they have, leading to severe financial loss for the token holders."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+  if (balanceOf[msg.sender] < _value) throw;            
+  if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+  if (frozenAccount[msg.sender]) throw;                
+  balanceOf[msg.sender] -= _value;                     
+  balanceOf[_to] += _value;                            
+  Transfer(msg.sender, _to, _value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not check if the subtraction of the transferred value from the balance of the 'msg.sender' address underflows, causing an integer overflow. This vulnerability can be exploited to allow attackers to transfer more tokens than they have, leading to severe financial loss for the token holders."
+        }
+    ]
+}

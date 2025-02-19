@@ -1,0 +1,81 @@
+ {
+    "output_list": [
+        {
+            "function_name": "safeMul",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The vulnerability identified as 'Integer Overflow' in the `safeMul` function is correct. The function does not properly check for overflow when multiplying two large numbers, which can lead to an overflow and incorrect results. The `require` statement that checks if the result of the multiplication divided by one of the operands equals the other operand is incorrect because it does not handle the case where the multiplication overflows. This oversight can be exploited to perform arithmetic operations that result in incorrect outcomes.",
+            "correctness": 1
+        },
+        {
+            "function_name": "safeSub",
+            "auditor_idx": 0,
+            "vulnerability": "Underflow",
+            "criticism": "The vulnerability identified as 'Underflow' in the `safeSub` function is correct. The function does not check if the subtraction would result in a negative number, which can lead to incorrect results and potential security issues. The `require` statement ensures that the second operand is not greater than the first, but it does not prevent the result from being negative if the subtraction is valid.",
+            "correctness": 1
+        },
+        {
+            "function_name": "safeAdd",
+            "auditor_idx": 0,
+            "vulnerability": "Overflow",
+            "criticism": "The vulnerability identified as 'Overflow' in the `safeAdd` function is correct. The function does not check if the addition of two large numbers exceeds the maximum value that can be stored, which can lead to an overflow and incorrect results. The `require` statement checks if the result of the addition is greater than or equal to one of the operands, which is not sufficient to prevent overflow.",
+            "correctness": 1
+        },
+        {
+            "function_name": "_transfer",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The vulnerability identified as 'Integer Overflow' in the `_transfer` function is correct. The function does not properly check for overflow when updating balances, which can lead to incorrect results and potential security issues. The `require` statement that checks if the new balance is greater than the previous balance is insufficient because it does not prevent overflow. The subsequent `assert` statement is also incorrect because it assumes that the sum of the balances will remain constant, which is not guaranteed if overflow occurs.",
+            "correctness": 1
+        },
+        {
+            "function_name": "transfer",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The vulnerability identified as 'Integer Overflow' in the `transfer` function is correct. The function calls `_transfer` with the sender's address as the `_from` parameter, which can lead to overflow if the sender's balance is large. The underlying `_transfer` function does not have adequate overflow checks, as discussed in the criticism for `_transfer`.",
+            "correctness": 1
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The vulnerability identified as 'Integer Overflow' in the `transferFrom` function is correct. Similar to the `transfer` function, this function calls `_transfer` with the `_from` parameter, which can lead to overflow if the `_from` balance is large. The underlying `_transfer` function does not have adequate overflow checks.",
+            "correctness": 1
+        },
+        {
+            "function_name": "balanceOf",
+            "auditor_idx": 0,
+            "vulnerability": "None",
+            "criticism": "The vulnerability identified as 'None' in the `balanceOf` function is incorrect. While this function does not directly involve arithmetic operations that can lead to overflow or underflow, it is still vulnerable to other types of attacks such as front-running attacks. The function does not check if the owner's address is valid, which could be exploited if the owner's balance is manipulated.",
+            "correctness": 0
+        },
+        {
+            "function_name": "approve",
+            "auditor_idx": 0,
+            "vulnerability": "None",
+            "criticism": "The vulnerability identified as 'None' in the `approve` function is incorrect. While this function does not directly involve arithmetic operations that can lead to overflow or underflow, it is still vulnerable to other types of attacks such as front-running attacks. The function does not check if the spender's address is valid, which could be exploited if the allowance is manipulated.",
+            "correctness": 0
+        },
+        {
+            "function_name": "allowance",
+            "auditor_idx": 0,
+            "vulnerability": "None",
+            "criticism": "The vulnerability identified as 'None' in the `allowance` function is incorrect. Similar to the `balanceOf` and `approve` functions, this function does not directly involve arithmetic operations that can lead to overflow or underflow. However, it is still vulnerable to other types of attacks such as front-running attacks. The function does not check if the owner's or spender's address is valid, which could be exploited if the allowance is manipulated.",
+            "correctness": 0
+        },
+        {
+            "function_name": "mint",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The vulnerability identified as 'Integer Overflow' in the `mint` function is correct. The function does not properly check for overflow when updating balances or the total supply, which can lead to incorrect results and potential security issues. The `+=` operator does not prevent overflow, and the subsequent `Transfer` events assume that the balances are updated correctly, which is not guaranteed if overflow occurs.",
+            "correctness": 1
+        },
+        {
+            "function_name": "unlock",
+            "auditor_idx": 0,
+            "vulnerability": "None",
+            "criticism": "The vulnerability identified as 'None' in the `unlock` function is incorrect. While this function does not directly involve arithmetic operations that can lead to overflow or underflow, it is still vulnerable to other types of attacks such as front-running attacks. The function does not check if the contract was paused before calling `unlock`, which could be exploited if the paused state is manipulated.",
+            "correctness": 0
+        }
+    ]
+}

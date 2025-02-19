@@ -1,0 +1,60 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address recipient, uint256 amount) public returns (bool) {
+    require(balanceOf[msg.sender] >= amount, 'Insufficient balance');
+    balanceOf[msg.sender] -= amount;
+    balanceOf[recipient] += amount;
+    emit Transfer(msg.sender, recipient, amount);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function does not check for overflow of the recipient's balance, allowing an attacker to make the balance of a target user overflow the maximum uint256 value, in turn allowing the attacker to steal funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address sender, address recipient, uint256 amount) public returns (bool) {
+    require(balanceOf[sender] >= amount, 'Insufficient balance');
+    require(allowance[sender][msg.sender] >= amount, 'Insufficient allowance');
+    balanceOf[sender] -= amount;
+    balanceOf[recipient] += amount;
+    allowance[sender][msg.sender] -= amount;
+    emit Transfer(sender, recipient, amount);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferFrom' function does not check for overflow of the recipient's balance, allowing an attacker to make the balance of a target user overflow the maximum uint256 value, in turn allowing the attacker to steal funds."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address spender, uint256 amount) public returns (bool) {
+    allowance[msg.sender][spender] = amount;
+    emit Approval(msg.sender, spender, amount);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'approve' function does not check for overflow of the allowance, allowing an attacker to set the allowance to a value greater than the maximum uint256 value, in turn allowing the attacker to steal funds."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address user, uint256 amount) public onlyOwner {
+    require(user != address(0), 'Invalid address');
+    totalSupply += amount;
+    balanceOf[user] += amount;
+    emit Transfer(address(0), user, amount);
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'mintToken' function allows the owner to mint an arbitrary amount of tokens for an arbitrary user, without any checks, allowing the owner to devalue the token."
+        },
+        {
+            "function_name": "changeOwner",
+            "code": "function changeOwner(address newOwner) public onlyOwner {
+    require(newOwner != address(0), 'Invalid address');
+    owner = newOwner;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'changeOwner' function allows the owner to transfer ownership to any address, without any checks, allowing the owner to become immutable."
+        }
+    ]
+}

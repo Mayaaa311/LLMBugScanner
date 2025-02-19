@@ -1,0 +1,123 @@
+[
+  {
+    "function_name": "mintTokens",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The function allows the owner to mint tokens without any checks, which can lead to manipulation of the token's total supply and potentially the balance of any user.",
+    "correctness": 7,
+    "severity": 8,
+    "profitability": 5,
+    "reason": "The function does not validate the input for `_mintedAmount`, allowing for potential overflow and manipulation of the token's total supply."
+  },
+  {
+    "function_name": "transfer",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The function does not properly check for overflow when updating the balance of the recipient, potentially allowing unauthorized balance manipulation.",
+    "correctness": 7,
+    "severity": 7,
+    "profitability": 5,
+    "reason": "The function does not include a check to prevent overflow when adding the transferred amount to the recipient's balance."
+  },
+  {
+    "function_name": "transferFrom",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The function does not validate the input for `_amount`, allowing for potential overflow and unauthorized balance manipulation.",
+    "correctness": 7,
+    "severity": 7,
+    "profitability": 5,
+    "reason": "The function does not include a check to prevent overflow when updating the balances of the sender and recipient."
+  },
+  {
+    "function_name": "approve",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The function does not check for overflow when updating the allowance, which can lead to unauthorized manipulation of allowances.",
+    "correctness": 7,
+    "severity": 7,
+    "profitability": 5,
+    "reason": "The function does not include a check to prevent overflow when updating the allowance for a spender."
+  },
+  {
+    "function_name": "transfer",
+    "auditor_idx": 1,
+    "vulnerability": "Reentrancy",
+    "criticism": "The transfer function does not implement reentrancy guards, making it susceptible to attacks where an attacker can call the function again before the previous call has finished.",
+    "correctness": 3,
+    "severity": 7,
+    "profitability": 4
+  },
+  {
+    "function_name": "transferFrom",
+    "auditor_idx": 1,
+    "vulnerability": "Reentrancy",
+    "criticism": "Similar to the transfer function, this function lacks reentrancy guards, increasing the risk of reentrancy attacks.",
+    "correctness": 3,
+    "severity": 7,
+    "profitability": 4
+  },
+  {
+    "function_name": "transfer",
+    "auditor_idx": 1,
+    "vulnerability": "Blacklist",
+    "criticism": "The transfer function checks the recipient's blacklist status but not the sender's, which could allow blacklisting the sender to prevent transfers.",
+    "correctness": 4,
+    "severity": 6,
+    "profitability": 3
+  },
+  {
+    "function_name": "transferFrom",
+    "auditor_idx": 1,
+    "vulnerability": "Blacklist",
+    "criticism": "The transferFrom function checks the sender's blacklist status before transferring tokens, which is ineffective as the sender's balance is reduced before the blacklist check.",
+    "correctness": 4,
+    "severity": 6,
+    "profitability": 3
+  },
+  {
+    "function_name": "transfer",
+    "auditor_idx": 2,
+    "vulnerability": "Reentrancy",
+    "criticism": "The function lacks reentrancy protection, making it susceptible to attacks where an attacker can exploit the contract's state changes during execution.",
+    "correctness": 3,
+    "severity": 8,
+    "profitability": 5
+  },
+  {
+    "function_name": "mintTokens",
+    "auditor_idx": 2,
+    "vulnerability": "Unrestricted Minting",
+    "criticism": "The function allows the owner to mint new tokens without any restrictions, which can lead to inflation and loss of value for token holders.",
+    "correctness": 2,
+    "severity": 7,
+    "profitability": 6
+  },
+  {
+    "function_name": "burn",
+    "auditor_idx": 2,
+    "vulnerability": "Unrestricted Burning",
+    "criticism": "The function allows the owner to burn tokens, which can lead to a decrease in token supply and potentially manipulate the token's value.",
+    "correctness": 2,
+    "severity": 7,
+    "profitability": 6
+  },
+  {
+    "function_name": "transferFrom",
+    "auditor_idx": 2,
+    "vulnerability": "Arbitrary Transfer",
+    "criticism": "The function allows transfers from other accounts without proper authorization checks, which can lead to unauthorized transfers.",
+    "correctness": 4,
+    "severity": 6,
+    "profitability": 5
+  },
+  {
+    "function_name": "approve",
+    "auditor_idx": 2,
+    "vulnerability": "Unrestricted Approval",
+    "criticism": "The function allows an approval without any checks, which can lead to unauthorized spending of tokens.",
+    "correctness": 3,
+    "severity": 6,
+    "profitability": 5
+  }
+]

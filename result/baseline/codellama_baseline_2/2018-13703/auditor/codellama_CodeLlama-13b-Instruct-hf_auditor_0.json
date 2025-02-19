@@ -1,0 +1,112 @@
+ Here are the 5 most severe vulnerabilities in the provided smart contract, along with their associated functions, reasons, and explanations:
+
+1. Integer Overflow Vulnerability in the `sellOffline` Function
+
+Function Name: `sellOffline`
+
+Vulnerability: Integer Overflow
+
+Function Code:
+```
+function sellOffline(address rec_address,uint256 token_amount) public onlyOwner 
+{
+    if (remaining > 0)
+    {
+        uint finalTokens =  (token_amount  * (10 ** 18));              
+        if(finalTokens < remaining)
+            {
+                remaining = remaining - finalTokens;
+                _transfer(owner,rec_address, finalTokens);    
+                TransferSell(owner, rec_address, finalTokens,'Offline');
+            }
+        else
+            {
+                revert();
+            }
+    }
+    else
+    {
+        revert();
+    }        
+}
+```
+Reason: The `sellOffline` function uses the `remaining` variable to keep track of the remaining supply of tokens. However, this variable is not updated correctly when tokens are sold. If the `token_amount` parameter is large enough, the `finalTokens` variable will overflow, causing the `remaining` variable to become negative. This can lead to a situation where the contract can sell more tokens than it has in its supply, which can lead to a loss of funds for the contract owner.
+
+2. Wrong Logic Vulnerability in the `getEthRate` Function
+
+Function Name: `getEthRate`
+
+Vulnerability: Wrong Logic
+
+Function Code:
+```
+function getEthRate() onlyOwner public constant returns  (uint)            
+{
+    return ethRate;
+}
+```
+Reason: The `getEthRate` function returns the `ethRate` variable, which is a public variable that can be modified by anyone. However, the function does not check if the caller is the owner of the contract. This means that anyone can modify the `ethRate` variable, which can lead to a loss of funds for the contract owner.
+
+3. Bad Randomness Vulnerability in the `setTokenPrice` Function
+
+Function Name: `setTokenPrice`
+
+Vulnerability: Bad Randomness
+
+Function Code:
+```
+function setTokenPrice (uint newTokenRate) public  onlyOwner               
+{
+    icoTokenPrice = newTokenRate;
+}
+```
+Reason: The `setTokenPrice` function sets the `icoTokenPrice` variable to a new value, which can be modified by anyone. However, the function does not check if the new value is valid. This means that anyone can set the `icoTokenPrice` variable to an invalid value, which can lead to a loss of funds for the contract owner.
+
+4. Access Control Vulnerability in the `withdraw` Function
+
+Function Name: `withdraw`
+
+Vulnerability: Access Control
+
+Function Code:
+```
+function withdraw(uint amountWith) public onlyOwner                        
+    {
+        if((msg.sender == owner) || (msg.sender ==  bkaddress))
+        {
+            benAddress.transfer(amountWith);
+        }
+        else
+        {
+            revert();
+        }
+    }
+```
+Reason: The `withdraw` function allows anyone to withdraw funds from the contract, but it only checks if the caller is the owner or the backup address. However, the function does not check if the caller has the necessary permissions to withdraw funds. This means that anyone can withdraw funds from the contract, which can lead to a loss of funds for the contract owner.
+
+5. Typo Constructor Vulnerability in the `CERB_Coin` Constructor
+
+Function Name: `CERB_Coin` Constructor
+
+Vulnerability: Typo Constructor
+
+Function Code:
+```
+function CERB_Coin() public
+{
+  totalSupply = 1000000000000000000000000000;                                 
+  owner =  msg.sender;                                                      
+  balanceOf[owner] = totalSupply;                                           
+  name = "CERB Coin";                                                     
+  symbol = "CERB";                                                          
+  decimals = 18;                                                            
+  remaining = totalSupply;                                                  
+  ethRate = 665;                                                            
+  icoStatus = 1;                                                            
+  icoTokenPrice = 50;                                                       
+  benAddress = 0x4532828EC057e6cFa04a42b153d74B345084C4C2;                  
+  bkaddress  = 0x1D38b496176bDaB78D430cebf25B2Fe413d3BF84;                   
+  allowTransferToken = 0;                                                   
+}
+```
+Reason: The `CERB_Coin` constructor sets the `totalSupply` variable to a large value, but it does not check if the value is valid. This means that anyone can set the `totalSupply` variable to an invalid value, which can lead to a loss of funds for the contract owner. Additionally, the constructor does not check if the `owner` variable is set correctly, which can lead to a loss of funds for the contract owner.

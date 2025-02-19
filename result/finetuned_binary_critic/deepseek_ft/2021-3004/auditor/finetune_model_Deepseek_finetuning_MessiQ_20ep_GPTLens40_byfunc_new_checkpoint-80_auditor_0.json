@@ -1,0 +1,67 @@
+ {
+    "output_list": [
+        {
+            "function_name": "deposit",
+            "code": "function deposit(IERC20 token, uint amount) external {
+        uint _value = LINK.getPriceUSD(address(token)) * amount / uint256(10)**token.decimals();
+        require(_value > 0, "!value");
+        (address _pair, uint amountA,) = _addLiquidity(address(token), address(this), amount, _value);
+        token.safeTransferFrom(msg.sender, _pair, amountA);
+        _mint(_pair, _value); 
+        uint _liquidity = ISushiswapV2Pair(_pair).mint(address(this));
+        collateral[msg.sender][address(token)] += _liquidity;
+        collateralCredit[msg.sender][address(token)] += _value;
+        uint _fee = _value * FEE / BASE;
+        _mint(msg.sender, _value - _fee);
+        _mint(address(this), _fee);
+        notifyFeeAmount(_fee);
+        emit Deposit(msg.sender, address(token), _value, amount, _value);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'mint' function does not check for overflow, allowing users to mint an arbitrary amount of tokens, leading to a loss of funds."
+        },
+        {
+            "function_name": "notifyFeeAmount",
+            "code": "function notifyFeeAmount(uint reward) internal updateReward(address(0)) {
+        if (block.timestamp >= periodFinish) {
+            rewardRate = reward / DURATION;
+        } else {
+            uint remaining = periodFinish - block.timestamp;
+            uint leftover = remaining * rewardRate;
+            rewardRate = (reward + leftover) / DURATION;
+        }
+        uint balance = balances[address(this)];
+        require(rewardRate <= balance / DURATION, "Provided reward too high");
+        lastUpdateTime = block.timestamp;
+        periodFinish = block.timestamp + DURATION;
+        emit Fees(reward);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'rewardRate' variable is updated without ensuring it does not overflow, allowing users to manipulate the rate, leading to a loss of funds."
+        },
+        {
+            "function_name": "stake",
+            "code": "function stake(uint256 amount) external nonReentrant updateReward(msg.sender) {
+        require(amount > 0, "Cannot stake 0");
+        stakedSupply += amount;
+        stakes[msg.sender] += amount;
+        _transferTokens(msg.sender, address(this), amount);
+        emit Staked(msg.sender, amount);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'stakedSupply' variable is updated without ensuring it does not overflow, allowing users to stake an arbitrary amount of tokens, leading to a loss of funds."
+        },
+        {
+            "function_name": "unstake",
+            "code": "function unstake(uint amount) public nonReentrant updateReward(msg.sender) {
+        require(amount > 0, "Cannot withdraw 0");
+        stakedSupply -= amount;
+        stakes[msg.sender] -= amount;
+        _transferTokens(address(this), msg.sender, amount);
+        emit Unstaked(msg.sender, amount);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'stakedSupply' variable is updated without ensuring it does not overflow, allowing users to unstake an arbitrary amount of tokens, leading to a loss of funds."
+        }
+    ]
+}

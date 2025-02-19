@@ -1,0 +1,72 @@
+Based on the provided code, there are several potential vulnerabilities that can be exploited in real-world scenarios. Here are the five most severe vulnerabilities identified:
+
+1. Integer Overflow:
+   Function: `transfer`
+   Code:
+   ```
+   function transfer(address _to, uint _value) onlyPayloadSize(2 * 32) unFrozenAccount onlyTransferable {
+    if (frozenAccount[_to]) {
+        InvalidAccount(_to, "The receiver account is frozen");
+    } else {
+        balances[msg.sender] = balances[msg.sender].sub(_value);
+        balances[_to] = balances[_to].add(_value);
+        Transfer(msg.sender, _to, _value);
+   
+   ```
+   Vulnerability: The `transfer` function allows the transfer of tokens from the sender's balance to the recipient's balance. However, there is no check to ensure that the sender has enough balance to cover the transfer amount. This can lead to an integer overflow, where the balance of the sender becomes negative.
+   Reason: The `sub` function in the `SafeMath` library is used to subtract the transfer amount from the sender's balance. If the sender's balance is less than the transfer amount, the subtraction operation will result in an integer overflow, causing the balance to become negative.
+
+2. Wrong Logic:
+   Function: `transferFrom`
+   Code:
+   ```
+   function transferFrom(address _from, address _to, uint _value) onlyPayloadSize(3 * 32) unFrozenAccount onlyTransferable{
+    var _allowance = allowed[_from][msg.sender];
+    require(!frozenAccount[_from]&&!frozenAccount[_to]);
+    balances[_to] = balances[_to].add(_value);
+    balances[_from] = balances[_from].sub(_value);
+    allowed[_from][msg.sender] = _allowance.sub(_value);
+    Transfer(_from, _to, _value);
+   }
+   ```
+   Vulnerability: The `transferFrom` function allows the transfer of tokens from one address to another. However, there is no check to ensure that the sender has enough allowance to cover the transfer amount. This can lead to wrong logic and potential misuse.
+   Reason: The `allowed` mapping is used to keep track of the allowance for each sender-spender pair. If the allowance is less than the transfer amount, the subtraction operation will result in an integer underflow, causing the allowance to become negative. This can be exploited by attackers to transfer tokens without the proper approval.
+
+3. Bad Randomness:
+   Function: `switchLiquidity`
+   Code:
+   ```
+   function switchLiquidity (bool _transferable) onlyOwner returns (bool success) {
+    transferable=_transferable;
+    return true;
+   }
+   ```
+   Vulnerability: The `switchLiquidity` function allows the owner to switch the liquidity status of the contract. However, there is no randomness involved in the function. This can lead to potential misuse and potential attacks.
+   Reason: The `switchLiquidity` function simply assigns the value of `_transferable` to the `transferable` variable. There is no randomness or other non-deterministic elements involved in the function. Attackers can potentially manipulate the `_transferable` parameter to enable or disable liquidity without proper authorization.
+
+4. Access Control:
+   Function: `freezeAccount`
+   Code:
+   ```
+   function freezeAccount(address target, bool freeze) onlyOwner public {
+    frozenAccount[target]=freeze;
+    FrozenFunds(target, freeze);
+   }
+   ```
+   Vulnerability: The `freezeAccount` function allows the owner to freeze or unfreeze an account. However, there is no access control mechanism in place to ensure that only the owner can call this function. This can lead to potential misuse and potential attacks.
+   Reason: The `freezeAccount` function is called by the owner, but there is no check to ensure that the caller is the owner. Attackers can potentially freeze or unfreeze accounts without proper authorization.
+
+5. Typo Constructor:
+   Function: `UBSexToken`
+   Code:
+   ```
+   function UBSexToken() {
+    owner = msg.sender;
+    totalSupply = 1.9 * 10 ** 26;
+    balances[owner] = totalSupply;
+   }
+   ```
+   Vulnerability: The constructor function `UBSexToken` initializes the owner, total supply, and balances of the token. However, there is a typo in the function name. The correct constructor name should be `UBSexToken`, not `UBSexToken`. This can lead to potential misuse and potential attacks.
+   Reason: The constructor function name is used to initialize the contract, but there is a typo in the function name. Attackers can potentially call the constructor with the wrong function name, leading to incorrect initialization of the contract.
+
+Please note that these vulnerabilities are potential risks that can be exploited in real-world scenarios. It is important to thoroughly analyze and test smart contracts to identify and mitigate these vulnerabilities.

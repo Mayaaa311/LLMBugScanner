@@ -1,0 +1,65 @@
+{
+    "output_list": [
+        {
+            "function_name": "adminClaimAirdrop",
+            "code": "function adminClaimAirdrop(address _participant, uint _amount) public onlyOwner {        doAirdrop(_participant, _amount);
+        }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'adminClaimAirdrop' function does not have a balance check before adding airdrop amount to the recipient's balance, allowing an attacker to exploit this vulnerability to overflow the recipient's balance and achieve denial of service."
+        },
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr  public {
+        uint256 tokens = 0;
+        require( msg.value >= minContribution );
+        require( msg.value > 0 );
+        tokens = tokensPerEth.mul(msg.value) / 1 ether;        
+        address investor = msg.sender;
+        if (tokens > 0) {
+            distr(investor, tokens);
+        }
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'getTokens' function does not have a balance check before adding tokens to the investor's balance, allowing an attacker to exploit this vulnerability to overflow the investor's balance and achieve denial of service."
+        },
+        {
+            "function_name": "distr",
+            "code": "function distr(address _to, uint256 _amount) canDistr private returns (bool) {
+        totalDistributed = totalDistributed.add(_amount);        
+        balances[_to] = balances[_to].add(_amount);
+        emit Distr(_to, _amount);
+        emit Transfer(address(0), _to, _amount);
+        return true;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'distr' function does not have a balance check before adding tokens to the recipient's balance, allowing an attacker to exploit this vulnerability to overflow the recipient's balance and achieve denial of service."
+        },
+        {
+            "function_name": "doAirdrop",
+            "code": "function doAirdrop(address _participant, uint _amount) internal {
+        require( _amount > 0 );      
+        require( totalDistributed < totalSupply );
+        balances[_participant] = balances[_participant].add(_amount);
+        totalDistributed = totalDistributed.add(_amount);
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+        emit Airdrop(_participant, _amount, balances[_participant]);
+        emit Transfer(address(0), _participant, _amount);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'doAirdrop' function does not have a balance check before adding airdrop amount to the recipient's balance, allowing an attacker to exploit this vulnerability to overflow the recipient's balance and achieve denial of service."
+        },
+        {
+            "function_name": "adminClaimAirdropMultiple",
+            "code": "function adminClaimAirdropMultiple(address[] _addresses, uint _amount) public onlyOwner {        
+        for (uint i = 0; i < _addresses.length; i++) doAirdrop(_addresses[i], _amount);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'adminClaimAirdropMultiple' function does not have a balance check before adding airdrop amount to the recipients' balances, allowing an attacker to exploit this vulnerability to overflow the recipients' balances and achieve denial of service."
+        }
+    ]
+}

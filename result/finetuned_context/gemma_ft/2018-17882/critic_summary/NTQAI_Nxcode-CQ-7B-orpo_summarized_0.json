@@ -1,0 +1,58 @@
+{
+    "output_list": [
+        {
+            "function_name": "batchTransfer",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'batchTransfer' function does not properly check for integer overflow when calculating the new balance of the sender. The multiplication of '_to.length * _value' does not ensure that the result will not exceed the maximum value that can be stored in a uint256, leading to potential overflow. This vulnerability allows an attacker to manipulate the balance of the sender, potentially gaining unauthorized access to their assets.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 6
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic in transferFrom function allows unauthorized transfer of attacker's assets",
+            "criticism": "The 'transferFrom' function does not correctly check the allowance of the spender before transferring tokens. The condition '_to != fights' is incorrect because it does not prevent unauthorized transfers to any address, including the 'fights' address. This logic flaw allows an attacker to transfer tokens to any address without the owner's approval, leading to unauthorized asset transfers.",
+            "correctness": 5,
+            "severity": 8,
+            "profitability": 7
+        },
+        {
+            "function_name": "balanceOf",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'balanceOf' function does not check for integer overflow when returning the balance of an address. If the balance is very large, it could lead to an overflow, potentially allowing an attacker to view incorrect balance information that could be used to exploit other vulnerabilities.",
+            "correctness": 6,
+            "severity": 7,
+            "profitability": 5
+        },
+        {
+            "function_name": "approve",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'approve' function does not check for integer overflow when setting the allowance. If the allowance is set to a very large value, it could lead to an overflow, which might not be immediately apparent but could affect the contract's state and operations.",
+            "correctness": 6,
+            "severity": 7,
+            "profitability": 5
+        },
+        {
+            "function_name": "safeAdd",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'safeAdd' function is intended to prevent overflow, but it does not fully address the issue. The assertion 'assert(c >= a)' only checks that the result is not less than 'a', not that it is within the valid range of uint256. This could still allow overflow under certain conditions.",
+            "correctness": 6,
+            "severity": 6,
+            "profitability": 6
+        },
+        {
+            "function_name": "safeSub",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'safeSub' function is intended to prevent underflow, but it does not fully address the issue. The assertion 'assert(b <= a)' only checks that 'b' is not greater than 'a', not that the result will not underflow. This could still allow underflow under certain conditions.",
+            "correctness": 6,
+            "severity": 6,
+            "profitability": 6
+        }
+    ]
+}

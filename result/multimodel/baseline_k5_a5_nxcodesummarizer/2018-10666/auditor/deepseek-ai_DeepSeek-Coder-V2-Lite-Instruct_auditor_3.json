@@ -1,0 +1,48 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "require(balanceOf[msg.sender] >= _amount);
+require(balanceOf[_to] + _amount >= balanceOf[_to]);
+balanceOf[msg.sender] -= _amount;
+balanceOf[_to] += _amount;",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function does not properly check for integer overflow when updating the balance of the sender and receiver. If _amount is such that the addition of _amount to balanceOf[_to] exceeds the maximum uint256 value, it will result in a silent failure, leading to potential loss of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "require(balanceOf[_from] >= _amount);
+require(balanceOf[_to] + _amount >= balanceOf[_to]);
+require(_amount <= allowance[_from][msg.sender]);
+balanceOf[_from] -= _amount;
+balanceOf[_to] += _amount;
+allowance[_from][msg.sender] -= _amount;",
+            "vulnerability": "Integer Overflow",
+            "reason": "Similar to the 'transfer' function, 'transferFrom' does not check for integer overflow when updating the balances of the sender and receiver. An attacker could exploit this by crafting a transaction that causes an overflow, leading to unauthorized transfers."
+        },
+        {
+            "function_name": "approve",
+            "code": "allowance[msg.sender][_spender] = _amount;
+Approval(msg.sender, _spender, _amount);",
+            "vulnerability": "Access Control",
+            "reason": "The 'approve' function does not check if the spender address is a contract that implements the tokenRecipient interface. If an attacker controls a contract that implements the tokenRecipient interface, they could call approve and subsequently call receiveApproval with arbitrary data, leading to potential abuse."
+        },
+        {
+            "function_name": "precalculate",
+            "code": "baseFeeDivisor = pow10(1, feeDecimals);
+feeDivisor = pow10(1, feeDecimals + decimals);
+singleIDXMQty = pow10(1, decimals);",
+            "vulnerability": "Typo Constructor",
+            "reason": "The 'precalculate' function is called during the contract deployment, but it incorrectly uses 'pow10' instead of 'pow' for calculating powers of 10. This typo could lead to incorrect initialization of the contract's parameters, potentially causing unintended behavior."
+        },
+        {
+            "function_name": "pow10",
+            "code": "for (uint8 i = 0; i < b; i++) {
+a *= 10;
+}
+return a;",
+            "vulnerability": "Typo Constructor",
+            "reason": "The 'pow10' function, used within 'precalculate', contains a typo in the loop where it multiplies 'a' by 10. This typo could lead to incorrect calculations during the contract deployment, potentially causing unintended behavior."
+        }
+    ]
+}

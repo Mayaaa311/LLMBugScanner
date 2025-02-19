@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "reward",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'reward' function has an integer overflow vulnerability. When 'locked' is true, it performs a 'require(totalLockedRewardsOf[_to] + _value > totalLockedRewardsOf[_to])' check. However, if 'totalLockedRewardsOf[_to]' is at its maximum value, adding _value can cause an overflow and become 'false'. This can be exploited to lock additional unauthorized rewards for any target user via the 'reward' function call.",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 7
+        },
+        {
+            "function_name": "transferReward",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'transferReward' function has an integer overflow where it performs a 'require(totalLockedRewardsOf[addr] > _value)' check. If 'totalLockedRewardsOf[addr]' is at its minimum value and '_value' is non-zero, a overflow in 'totalLockedRewardsOf[addr] -= _value' can occur, making the check always 'false'. This vulnerability can be exploited to lock additional unauthorized rewards for any target user via the 'transferReward' function call.",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 7
+        },
+        {
+            "function_name": "unlockReward",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'unlockReward' function has an integer overflow where it performs a 'require(totalLockedRewardsOf[addr] > _value)' check. If 'totalLockedRewardsOf[addr]' is at its minimum value and '_value' is non-zero, a overflow in 'totalLockedRewardsOf[addr] -= _value' can occur, making the check always 'false'. This vulnerability can be exploited to unlock additional unauthorized rewards for any target user via the 'unlockReward' function call.",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 7
+        },
+        {
+            "function_name": "setAdmin",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The 'setAdmin' function has a access control vulnerability. It uses 'admin[addr]=enabled' to assign admin rights, allowing anyone to call this function and gain admin privileges, potentially causing unexpected financial losses for asset owners.",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 7
+        },
+        {
+            "function_name": "setUsersCanTrade",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The 'setUsersCanTrade' function has a access control vulnerability. It allows anyone to call this function and modify the trade state, potentially leading to unexpected financial losses for asset owners.",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 7
+        }
+    ]
+}

@@ -1,0 +1,45 @@
+ {
+    "output_list": [
+        {
+            "function_name": "batchTransfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "balances[msg.sender] = safeSub(balances[msg.sender], _to.length * _value);
+for (uint i = 0; i < _to.length; i++) {
+    balances[_to[i]] = safeAdd(balances[_to[i]], _value);
+    Transfer(msg.sender, _to[i], _value);
+}",
+            "reason": "The `batchTransfer` function uses `_to.length * _value` to update the balance of multiple recipients in a single transaction. If `_value` is zero, this operation will not reduce the balance of the sender, leading to an integer overflow. This overflow can be exploited to increase the balance of the attacker-controlled addresses beyond their initial balances, potentially allowing them to drain funds from the contract."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "balances[_to] = safeAdd(balances[_to], _value);
+balances[_from] = safeSub(balances[_from], _value);
+if (_to != fights) {
+    allowed[_from][msg.sender] = safeSub(allowed[_from][msg.sender], _value);
+}
+Transfer(_from, _to, _value);",
+            "reason": "The `transferFrom` function allows an approved spender to transfer tokens on behalf of the owner, but it does not enforce any additional access control checks. If the spender is the `fights` address, the function does not reduce the allowance, which can lead to a situation where tokens are transferred without the owner's knowledge or consent, if the spender is compromised or malicious."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Wrong Logic",
+            "function_code": "allowed[msg.sender][_spender] = _value;
+Approval(msg.sender, _spender, _value);",
+            "reason": "The `approve` function does not check if the spender is the zero address, which can lead to a situation where an approval is made to the zero address. This is unnecessary and can lead to confusion or unintended behavior in the contract's usage."
+        },
+        {
+            "function_name": "create",
+            "vulnerability": "Token Devalue",
+            "function_code": "balances[msg.sender] = safeAdd(balances[msg.sender], _amount);
+totalSupply = safeAdd(totalSupply, _amount);",
+            "reason": "The `create` function allows the owner to create new tokens and assign them to their own address. This can lead to the devaluation of the token if the owner creates tokens without any specific purpose or value, which might reduce the perceived value of the token in the market."
+        },
+        {
+            "function_name": "setFightsAddress",
+            "vulnerability": "Access Control",
+            "function_code": "fights = _fights;",
+            "reason": "The `setFightsAddress` function allows the owner to set the `fights` address, which is not used elsewhere in the contract. This lack of use and the fact that it can be set by the owner might indicate a potential vulnerability if the `fights` address is later used in a critical function without proper validation."
+        }
+    ]
+}

@@ -1,0 +1,69 @@
+{
+    "output_list": [
+        {
+            "function_name": "createChamp",
+            "code": "function createChamp(address _affiliateAddress) external payable
+    whenNotPaused
+    isPaid(createChampFee)
+    distributeInput(_affiliateAddress)
+    {
+        uint256 id = champs.push(Champ(0, 2 + randMod(4), 1 + randMod(4), uint256(1 days)  - uint256(randMod(9) * 1 hours), 0, 0, 0, leaderboard.length + 1, 0, uint256(block.timestamp), 0,0,0, false)) - 1;
+        champs[id].id = id; 
+        leaderboard.push(id); 
+        champToOwner[id] = msg.sender; 
+        addressInfo[msg.sender].champsCount++;",
+            "vulnerability": "Integer Overflow",
+            "reason": "The `champs.push` function can lead to integer overflow if `leaderboard.length` is manipulated by an attacker. This can be exploited to increase the `champsCount` of any address, potentially leading to denial of service or other malicious activities."
+        },
+        {
+            "function_name": "randMod",
+            "code": "function randMod(uint256 _modulus) internal returns(uint256) {
+    randNonce++;
+    return uint256(keccak256(randNonce, blockhash(block.number - 1))) % _modulus;
+}",
+            "vulnerability": "Bad Randomness",
+            "reason": "The `randMod` function uses `blockhash` which can be manipulated by miners. This makes the randomness predictable and can be exploited to influence the outcome of the game, potentially leading to unfair results."
+        },
+        {
+            "function_name": "transferOwnership",
+            "code": "function transferOwnership(address newOwner) public onlyOwner {
+    require(newOwner != address(0));
+    contractOwner = newOwner;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The `transferOwnership` function does not check if the new owner is a contract. If the new owner is a contract, it can call the `transferOwnership` function to gain ownership of the contract, leading to potential abuse of the contract's functionality."
+        },
+        {
+            "function_name": "triggerPause",
+            "code": "function triggerPause() onlyOwner external {
+    paused = !paused;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The `triggerPause` function allows the owner to toggle the `paused` state. If an attacker can manipulate the `paused` state, they can potentially disrupt the normal operation of the contract, leading to a denial of service or other malicious activities."
+        },
+        {
+            "function_name": "openLootbox",
+            "code": "function openLootbox(address _affiliateAddress) external payable
+    whenNotPaused
+    isPaid(lootboxFee)
+    distributeInput(_affiliateAddress) {
+        uint256 pointToCooldownReduction;
+        uint256 randNum = randMod(1001);
+        uint256 pointsToShare;
+        uint256 itemID;
+        Item memory item = Item({
+            itemType: uint8(uint256(randMod(3) + 1)),
+            itemRarity: uint8(0),
+            attackPower: 0,
+            defencePower: 0,
+            cooldownReduction: 0,
+            price: 0,
+            onChampId: 0,
+            onChamp: false,
+            forSale: false
+        });",
+            "vulnerability": "Wrong Logic",
+            "reason": "The `openLootbox` function generates random numbers using `randMod` which can be manipulated by miners. This makes the random number generation predictable and can be exploited to influence the outcome of the lootbox opening, potentially leading to unfair results."
+        }
+    ]
+}

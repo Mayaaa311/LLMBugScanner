@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "vulnerability": "Access Control",
+            "reason": "The 'mint' function is restricted to the contract owner only. However, the logic inside the function does not check if the 'buyer' address is valid or if the tokenAmount is within any reasonable limits. An attacker could exploit this by calling 'mint' with a high tokenAmount, effectively minting tokens to themselves without any corresponding value, leading to token devaluation."
+        },
+        {
+            "function_name": "pullBack",
+            "vulnerability": "Access Control",
+            "reason": "Similar to the 'mint' function, 'pullBack' is also restricted to the contract owner. The vulnerability here is that there is no check to ensure that the 'wallet' address is legitimate or that the 'tokenAmount' is within any reasonable limits. An attacker could exploit this by calling 'pullBack' with a high tokenAmount, effectively stealing tokens from the 'buyer' without any corresponding value, leading to token devaluation."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function does not perform any overflow checks. If an attacker can manipulate the 'tokenBalances' mapping in such a way that the subtraction operation results in an integer overflow, it could lead to an unexpected increase in the balance of the recipient, potentially allowing unauthorized transfers."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "reason": "Similar to the 'transfer' function, the 'transferFrom' function also does not perform any overflow checks. If an attacker can manipulate the 'tokenBalances' or 'allowed' mappings in such a way that the subtraction operation results in an integer overflow, it could lead to an unexpected increase in the balance of the recipient, potentially allowing unauthorized transfers."
+        },
+        {
+            "function_name": "quaker",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor function 'quaker' has a typo in its name. This typo makes it look like a regular function and could lead to confusion among developers or users. However, this typo does not directly introduce a vulnerability but could lead to confusion and potential errors in the codebase."
+        }
+    ]
+}

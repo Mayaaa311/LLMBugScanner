@@ -1,0 +1,39 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function getTokens() payable {
+  uint256 tokens = 0;
+  require(msg.value >= minContribution);
+  require(msg.value > 0);
+  tokens = tokensPerEth.mul(msg.value) / 1 ether;
+  address investor = msg.sender;
+  if (tokens > 0) {
+    distr(investor, tokens);
+  }
+  if (totalDistributed >= totalSupply) {
+    distributionFinished = true;
+  }
+  emit Transfer(msg.sender, _to, _amount);
+  return true;
+}",
+            "reason": "The function `getTokens` is vulnerable to Integer Overflow. If the input value is high, the calculation of tokens may exceed the maximum value that can be stored in a uint256 variable, causing an overflow and potentially causing incorrect results or the function to fail."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function transfer(address _to, uint256 _amount) onlyPayloadSize(3 * 32) public returns (bool success) {
+  require(_to != address(0));
+  require(_amount <= balances[msg.sender]);
+  balances[msg.sender] = balances[msg.sender].sub(_amount);
+  allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+  balances[_to] = balances[_to].add(_amount);
+  emit Transfer(_from, _to, _amount);
+  return true;
+}",
+            "reason": "The function `transfer` is vulnerable to Wrong Logic. The condition `_amount <= balances[msg.sender]` is not correctly checking if the transfer amount is less than or equal to the balance of the sender. This can potentially allow a user to transfer more funds than they actually have, causing a negative balance for the sender and potential exploitation."
+        }
+    ]
+}<eos>

@@ -1,0 +1,345 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow that allows the owner to set the balance of the arbitrary user to any value."}]}
+{"output_list": [{"function_name": "freezeAccount", "vulnerability": "Access Control", "reason": "The freezeAccount function has an access control issue, allowing the owner to freeze the account of any user."}]}
+{"output_list": [{"function_name": "setPrices", "vulnerability": "Bad Randomness", "reason": "The setPrices function has a bad randomness issue, as the owner can set the balance of the contract."}]}
+{"output_list": [{"function_name": "buy", "vulnerability": "Integer Overflow", "reason": "The buy function has an integer overflow that allows the owner to set the balance of the contract to zero."}]}
+{"output_list": [{"function_name": "sell", "vulnerability": "Integer Overflow", "reason": "The sell function has an integer overflow that allows the owner to set the balance of the contract to zero."}]}
+}
+Code: 
+pragma solidity ^0.4.19;
+contract LottoCount {
+    uint256 public maxTickets;
+    uint256 public ticketPrice; 
+    uint256 public totalBounty;
+    address public owner;
+    event NewTicket(address indexed sender, uint256 value);
+    event LottoComplete(address indexed sender, uint256 value);
+    event Burn(address indexed sender, uint256 value);
+    function LottoCount() {
+        owner = msg.sender;
+        ticketPrice = 0.01 ether;
+        maxTickets = 100;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        if (msg.value < ticketPrice) throw;               
+        if (balanceOf[this] < maxTickets) maxTickets = maxTickets + 1;
+        balanceOf[msg.sender] += ticketPrice;                   
+        balanceOf[this] -= ticketPrice;                         
+        NewTicket(msg.sender, ticketPrice);                
+        if (balanceOf[this] < maxTickets) throw;               
+    }
+    function burn(uint256 amount) onlyOwner {
+        if (balanceOf[msg.sender] < amount ) throw;        
+        balanceOf[msg.sender] -= amount;                   
+        balanceOf[this] += amount;                         
+        Burn(msg.sender, amount);
+    }
+    function complete(address _address, uint256 _value) onlyOwner {
+        if (balanceOf[_address] < _value) throw;               
+        if (balanceOf[msg.sender] > _value) throw;           
+        balanceOf[_address] -= _value;                        
+        balanceOf[msg.sender] += _value;                    
+        LottoComplete(_address, _value);                   
+    }
+}
+contract Lotto is owned, LottoCount {
+    uint256 public price;
+    uint256 public totalBounty;
+    mapping (address => uint256) public winnings;
+    mapping (address => mapping (address => uint256)) public winningsOfOwner;
+    mapping (address => uint256) public burnCount;
+    address[] public allUsers;
+    uint256 public totalUsers;
+    uint256 public totalBounty;
+    uint256 public totalBurn;
+    bool public userExists;
+    string public name;
+    string public symbol;
+    uint8 public decimals;
+    uint256 initialSupply;
+    string dataDir;
+    function Lotto() {
+        owner = msg.sender;
+        price = 0.01 ether;
+        maxTickets = 100;
+        userExists = false;
+        name = "Lottery Name";
+        symbol = "Lottery Symbol";
+        decimals = 0;
+        initialSupply = 0;
+        dataDir = "data";
+    }
+    function setMiners(address[] addresses) onlyOwner {
+        allUsers.push(addresses);
+        totalUsers += addresses.length;
+    }
+    function getBalance(address user) constant returns (uint256 balance) {
+        balance = totalBounty;
+    }
+    function getBurnCount(address user) constant returns (uint256 balance) {
+        balance = burnCount[user];
+    }
+    function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) throw;           
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+        if (userExists == false && maxTickets < 100) throw;   
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+        userExists = true;
+        name = "Lottery Name";
+        symbol = "Lottery Symbol";
+        decimals = 0;
+        initialSupply = 0;
+        dataDir = "data";
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        balanceOf[this] -= mintedAmount;
+        NewTicket(target, mintedAmount);                
+        if (balanceOf[this] < maxTickets) throw;               
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        if (userExists == false && maxTickets < 100) throw;   
+        freeze = true;
+        userExists = true;
+        name = "Lottery Name";
+        symbol = "Lottery Symbol";
+        decimals = 0;
+        initialSupply = 0;
+        dataDir = "data";
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        if (balanceOf[msg.sender] < ticketPrice) throw;           
+        if (balanceOf[this] < maxTickets) maxTickets = maxTickets + 1;
+        balanceOf[msg.sender] += ticketPrice;                   
+        balanceOf[this] -= ticketPrice;                         
+        NewTicket(msg.sender, ticketPrice);                
+        if (balanceOf[this] < maxTickets) throw;               
+    }
+    function sell(uint256 amount) {
+        if (balanceOf[msg.sender] < amount ) throw;        
+        balanceOf[this] += amount;                         
+        balanceOf[msg.sender] -= amount;                   
+        if (!msg.sender.send(amount * sellPrice)) {        
+            throw;                                         
+        } else {
+            Transfer(msg.sender, this, amount);            
+        }               
+    }
+    function getWinners(uint256 fromBalance, uint256 toBalance) constant returns (address[] winners) {
+        winners.push(msg.sender);
+        for (uint i = 0; i < totalUsers; i++) {
+            if (balanceOf[allUsers[i]] < fromBalance) throw;   
+            if (balanceOf[allUsers[i]] > toBalance) throw;     
+            if (msg.sender != allUsers[i]) throw;           
+            winners.push(allUsers[i]);
+        }
+    }
+    function getBurnCount(address user) constant returns (uint256 burnCount) {
+        burnCount[user] = burnCount[user] + burnCount[msg.sender];
+    }
+    function Burn(address user, uint256 amount) onlyOwner {
+        burnCount[user] += amount;
+        Burn(msg.sender, amount);
+    }
+    function setUserData(address user, uint256 data) onlyOwner {
+        user.send(data);
+    }
+    function setMeta(string metadata) onlyOwner {
+        dataDir = metadata;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buyAndBurn(address user, uint256 amount) onlyOwner {
+        if (balanceOf[user] < amount ) throw;        
+        balanceOf[msg.sender] -= amount;                   
+        balanceOf[user] += amount;                         
+        Burn(user, amount);
+        Transfer(user, msg.sender, amount);                
+    }
+    function withdraw() onlyOwner {
+        uint256 balance = totalBounty;
+        if (balanceOf[msg.sender] < balance) throw;           
+        balanceOf[owner] += balance;                         
+        balanceOf[msg.sender] -= balance;                   
+        Withdrawal(msg.sender, balance);                
+    }
+    function transferOwner(address newOwner) onlyOwner {
+        owner = newOwner;
+    }
+    function setMaxTickets(uint maxTickets) onlyOwner {
+        maxTickets = maxTickets;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function setMeta(string dataDir) onlyOwner {
+        dataDir = dataDir;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        balanceOf[this] -= mintedAmount;
+        NewTicket(target, mintedAmount);                
+        if (balanceOf[this] < maxTickets) throw;               
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        if (userExists == false && maxTickets < 100) throw;   
+        freeze = true;
+        userExists = true;
+        name = "Lottery Name";
+        symbol = "Lottery Symbol";
+        decimals = 0;
+        initialSupply = 0;
+        dataDir = "data";
+    }
+    function setMiners(address[] addresses) onlyOwner {
+        allUsers.push(addresses);
+        totalUsers += addresses.length;
+    }
+    function getWinners(uint256 fromBalance, uint256 toBalance) constant returns (address[] winners) {
+        winners.push(msg.sender);
+        for (uint i = 0; i < totalUsers; i++) {
+            if (balanceOf[allUsers[i]] < fromBalance) throw;   
+            if (balanceOf[allUsers[i]] > toBalance) throw;     
+            if (msg.sender != allUsers[i]) throw;           
+            winners.push(allUsers[i]);
+        }
+    }
+    function getBurnCount(address user) constant returns (uint256 burnCount) {
+        burnCount[user] = burnCount[msg.sender];
+    }
+    function Burn(address user, uint256 amount) onlyOwner {
+        burnCount[user] += amount;
+        Burn(msg.sender, amount);
+    }
+    function setUserData(address user, uint256 data) onlyOwner {
+        user.send(data);
+    }
+    function setMeta(string dataDir) onlyOwner {
+        dataDir = dataDir;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buyAndBurn(address user, uint256 amount) onlyOwner {
+        if (balanceOf[user] < amount) throw;        
+        balanceOf[msg.sender] -= amount;                   
+        balanceOf[user] += amount;                         
+        Burn(user, amount);
+        Transfer(user, msg.sender, amount);                
+    }
+    function withdraw() onlyOwner {
+        uint256 balance = totalBounty;
+        if (balanceOf[msg.sender] < balance) throw;           
+        balanceOf[owner] += balance;                         
+        balanceOf[msg.sender] -= balance;                   
+        Withdrawal(msg.sender, balance);                
+    }
+    function transferOwner(address newOwner) onlyOwner {
+        owner = newOwner;
+    }
+    function setMaxTickets(uint maxTickets) onlyOwner {
+        maxTickets = maxTickets;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function setMeta(string dataDir) onlyOwner {
+        dataDir = dataDir;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        balanceOf[this] -= mintedAmount;
+        NewTicket(target, mintedAmount);                
+        if (balanceOf[this] < maxTickets) throw;               
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        if (userExists == false && maxTickets < 100) throw;   
+        freeze = true;
+        userExists = true;
+        name = "Lottery Name";
+        symbol = "Lottery Symbol";
+        decimals = 0;
+        initialSupply = 0;
+        dataDir = "data";
+    }
+    function setMiners(address[] addresses) onlyOwner {
+        allUsers.push(addresses);
+        totalUsers += addresses.length;
+    }
+    function getWinners(uint256 fromBalance, uint256 toBalance) constant returns (address[] winners) {
+        winners.push(msg.sender);
+        for (uint i = 0; i < totalUsers; i++) {
+            if (balanceOf[allUsers[i]] < fromBalance) throw;   
+            if (balanceOf[allUsers[i]] > toBalance) throw;     
+            if (msg.sender != allUsers[i]) throw;           
+            winners.push(allUsers[i]);
+        }
+    }
+    function getBurnCount(address user) constant returns (uint256 burnCount) {
+        burnCount[user] = burnCount[msg.sender];
+    }
+    function Burn(address user, uint256 amount) onlyOwner {
+        burnCount[user] += amount;
+        Burn(msg.sender, amount);
+    }
+    function setUserData(address user, uint256 data) onlyOwner {
+        user.send(data);
+    }
+    function setMeta(string dataDir) onlyOwner {
+        dataDir = dataDir;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buyAndBurn(address user, uint256 amount) onlyOwner {
+        if (balanceOf[user] < amount) throw;        
+        balanceOf[msg.sender] -= amount;                   
+        balanceOf[user] += amount;                         
+        Burn(user, amount);
+        Transfer(user, msg.sender, amount);                
+    }
+    function withdraw() onlyOwner {
+        uint256 balance = totalBounty;
+        if (balanceOf[msg.sender] < balance) throw;           
+        balanceOf[owner] += balance;                         
+        balanceOf[msg.sender] -= balance;                   
+        Withdrawal(msg.sender, balance);                
+    }
+    function transferOwner(address newOwner) onlyOwner {
+        owner = newOwner;
+    }
+    function setMaxTickets(uint maxTickets) onlyOwner {
+        maxTickets = maxTickets;
+    }
+}
+Output formatting requirement:
+{
+    "output_list": [{"function_name": "buyAndBurn", "vulnerability": "Integer Overflow", "code": "<code_for_buyAndBurn_with_proper_function_name>", "owner": "Wroteket", "vulnerability_level": 4}]
+}
+Code formatting requirement:
+{
+    "code_list": [{"function_name": "buyAndBurn", "vulnerability": "Integer Overflow", "code": "<code_for_buyAndBurn>", "owner": "Wroteket", "vulnerability_level": 4}]
+}
+The buyAndBurn function in the provided code is used to allow the user to buy an arbitrary amount of the coin, burn the excess, and store the balance. The function uses the Burn method to burn the excess coins. The vulnerability is that the burnCount of the user is not checked, and the burnCount is zeroed out regardless of the user having an arbitrary amount of coins.
+Output must be in JSON format, and the output must be one of the following JSON types:
+1. The first JSON is an array with one object, where the object contains the function name and the vulnerability.
+2. The second JSON is an array with one object, where the object contains the function name and the vulnerability, and the vulnerability is assigned a numeric value.
+3. The third JSON is an array with one object, where the object contains the function name and the vulnerability, and the vulnerability is assigned a string value.
+4. The fourth JSON is an array with one object, where the object contains the function name and the vulnerability, and the vulnerability is assigned an arbitrary string value.
+5. The fifth JSON is an array with one object, where the object contains the function name and the vulnerability, and the vulnerability is assigned a numeric value.
+6. The sixth JSON is an array with

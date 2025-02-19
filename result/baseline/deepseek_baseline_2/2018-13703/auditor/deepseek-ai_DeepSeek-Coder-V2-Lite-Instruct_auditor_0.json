@@ -1,0 +1,64 @@
+ {
+    "output_list": [
+        {
+            "function_name": "sellOffline",
+            "vulnerability": "Integer Overflow",
+            "function_code": "uint finalTokens = (token_amount * (10 ** 18));
+if(finalTokens < remaining)
+{
+    remaining = remaining - finalTokens;
+    _transfer(owner,rec_address, finalTokens);
+    TransferSell(owner, rec_address, finalTokens,'Offline');
+}
+else
+{
+    revert();
+}
+",
+            "reason": "The multiplication `token_amount * (10 ** 18)` can lead to an integer overflow if `token_amount` is large, causing `finalTokens` to be less than `remaining` but still overflow and result in a very large number being subtracted from `remaining`, potentially leading to incorrect token distribution or loss of tokens."
+        },
+        {
+            "function_name": "withdraw_all",
+            "vulnerability": "Wrong Logic",
+            "function_code": "var amountWith = this.balance - 10000000000000000;
+benAddress.transfer(amountWith);
+",
+            "reason": "The subtraction `this.balance - 10000000000000000` can potentially underflow if the balance is less than 10000000000000000 wei, which could lead to an incorrect calculation of the amount to withdraw, potentially allowing the owner to withdraw more than the actual balance or causing a revert."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Bad Randomness",
+            "function_code": "if(tokensToMint > 0)
+{
+    var totalTokenToMint = tokensToMint * (10 ** 18);
+    balanceOf[owner] += totalTokenToMint;
+    totalSupply += totalTokenToMint;
+    Transfer(0, owner, totalTokenToMint);
+}
+",
+            "reason": "The function `mintToken` does not check for any randomness or conditions that might be necessary for a token minting mechanism, which could be exploited by an attacker to mint unlimited tokens or mint tokens without any apparent reason, devaluing the token's value."
+        },
+        {
+            "function_name": "transferOwnership",
+            "vulnerability": "Access Control",
+            "function_code": "balanceOf[owner] = 0;
+balanceOf[newOwner] = remaining;
+owner = newOwner;
+",
+            "reason": "The `transferOwnership` function allows the owner to transfer ownership to a new address, but it does not check if the new owner is a trusted party or if there are any conditions that need to be met before transferring ownership. This could lead to unauthorized transfer of ownership, allowing an attacker to gain control over the contract."
+        },
+        {
+            "function_name": "burnFrom",
+            "vulnerability": "Access Control",
+            "function_code": "require(balanceOf[_from] >= _value);
+require(_value <= allowance[_from][msg.sender]);
+balanceOf[_from] -= _value;
+allowance[_from][msg.sender] -= _value;
+totalSupply -= _value;
+Burn(_from, _value);
+return true;
+",
+            "reason": "The `burnFrom` function allows any approved address to burn tokens on behalf of another user, which could be exploited if the approval is granted without proper authorization, leading to unauthorized token burning and potentially devaluing the token for the owner."
+        }
+    ]
+}

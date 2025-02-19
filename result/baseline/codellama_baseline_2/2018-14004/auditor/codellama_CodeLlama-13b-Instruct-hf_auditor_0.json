@@ -1,0 +1,195 @@
+ Here are the 5 most severe vulnerabilities in the provided smart contract, along with their associated functions, reasons, and explanations:
+
+1. Integer Overflow Vulnerability in the `transfer` Function
+
+Function Name: `transfer`
+
+Vulnerability: Integer Overflow
+
+Function Code:
+```
+function transfer(address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool) {
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+}
+```
+Reason: The `sub` and `add` functions in the `SafeMath` library are used to perform arithmetic operations on the `balances` mapping. However, these functions do not check for integer overflow, which can lead to unexpected behavior and potential security vulnerabilities.
+
+For example, if the `balances` mapping contains a large value and the `_value` parameter passed to the `transfer` function is a large value, the `sub` function can overflow and return an incorrect result. Similarly, the `add` function can also overflow and return an incorrect result.
+
+2. Wrong Logic Vulnerability in the `transferFrom` Function
+
+Function Name: `transferFrom`
+
+Vulnerability: Wrong Logic
+
+Function Code:
+```
+function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    balances[_from] = balances[_from].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    Transfer(_from, _to, _value);
+    return true;
+}
+```
+Reason: The `transferFrom` function checks that the `_value` parameter is less than or equal to the balance of the `_from` address and the allowance of the `_from` address for the `msg.sender` address. However, the function does not check that the `_value` parameter is less than or equal to the balance of the `_to` address.
+
+Therefore, an attacker can transfer tokens from one address to another address, even if the `_to` address does not have enough balance to receive the tokens.
+
+3. Bad Randomness Vulnerability in the `increaseApproval` Function
+
+Function Name: `increaseApproval`
+
+Vulnerability: Bad Randomness
+
+Function Code:
+```
+function increaseApproval (address _spender, uint _addedValue) public returns (bool success) {
+    allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+}
+```
+Reason: The `increaseApproval` function uses the `add` function from the `SafeMath` library to add the `_addedValue` parameter to the allowance of the `_spender` address for the `msg.sender` address. However, the function does not check for integer overflow, which can lead to unexpected behavior and potential security vulnerabilities.
+
+For example, if the allowance of the `_spender` address for the `msg.sender` address is a large value and the `_addedValue` parameter is a large value, the `add` function can overflow and return an incorrect result.
+
+4. Access Control Vulnerability in the `transfer_tokens_after_ICO` Function
+
+Function Name: `transfer_tokens_after_ICO`
+
+Vulnerability: Access Control
+
+Function Code:
+```
+function transfer_tokens_after_ICO(address[] addresses, uint256 _value)
+{
+       require(_value <= balances[msg.sender]);
+ for (uint i = 0; i < addresses.length; i++) {
+   balances[msg.sender] -= _value;
+   balances[addresses[i]] += _value;
+   Transfer(msg.sender, addresses[i], _value);
+    }
+}
+```
+Reason: The `transfer_tokens_after_ICO` function allows anyone to transfer tokens to a list of addresses after the ICO. However, the function does not check that the `msg.sender` address has enough balance to transfer the tokens.
+
+Therefore, an attacker can transfer tokens from one address to another address, even if the `msg.sender` address does not have enough balance to transfer the tokens.
+
+5. Typo Constructor Vulnerability in the `Globecoin` Constructor
+
+Function Name: `Globecoin` Constructor
+
+Vulnerability: Typo Constructor
+
+Function Code:
+```
+function Globecoin () { 
+Transfer(initial, _base , max);
+Transfer(_x0, this , available);
+Transfer(_initial, funds, custom);
+Transfer(_base, fee, custom);
+Transfer(base, owner, max);
+balances[_initial] = i;  
+balances[initial] = balances[_initial]; 
+balances[_base] = balances[_initial]; 
+balances[base] = balances[_base]; 
+balances[_x0] = balances[_base]; 
+balances[funds] = (initialSupply/4 - 4*i); 
+balances[msg.sender] = (initialSupply/8); 
+balances[owner] = (initialSupply/2 - 3*i); 
+balances[fee] = (initialSupply/8 - i); 
+balances[this] = 3 * i;
+totalSupply = initialSupply;    
+  }
+```
+Reason: The `Globecoin` constructor has a typo in the `balances` mapping. The `balances[_initial]` mapping is set to `i`, which is a small value. However, the `balances[initial]` mapping is set to `balances[_initial]`, which is a large value.
+
+Therefore, the `balances[initial]` mapping is set to a large value, which can lead to unexpected behavior and potential security vulnerabilities.
+
+Here is the output in the required JSON format:
+```
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool) {
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+}",
+            "reason": "The sub and add functions in the SafeMath library do not check for integer overflow, which can lead to unexpected behavior and potential security vulnerabilities."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    balances[_from] = balances[_from].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    Transfer(_from, _to, _value);
+    return true;
+}",
+            "reason": "The transferFrom function checks that the _value parameter is less than or equal to the balance of the _from address and the allowance of the _from address for the msg.sender address. However, the function does not check that the _value parameter is less than or equal to the balance of the _to address."
+        },
+        {
+            "function_name": "increaseApproval",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function increaseApproval (address _spender, uint _addedValue) public returns (bool success) {
+    allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+}",
+            "reason": "The increaseApproval function uses the add function from the SafeMath library to add the _addedValue parameter to the allowance of the _spender address for the msg.sender address. However, the function does not check for integer overflow, which can lead to unexpected behavior and potential security vulnerabilities."
+        },
+        {
+            "function_name": "transfer_tokens_after_ICO",
+            "vulnerability": "Access Control",
+            "function_code": "function transfer_tokens_after_ICO(address[] addresses, uint256 _value)
+{
+       require(_value <= balances[msg.sender]);
+ for (uint i = 0; i < addresses.length; i++) {
+   balances[msg.sender] -= _value;
+   balances[addresses[i]] += _value;
+   Transfer(msg.sender, addresses[i], _value);
+    }
+}",
+            "reason": "The transfer_tokens_after_ICO function allows anyone to transfer tokens to a list of addresses after the ICO. However, the function does not check that the msg.sender address has enough balance to transfer the tokens."
+        },
+        {
+            "function_name": "Globecoin",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function Globecoin () { 
+Transfer(initial, _base , max);
+Transfer(_x0, this , available);
+Transfer(_initial, funds, custom);
+Transfer(_base, fee, custom);
+Transfer(base, owner, max);
+balances[_initial] = i;  
+balances[initial] = balances[_initial]; 
+balances[_base] = balances[_initial]; 
+balances[base] = balances[_base]; 
+balances[_x0] = balances[_base]; 
+balances[funds] = (initialSupply/4 - 4*i); 
+balances[msg.sender] = (initialSupply/8); 
+balances[owner] = (initialSupply/2 - 3*i); 
+balances[fee] = (initialSupply/8 - i); 
+balances[this] = 3 * i;
+totalSupply = initialSupply;    
+  }",
+            "reason": "The Globecoin constructor has a typo in the balances mapping. The balances[_initial] mapping is set to i, which is a small value. However, the balances[initial] mapping is set to balances[_initial], which is a large value."
+        }
+    ]
+}
+```

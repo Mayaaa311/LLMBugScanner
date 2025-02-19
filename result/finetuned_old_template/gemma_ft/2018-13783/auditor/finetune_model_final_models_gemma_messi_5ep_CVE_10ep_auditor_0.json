@@ -1,0 +1,345 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "buy", "vulnerability": "Integer Overflow", "reason": "The buy function has an integer overflow where the amount is calculated as `msg.value / price`, which can be zero."}]}
+{"output_list": [{"function_name": "sell", "vulnerability": "Integer Overflow", "reason": "The sell function has an integer overflow where the amount is checked as `amount == 1`, which can be false."}]}
+}
+uint256 public amount;
+function setAmount(uint256 newAmount) onlyOwner public {
+    amount = newAmount;
+}
+function getBalance() constant public returns (uint256){
+    return amount;
+}
+function burn() onlyOwner public {
+    require(amount <= transferFees);
+    selfdestruct(msg.sender);
+}
+function withdrawEarnings() onlyOwner public {
+    owner.transfer(this.balance);
+}
+function () public payable {
+    uint256 amount = msg.value / price;
+    _transfer(this, msg.sender, amount);
+}
+contract MyAdvancedToken is owned, JiucaiToken {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => uint256) public burnedTokens;
+    event Burn(address indexed from, uint256 value);
+    function MyAdvancedToken(uint256 initialSupply, uint8 initialDecimals, string tokenName, string tokenSymbol) JiucaiToken(initialSupply, initialDecimals, tokenName, tokenSymbol) public {}
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balanceOf[_from] >= _value);               
+        require (balanceOf[_to] + _value > balanceOf[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                       
+        balanceOf[_from] -= _value;                         
+        balanceOf[_to] += _value;                           
+        burnedTokens[_from] += _value;
+        emit Transfer(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        burnedTokens[target] += mintedAmount;
+        emit Transfer(0, this, mintedAmount);
+        emit Transfer(this, target, mintedAmount);
+    }
+    function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(_value <= burnedTokens[_from]);
+        balanceOf[_from] += _value;
+        burnedTokens[_from] -= _value;
+        emit Burn(_from, _value);
+        return true;
+    }
+    function transferAndBurn(address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);    
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        burnedTokens[msg.sender] += _value;
+        emit Burn(msg.sender, _value);
+        return true;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);         
+        require(_value <= burnedTokens[msg.sender]);     
+        balanceOf[msg.sender] -= _value;                   
+        burnedTokens[msg.sender] -= _value;               
+        emit Burn(msg.sender, _value);
+        return true;
+    }
+    function transferAndBurn(address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[msg.sender][this]);    
+        allowance[msg.sender][this] -= _value;
+        _transfer(this, _to, _value);
+        burnedTokens[msg.sender] += _value;
+        emit Burn(msg.sender, _value);
+        return true;
+    }
+}
+contract GZSToken is MyAdvancedToken {
+    uint public GZSTokenPrice;
+    bool public isSelling;
+    mapping (address => uint256) public burnedTokens;
+    event Burn(address indexed from, uint256 value);
+    function GZSToken(uint256 initialSupply, uint8 initialDecimals, string tokenName, string tokenSymbol) MyAdvancedToken(initialSupply, initialDecimals, tokenName, tokenSymbol) public {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        burnedTokens[target] += mintedAmount;
+        emit Transfer(0, this, mintedAmount);
+        emit Transfer(this, target, mintedAmount);
+    }
+    function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(_value <= burnedTokens[_from]);
+        balanceOf[_from] += _value;
+        burnedTokens[_from] -= _value;
+        emit Burn(_from, _value);
+        return true;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function setSelling(bool newStatus) onlyOwner public {
+        isSelling = newStatus;
+    }
+    function buy() payable public {
+        if(isSelling == false) revert();
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);         
+        require(_value <= burnedTokens[msg.sender]);     
+        balanceOf[msg.sender] -= _value;                   
+        burnedTokens[msg.sender] -= _value;               
+        emit Burn(msg.sender, _value);
+        return true;
+    }
+    function transferAndBurn(address _to, uint256 _value) public returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);         
+        require(_value <= burnedTokens[msg.sender]);     
+        require(_value <= allowance[msg.sender][this]);    
+        balanceOf[msg.sender] -= _value;                   
+        burnedTokens[msg.sender] -= _value;               
+        allowance[msg.sender][this] -= _value;             
+        emit Burn(msg.sender, _value);
+        return true;
+    }
+}
+contract GRZSToken is GZSToken {
+    uint256 public totalBounties;
+    mapping (address => uint256) public balances;
+    mapping (address => mapping (address => uint256)) public allowed;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    function GRZSToken(uint256 initialSupply, uint8 initialDecimals, string tokenName, string tokenSymbol) GZSToken(initialSupply, initialDecimals, tokenName, tokenSymbol) public {}
+    function getBalance() constant public returns (uint256){
+        return balances[msg.sender];
+    }
+    function getBurnCount() constant public returns (uint256){
+        return burnedTokens[msg.sender];
+    }
+    function transfer(address _to, uint256 _value) public {
+        require(!frozenAccount[msg.sender]);           
+        if (msg.sender.balance < _value) revert();        
+        if (_value > balances[msg.sender]) revert();       
+        balances[msg.sender] -= _value;                     
+        balances[_to] += _value;                           
+        Transfer(msg.sender, _to, _value);                   
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[_from]);                     
+        require(_value <= allowed[_from][msg.sender]);     
+        allowed[_from][msg.sender] -= _value;
+        if (msg.sender.balance < _value) revert();        
+        if (_value > balances[_from]) revert();       
+        balances[_to] += _value;
+        balances[_from] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        burnedTokens[target] += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);         
+        require(_value <= burnedTokens[msg.sender]);     
+        balanceOf[msg.sender] -= _value;                   
+        burnedTokens[msg.sender] -= _value;               
+        Transfer(msg.sender, this, _value);             
+        return true;
+    }
+    function transferAndBurn(address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);                     
+        require(_value <= allowed[msg.sender][this]);     
+        allowed[_from][msg.sender] -= _value;
+        if (msg.sender.balance < _value) revert();        
+        if (_value > balances[_from]) revert();       
+        balances[_to] += _value;
+        balances[_from] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+}
+contract Owned {
+    address public owner;
+    function Owned() public {
+        owner = msg.sender;
+    }
+    function setOwner(address newOwner) onlyOwner public {
+        owner = newOwner;
+    }
+    function burn(uint256 _value) onlyOwner public returns (bool success) {
+        require(owner.balance < _value);                     
+        msg.sender.transfer(_value);                        
+        owner.transfer(_value);                            
+        return true;
+    }
+    function transferAndBurn(address _to, uint256 _value) onlyOwner public returns (bool success) {
+        require(owner.balance >= _value);                   
+        require(_value <= owner.balance);             
+        owner.transfer(_value);                        
+        _to.transfer(_value);                           
+        return true;
+    }
+}
+contract BitAseanToken is Owned, GRZSToken {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function BitAseanToken(uint256 initialSupply, uint8 initialDecimals, string tokenName, string tokenSymbol) GRZSToken(initialSupply, initialDecimals, tokenName, tokenSymbol) public {}
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        require(!frozenAccount[target]);                 
+        balanceOf[target] += mintedAmount;                   
+        totalSupply += mintedAmount;                       
+        burnedTokens[target] += mintedAmount;             
+        Transfer(0, this, mintedAmount);               
+        Transfer(this, target, mintedAmount);           
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);           
+        require(balanceOf[msg.sender] >= _value);         
+        require(_value <= burnedTokens[msg.sender]);     
+        balanceOf[msg.sender] -= _value;                   
+        burnedTokens[msg.sender] -= _value;               
+        Transfer(msg.sender, this, _value);             
+        return true;
+    }
+    function transferAndBurn(address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);           
+        require(_value <= owner.balance);             
+        owner.transfer(_value);                        
+        _to.transfer(_value);                           
+        transferAndBurn(_to, _value);
+        return true;
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);           
+        if (msg.sender.balance < _value) revert();        
+        if (_value > balances[msg.sender]) revert();       
+        balances[msg.sender] -= _value;                     
+        balances[_to] += _value;                           
+        Transfer(msg.sender, _to, _value);                   
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[_from]);                     
+        require(_value <= allowed[_from][msg.sender]);     
+        allowed[_from][msg.sender] -= _value;
+        if (msg.sender.balance < _value) revert();        
+        if (_value > balances[_from]) revert();       
+        balances[_to] += _value;
+        balances[_from] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function getBurnCount() constant public returns (uint256){
+        return burnedTokens[msg.sender];
+    }
+    function setFrozenAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setOwner(address newOwner) onlyOwner public {
+        owner = newOwner;
+    }
+}
+contract BitAseanPriceReceiver {
+    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public;
+}
+contract GRZSTokenFactory {
+    function create(address target, uint256 _value) public returns (bool success);
+}
+contract BitAseanTokenFactory {
+    function create(address target, uint256 _value) public returns (bool success);
+}
+contract OwnedToken {
+    OwnedToken public owner;
+    function OwnedToken() public {
+        owner = new OwnedToken();
+    }
+    function setOwner(address newOwner) onlyOwner public {
+        owner = newOwner;
+    }
+    function getOwner() public returns (address){
+        return owner;
+    }
+}
+contract BitAseanToken is OwnedToken, GRZSToken {
+    bool public isSelling;
+    mapping (address => uint256) public soldAmounts;
+    function BitAseanToken(uint256 initialSupply, uint8 initialDecimals, string tokenName, string tokenSymbol) GRZSToken(initialSupply, initialDecimals, tokenName, tokenSymbol) public {}
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function setFrozenAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+    }
+    function setOwner(address newOwner) onlyOwner public {
+        owner = newOwner;
+    }
+    function setSelling(bool newStatus) onlyOwner public {
+        isSelling = newStatus;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        require(!frozenAccount[target]);                 
+        require(!isSelling);                           
+        balanceOf[target] += mintedAmount;                   
+        totalSupply += mintedAmount;                       
+        burnedTokens[target] += mintedAmount;             
+        Transfer(0, this, mintedAmount);               
+        Transfer(this, target, mintedAmount);           
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);           
+        require(!isSelling);                           
+        require(_value <= owner.balance);             
+        balanceOf[msg.sender] -=

@@ -1,0 +1,292 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "description": "The mintToken function has an integer overflow in the calculation of totalSupply, allowing the minted amount to be greater than the total supply."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow in the calculation of totalSupply, allowing the minted amount to be greater than the total supply."}]}
+]}
+
+pragma solidity ^0.4.16;
+contract owned {
+    address public owner;
+    function owned() public {
+        owner = msg.sender;
+    }
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+    function transferOwnership(address newOwner) onlyOwner public {
+        owner = newOwner;
+    }
+}
+contract TokenERC20 {
+    uint256 public totalSupply;
+    function balanceOf(address _owner) constant public returns (uint256 balance);
+    function transfer(address _to, uint256 _value) public returns (bool success);
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
+    function approve(address _spender, uint256 _value) public returns (bool success);
+    function allowance(address _owner, address _spender) constant public returns (uint256 remaining);
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+}
+contract StandardToken is TokenERC20 {
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(balances[msg.sender] >= _value);
+        balances[msg.sender] -= _value;
+        balances[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(balances[_from] >= _value);
+        require(_value <= allowances[_from][msg.sender]);
+        balances[_to] += _value;
+        balances[_from] -= _value;
+        allowances[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function balanceOf(address _owner) constant public returns (uint256 balance) {
+        return balances[_owner];
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        allowances[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant public returns (uint256 remaining) {
+        return allowances[_owner][_spender];
+    }
+    mapping (address => uint256) balances;
+    mapping (address => mapping (address => uint256)) allowances;
+    uint256 public totalSupply;
+}
+contract ERC20Token is StandardToken {
+    function () public {
+        throw;
+    }
+    string public name;                   
+    uint8 public decimals;                
+    string public symbol;                 
+    function ERC20Token(uint256 _initialAmount, string _tokenName, uint8 _decimalUnits, string _tokenSymbol) public {
+        balances[msg.sender] = _initialAmount;           
+        totalSupply = _initialAmount;                        
+        name = _tokenName;                                   
+        decimals = _decimalUnits;                            
+        symbol = _tokenSymbol;                               
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData) public returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) { throw; }
+        return true;
+    }
+}
+contract IADOWR is owned, ERC20Token {
+tstring public name = "IADOWR Coin";                                      
+    string public symbol = "IAD";                                            
+    address public IADAddress = this;                                 
+    uint8 public decimals = 18;                                          
+    uint256 public initialSupply = 2000000000000000000000000000; 
+tuint256 public totalSupply = 2000000000000000000000000000;          
+    uint256 public unitsOneEthCanBuy = 5000;
+    uint256 public sellPriceEth = 0.1 finney;                               
+    uint256 public buyPriceEth = 0.2 finney;                              
+    uint256 public gasForIAD = 300000 wei;                                    
+    uint256 public IADForGas = 1;                                        
+    uint256 public gasReserve = 0.1 ether;                                 
+    uint256 public minBalanceForAccounts = 2 finney;                    
+    bool public directTradeAllowed = false;                              
+tuint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                              
+        require (balances[_from] >= _value);               
+        require (balances[_to] + _value >= balances[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                       
+        balances[_from] -= _value;                         
+        balances[_to] += _value;                           
+        Transfer(_from, _to, _value);
+        assert(balances[_from] + balances[_to] == totalSupply);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, this, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function setGasReserve(uint256 newReserve) onlyOwner public {
+        gasReserve = newReserve;
+    }
+    function setMinBalance(uint256 newMinBalance) onlyOwner public {
+        minBalanceForAccounts = newMinBalance;
+    }
+    function setDirectTrade(bool newDirectTradeAllowed) onlyOwner public {
+        directTradeAllowed = newDirectTradeAllowed;
+    }
+    function setGasForIAD(uint256 newGasForIAD) onlyOwner public {
+        gasForIAD = newGasForIAD;
+    }
+    function setIADForGas(uint256 newIADForGas) onlyOwner public {
+        IADForGas = newIADForGas;
+    }
+    function setIADAddress(address newIADAddress) onlyOwner public {
+        IADAddress = newIADAddress;
+    }
+    function setUnitsOneEthCanBuy(uint256 newUnitsOneEthCanBuy) onlyOwner public {
+        unitsOneEthCanBuy = newUnitsOneEthCanBuy;
+    }
+    function setSellPrice(uint256 newSellPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+    }
+    function setBuyPrice(uint256 newBuyPrice) onlyOwner public {
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+    function withdrawToOwner(uint256 amountWei) onlyOwner public {
+        owner.transfer(amountWei);
+    }
+    function withdrawToOwnerTokens(uint256 amountTokens) onlyOwner public {
+        _transfer(this, owner, amountTokens);
+    }
+}
+contract CryptoniteCoin is IADOWR {
+    function CryptoniteCoin() public {
+        totalSupply = 20000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;
+        name = "Cryptonite Coin";
+        symbol = "CRYPTONITE";
+        decimals = 18;
+    }
+}
+contract CryptoniteCoinPreSale is IADOWR {
+    function CryptoniteCoinPreSale() public {
+        totalSupply = 1000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;
+        name = "Cryptonite Coin PreSale";
+        symbol = "CRYPTONITE";
+        decimals = 18;
+    }
+}
+contract CryptoniteCoinICO is IADOWR {
+    function CryptoniteCoinICO() public {
+        totalSupply = 1000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;
+        name = "Cryptonite Coin ICO";
+        symbol = "CRYPTONITE";
+        decimals = 18;
+    }
+}
+contract CryptoniteCoinPreICO is IADOWR {
+    function CryptoniteCoinPreICO() public {
+        totalSupply = 100000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;
+        name = "Cryptonite Coin PreICO";
+        symbol = "CRYPTONITE";
+        decimals = 18;
+    }
+}
+contract CryptoniteCoinBounty is IADOWR {
+    function CryptoniteCoinBounty() public {
+        totalSupply = 10000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;
+        name = "Cryptonite Coin Bounty";
+        symbol = "CRYPTONITE";
+        decimals = 18;
+    }
+}
+contract CryptoniteCoinAirdrop is IADOWR {
+    function CryptoniteCoinAirdrop() public {
+        totalSupply = 1000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;
+        name = "Cryptonite Coin Airdrop";
+        symbol = "CRYPTONITE";
+        decimals = 18;
+    }
+}
+contract CryptoniteCoinTeam is IADOWR {
+    function CryptoniteCoinTeam() public {
+        totalSupply = 1000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;
+        name = "Cryptonite Coin Team";
+        symbol = "CRYPTONITE";
+        decimals = 18;
+    }
+}
+contract CryptoniteCoinAdvisors is IADOWR {
+    function CryptoniteCoinAdvisors() public {
+        totalSupply = 100000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;
+        name = "Cryptonite Coin Advisors";
+        symbol = "CRYPTONITE";
+        decimals = 18;
+    }
+}
+contract CryptoniteCoinReserve is IADOWR {
+    function CryptoniteCoinReserve() public {
+        totalSupply = 10000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;
+        name = "Cryptonite Coin Reserve";
+        symbol = "CRYPTONITE";
+        decimals = 18;
+    }
+}
+contract CryptoniteCoinPreICO is IADOWR {
+    function CryptoniteCoinPreICO() public {
+        totalSupply = 1000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;
+        name = "Cryptonite Coin PreICO";
+        symbol = "CRYPTONITE";
+        decimals = 18;
+    }
+}
+contract CryptoniteCoinICO is IADOWR {
+    function CryptoniteCoinICO() public {
+        totalSupply = 1000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;
+        name = "Cryptonite Coin ICO";
+        symbol = "CRYPTONITE";
+        decimals = 18;
+    }
+}
+contract CryptoniteCoin is IADOWR {
+    function CryptoniteCoin() public {
+        totalSupply = 1000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;
+        name = "Cryptonite Coin";
+        symbol = "CRYPTONITE";
+        decimals = 18;
+    }
+}
+contract CryptoniteCoinPreSale is IADOWR {
+    function CryptoniteCoinPreSale() public {
+        totalSupply = 10000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;
+        name = "Cryptonite Coin PreSale";
+        symbol = "CRYPTONITE";
+        decimals = 18;
+    }
+}
+contract CryptoniteCoinICO is IADOWR {
+    function CryptoniteCoinICO() public {
+        totalSupply = 1000000000000000000000000000;
+        balanceOf[msg.sender] = totalSupply;
+        name = "Cryptonite Coin ICO";
+        symbol = "CRYPTONITE";
+        decimals = 18;

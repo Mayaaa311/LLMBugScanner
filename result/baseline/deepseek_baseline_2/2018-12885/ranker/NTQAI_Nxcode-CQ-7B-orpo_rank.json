@@ -1,0 +1,37 @@
+Here is the output in JSON format:
+
+```json
+{
+  "output_list": [
+    {
+      "function_name": "createChamp",
+      "auditor_idx": 0,
+      "vulnerability": "Integer Overflow",
+      "criticism": "The function `createChamp` uses `champs.push` to add a new champion to the `champs` array, which increments the array length. This length is then used to set the `id` of the new champion. However, the function does not check if the array length exceeds the maximum value that can be stored in a uint256, which could lead to an integer overflow. This vulnerability could be exploited by an attacker to manipulate the `id` of the new champion, potentially leading to the compromise of other critical data structures.",
+      "correctness": 7,
+      "severity": 9,
+      "profitability": 5
+    },
+    {
+      "function_name": "withdrawChamp",
+      "auditor_idx": 0,
+      "vulnerability": "Access Control",
+      "criticism": "The `withdrawChamp` function allows the owner of a champion to withdraw rewards based on their position in the leaderboard. However, the function does not check if the `position` is within a valid range (1 to 800). An attacker could manipulate the `position` value to gain access to other users' rewards or to exploit other parts of the contract that rely on the `position` value. This could lead to significant financial loss and undermine the trust in the contract.",
+      "correctness": 6,
+      "severity": 8,
+      "profitability": 7
+    },
+    {
+      "function_name": "randMod",
+      "auditor_idx": 0,
+      "vulnerability": "Bad Randomness",
+      "criticism": "The `randMod` function uses `blockhash` and `randNonce` to generate a random number. However, `blockhash` is deprecated in Solidity 0.5.0 and removed in Solidity 0.6.0, and `randNonce` is not securely random. This makes the random number generation predictable and potentially exploitable by attackers who can manipulate the `blockhash` or control the block number to influence the outcome. This could lead to predictable outcomes in critical functions like lootbox openings, which could be exploited for financial gain.",
+      "correctness": 4,
+      "severity": 8,
+      "profitability": 6
+    }
+  ]
+}
+```
+
+The output is sorted by severity in descending order and includes the top 5 most severe vulnerabilities.

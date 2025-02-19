@@ -1,0 +1,35 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "HumanStandardToken",
+            "vulnerability": "Weak Randomness",
+            "function_code": "function HumanStandardToken(uint256 _initialAmount, string _tokenName, uint8 _decimalUnits, string _tokenSymbol)",
+            "reason": "The constructor of this contract sets the initial balance of the owner to a hardcoded value (_initialAmount). This makes the token creation unfair and can be exploited to create tokens with an unfair distribution."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "balances[_from] -= _value;",
+            "reason": "If the value being transferred is greater than the balance of the sender, this will cause an underflow, leading to potential loss of funds."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "function_code": "balances[_to] += _value;",
+            "reason": "This transfer function does not check if the sender has sufficient funds before attempting the transfer, leading to potential loss of funds."
+        },
+        {
+            "function_name": "approveAndCall",
+            "vulnerability": "Access Control",
+            "function_code": "allowed[msg.sender][_spender] = _value;",
+            "reason": "This function does not check if the sender has sufficient funds before attempting to approve the spending of tokens, leading to potential loss of funds."
+        },
+        {
+            "function_name": "allowance",
+            "vulnerability": "Typo Constructor",
+            "function_code": "return allowed[_owner][_spender]",
+            "reason": "This function does not properly handle the case when the sender and spender are the same, leading to potential loss of funds."
+        }
+    ]
+}<eos>

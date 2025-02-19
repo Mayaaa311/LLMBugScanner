@@ -1,0 +1,267 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "freezeAccount", "vulnerability": "Integer Overflow", "reason": "The freezeAccount function has an integer overflow that allows the owner to set the balance of an arbitrary user to zero."}]}
+{"output_list": [{"function_name": "setPrices", "vulnerability": "Integer Overflow", "reason": "The setPrices function has an integer overflow that allows the owner to set the balance of an arbitrary user to zero."}]}
+{"output_list": [{"function_name": "buy", "vulnerability": "Integer Overflow", "reason": "The buy function always calls the safe fallback function, which means it never checks the balance of the user who is making the purchase."}]}
+{"output_list": [{"function_name": "sell", "vulnerability": "Bad Randomness", "reason": "The sell function never generates random values, which leaves the balance of the user who is making the sell at risk."}]}
+{"output_list": [{"function_name": "burn", "vulnerability": "Integer Overflow", "reason": "The burn function has an integer overflow that allows the owner to set the balance of an arbitrary user to zero."}]}
+{"output_list": [{"function_name": "burnFrom", "vulnerability": "Integer Overflow", "reason": "The burnFrom function has an integer overflow that allows the owner to set the balance of an arbitrary user to zero, while also returning the success of the operation."}]}
+}
+Code: 
+pragma solidity ^0.4.16;
+contract YiTongCoin is owned, TokenERC20 {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function YiTongCoin(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) TokenERC20(initialSupply, tokenName, tokenSymbol) public {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);            
+        require(balanceOf[msg.sender] >= _value);        
+        balanceOf[msg.sender] -= _value;                
+        totalSupply -= _value;                      
+        Burn(msg.sender, _value);
+        return true;
+    }
+    function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[_from]);                
+        require(balanceOf[_from] >= _value);                
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        Burn(_from, _value);
+        return true;
+    }
+}
+Output formatting requirement:
+{
+    "output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+    {"output_list": [{"function_name": "freezeAccount", "vulnerability": "Integer Overflow", "reason": "The freezeAccount function has an integer overflow that allows the owner to set the balance of an arbitrary user to zero."}]}
+    {"output_list": [{"function_name": "setPrices", "vulnerability": "Integer Overflow", "reason": "The setPrices function has an integer overflow that allows the owner to set the balance of an arbitrary user to zero."}]}
+    {"output_list": [{"function_name": "buy", "vulnerability": "Integer Overflow", "reason": "The buy function always calls the safe fallback function, which means it never checks the balance of the user who is making the purchase."}]}
+    {"output_list": [{"function_name": "sell", "vulnerability": "Bad Randomness", "reason": "The sell function never generates random values, which leaves the balance of the user who is making the sell at risk."}]}
+    {"output_list": [{"function_name": "burn", "vulnerability": "Integer Overflow", "reason": "The burn function has an integer overflow that allows the owner to set the balance of an arbitrary user to zero."}]}
+    {"output_list": [{"function_name": "burnFrom", "vulnerability": "Integer Overflow", "reason": "The burnFrom function has an integer overflow that allows the owner to set the balance of an arbitrary user to zero, while also returning the success of the operation."}]}
+}
+Code: 
+pragma solidity ^0.4.16;
+contract YiTongCoin is owned, TokenERC20 {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function YiTongCoin(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) TokenERC20(initialSupply, tokenName, tokenSymbol) public {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(!frozenAccount[msg.sender]);            
+        uint balance = balanceOf[msg.sender];
+        if (msg.sender.transfer(amount * sellPrice)) {   
+            balanceOf[msg.sender] -= amount;             
+            totalSupply -= amount;                      
+        } else { return; }                          
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);            
+        require(balanceOf[msg.sender] >= _value);        
+        balanceOf[msg.sender] -= _value;                
+        totalSupply -= _value;                      
+        Burn(msg.sender, _value);
+        return true;
+    }
+    function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[_from]);                
+        require(balanceOf[_from] >= _value);                
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        Burn(_from, _value);
+        return true;
+    }
+}
+Output formatting requirement:
+{
+    "output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+    {"output_list": [{"function_name": "freezeAccount", "vulnerability": "Integer Overflow", "reason": "The freezeAccount function has an integer overflow that allows the owner to set the balance of an arbitrary user to zero."}]}
+    {"output_list": [{"function_name": "setPrices", "vulnerability": "Integer Overflow", "reason": "The setPrices function has an integer overflow that allows the owner to set the balance of an arbitrary user to zero."}]}
+    {"output_list": [{"function_name": "buy", "vulnerability": "Integer Overflow", "reason": "The buy function always calls the safe fallback function, which means it never checks the balance of the user who is making the purchase."}]}
+    {"output_list": [{"function_name": "sell", "vulnerability": "Bad Randomness", "reason": "The sell function never generates random values, which leaves the balance of the user who is making the sell at risk."}]}
+    {"output_list": [{"function_name": "burn", "vulnerability": "Integer Overflow", "reason": "The burn function has an integer overflow that allows the owner to set the balance of an arbitrary user to zero."}]}
+    {"output_list": [{"function_name": "burnFrom", "vulnerability": "Integer Overflow", "reason": "The burnFrom function has an integer overflow that allows the owner to set the balance of an arbitrary user to zero, while also returning the success of the operation."}]}
+}
+Code: 
+pragma solidity ^0.4.16;
+contract YLCToken is owned, TokenERC20 {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function YLCToken(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) TokenERC20(initialSupply, tokenName, tokenSymbol) public {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(!frozenAccount[msg.sender]);            
+        uint balance = balanceOf[msg.sender];
+        if (msg.sender.transfer(amount * sellPrice)) {   
+            balanceOf[msg.sender] -= amount;             
+            totalSupply -= amount;                      
+        } else { return; }                          
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);            
+        require(balanceOf[msg.sender] >= _value);        
+        balanceOf[msg.sender] -= _value;                
+        totalSupply -= _value;                      
+        Burn(msg.sender, _value);
+        return true;
+    }
+    function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[_from]);                
+        require(balanceOf[_from] >= _value);                
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        Burn(_from, _value);
+        return true;
+    }
+}
+Output formatting requirement:
+{
+    "output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+    {"output_list": [{"function_name": "freezeAccount", "vulnerability": "Integer Overflow", "reason": "The freezeAccount function has an integer overflow that allows the owner to set the balance of an arbitrary user to zero."}]}
+    {"output_list": [{"function_name": "setPrices", "vulnerability": "Integer Overflow", "reason": "The setPrices function has an integer overflow that allows the owner to set the balance of an arbitrary user to zero."}]}
+    {"output_list": [{"function_name": "buy", "vulnerability": "Integer Overflow", "reason": "The buy function always calls the safe fallback function, which means it never checks the balance of the user who is making the purchase."}]}
+    {"output_list": [{"function_name": "sell", "vulnerability": "Bad Randomness", "reason": "The sell function never generates random values, which leaves the balance of the user who is making the sell at risk."}]}
+    {"output_list": [{"function_name": "burn", "vulnerability": "Integer Overflow", "reason": "The burn function has an integer overflow that allows the owner to set the balance of an arbitrary user to zero."}]}
+    {"output_list": [{"function_name": "burnFrom", "vulnerability": "Integer Overflow", "reason": "The burnFrom function has an integer overflow that allows the owner to set the balance of an arbitrary user to zero, while also returning the success of the operation."}]}
+}
+Code: 
+pragma solidity ^0.4.16;
+contract YLCToken is owned, TokenERC20 {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function YLCToken(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) TokenERC20(initialSupply, tokenName, tokenSymbol) public {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(!frozenAccount[msg.sender]);            
+        uint balance = balanceOf[msg.sender];
+        if (msg.sender.transfer(amount * sellPrice)) {   
+            balanceOf[msg.sender] -= amount;             
+            totalSupply -= amount;                      
+        } else { return; }                          
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);            
+        require(balanceOf[msg.sender] >= _value);        
+        balanceOf[msg.sender] -= _value;                
+        totalSupply -= _value;                      
+        Burn(msg.sender, _value);
+        return true;
+    }
+    function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[_from]);                
+        require(balanceOf[_from] >= _value);                
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        Burn(_from, _value);
+        return true;
+    }
+}
+Output formatting requirement:
+{
+    "output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+    {"output_list": [{"function_name": "freezeAccount", "vulnerability": "Integer Overflow", "reason": "The freezeAccount function has an integer overflow that allows the owner to set the balance of an

@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "auditor_idx": 3,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'transfer' function does not properly check for integer overflow when updating the balances of the sender and receiver. If _value is such that balances[_to] + _value overflows, it will not revert, leading to incorrect balance updates and potential loss of funds.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 6
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 3,
+            "vulnerability": "Integer Overflow",
+            "criticism": "Similar to the 'transfer' function, the 'transferFrom' function also does not check for integer overflow when updating the balances of the sender and receiver. An attacker could exploit this by crafting a transaction that causes an overflow, leading to unauthorized transfers and loss of funds.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 6
+        },
+        {
+            "function_name": "approve",
+            "auditor_idx": 3,
+            "vulnerability": "Access Control",
+            "criticism": "The 'approve' function does not check if the spender address is a contract. If an attacker controls a contract that implements the receiveApproval function, they can call approveAndCall or approveAndCallcode to execute arbitrary code on behalf of the owner, leading to unauthorized spending.",
+            "correctness": 6,
+            "severity": 7,
+            "profitability": 5
+        },
+        {
+            "function_name": "approveAndCall",
+            "auditor_idx": 3,
+            "vulnerability": "Bad Randomness",
+            "criticism": "The 'approveAndCall' function uses the output of the sha3 function to construct the function signature for the external call. The sha3 function is deterministic but can be manipulated by an attacker to return a specific function signature, potentially leading to unexpected behavior and security issues.",
+            "correctness": 5,
+            "severity": 6,
+            "profitability": 4
+        },
+        {
+            "function_name": "approveAndCallcode",
+            "auditor_idx": 3,
+            "vulnerability": "Bad Randomness",
+            "criticism": "Similar to 'approveAndCall', the 'approveAndCallcode' function also uses the _extraData for the external call without proper validation. This can lead to unexpected behavior and potential exploits if the _extraData is controlled by an attacker, allowing them to execute arbitrary code on the contract.",
+            "correctness": 5,
+            "severity": 6,
+            "profitability": 4
+        }
+    ]
+}

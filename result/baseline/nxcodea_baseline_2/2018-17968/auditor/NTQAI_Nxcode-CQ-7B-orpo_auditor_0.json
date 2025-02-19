@@ -1,0 +1,85 @@
+{
+    "output_list": [
+        {
+            "function_name": "enter",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function enter(uint256 _roomId) public payable {
+        Room storage room = allRooms[_roomId-1]; 
+        require(room.players.length < 6);
+        require(msg.value >= room.entryPrice);
+        room.players.push(msg.sender);
+        room.balance += room.entryPrice;
+        emit newPlayer(_roomId, msg.sender);
+        if(room.players.length == 6){
+            executeRoom(_roomId);
+        }
+    }",
+            "reason": "The function `enter` allows anyone to enter a room by paying the entry price. The `room.balance` is increased by `room.entryPrice` after each entry. However, the `room.balance` is not checked for overflow. If the `room.balance` exceeds the maximum value that can be stored in a `uint256`, the contract will revert. This vulnerability can be exploited by a malicious user who enters the room multiple times, causing the contract to revert and lose all the funds. The solution is to add a check for overflow before increasing the `room.balance`."
+        },
+        {
+            "function_name": "enterWithReferral",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function enterWithReferral(uint256 _roomId, address referrer) public payable {
+        Room storage room = allRooms[_roomId-1]; 
+        require(room.players.length < 6);
+        require(msg.value >= room.entryPrice);
+        uint256 referrerCut = SafeMath.div(room.entryPrice, 100); 
+        referrer.transfer(referrerCut);
+        room.players.push(msg.sender);
+        room.balance += room.entryPrice - referrerCut;
+        emit newPlayer(_roomId, msg.sender);
+        if(room.players.length == 6){
+            emit fullRoom(_roomId);
+            executeRoom(_roomId);
+        }
+    }",
+            "reason": "The function `enterWithReferral` is similar to `enter`, but it also transfers a referrer cut from the entry price. The `room.balance` is increased by `room.entryPrice - referrerCut` after each entry. However, the `room.balance` is not checked for overflow. If the `room.balance` exceeds the maximum value that can be stored in a `uint256`, the contract will revert. This vulnerability can be exploited by a malicious user who enters the room multiple times, causing the contract to revert and lose all the funds. The solution is to add a check for overflow before increasing the `room.balance`."
+        },
+        {
+            "function_name": "executeRoom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function executeRoom(uint256 _roomId) public {
+        Room storage room = allRooms[_roomId-1]; 
+        require(room.players.length == 6);
+        uint256 halfFee = SafeMath.div(room.entryPrice, 20);
+        CTO.transfer(halfFee);
+        CEO.transfer(halfFee);
+        room.balance -= halfFee * 2;
+        uint256 deadSeat = random();
+        distributeFunds(_roomId, deadSeat);
+        delete room.players;
+    }",
+            "reason": "The function `executeRoom` is called when all players have entered the room. It transfers half of the entry price to the CTO and CEO, and then distributes the remaining funds to the winners. The `room.balance` is decreased by `halfFee * 2` after each distribution. However, the `room.balance` is not checked for overflow. If the `room.balance` exceeds the maximum value that can be stored in a `uint256`, the contract will revert. This vulnerability can be exploited by a malicious user who enters the room multiple times, causing the contract to revert and lose all the funds. The solution is to add a check for overflow before decreasing the `room.balance`."
+        },
+        {
+            "function_name": "distributeFunds",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function distributeFunds(uint256 _roomId, uint256 _deadSeat) private returns(uint256) {
+        Room storage room = allRooms[_roomId-1]; 
+        uint256 balanceToDistribute = SafeMath.div(room.balance,5);
+        address victim = room.players[_deadSeat];
+        address[] memory winners = new address[](5);
+        uint256 j = 0; 
+        for (uint i = 0; i<6; i++) {
+            if(i != _deadSeat){
+               room.players[i].transfer(balanceToDistribute);
+               room.balance -= balanceToDistribute;
+               winners[j] = room.players[i];
+               j++;
+            }
+        }
+        emit partyOver(_roomId, victim, winners);
+        return address(this).balance;
+    }",
+            "reason": "The function `distributeFunds` is called when all players have entered the room. It distributes the remaining funds to the winners, excluding the dead seat. The `room.balance` is decreased by `balanceToDistribute` after each distribution. However, the `room.balance` is not checked for overflow. If the `room.balance` exceeds the maximum value that can be stored in a `uint256`, the contract will revert. This vulnerability can be exploited by a malicious user who enters the room multiple times, causing the contract to revert and lose all the funds. The solution is to add a check for overflow before decreasing the `room.balance`."
+        },
+        {
+            "function_name": "random",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function random() private view returns (uint256) {
+        return uint256(uint256(keccak256(block.timestamp, block.difficulty))%6);
+    }",
+            "reason": "The function `random` uses the current block timestamp and difficulty to generate a random number. However, the `keccak256` function is not suitable for generating random numbers. The `keccak256` function is deterministic and can be predicted by attackers. This vulnerability can be exploited by a malicious user who predicts the random number and enters the room at the right time. The solution is to use a more secure random number generator, such as `random.org` or `chainlink`. Additionally, the contract should have a mechanism to prevent the use of the same random number multiple times. This can be achieved by storing the last random number generated and checking if the current random number is the same as the last one. If it is, the contract should generate a new random number."
+        }
+    ]
+}

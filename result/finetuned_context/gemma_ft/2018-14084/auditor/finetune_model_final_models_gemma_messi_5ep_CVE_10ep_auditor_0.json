@@ -1,0 +1,352 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "impact": "Integer overflow in mintToken function allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "freezeAccount", "vulnerability": "Access Control", "impact": "The freezeAccount function allows the owner to set the freeze status of an arbitrary user, which can be used to create role-based access controls."}]}
+{"output_list": [{"function_name": "setPrices", "vulnerability": "Access Control", "impact": "The setPrices function is public and allows any user to set the prices. This can be abused by unauthorized users to set arbitrary prices."}]}
+{"output_list": [{"function_name": "buy", "vulnerability": "Integer Overflow", "impact": "Integer overflow in buy function allows user to set the balance of the contract to zero, aka the 'tradeTrap' issue."}]}
+{"output_list": [{"function_name": "sell", "vulnerability": "Integer Overflow", "impact": "Integer overflow in sell function allows user to set the balance of the contract to zero, aka the 'tradeTrap' issue."}]}
+{"output_list": [{"function_name": "selfdestructs", "vulnerability": "Access Control", "impact": "The selfdestructs function is public and allows any user to set the contract to zero, aka the 'tradeTrap' issue."}]}
+{"output_list": [{"function_name": "getEth", "vulnerability": "Access Control", "impact": "The getEth function is public and allows unauthorized users to retrieve arbitrary amounts of eth."}]}
+}
+ 
+---
+ 
+contract MyAdvancedToken is owned, MyAdvancedToken, KingOfEther {
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        return _transfer(msg.sender, _to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        return _transfer(_from, _to, _value);
+    }
+    function approve(address _spender, uint256 _value) public
+        returns (bool success) {
+        return _approve(_spender, _value);
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+        public
+        returns (bool success) {
+        return _approve(_spender, _value, _extraData);
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        return _burn(msg.sender, _value);
+    }
+    function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        return _burn(_from, _value);
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balanceOf[_from] >= _value);               
+        require (balanceOf[_to] + _value > balanceOf[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                       
+        balanceOf[_from] -= _value;                         
+        balanceOf[_to] += _value;                           
+        Transfer(_from, _to, _value);
+    }
+    function _approve(address _spender, uint256 _value) internal returns (bool success) {
+        allowance[_spender] = _value;
+        return true;
+    }
+    function _burn(address target, uint _value) internal returns (bool success) {
+        require(balanceOf[target] >= _value);   
+        require(_value <= allowance[msg.sender]);    
+        balanceOf[target] -= _value;                         
+        allowance[msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        Burn(target, _value);
+        return true;
+    }
+}
+contract MyAdvancedTokenOld is MyAdvancedToken {
+    address owner = msg.sender;
+    bool public useOld = true;
+    function MyAdvancedTokenOld() public {
+        owner = msg.sender;
+    }
+    function setUseOld(bool _useOld) onlyOwner public {
+        useOld = _useOld;
+    }
+    function getBalance() public returns (uint256){
+        return balances[msg.sender];
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);                               
+        require (balanceOf[_from] >= _value);               
+        require (balanceOf[_to] + _value > balanceOf[_to]); 
+        require(!frozenAccount[_from]);                     
+        require(!frozenAccount[_to]);                       
+        if(useOld) {
+            _oldTransfer(_from, _to, _value);
+        } else {
+            _newTransfer(_from, _to, _value);
+        }
+    }
+    function _oldTransfer(address _from, address _to, uint _value) internal {
+        balanceOf[_from] -= _value;                         
+        balanceOf[_to] += _value;                           
+        Transfer(_from, _to, _value);
+    }
+    function _newTransfer(address _from, address _to, uint _value) internal {
+        require(!useOld);
+        balanceOf[_from] -= _value;                         
+        balanceOf[_to] += _value;                           
+        Transfer(_from, _to, _value);
+    }
+}
+contract ownedOld {
+    address owner = msg.sender;
+    function ownedOld() public {
+        owner = msg.sender;
+    }
+    function setOwner(address _newOwner) onlyOwner public {
+        owner = _newOwner;
+    }
+}
+contract MyAdvancedTokenOldFactory is ownedOld {
+    function create(address _target, uint256 _value) public returns (MyAdvancedTokenOld t) {
+        t = new MyAdvancedTokenOld();
+        t.owner = msg.sender;
+        t.useOld = true;
+        return t;
+    }
+    function createWithPrices(address _target, uint256 _value, uint256 _price) public returns (MyAdvancedTokenOld t) {
+        t = new MyAdvancedTokenOld();
+        t.owner = msg.sender;
+        t.useOld = true;
+        t.setPrice(_price);
+        t.value = _value;
+        return t;
+    }
+    function createWithoutPrices(address _target, uint256 _value) public returns (MyAdvancedTokenOld t) {
+        t = new MyAdvancedTokenOld();
+        t.owner = msg.sender;
+        t.useOld = true;
+        t.value = _value;
+        return t;
+    }
+}
+contract TokenWithDrawings is MyAdvancedToken {
+    mapping (address => uint256) public totalDrawn;
+    mapping (address => uint256) public totalDrawnOut;
+    mapping (address => uint256) public totalBounty;
+    mapping (address => uint256) public totalBountyRaised;
+    uint public totalBountyRate = 0;
+    uint256 public totalBalance = 0;
+    function draw(address target, uint256 amount) public {
+        require(msg.sender == owner);
+        require(amount <= totalBalance);
+        totalDrawn[target] += amount;
+        totalDrawnOut[target] += amount;
+        totalBalance -= amount;
+        Transfer(this, target, amount);
+    }
+    function distribute(address target, uint256 amount) public onlyOwner {
+        require(amount <= totalBalance);
+        totalBalance -= amount;
+        totalDrawn[target] += amount;
+        totalDrawnOut[target] += amount;
+        totalBounty[target] += amount;
+        totalBountyRaised[target] += amount;
+        Transfer(this, target, amount);
+    }
+    function withdraw(address target, uint256 amount) public onlyOwner {
+        require(amount <= totalDrawn[target]);
+        totalDrawn[target] -= amount;
+        totalDrawnOut[target] -= amount;
+        totalBounty[target] -= amount;
+        totalBountyRaised[target] -= amount;
+        target.transfer(amount);
+    }
+    function getDrawings() public view returns (uint256, uint256, uint256, uint256) {
+        return (totalDrawn[msg.sender], totalDrawnOut[msg.sender], totalBounty[msg.sender], totalBountyRaised[msg.sender]);
+    }
+    function setBountyRate(uint256 newRate) public onlyOwner {
+        totalBountyRate = newRate;
+    }
+    function setOwner(address _newOwner) public onlyOwner {
+        owner = _newOwner;
+    }
+}
+contract TokenWithDrawingsOld is ownedOld, MyAdvancedTokenOldFactory {
+    function create(address target, uint256 amount) public returns (MyAdvancedTokenOld t) {
+        t = new TokenWithDrawings();
+        t.owner = msg.sender;
+        return t;
+    }
+    function createWithPrices(address target, uint256 amount, uint256 _price) public returns (MyAdvancedTokenOld t) {
+        t = new TokenWithDrawings();
+        t.owner = msg.sender;
+        t.value = amount;
+        t.price = _price;
+        return t;
+    }
+    function withdraw(address target, uint256 amount) public onlyOwner {
+        require(amount <= totalDrawn[target]);
+        totalDrawn[target] -= amount;
+        totalDrawnOut[target] -= amount;
+        totalBounty[target] -= amount;
+        totalBountyRaised[target] -= amount;
+        target.transfer(amount);
+    }
+    function getDrawings() public view returns (uint256, uint256, uint256, uint256) {
+        return (totalDrawn[msg.sender], totalDrawnOut[msg.sender], totalBounty[msg.sender], totalBountyRaised[msg.sender]);
+    }
+    function setOwner(address _newOwner) public onlyOwner {
+        owner = _newOwner;
+    }
+}
+contract MyAdvancedTokenOld is ownedOld, MyAdvancedTokenOldFactory, TokenWithDrawingsOld {
+    function create(address target, uint256 amount) public returns (MyAdvancedTokenOld t) {
+        t = new MyAdvancedTokenOld();
+        t.owner = msg.sender;
+        t.useOld = true;
+        return t;
+    }
+    function createWithPrices(address target, uint256 amount, uint256 _price) public returns (MyAdvancedTokenOld t) {
+        t = new MyAdvancedTokenOld();
+        t.owner = msg.sender;
+        t.useOld = true;
+        t.setPrice(_price);
+        t.value = amount;
+        return t;
+    }
+    function withdraw(address target, uint256 amount) public onlyOwner {
+        require(amount <= totalDrawn[target]);
+        totalDrawn[target] -= amount;
+        totalDrawnOut[target] -= amount;
+        totalBounty[target] -= amount;
+        totalBountyRaised[target] -= amount;
+        target.transfer(amount);
+    }
+    function getDrawings() public view returns (uint256, uint256, uint256, uint256) {
+        return (totalDrawn[msg.sender], totalDrawnOut[msg.sender], totalBounty[msg.sender], totalBountyRaised[msg.sender]);
+    }
+    function setOwner(address _newOwner) public onlyOwner {
+        owner = _newOwner;
+    }
+}
+contract owned is ownedOld {
+    function mintToken(address target, uint256 amount) public onlyOwner {
+        totalBalance += amount;
+        totalSupply += amount;
+        balances[target] += amount;
+        Transfer(0, this, amount);
+        Transfer(this, target, amount);
+    }
+    function burn(uint256 amount) public onlyOwner returns (bool success) {
+        require(balances[msg.sender] >= amount);   
+        address burner = msg.sender;
+        balances[burner] -= amount;                      
+        totalSupply -= amount;                            
+        Transfer(this, burner, amount);               
+        return true;
+    }
+    function setPrices(uint256 newPrice) public onlyOwner {
+        price = newPrice;
+    }
+    function setOwner(address _newOwner) public onlyOwner {
+        owner = _newOwner;
+    }
+}
+contract BitAseanToken is owned, ownedOld, MyAdvancedTokenOldFactory {
+    function create(address target, uint256 amount) public returns (MyAdvancedTokenOld t) {
+        t = new BitAseanToken();
+        t.owner = msg.sender;
+        return t;
+    }
+    function createWithPrices(address target, uint256 amount, uint256 _price) public returns (MyAdvancedTokenOld t) {
+        t = new BitAseanToken();
+        t.owner = msg.sender;
+        t.value = amount;
+        t.price = _price;
+        return t;
+    }
+    function withdraw(address target, uint256 amount) public onlyOwner {
+        require(amount <= balances[target]);
+        target.transfer(amount);
+    }
+    function getDrawings() public view returns (uint256, uint256, uint256, uint256) {
+        return (totalDrawn[msg.sender], totalDrawnOut[msg.sender], totalBounty[msg.sender], totalBountyRaised[msg.sender]);
+    }
+    function setOwner(address _newOwner) public onlyOwner {
+        owner = _newOwner;
+    }
+    function setPrices(uint256 newPrice) public onlyOwner {
+        price = newPrice;
+    }
+}
+contract BitAseanTokenOld is ownedOld, MyAdvancedTokenOldFactory {
+    function create(address target, uint256 amount) public returns (MyAdvancedTokenOld t) {
+        t = new BitAseanTokenOld();
+        t.owner = msg.sender;
+        return t;
+    }
+    function createWithPrices(address target, uint256 amount, uint256 _price) public returns (MyAdvancedTokenOld t) {
+        t = new BitAseanTokenOld();
+        t.owner = msg.sender;
+        t.value = amount;
+        t.price = _price;
+        return t;
+    }
+    function withdraw(address target, uint256 amount) public onlyOwner {
+        require(amount <= balances[target]);
+        target.transfer(amount);
+    }
+    function getDrawings() public view returns (uint256, uint256, uint256, uint256) {
+        return (totalDrawn[msg.sender], totalDrawnOut[msg.sender], totalBounty[msg.sender], totalBountyRaised[msg.sender]);
+    }
+    function setOwner(address _newOwner) public onlyOwner {
+        owner = _newOwner;
+    }
+    function setPrices(uint256 newPrice) public onlyOwner {
+        price = newPrice;
+    }
+}
+contract DistributeAseanToken is owned {
+    function mintToken(address target, uint256 amount) public onlyOwner {
+        totalBalance += amount;
+        totalSupply += amount;
+        balances[target] += amount;
+        Transfer(0, this, amount);
+        Transfer(this, target, amount);
+    }
+    function burn(uint256 amount) public onlyOwner returns (bool success) {
+        require(balances[msg.sender] >= amount);   
+        address burner = msg.sender;
+        balances[burner] -= amount;                      
+        totalSupply -= amount;                            
+        Transfer(this, burner, amount);               
+        return true;
+    }
+    function setOwner(address _newOwner) public onlyOwner {
+        owner = _newOwner;
+    }
+    function setPrices(uint256 newPrice) public onlyOwner {
+        price = newPrice;
+    }
+}
+contract DistributeAseanTokenOld is ownedOld {
+    function mintToken(address target, uint256 amount) public onlyOwner {
+        totalBalance += amount;
+        totalSupply += amount;
+        balances[target] += amount;
+        Transfer(0, this, amount);
+        Transfer(this, target, amount);
+    }
+    function burn(uint256 amount) public onlyOwner returns (bool success) {
+        require(balances[msg.sender] >= amount);   
+        address burner = msg.sender;
+        balances[burner] -= amount;                      
+        totalSupply -= amount;                            
+        Transfer(this, burner, amount);               
+        return true;
+    }
+    function setOwner(address _newOwner) public onlyOwner {
+        owner = _newOwner;
+    }
+    function setPrices(uint256 newPrice) public onlyOwner {
+        price = newPrice;
+    }
+}
+contract OwnedAndDistributedAseanToken is DistributeAseanToken, owned {
+    function create(address target, uint256 amount) public onlyOwner {
+        totalBalance += amount;
+        totalSupply += amount;

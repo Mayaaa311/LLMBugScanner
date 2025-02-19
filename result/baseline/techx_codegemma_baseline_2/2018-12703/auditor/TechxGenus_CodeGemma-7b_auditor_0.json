@@ -1,0 +1,41 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "balances[msg.sender] -= _value; balances[_to] += _value;",
+            "reason": "If the sender has a larger balance than the receiver, this function will underflow, allowing the sender to gain an unfair advantage."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "balances[_from] -= _value; allowed[_from][msg.sender] -= _value;",
+            "reason": "If the sender has a larger balance than the receiver, this function will underflow, allowing the sender to gain an unfair advantage."
+        },
+        {
+            "function_name": "balanceOf",
+            "vulnerability": "Wrong Logic",
+            "function_code": "return balances[_owner];",
+            "reason": "This function always returns the balance of the owner, regardless of whether it exists or not. This could allow an attacker to gain an unfair advantage."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Bad Randomness",
+            "function_code": "allowed[msg.sender][_spender] = _value;",
+            "reason": "This function always sets the allowance of a spender to the sender's balance. This could allow an attacker to gain an unfair advantage if they are able to choose the spender."
+        },
+        {
+            "function_name": "allowance",
+            "vulnerability": "Access Control",
+            "function_code": "return allowed[_owner][_spender];",
+            "reason": "This function does not enforce access control properly. It could allow an attacker to gain an unfair advantage if they are able to choose the spender."
+        },
+        {
+            "function_name": "transferAndCall",
+            "vulnerability": "Access Control",
+            "function_code": "if(msg.sender.balance >= _value) { balances[msg.sender] -= _value; balances[_to] += _value; allowed[msg.sender][_spender] -= _value; } else { revert(); }",
+            "reason": "This function does not properly enforce access control. It could allow an attacker to gain an unfair advantage if they are able to choose the spender."
+        }
+    ]
+}<eos>

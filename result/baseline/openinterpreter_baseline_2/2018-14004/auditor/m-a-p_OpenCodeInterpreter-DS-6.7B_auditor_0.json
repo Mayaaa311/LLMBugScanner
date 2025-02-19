@@ -1,0 +1,70 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool)
+{
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+}",
+            "reason": "In the transfer function, the subtraction of _value from the sender's balance and addition of _value to the recipient's balance can result in an integer overflow if _value is greater than the sender's balance."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool)
+{
+    require(_to != address(0));
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    balances[_from] = balances[_from].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    Transfer(_from, _to, _value);
+    return true;
+}",
+            "reason": "In the transferFrom function, the subtraction of _value from the sender's balance, addition of _value to the recipient's balance, and subtraction of _value from the sender's allowance can result in an integer overflow if _value is greater than the sender's balance or allowance."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint256 _value) public returns (bool)
+{
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+}",
+            "reason": "In the approve function, the assignment of _value to the sender's allowance can result in an integer overflow if _value is greater than the maximum value that can be represented by uint256."
+        },
+        {
+            "function_name": "increaseApproval",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function increaseApproval (address _spender, uint _addedValue) public returns (bool success)
+{
+    allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+}",
+            "reason": "In the increaseApproval function, the addition of _addedValue to the sender's allowance can result in an integer overflow if _addedValue is greater than the maximum value that can be represented by uint256."
+        },
+        {
+            "function_name": "decreaseApproval",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function decreaseApproval (address _spender, uint _subtractedValue) public returns (bool success)
+{
+    uint oldValue = allowed[msg.sender][_spender];
+    if (_subtractedValue > oldValue) {
+      allowed[msg.sender][_spender] = 0;
+    } else {
+      allowed[msg.sender][_spender] = oldValue.sub(_subtractedValue);
+    }
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+}",
+            "reason": "In the decreaseApproval function, the subtraction of _subtractedValue from the sender's allowance can result in an integer overflow if _subtractedValue is greater than the sender's allowance."
+        }
+    ]
+}

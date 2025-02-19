@@ -1,0 +1,47 @@
+[
+  {
+    "function_name": "mintToken",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The initial supply is set in the constructor, minted to the contract owner, and can be minted to any target address by the owner. The initial supply is in the units of 10^decimals, and can be set to a very large value, causing an overflow in the totalSupply variable.",
+    "correctness": 7,
+    "severity": 7,
+    "profitability": 4
+  },
+  {
+    "function_name": "transfer",
+    "auditor_idx": 0,
+    "vulnerability": "Wrong Logic",
+    "criticism": "The _transfer function is called by the transfer and transferFrom functions, and it does not check if the target address is a smart contract. If a user transfers tokens to a smart contract, the smart contract can call the tokenFallback function, which is not safe and can cause unexpected issues.",
+    "correctness": 6,
+    "severity": 6,
+    "profitability": 5
+  },
+  {
+    "function_name": "burnFrom",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The _value parameter is not checked to ensure it is not zero, and the balanceOf[_from] -= _value; line can underflow, causing a denial of service to the _from account.",
+    "correctness": 7,
+    "severity": 7,
+    "profitability": 3
+  },
+  {
+    "function_name": "mintToken",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The mintedAmount parameter is not checked to ensure it is not zero, and the totalSupply += mintedAmount; line can overflow, causing a denial of service to the token owner.",
+    "correctness": 7,
+    "severity": 7,
+    "profitability": 3
+  },
+  {
+    "function_name": "mintToken",
+    "auditor_idx": 0,
+    "vulnerability": "Token Devalue",
+    "criticism": "The owner can exploit the mintToken function to devalue the token, allowing the owner to mint additional tokens and sell them at the inflated price, causing a decrease in token value.",
+    "correctness": 5,
+    "severity": 5,
+    "profitability": 5
+  }
+]

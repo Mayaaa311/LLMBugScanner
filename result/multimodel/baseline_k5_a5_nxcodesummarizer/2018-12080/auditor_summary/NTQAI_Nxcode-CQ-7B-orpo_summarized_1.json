@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function allows the owner to mint new tokens by adding the specified amount to the balanceOf and totalSupply of the target address. If the mintedAmount is greater than the maximum value that can be stored in a uint256 variable, an integer overflow will occur."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The setPrices function allows the owner to set the sell and buy prices for the token. However, it does not check if the new prices are valid or if they are within a certain range."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable {
+    uint amount = msg.value / buyPrice;               
+    _transfer(this, msg.sender, amount);              
+}",
+            "vulnerability": "Bad Randomness",
+            "reason": "The buy function allows users to buy tokens by sending Ether to the contract. However, it does not implement any randomness or fairness checks."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner {
+    frozenAccount[target] = freeze;
+    FrozenFunds(target, freeze);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The freezeAccount function allows the owner to freeze or unfreeze an account. However, it does not have any access control mechanisms in place to ensure that only the owner can call this function."
+        },
+        {
+            "function_name": "INT",
+            "code": "contract INT is INTToken(1000000000000000, "Internet Node Token", 6, "INT") {}
+",
+            "vulnerability": "Typo Constructor",
+            "reason": "The INT contract is a constructor that inherits from the INTToken contract. However, it does not have any constructor parameters."
+        }
+    ]
+}

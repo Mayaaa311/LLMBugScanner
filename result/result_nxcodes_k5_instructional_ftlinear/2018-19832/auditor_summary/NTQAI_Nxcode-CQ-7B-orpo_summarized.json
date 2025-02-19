@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr onlyWhitelist public { if (value > totalRemaining) { value = totalRemaining; } require(value <= totalRemaining); address investor = msg.sender; uint256 toGive = value; distr(investor, toGive); if (toGive > 0) { blacklist[investor] = true; } if (totalDistributed >= totalSupply) { distributionFinished = true; } value = value.div(100000).mul(99999); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `getTokens` has an integer overflow vulnerability. The variable `value` is initialized with a value of 2500e18 and is updated in the function. However, the update operation `value = value.div(100000).mul(99999);` can cause an integer overflow if the value of `value` is too large. This can be exploited by an attacker to cause the contract to distribute more tokens than the total supply, leading to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "distr",
+            "code": "function distr(address _to, uint256 _amount) canDistr private returns (bool) { totalDistributed = totalDistributed.add(_amount); totalRemaining = totalRemaining.sub(_amount); balances[_to] = balances[_to].add(_amount); emit Distr(_to, _amount); emit Transfer(address(0), _to, _amount); return true; if (totalDistributed >= totalSupply) { distributionFinished = true; } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `distr` has an integer overflow vulnerability. The variable `totalDistributed` is initialized with a value of 250000000e18 and is updated in the function. However, the update operation `totalDistributed = totalDistributed.add(_amount);` can cause an integer overflow if the value of `_amount` is too large. This can be exploited by an attacker to cause the contract to distribute more tokens than the total supply, leading to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr onlyWhitelist public { if (value > totalRemaining) { value = totalRemaining; } require(value <= totalRemaining); address investor = msg.sender; uint256 toGive = value; distr(investor, toGive); if (toGive > 0) { blacklist[investor] = true; } if (totalDistributed >= totalSupply) { distributionFinished = true; } value = value.div(100000).mul(99999); }",
+            "vulnerability": "Access Control",
+            "reason": "The function `getTokens` has an access control vulnerability. The modifier `onlyWhitelist` is used to restrict the execution of the function to whitelisted addresses. However, the whitelist is not properly managed. If an attacker is not in the whitelist, they can still call the function, leading to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr onlyWhitelist public { if (value > totalRemaining) { value = totalRemaining; } require(value <= totalRemaining); address investor = msg.sender; uint256 toGive = value; distr(investor, toGive); if (toGive > 0) { blacklist[investor] = true; } if (totalDistributed >= totalSupply) { distributionFinished = true; } value = value.div(100000).mul(99999); }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The function `getTokens` has a typo in the constructor. The variable `value` is initialized with a value of 2500e18, but the variable `value` is used in the function `getTokens` to update the value. This can lead to a confusion for the contract owner and the users of the contract. It is recommended to rename the variable `value` to something else to avoid this typo."
+        },
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr onlyWhitelist public { if (value > totalRemaining) { value = totalRemaining; } require(value <= totalRemaining); address investor = msg.sender; uint256 toGive = value; distr(investor, toGive); if (toGive > 0) { blacklist[investor] = true; } if (totalDistributed >= totalSupply) { distributionFinished = true; } value = value.div(100000).mul(99999); }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The function `getTokens` has a typo in the constructor. The variable `totalDistributed` is initialized with a value of 250000000e18, but the variable `totalDistributed` is used in the function `distr` to update the value. This can lead to a confusion for the contract owner and the users of the contract. It is recommended to rename the variable `totalDistributed` to something else to avoid this typo."
+        }
+    ]
+}

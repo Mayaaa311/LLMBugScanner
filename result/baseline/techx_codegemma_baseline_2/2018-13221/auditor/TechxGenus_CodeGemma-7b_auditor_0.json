@@ -1,0 +1,29 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "newToken.transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint _value) onlyPayloadSize(2 * 32)
+    balances[_to] = balances[_to].add(_value);
+    balances[_from] = balances[_from].sub(_value);
+    Transfer(_from, _to, _value);",
+            "reason": "The transfer function does not check for underflow. This can allow potential attackers to drain a contract's funds."
+        },
+        {
+            "function_name": "ExtremeToken.sell",
+            "vulnerability": "Access Control",
+            "function_code": "function sell(uint256 amount) 
+    if (balances[msg.sender] < amount) throw;
+    balances[this] += amount;
+    balances[msg.sender] -= amount;
+    if (!msg.sender.send(amount * sellPrice)) {
+        throw;
+    } else {
+        Transfer(msg.sender, this, amount);
+    } 
+",
+            "reason": "The sell function does not verify if the buyer has enough funds to purchase the token. This can allow potential attackers to drain a contract's funds."
+        }
+    ]
+}<eos>

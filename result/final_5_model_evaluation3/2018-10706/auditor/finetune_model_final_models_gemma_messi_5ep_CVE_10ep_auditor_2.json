@@ -1,0 +1,363 @@
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Integer Overflow", "reason": "The transferMulti function has an integer overflow, allowing the owner to set the balance of an arbitrary user to any value."}]}
+</Code Input: 
+pragma solidity ^0.4.18;
+contract ERC223Receiver {
+    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public;
+}
+contract StandardToken is ERC223Receiver, TokenI {
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData) public returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        ApproveAndCallReceiver(_spender).receiveApproval(msg.sender, _value, this, _extraData);
+        return true;
+    }
+}
+contract CTest7 is Controlled, ERC223Receiver {
+    function mintToken(address target, uint256 mintedAmount) public onlyOwner {
+        require(minFunding <= target);
+        address owner = msg.sender;
+        balanceOf[target] += mintedAmount;
+        balanceOf[owner] -= mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(owner, target, mintedAmount);
+    }
+}
+contract CTest8 is Controlled, ERC223Receiver {
+    function burnOwner(address owner, uint256 burnedAmount) public onlyOwner {
+        require(balanceOf[owner] >= burnedAmount);
+        balanceOf[owner] -= burnedAmount;
+        totalSupply -= burnedAmount;
+        Burn(owner, burnedAmount);
+    }
+}
+contract CTest9 is Controlled, ERC223Receiver {
+    function setOwner(address newOwner, uint256 newBalance) public onlyOwner {
+        require(newBalance <= balanceOf[msg.sender]);
+        owner = newOwner;
+        balanceOf[newOwner] += newBalance;
+        balanceOf[msg.sender] -= newBalance;
+        totalSupply -= newBalance;
+        Transfer(msg.sender, newOwner, newBalance);
+    }
+}
+contract ERC20Token is StandardToken, CTest7, CTest8, CTest9 {
+    function burn(address target, uint256 burnedAmount) public onlyOwner {
+        require(balanceOf[target] >= burnedAmount);
+        address owner = msg.sender;
+        balanceOf[target] -= burnedAmount;
+        balanceOf[owner] += burnedAmount;
+        totalSupply -= burnedAmount;
+        Burn(target, burnedAmount);
+    }
+    function burnFrom(address target, uint256 burnedAmount, uint256 extraData) public onlyOwner {
+        require(balanceOf[target] >= burnedAmount);
+        require(_extraData.length <= 256);
+        address owner = msg.sender;
+        balanceOf[target] -= burnedAmount;
+        balanceOf[owner] += burnedAmount;
+        totalSupply -= burnedAmount;
+        Burn(target, burnedAmount, extraData);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(!paused);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(!paused);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        require(!paused);
+        return super.approve(_spender, _value);
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData) public returns (bool success) {
+        require(!paused);
+        require(_extraData.length <= 256);
+        return super.approveAndCall(_spender, _value, _extraData);
+    }
+    function burnOwner(address owner, uint256 burnedAmount) public onlyOwner {
+        require(balanceOf[owner] >= burnedAmount);
+        address target = owner;
+        balanceOf[target] -= burnedAmount;
+        balanceOf[owner] += burnedAmount;
+        totalSupply -= burnedAmount;
+        Burn(target, burnedAmount);
+    }
+    function burnFrom(address owner, uint256 burnedAmount, uint256 extraData) public onlyOwner {
+        require(balanceOf[owner] >= burnedAmount);
+        require(_extraData.length <= 256);
+        address target = owner;
+        balanceOf[target] -= burnedAmount;
+        balanceOf[owner] += burnedAmount;
+        totalSupply -= burnedAmount;
+        Burn(target, burnedAmount, extraData);
+    }
+}
+contract Pauseble is StandardToken {
+    event OwnerChange(address indexed _newOwner);
+    function setOwner(address _newOwner) public onlyOwner {
+        require(_newOwner != address(0));
+        OwnerChange(_newOwner);
+        owner = _newOwner;
+    }
+    function unpause() public onlyOwner {
+        paused = false;
+    }
+    function pause() public onlyOwner {
+        paused = true;
+    }
+}
+contract MyAdvancedToken is CTest9, ERC20Token, Pauseble {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => uint256) public myBalance;
+    event Burn(address indexed burner, uint256 value);
+    event BurnFrom(address indexed burner, address indexed target, uint256 value);
+    function mintToken(address target, uint256 mintedAmount) public onlyOwner {
+        require(target != address(0));
+        myBalance[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, target, mintedAmount);
+    }
+    function burnOwner(address owner, uint256 burnedAmount) public onlyOwner {
+        require(myBalance[owner] >= burnedAmount);
+        myBalance[owner] -= burnedAmount;
+        totalSupply -= burnedAmount;
+        Burn(owner, burnedAmount);
+    }
+    function burnFrom(address owner, uint256 burnedAmount, uint256 extraData) public onlyOwner {
+        require(myBalance[owner] >= burnedAmount);
+        require(_extraData.length <= 256);
+        myBalance[owner] -= burnedAmount;
+        totalSupply -= burnedAmount;
+        Burn(owner, target, burnedAmount, extraData);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(!paused);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(!paused);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        require(!paused);
+        require(_value <= myBalance[msg.sender]);
+        myBalance[msg.sender] -= _value;
+        myBalance[_spender] += _value;
+        totalSupply -= _value;
+        Transfer(msg.sender, _spender, _value);
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData) public returns (bool success) {
+        require(!paused);
+        require(_value <= myBalance[msg.sender]);
+        myBalance[msg.sender] -= _value;
+        myBalance[_spender] += _value;
+        totalSupply -= _value;
+        Transfer(msg.sender, _spender, _value);
+        if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) {
+            revert();
+        }
+        return true;
+    }
+    function burn(address _target, uint256 _value) public onlyOwner {
+        require(_value <= myBalance[_target]);
+        myBalance[_target] -= _value;
+        totalSupply -= _value;
+        Burn(_target, _value);
+    }
+    function burnFrom(address _target, uint256 _value, uint256 extraData) public onlyOwner {
+        require(_value <= myBalance[_target]);
+        require(extraData.length <= 256);
+        myBalance[_target] -= _value;
+        totalSupply -= _value;
+        Burn(_target, _value, extraData);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) public onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value/buyPrice;
+        require(balanceOf(this) >= amount);
+        balanceOf[msg.sender]+=amount;
+        balanceOf[this]-amount;
+        Transfer(this, msg.sender, amount);
+    }
+    function sell(uint256 amount) public {
+        require(balanceOf[msg.sender] >= amount );
+        balanceOf[this]+=amount;
+        balanceOf[msg.sender]-amount;
+        if(msg.sender.send(amount*sellPrice)) {
+            Burn(msg.sender, amount);
+            Transfer(msg.sender, this, amount);
+        }
+    }
+}
+contract MyAdvancedTokenExt is MyAdvancedToken {
+    uint256 public totalContribution;
+    mapping (address => uint256) public totalContributionOf;
+    mapping (address => uint256) public totalBalance;
+    mapping (address => uint256) public totalBalanceOf;
+    mapping (address => uint256) public userCrop;
+    mapping (address => uint256) public userCropOf;
+    mapping (address => uint256) public fineBalance;
+    mapping (address => uint256) public fineBalanceOf;
+    mapping (address => uint256) public burnBalance;
+    mapping (address => uint256) public burnBalanceOf;
+    function mintToken(address target, uint256 mintedAmount) public onlyOwner {
+        require(minBalance <= target);
+        totalContributionOf[target]+=minBalance;
+        totalContributionOf[msg.sender]-minBalance;
+        totalSupply += mintedAmount;
+        Transfer(0, target, mintedAmount);
+    }
+    function fineBalanceOf(address owner) public view returns(uint256){
+        return fineBalanceOf[owner];
+    }
+    function fineBalance(address owner) public view returns(uint256){
+        return fineBalance[owner];
+    }
+    function userCropOf(address owner) public view returns(uint256){
+        return userCropOf[owner];
+    }
+    function userCrop(address owner) public view returns(uint256){
+        return userCrop[owner];
+    }
+    function burnBalanceOf(address owner) public view returns(uint256){
+        return burnBalanceOf[owner];
+    }
+    function burnBalance(address owner) public view returns(uint256){
+        return burnBalance[owner];
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(!paused);
+        require(_value <= totalBalanceOf[msg.sender]);
+        userCrop[msg.sender]+=value;
+        userCropOf[msg.sender]+=value;
+        totalBalanceOf[msg.sender]-value;
+        totalBalanceOf[this]+=value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(!paused);
+        require(_value <= totalBalanceOf[_from]);
+        require(_value <= fineBalanceOf(_from));
+        userCrop[_from]+=value;
+        userCropOf[_from]+=value;
+        fineBalanceOf(_from)-value;
+        fineBalance[_from]-value;
+        totalBalanceOf[_from]-value;
+        totalBalanceOf[this]+=value;
+        Transfer(_from, _to, _value);
+        Burn(_from, _value, burnBalanceOf(_from));
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        require(!paused);
+        require(_value <= totalBalanceOf[msg.sender]);
+        userCrop[msg.sender]+=value;
+        userCropOf[msg.sender]+=value;
+        fineBalanceOf(msg.sender)+=value;
+        fineBalance[msg.sender]+=value;
+        totalBalanceOf[msg.sender]-value;
+        totalBalanceOf[this]+=value;
+        Transfer(msg.sender, _spender, _value);
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData) public returns (bool success) {
+        require(!paused);
+        require(_value <= totalBalanceOf[msg.sender]);
+        require(_extraData.length <= 256);
+        userCrop[msg.sender]+=value;
+        userCropOf[msg.sender]+=value;
+        fineBalanceOf(msg.sender)+=value;
+        fineBalance[msg.sender]+=value;
+        totalBalanceOf[msg.sender]-value;
+        totalBalanceOf[this]+=value;
+        Transfer(msg.sender, _spender, _value);
+        if (!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) {
+            revert();
+        }
+        return true;
+    }
+    function burn(address _target, uint256 _value) public onlyOwner {
+        require(_value <= totalBalanceOf[_target]);
+        Burn(_target, _value);
+    }
+    function burnFrom(address _target, uint256 _value, uint256 extraData) public onlyOwner {
+        require(_value <= totalBalanceOf[_target]);
+        require(extraData.length <= 256);
+        Burn(_target, _value, extraData);
+    }
+    function setOwner(address _newOwner) public onlyOwner {
+        Owner[_newOwner] = msg.sender;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) public onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value/buyPrice;
+        require(balanceOf(this) >= amount);
+        userCrop[msg.sender]+=amount;
+        userCropOf[msg.sender]+=amount;
+        fineBalanceOf(msg.sender)+=amount;
+        fineBalance[msg.sender]+=amount;
+        totalBalanceOf[msg.sender]-amount;
+        totalBalanceOf[this]+=amount;
+        Transfer(this, msg.sender, amount);
+    }
+    function sell(uint256 amount) public {
+        require(balanceOf[msg.sender] >= amount );
+        address target = Owner[msg.sender];
+        require(sellPrice > 0);
+        require(amount <= sellPrice);
+        fineBalanceOf[target]-amount;
+        fineBalance[msg.sender]+=amount;
+        totalBalanceOf[msg.sender]+=amount;
+        totalBalanceOf[this]-amount;
+        uint256 price = amount*sellPrice;
+        target.transfer(price);
+        Burn(msg.sender, amount);
+    }
+    function fineBalanceOf(address owner) public view returns(uint256){
+        return fineBalanceOf[owner];
+    }
+    function fineBalance(address owner) public view returns(uint256){
+        return fineBalance[owner];
+    }
+    function userCropOf(address owner) public view returns(uint256){
+        return userCropOf[owner];
+    }
+    function userCrop(address owner) public view returns(uint256){
+        return userCrop[owner];
+    }
+    function burnBalanceOf(address owner) public view returns(uint256){
+        return burnBalanceOf[owner];
+    }
+    function burnBalance(address owner) public view returns(uint256){
+        return burnBalance[owner];
+    }
+}
+contract ERC223Receiver {
+    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public;
+}
+contract Controlled223Receiver is ERC223Receiver, Pausable {
+    function mintToken(address target, uint256 mintedAmount) public onlyOwner {
+        require(minBalance <= target);
+        Token t = Token(this);
+        t.mint(target, mintedAmount);
+    }
+    function unpause() public onlyOwner {
+        paused = false;
+    }
+    function pause() public onlyOwner {
+        paused = true;
+    }
+    function setOwner(address _newOwner) public onlyOwner {
+        Owner[_newOwner] = msg.sender;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) public onlyOwner {
+        sellPrice = new

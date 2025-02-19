@@ -1,0 +1,365 @@
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Integer Overflow", "reason": "The transferMulti function has an integer overflow, allowing the owner to set the balance of an arbitrary user to any value."}]}
+</Code Input: 
+pragma solidity ^0.4.19;
+contract ERC20 {
+    function balanceOf(address _owner) public view returns (uint256 balance);
+    function transfer(address _to, uint256 _value) public returns (bool success);
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
+    function approve(address _spender, uint256 _value) public returns (bool success);
+    function allowance(address _owner, address _spender) public view returns (uint256 remaining);
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+}
+contract StandardToken is ERC20, Token {
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        if (msg.sender.balance < _value) revert();
+        if (_to == 0x0) revert();
+        uint256 _ownerBalance = balanceOf(msg.sender);
+        require(_ownerBalance >= _value);
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        if (msg.sender.balance < _value) revert();
+        if (_to == 0x0) revert();
+        uint256 _allowance = allowance(_from, msg.sender);
+        require(_value <= _allowance);
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        allowance(_from, msg.sender) -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) public view returns (uint256 remaining) {
+        return _allowance[_owner][_spender];
+    }
+}
+contract CTest7 is StandardToken {
+    uint256 public myBalance;
+    address public owner;
+    mapping (address => uint256) balances;
+    mapping (address => mapping (address => uint256)) allowed;
+    event Burn(address indexed from, uint256 value);
+    function mintToken(address target, uint256 mintedAmount) public onlyOwner {
+        myBalance += mintedAmount;
+        owner += target;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function burn(uint256 amount) public onlyOwner returns (bool success) {
+        require(balanceOf(msg.sender) >= amount);
+        balanceOf(msg.sender) -= amount;
+        totalSupply -= amount;
+        Burn(msg.sender, amount);
+        return true;
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(balanceOf(msg.sender) >= _value);
+        if (_to == 0x0) revert();
+        balances[msg.sender] -= _value;
+        balances[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+}
+contract Controlled2 is CTest7 {
+    uint256 public burnAmount;
+    function setBurnAmount(uint256 _burnAmount) public onlyOwner {
+        burnAmount = _burnAmount;
+    }
+    function burnTokens() public returns (bool success) {
+        require(burnAmount > 0);
+        require(balanceOf(msg.sender) >= burnAmount);
+        balanceOf(msg.sender) -= burnAmount;
+        totalSupply -= burnAmount;
+        Burn(msg.sender, burnAmount);
+        return true;
+    }
+}
+contract ERC223 is StandardToken {
+    function _transfer(address _from, address _to, uint _value) internal {
+        require(_to != 0x0);
+        require(balanceOf[_from] >= _value);
+        require(balanceOf[_to] + _value > balanceOf[_to]);
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(_from, _to, _value);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        _transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferMulti(address[] _to, uint256[] _value) public returns (bool success) {
+        require(_to.length <= 255);
+        require(_value.length <= 255);
+        for (uint i = 0; i < _to.length; i++) {
+            _transfer(msg.sender, _to[i], _value[i]);
+        }
+        return true;
+    }
+}
+contract Standard2 is Controlled2, ERC223 {
+    uint256 public minBalance = 1000000000000000000000000000;
+    function mintToken(address target, uint256 mintedAmount) public onlyOwner {
+        require(minBalance <= target);
+        myBalance += mintedAmount;
+        owner += target;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+        Burn(target, burnedAmount);
+    }
+    function burnTokens() public returns (bool success) {
+        require(balanceOf(msg.sender) >= burnAmount);
+        require(burnAmount <= 1000000000000000000000000000);
+        balanceOf(msg.sender) -= burnAmount;
+        totalSupply -= burnAmount;
+        Burn(msg.sender, burnAmount);
+        return true;
+    }
+}
+contract BitAseanToken is Standard2, Controlled2, ERC223 {
+    string public name;
+    string public symbol;
+    uint8 public decimals;
+    uint256 public airdropTotalQty;
+    uint256 public airdropQty;
+    address public vaultAddress;
+    bool public isPaused;
+    event Pause();
+    event Unpause();
+    function BitAseanToken(
+    uint256 initialSupply,
+    string tokenName,
+    uint8 decimalUnits,
+    string tokenSymbol
+    ) Standard2(initialSupply, tokenName, decimalUnits, tokenSymbol) public {}
+    function setPause(bool _isPaused) public onlyOwner {
+        isPaused = _isPaused;
+    }
+    function setAirdropTotalQty(uint256 _airdropTotalQty) public onlyOwner {
+        airdropTotalQty = _airdropTotalQty;
+    }
+    function setAirdropQty(uint256 _airdropQty) public onlyOwner {
+        airdropQty = _airdropQty;
+    }
+    function airdrop(address target, uint256 _value) public returns (bool success) {
+        require(!isPaused);
+        require(airdropQty <= totalBalance);
+        require(_value <= airdropTotalQty);
+        uint256 _tokenAmount = _value;
+        uint256 _userBalance = balanceOf(target);
+        if (_userBalance + _tokenAmount < airdropTotalQty) revert();
+        balanceOf(msg.sender) -= _tokenAmount;
+        balanceOf(target) += _tokenAmount;
+        airdrop(target, _tokenAmount);
+        Transfer(msg.sender, target, _tokenAmount);
+        return true;
+    }
+    function unpause() public onlyOwner {
+        isPaused = false;
+        Unpause();
+    }
+    function pause() public onlyOwner {
+        isPaused = true;
+        Pause();
+    }
+    function setOwner(address _newOwner) public onlyOwner {
+        owner = _newOwner;
+    }
+    function setVaultAddress(address _newVaultAddress) public onlyOwner {
+        vaultAddress = _newVaultAddress;
+    }
+    function setMinBalance(uint256 _newMinBalance) public onlyOwner {
+        minBalance = _newMinBalance;
+    }
+    function setSymbols(string _newSymbol) public onlyOwner {
+        symbol = _newSymbol;
+    }
+    function setName(string _newName) public onlyOwner {
+        name = _newName;
+    }
+    function setBalance(uint256 _newBalance) public onlyOwner {
+        myBalance = _newBalance;
+    }
+}
+contract BitAseanTokenFactory {
+    function create(address _owner, address _vault, uint256 _minBalance, string _symbol, string _name) public returns (BitAseanToken _token) {
+        _token = new BitAseanToken(
+            _minBalance, _symbol, _decimals, _name
+        );
+        _token.setOwner(_owner);
+        _token.setVaultAddress(_vault);
+        _token.setMinBalance(_minBalance);
+        return _token;
+    }
+}
+contract Vault is owned {
+    function deposit(address _from, uint256 _value) public returns (bool success) {
+        _from.transfer(this._value);
+        return true;
+    }
+    function withdraw(address _to, uint256 _value) public returns (bool success) {
+        _to.transfer(this._value);
+        return true;
+    }
+}
+contract OwnedVault is Vault, Controlled2, ERC223 {
+    address public owner;
+    mapping (address => uint256) balances;
+    mapping (address => mapping (address => uint256)) allowed;
+    function OwnedVault(address _owner) public {
+        owner = _owner;
+    }
+    function setOwner(address _newOwner) public onlyOwner {
+        owner = _newOwner;
+    }
+    function setSymbols(string _newSymbol) public onlyOwner {
+        symbol = _newSymbol;
+    }
+    function setName(string _newName) public onlyOwner {
+        name = _newName;
+    }
+    function setBalance(uint256 _newBalance) public onlyOwner {
+        myBalance = _newBalance;
+    }
+    function mintToken(address target, uint256 _mintAmount) public onlyOwner {
+        BitAseanTokenFactory(_owner, _vault, _minBalance, _symbol, _name).create(target, _vault, _minBalance, _symbol, _name);
+    }
+    function unpause() public onlyOwner {
+        isPaused = false;
+        Unpause();
+    }
+    function pause() public onlyOwner {
+        isPaused = true;
+        Pause();
+    }
+    function burn(address _investor, uint256 _value) public onlyOwner {
+        require(balanceOf(_investor) >= _value);
+        balanceOf(_investor) -= _value;
+        totalSupply -= _value;
+        Burn(_investor, _value);
+    }
+}
+contract MyAdvancedToken is OwnedVault, Controlled2, ERC223 {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function MyAdvancedToken(address _owner, string _name, string _symbol, uint256 _totalReserved) public OwnedVault(_owner) {
+        _token = new BitAseanTokenFactory(_owner, this, _totalReserved, _symbol, _name);
+        _token.setOwner(msg.sender);
+        _token.setVaultAddress(this);
+        _token.setMinBalance(1000000000000000000000000000);
+        sellPrice = 600;
+        buyPrice = 1300;
+        frozenAccount[msg.sender] = true;
+        FrozenFunds(msg.sender, true);
+        return _token;
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);
+        return super.approve(_spender, _value);
+    }
+    function allowance(address _owner, address _spender) public view returns (uint256 remaining) {
+        require(!frozenAccount[_owner]);
+        return super.allowance(_owner, _spender);
+    }
+    function getTokenBalance(address tokenAddress, address who) public view returns (uint){
+        ERC20(tokenAddress).allowance(who, tokenAddress);
+    }
+    function withdrawForeignTokens(address _tokenContract, uint256 _amount) public onlyOwner {
+        _tokenContract.transfer(owner, _amount);
+    }
+    function mintToken(address target, uint256 _mintAmount) public onlyOwner {
+        BitAseanTokenFactory(_owner).create(target, this, _mintAmount, getSymbol(), getBalance());
+    }
+    function freezeAccount(address target, bool freeze) public onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) public onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;
+        require(balanceOf(this) >= amount);
+        owner.transfer(amount);
+        totalSupply += amount;
+        Transfer(this, owner, amount);
+    }
+    function sell(uint256 amount) public {
+        require(balanceOf(msg.sender) >= amount );
+        owner.transfer(msg.value);
+        totalSupply -= amount;
+        Transfer(msg.sender, owner, amount);
+        msg.sender.transfer(amount);
+    }
+}
+contract BitAseanTokenFactory {
+    function create(address _owner, address _vault, uint256 _minBalance, string _symbol, string _name) public returns (BitAseanToken _token) {
+        _token = new BitAseanToken(
+            _minBalance, _symbol, _decimals, _name
+        );
+        _token.setOwner(_owner);
+        _token.setVaultAddress(_vault);
+        return _token;
+    }
+}
+contract Controlled4 is BitAseanTokenFactory, OwnedVault {
+    function create(address _owner, address _vault, uint256 _minBalance, string _symbol, string _name, address _controller) public returns (BitAseanToken _token) {
+        _token = new BitAseanTokenFactory(_owner, _vault, _minBalance, _symbol, _name);
+        _token.setController(_controller);
+        return _token;
+    }
+}
+contract Controlled2 is BitAseanTokenFactory, OwnedVault {
+    function create(address _owner, address _vault, uint256 _minBalance, string _symbol, string _name, address _controller) public returns (BitAseanToken _token) {
+        _token = new BitAseanTokenFactory(_owner, _vault, _minBalance, _symbol, _name);
+        _token.setController(_controller);
+        return _token;
+    }
+    function setOwner(address _newOwner) public onlyOwner {
+        owner = _newOwner;
+    }
+    function setController(address _newController) public onlyOwner {
+        _controller = _newController;
+    }
+}
+contract ERC20Token is BitAseanToken, Controlled2 {
+    function burn(address _investor, uint256 _value) public onlyOwner {
+        require(!frozenAccount[_investor]);
+        balanceOf(_investor) -= _value;
+        totalSupply -= _value;
+        Burn(_investor, _value);
+    }
+}
+contract ERC20 is ERC20Token {
+    function name() public view returns (string) {
+        return name;
+    }
+    function symbol() public view returns (string) {
+        return symbol;
+    }
+    function decimals() public view returns (uint256) {
+        return decimals;
+    }
+    function airdrop(address _investor, uint256 _value) public onlyOwner {
+        require(!frozenAccount[msg.

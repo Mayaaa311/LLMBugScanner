@@ -1,0 +1,88 @@
+ {
+    "output_list": [
+        {
+            "function_name": "distribute",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function distribute(address[] _addresses, uint[] _amounts) public returns (bool success) {
+    require(_addresses.length < 256 && _addresses.length == _amounts.length);
+    uint totalAmount;
+    for (uint a = 0; a < _amounts.length; a++) {
+        totalAmount += _amounts[a]; // Vulnerable line
+    }
+    require(totalAmount > 0 && balances[msg.sender] >= totalAmount);
+    balances[msg.sender] -= totalAmount;
+    for (uint b = 0; b < _addresses.length; b++) {
+        if (_amounts[b] > 0) {
+            balances[_addresses[b]] += _amounts[b];
+            Transfer(msg.sender, _addresses[b], _amounts[b]);
+        }
+    }
+    return true;
+}",
+            "reason": "The vulnerability exists in the line `totalAmount += _amounts[a];`. If the sum exceeds the maximum value representable by the `uint` type (`2^256 - 1`), it causes an integer overflow. This bypasses the subsequent `require` check, leading to unauthorized deductions and logical inconsistencies."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if (msg.data.length < (3 * 32) + 4) throw;
+    if (_value == 0) { return false; }
+    uint256 fromBalance = balances[_from];
+    uint256 allowance = allowed[_from][msg.sender];
+    bool sufficientFunds = fromBalance <= _value;
+    bool sufficientAllowance = allowance <= _value;
+    bool overflowed = balances[_to] + _value > balances[_to];
+    if (sufficientFunds && sufficientAllowance && !overflowed) {
+        balances[_to] += _value;
+        balances[_from] -= _value;
+        allowed[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    } else { 
+        return false; 
+    }
+}",
+            "reason": "Logical errors in conditions for verifying funds and allowances, allowing transfers only when balances or allowances are insufficient. This enables unauthorized transfers and financial losses."
+        },
+        {
+            "function_name": "ToOwner",
+            "vulnerability": "Access Control",
+            "function_code": "function ToOwner() public {
+    balances[msg.sender] = totalSupply;
+    owner = msg.sender;
+}",
+            "reason": "Missing access control checks allow any user to claim ownership and funds."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Token Devalue",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+}",
+            "reason": "Allows unlimited token minting without constraints, disrupting supply-demand balance."
+        },
+        {
+            "function_name": "PayWinner",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function PayWinner(address winner) private {
+    require(numtickets == maxTickets);
+    uint ownerTax = 6 * totalBounty / 100;
+    uint winnerPrice = totalBounty - ownerTax;
+    LottoComplete(msg.sender, lottoIndex, winnerPrice);
+    lottoIndex += 1;
+    numtickets = 0;
+    totalBounty = 0;
+    if (_direction == 0 && maxTickets < 20) maxTickets += 1;
+    if (_direction == 1 && maxTickets > 10) maxTickets -= 1;
+    if (_direction == 0 && maxTickets == 20) _direction = 1;
+    if (_direction == 1 && maxTickets == 10) _direction = 0;
+    worldOwner.transfer(ownerTax);
+    winner.transfer(winnerPrice);
+}",
+            "reason": "Predictable winner selection without secure randomness enables exploitation."
+        }
+    ]
+}

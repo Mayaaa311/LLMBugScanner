@@ -1,0 +1,50 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+  balanceOf[target] += mintedAmount;
+  totalSupply += mintedAmount;
+  Transfer(0, this, mintedAmount);
+  Transfer(this, target, mintedAmount);
+}",
+            "vulnerability": "Token Issuance Control",
+            "reason": "The mintToken function allows the owner to increase arbitrary amounts of tokens for any address, bypassing any restrictions on token distribution."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+  require (_value < allowance[_from][msg.sender]);     
+  allowance[_from][msg.sender] -= _value;
+  _transfer(_from, _to, _value);
+  return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check for overflow of the recipient's balance, allowing it to be set to a very high value, leading to loss of funds."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) returns (bool success) {
+  require(balanceOf[_from] >= _value);
+  require(_value <= allowance[_from][msg.sender]);    
+  balanceOf[_from] -= _value;                         
+  allowance[_from][msg.sender] -= _value;            
+  totalSupply -= _value;                              
+  Burn(_from, _value);
+  return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burnFrom function does not check for overflow of the sender's balance, allowing it to be set to a very low value, leading to loss of funds."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) {
+  require(this.balance >= amount * sellPrice);
+  _transfer(msg.sender, this, amount);
+  msg.sender.transfer(amount * sellPrice);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The sell function does not check for overflow of the sender's balance, allowing it to be set to a very high value, leading to loss of funds."
+        }
+    ]
+}

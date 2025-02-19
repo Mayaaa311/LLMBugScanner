@@ -1,0 +1,68 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferToAddress",
+            "code": "function transferToAddress(address _to, uint256 _value, bytes _data) private returns (bool success) {
+trequire(_to != address(0x0));
+trequire(balances[msg.sender] >= _value);
+tbalances[msg.sender] -= _value;
+tbalances[_to] += _value;
+tTransfer(msg.sender, _to, _value);
+tTransfer(msg.sender, _to, _value, _data);
+treturn true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferToAddress' function does not check whether the subtraction of the transferred amount from the sender's balance overflows, allowing the sender to transfer more tokens than they actually have."
+        },
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _to, uint256[] _value) public returns (bool success) {
+trequire(_to.length > 0);
+trequire(_value.length > 0);
+trequire(_to.length == _value.length);
+tfor (uint256 i = 0; i < _to.length; ++i) {
+ttaddress to = _to[i];
+ttuint256 value = _value[i];
+ttrequire(balances[msg.sender] >= value);
+ttbalances[msg.sender] -= value;
+t tbalances[to] += value;
+t tTransfer(msg.sender, to, value);
+t}
+treturn true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'batchTransfer' function does not check whether the subtraction of the transferred amount from the sender's balance overflows, allowing the sender to transfer more tokens than they actually have."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value, bytes _data) public returns (bool success) {
+trequire(balances[msg.sender] >= _value);
+tbalances[msg.sender] -= _value;
+ttotalBurned += _value;
+tBurn(msg.sender, _value, totalSupply(), _data);
+treturn true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'burn' function does not check whether the subtraction of the burned amount from the sender's balance overflows, allowing the sender to burn more tokens than they actually have."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value, bytes _data) public returns (bool success) {
+tif (transferFrom(_from, msg.sender, _value)) {
+ttreturn burn(_value, _data);
+t}
+        return false;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'burnFrom' function allows a user to burn tokens from another user without ensuring that the user has enough balance, which can lead to integer overflow in the 'burn' function."
+        },
+        {
+            "function_name": "initialSupply",
+            "code": "function initialSupply() public pure returns (uint256) {
+treturn INITIAL_SUPPLY;
+}",
+            "vulnerability": "Hard Coded Ether",
+            "reason": "The 'initialSupply' function returns a hard coded value of 20000000000 * (10 ** uint256(DECIMALS)) which is vulnerable to attackers stealing the initial supply of the token."
+        }
+    ]
+}

@@ -1,0 +1,50 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+                _transfer(msg.sender, _to, _value);
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function does not check for overflow of the recipient's balance, which can be exploited to make the balance of a target user overflow the maximum uint256 value, freezing the target user's funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+                require(_value <= allowance[_from][msg.sender]);     
+                allowance[_from][msg.sender] -= _value;
+                _transfer(_from, _to, _value);
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferFrom' function does not check for overflow of the recipient's balance, which can be exploited to make the balance of a target user overflow the maximum uint256 value, freezing the target user's funds."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) {
+                require(balanceOf[msg.sender] >= _value);   
+                balanceOf[msg.sender] -= _value;            
+                totalSupply -= _value;                      
+                emit Burn(msg.sender, _value);
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'burn' function does not check for underflow of the sender's balance, which can be exploited to allow a user to burn more tokens than they own, causing an integer overflow in the balanceOf mapping, making it impossible to transfer funds from the user's account."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) public returns (bool success) {
+                require(balanceOf[_from] >= _value);                
+                require(_value <= allowance[_from][msg.sender]);    
+                balanceOf[_from] -= _value;                         
+                allowance[_from][msg.sender] -= _value;             
+                totalSupply -= _value;                              
+                emit Burn(_from, _value);
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'burnFrom' function does not check for underflow of the sender's balance, which can be exploited to allow a user to burn more tokens than they own, causing an integer overflow in the balanceOf mapping, making it impossible to transfer funds from the user's account."
+        }
+    ]
+}

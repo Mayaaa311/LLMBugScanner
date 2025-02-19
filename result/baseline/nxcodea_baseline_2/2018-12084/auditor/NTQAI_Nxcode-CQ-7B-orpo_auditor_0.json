@@ -1,0 +1,63 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) {
+                if (balanceOf[msg.sender] < _value) revert();           
+                if (balanceOf[_to] + _value < balanceOf[_to]) revert(); 
+                balanceOf[msg.sender] -= _value;                     
+                balanceOf[_to] += _value;                            
+                Transfer(msg.sender, _to, _value);                   
+            }",
+            "reason": "The transfer function does not check for integer overflow when adding the transferred value to the recipient's balance. If the recipient's balance exceeds the maximum value that can be stored in a uint256, the addition operation will wrap around and result in a value that is less than the original recipient's balance, leading to a loss of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+                if (balanceOf[_from] < _value) revert();                 
+                if (balanceOf[_to] + _value < balanceOf[_to]) revert();  
+                if (_value > allowance[_from][msg.sender]) revert();   
+                balanceOf[_from] -= _value;                          
+                balanceOf[_to] += _value;                            
+                allowance[_from][msg.sender] -= _value;
+                Transfer(_from, _to, _value);
+                return true;
+            }",
+            "reason": "The transferFrom function does not check for integer overflow when adding the transferred value to the recipient's balance. If the recipient's balance exceeds the maximum value that can be stored in a uint256, the addition operation will wrap around and result in a value that is less than the original recipient's balance, leading to a loss of funds."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+                balanceOf[target] += mintedAmount;
+                totalSupply += mintedAmount;
+                Transfer(0, this, mintedAmount);
+                Transfer(this, target, mintedAmount);
+            }",
+            "reason": "The mintToken function does not check for integer overflow when adding the minted amount to the total supply and the recipient's balance. If the total supply or the recipient's balance exceeds the maximum value that can be stored in a uint256, the addition operation will wrap around and result in a value that is less than the original total supply or recipient's balance, leading to a loss of tokens."
+        },
+        {
+            "function_name": "freezeAccount",
+            "vulnerability": "Access Control",
+            "function_code": "function freezeAccount(address target, bool freeze) onlyOwner {
+                frozenAccount[target] = freeze;
+                FrozenFunds(target, freeze);
+            }",
+            "reason": "The freezeAccount function is only accessible to the contract owner. However, it does not check if the target account is already frozen or not before attempting to freeze it. This could allow an attacker to freeze an already frozen account, which could lead to a loss of funds."
+        },
+        {
+            "function_name": "BitAseanToken",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function BitAseanToken(
+                uint256 initialSupply,
+                string tokenName,
+                uint8 decimalUnits,
+                string tokenSymbol
+            ) token (initialSupply, tokenName, decimalUnits, tokenSymbol) {  
+            }",
+            "reason": "The constructor of the BitAseanToken contract is missing a parameter for the token symbol. This could lead to confusion and errors when interacting with the contract."
+        }
+    ]
+}

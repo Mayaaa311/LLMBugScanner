@@ -1,0 +1,29 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function has an integer overflow vulnerability in the mintedAmount += _value; totalSupply += mintedAmount; Transfer(0, this, mintedAmount); Transfer(this, target, mintedAmount); lines. If the sum of mintedAmount and _value overflows, the totalSupply will be increased without bound."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "reason": "The transfer function has a wrong logic vulnerability in the if (frozenAccount[msg.sender]) throw; balanceOf[msg.sender] -= _value; balanceOf[_to] += _value; Transfer(msg.sender, _to, _value); lines. The check for frozen accounts is incorrectly placed before decreasing the balance, allowing a frozen account to transfer tokens."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "reason": "The transferFrom function has a wrong logic vulnerability in the if (frozenAccount[_from]) throw; if (balanceOf[_from] < _value) throw; if (balanceOf[_to] + _value < balanceOf[_to]) throw; if (_value > allowance[_from][msg.sender]) throw; balanceOf[_from] -= _value; balanceOf[_to] += _value; allowance[_from][msg.sender] -= _value; Transfer(_from, _to, _value); lines. The checks for balance and allowance are incorrectly ordered, allowing a frozen account to transfer tokens from others."
+        },
+        {
+            "function_name": "claimThrone",
+            "vulnerability": "Access Control",
+            "reason": "The claimThrone function has an access control vulnerability in the require(msg.value > balance, "Need to pay more to become the king"); if (!msg.sender.call{value: balance}()) { throw; } balance = msg.value; king = msg.sender; lines. Anyone can call this function and become the king if they send more ether than the current balance, without any restrictions."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Token Devalue",
+            "reason": "The mintToken function has a token devalue vulnerability in the balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0, this, mintedAmount); Transfer(this, target, mintedAmount); lines. Anyone can mint tokens for any address, causing the token price to crash and financial losses to token holders."
+        }
+    ]
+}

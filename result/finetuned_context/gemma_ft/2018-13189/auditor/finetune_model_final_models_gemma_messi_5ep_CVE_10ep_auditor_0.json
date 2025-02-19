@@ -1,0 +1,280 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "impact": "Integer overflow in mintToken function allows unauthorized increase of total supply."}]}
+{"output_list": [{"function_name": "transfer", "vulnerability": "Integer Overflow", "impact": "Integer overflow in transfer function allows unauthorized increase of total supply."}]}
+{"output_list": [{"function_name": "transferFrom", "vulnerability": "Integer Overflow", "impact": "Integer overflow in transferFrom function allows unauthorized increase of total supply."}]}
+{"output_list": [{"function_name": "approve", "vulnerability": "Integer Overflow", "impact": "Integer overflow in approve function allows unauthorized increase of total supply."}]}
+{"output_list": [{"function_name": "unpause", "vulnerability": "Integer Overflow", "impact": "Integer overflow in unpause function allows unauthorized increase of total supply."}]}
+{"output_list": [{"function_name": "finalization", "vulnerability": "Integer Overflow", "impact": "Integer overflow in finalization function allows unauthorized increase of total supply."}]}
+{"output_list": [{"function_name": "withdraw", "vulnerability": "Integer Overflow", "impact": "Integer overflow in withdraw function allows unauthorized increase of total supply."}]}
+  uint256 public totalBounty;
+  uint256 public totalRaised;
+  uint256 public totalGiven;
+  uint256 public totalBountyOfOwner;
+  uint256 public totalBountyOfTeam;
+  uint256 public totalBountyOfInvestor;
+  uint256 public totalBountyOfFund;
+  uint256 public totalBounty;
+  uint256 public totalBountyOfOwner;
+  uint256 totalBountyOfOwnerAsPercentOfTotal = 100;
+  uint256 totalBountyOfTeamAsPercentOfTotal = 100;
+  uint256 totalBountyOfInvestorAsPercentOfTotal = 100;
+  uint256 totalBountyOfFundAsPercentOfTotal = 100;
+  uint256 totalBounty = 0;
+  uint256 totalBountyOfOwner = 0;
+  uint256 totalBountyOfTeam = 0;
+  uint256 totalBountyOfInvestor = 0;
+  uint256 totalBountyOfFund = 0;
+  uint256 totalBountyOfOwnerAsPercentOfTotal = 100;
+  uint256 totalBountyOfTeamAsPercentOfTotal = 100;
+  uint256 totalBountyOfInvestorAsPercentOfTotal = 100;
+  uint256 totalBountyOfFundAsPercentOfTotal = 100;
+  uint256 totalBounty = 0;
+  uint256 totalBountyOfOwner = 0;
+  uint256 totalBountyOfTeam = 0;
+  uint256 totalBountyOfInvestor = 0;
+  uint256 totalBountyOfFund = 0;
+  uint256 totalBountyOfOwnerAsPercentOfTotal = 100;
+  uint256 totalBountyOfTeamAsPercentOfTotal = 100;
+  uint256 totalBountyOfInvestorAsPercentOfTotal = 100;
+  uint256 totalBountyOfFundAsPercentOfTotal = 100;
+  address owner;
+  address team;
+  address bountyOwner;
+  address investor;
+  address fund;
+  string txHash;
+  uint256 amountRaised;
+  uint256 totalBountyOfOwnerInStages;
+  uint256 totalBountyOfTeamInStages;
+  uint256 totalBountyOfInvestorInStages;
+  uint256 totalBountyOfFundInStages;
+  uint256 totalBountyOfOwnerAsPercentOfTotalInStages;
+  uint256 totalBountyOfTeamAsPercentOfTotalInStages;
+  uint256 totalBountyOfInvestorAsPercentOfTotalInStages;
+  uint256 totalBountyOfFundAsPercentOfTotalInStages;
+  uint256 totalBountyOfOwnerAsPercentOfTotal = totalBountyOfOwnerAsPercentOfTotalInStages;
+  uint256 totalBountyOfTeamAsPercentOfTotal = totalBountyOfTeamAsPercentOfTotalInStages;
+  uint256 totalBountyOfInvestorAsPercentOfTotal = totalBountyOfInvestorAsPercentOfTotalInStages;
+  uint256 totalBountyOfFundAsPercentOfTotal = totalBountyOfFundAsPercentOfTotalInStages;
+}
+contract MyAdvancedToken is ICO, UNLB {
+  uint256 public totalBounty;
+  uint256 public totalBountyOfOwner;
+  uint256 totalBountyOfTeam;
+  uint256 totalBountyOfInvestor;
+  uint256 totalBountyOfFund;
+  uint256 totalBountyOfOwnerAsPercentOfTotal;
+  uint256 totalBountyOfTeamAsPercentOfTotal;
+  uint256 totalBountyOfInvestorAsPercentOfTotal;
+  uint256 totalBountyOfFundAsPercentOfTotal;
+  function unpause() onlyOwner {
+    unlb.unpause();
+  }
+  function setParameters(uint256 _totalBounty, uint256 _totalBountyOfOwner, uint256 _totalBountyOfTeam, uint256 _totalBountyOfInvestor, uint256 _totalBountyOfFund, address _owner, address _team, address _bountyOwner, address _investor, address _fund) ICO.
+  {
+    require(_owner != 0 && _team != 0 && _bountyOwner != 0 && _investor != 0 && _fund != 0);
+    owner = _owner;
+    team = _team;
+    bountyOwner = _bountyOwner;
+    investor = _investor;
+    fund = _fund;
+    totalBounty = _totalBounty;
+    totalBountyOfOwner = _totalBountyOfOwner;
+    totalBountyOfTeam = _totalBountyOfTeam;
+    totalBountyOfInvestor = _totalBountyOfInvestor;
+    totalBountyOfFund = _totalBountyOfFund;
+    totalBountyOfOwnerAsPercentOfTotal = totalBountyOfOwnerAsPercentOfTotal / totalBounty;
+    totalBountyOfTeamAsPercentOfTotal = totalBountyOfTeamAsPercentOfTotal / totalBounty;
+    totalBountyOfInvestorAsPercentOfTotal = totalBountyOfInvestorAsPercentOfTotal / totalBounty;
+    totalBountyOfFundAsPercentOfTotal = totalBountyOfFundAsPercentOfTotal / totalBounty;
+  }
+  function() public payable {
+    require(!paused);
+    var unlb = UNLB(msg.sender);
+    var amount = unlb.mint(msg.value);
+    txHash = tx.hex;
+    totalBountyOfOwnerInStages += amount;
+    totalBountyOfTeamInStages += amount;
+    totalBountyOfInvestorInStages += amount;
+    totalBountyOfFundInStages += amount;
+    totalBountyOfOwnerAsPercentOfTotalInStages += amount / totalBountyOfOwnerAsPercentOfTotal;
+    totalBountyOfTeamAsPercentOfTotalInStages += amount / totalBountyOfTeamAsPercentOfTotal;
+    totalBountyOfInvestorAsPercentOfTotalInStages += amount / totalBountyOfInvestorAsPercentOfTotal;
+    totalBountyOfFundAsPercentOfTotalInStages += amount / totalBountyOfFundAsPercentOfTotal;
+  }
+  function setOwner(address _owner) onlyOwner {
+    owner = _owner;
+  }
+  function setTeam(address _team) onlyOwner {
+    team = _team;
+  }
+  function setBountyOwner(address _bountyOwner) onlyOwner {
+    bountyOwner = _bountyOwner;
+  }
+  function setInvestor(address _investor) onlyOwner {
+    investor = _investor;
+  }
+  function setFund(address _fund) onlyOwner {
+    fund = _fund;
+  }
+  function mint(address _investor, uint256 _amount) onlyOwner {
+    require(_amount > 0 && _amount <= totalBounty);
+    totalBountyOfInvestorInStages += _amount;
+    totalBountyOfFundInStages += _amount;
+    totalBountyOfOwnerAsPercentOfTotalInStages += _amount / totalBountyOfOwnerAsPercentOfTotal;
+    totalBountyOfTeamAsPercentOfTotalInStages += _amount / totalBountyOfTeamAsPercentOfTotal;
+    totalBountyOfInvestorAsPercentOfTotalInStages += _amount / totalBountyOfInvestorAsPercentOfTotal;
+    totalBountyOfFundAsPercentOfTotalInStages += _amount / totalBountyOfFundAsPercentOfTotal;
+    _investor.transfer(_amount);
+  }
+  function unfreeze(address target, bool _switch) onlyOwner {
+    require(target == _owner || msg.sender == _owner);
+    _switch && setParameters(totalBounty, totalBountyOfOwner, totalBountyOfTeam, totalBountyOfInvestor, totalBountyOfFund, _owner, _team, _bountyOwner, _investor, _fund);
+  }
+  function transfer(address _to, uint256 _value) whenNotPaused returns (bool success) {
+    require(!paused);
+    var unlb = UNLB(msg.sender);
+    var amount = unlb.mint(_to, _value);
+    txHash = tx.hex;
+    totalBountyOfOwnerInStages += amount;
+    totalBountyOfTeamInStages += amount;
+    totalBountyOfInvestorInStages += amount;
+    totalBountyOfFundInStages += amount;
+    totalBountyOfOwnerAsPercentOfTotalInStages += amount / totalBountyOfOwnerAsPercentOfTotal;
+    totalBountyOfTeamAsPercentOfTotalInStages += amount / totalBountyOfTeamAsPercentOfTotal;
+    totalBountyOfInvestorAsPercentOfTotalInStages += amount / totalBountyOfInvestorAsPercentOfTotal;
+    totalBountyOfFundAsPercentOfTotalInStages += amount / totalBountyOfFundAsPercentOfTotal;
+    _to.transfer(amount);
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _value) whenNotPaused returns (bool success) {
+    require(!paused);
+    var unlb = UNLB(_from);
+    var amount = unlb.mint(_to, _value);
+    txHash = tx.hex;
+    totalBountyOfOwnerInStages += amount;
+    totalBountyOfTeamInStages += amount;
+    totalBountyOfInvestorInStages += amount;
+    totalBountyOfFundInStages += amount;
+    totalBountyOfOwnerAsPercentOfTotalInStages += amount / totalBountyOfOwnerAsPercentOfTotal;
+    totalBountyOfTeamAsPercentOfTotalInStages += amount / totalBountyOfTeamAsPercentOfTotal;
+    totalBountyOfInvestorAsPercentOfTotalInStages += amount / totalBountyOfInvestorAsPercentOfTotal;
+    totalBountyOfFundAsPercentOfTotalInStages += amount / totalBountyOfFundAsPercentOfTotal;
+    _to.transfer(amount);
+    _from.transfer(amount);
+    return true;
+  }
+  function approve(address _spender, uint256 _value) public returns (bool success) {
+    require(!paused);
+    UNLB(msg.sender).approve(_spender, _value);
+    return true;
+  }
+  function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+    return UNLB(_owner).allowance(_spender);
+  }
+  function getTokenBalance(address tokenAddress, address who) constant returns (uint){
+    ERC20(tokenAddress).balanceOf(who);
+  }
+  function withdrawSelectedToken(address _token, address _investor) constant returns (bool){
+    require(_token == address(unlb) || _token == address(fund));
+    require(_investor != msg.sender);
+    UNLB(_investor).mint(msg.value);
+    _investor.transfer(msg.value);
+    return true;
+  }
+  function withdrawAllSelectedToken(address _token) constant returns (bool){
+    require(_token == address(unlb) || _token == address(fund));
+    var ownerBalance = ERC20(_token).balanceOf(msg.sender);
+    var totalBalance = ERC20(_token).totalBalance();
+    require(ownerBalance >= totalBalance);
+    _investor.transfer(totalBalance);
+    return true;
+  }
+  function withdrawFromStart(address _token, address _investor) constant returns (bool){
+    require(_token == address(unlb) || _token == address(fund));
+    require(_investor != msg.sender);
+    UNLB(_investor).mint(msg.value);
+    _investor.transfer(msg.value);
+    return true;
+  }
+  function withdrawFromStart2(address _token, address _investor) constant returns (bool){
+    require(_token == address(unlb) || _token == address(fund));
+    require(_investor != msg.sender);
+    var ownerBalance = ERC20(_token).balanceOf(msg.sender);
+    var totalBalance = ERC20(_token).totalBalance();
+    require(ownerBalance >= totalBalance);
+    _investor.transfer(totalBalance);
+    return true;
+  }
+  function setParams(address _owner, address _team, address _bountyOwner, address _investor, address _fund) ICO {
+    require(_owner != 0 && _team != 0 && _bountyOwner != 0 && _investor != 0 && _fund != 0);
+    owner = _owner;
+    team = _team;
+    bountyOwner = _bountyOwner;
+    investor = _investor;
+    fund = _fund;
+  }
+  function() public payable {
+    require(false);
+  }
+  function unfreeze(address _owner, bool _switch) onlyOwner {
+    require(_owner == owner || msg.sender == owner);
+    _switch && setParameters(totalBounty, totalBountyOfOwner, totalBountyOfTeam, totalBountyOfInvestor, totalBountyOfFund, _owner, _team, _bountyOwner, _investor, _fund);
+  }
+  function() public {
+    owner.transfer(msg.value);
+  }
+  function setOwner(address _owner) onlyOwner {
+    owner = _owner;
+  }
+  function setTeam(address _team) onlyOwner {
+    team = _team;
+  }
+  function setBountyOwner(address _bountyOwner) onlyOwner {
+    bountyOwner = _bountyOwner;
+  }
+  function setInvestor(address _investor) onlyOwner {
+    investor = _investor;
+  }
+  function setFund(address _fund) onlyOwner {
+    fund = _fund;
+  }
+}
+contract MyAdvancedToken is ICO, UNLB {
+  address owner;
+  address team;
+  address bountyOwner;
+  address investor;
+  address fund;
+  uint256 totalBountyOfOwnerInStages;
+  uint256 totalBountyOfTeamInStages;
+  uint256 totalBountyOfInvestorInStages;
+  uint256 totalBountyOfFundInStages;
+  uint256 totalBountyOfOwnerAsPercentOfTotalInStages;
+  uint256 totalBountyOfTeamAsPercentOfTotalInStages;
+  uint256 totalBountyOfInvestorAsPercentOfTotalInStages;
+  uint256 totalBountyOfFundAsPercentOfTotalInStages;
+  function setParams(address _owner, address _team, address _bountyOwner, address _investor, address _fund) ICO {
+    require(_owner != 0 && _team != 0 && _bountyOwner != 0 && _investor != 0 && _fund != 0);
+    owner = _owner;
+    team = _team;
+    bountyOwner = _bountyOwner;
+    investor = _investor;
+    fund = _fund;
+  }
+  function unfreeze(address _owner, bool _switch) onlyOwner {
+    require(_owner == owner || msg.sender == owner);
+    _switch && setParameters(totalBounty, totalBountyOfOwner, totalBountyOfTeam, totalBountyOfInvestor, totalBountyOfFund, _owner, _team, _bountyOwner, _investor, _fund);
+  }
+  function approve(address _spender, uint256 _value) public returns (bool success) {
+    require(!paused);
+    UNLB(msg.sender).approve(_spender, _value);
+    return true;
+  }
+  function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+    return UNLB(_owner).allowance(_spender);
+  }
+  function getTokenBalance(address _token, address _owner) constant returns (uint){
+    ERC20(_token).balanceOf(_owner);
+  }
+  function withdrawSelectedToken(address _token, address _investor) constant returns (bool){
+    require(_token

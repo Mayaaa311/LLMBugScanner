@@ -1,0 +1,29 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "vulnerability": "unsafeleave",
+            "reason": "Minting tokens by the contract itself is highly undesirable since it can result in the contract having an unbalance amount of ether."
+        },
+        {
+            "function_name": "freezeAccount",
+            "vulnerability": "unchecked external call",
+            "reason": "The transfer function relies on the balance of the contract, which can be exploited if the contract balance is affected by other factors, such as pre-stored Ether."
+        },
+        {
+            "function_name": "setPrices",
+            "vulnerability": "integer overflow",
+            "reason": "The setPrices function uses arithmetic operations that are not checked for overflow, leading to potential numeric exceptions within the contract."
+        },
+        {
+            "function_name": "sell",
+            "vulnerability": "ether balance dependency",
+            "reason": "The sell function relies on the Ether balance (this.balance) as the potential target for executing the buy function, which can be unreliable since the balance may be affected by other factors, such as self-destruct."
+        },
+        {
+            "function_name": "setExchange",
+            "vulnerability": "unchecked external call",
+            "reason": "The setExchange function relies on an untrusted call to potentially perform critical operations, such as transferring Ether, without having its return values checked."
+        }
+    ]
+}

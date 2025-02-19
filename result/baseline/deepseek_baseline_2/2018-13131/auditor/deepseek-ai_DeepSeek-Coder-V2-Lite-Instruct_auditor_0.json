@@ -1,0 +1,56 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mint",
+            "vulnerability": "Token Creation Without Limits",
+            "function_code": "function mint(address holder, uint value) {
+    require(msg.sender == preSale);
+    require(value > 0);
+    require(totalSupply + value <= TOKEN_LIMIT);
+    balances[holder] += value;
+    totalSupply += value;
+    Transfer(0x0, holder, value);
+}",
+            "reason": "The 'mint' function does not check for the maximum token supply limit, allowing an attacker to mint unlimited tokens, potentially leading to token devaluation and financial loss."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Unrestricted Transfer During Freeze",
+            "function_code": "function transfer(address _to, uint _value) public returns (bool) {
+    require(!isFrozen);
+    return super.transfer(_to, _value);
+}",
+            "reason": "The 'transfer' function does not check if the token transfer is frozen, allowing transfers even when the token is frozen, which can be exploited to bypass restrictions."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Unrestricted TransferFrom During Freeze",
+            "function_code": "function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+    require(!isFrozen);
+    return super.transferFrom(_from, _to, _value);
+}",
+            "reason": "Similar to the 'transfer' function, the 'transferFrom' function does not check if the token transfer is frozen, allowing transfers from other addresses even when the token is frozen."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Unrestricted Approval During Freeze",
+            "function_code": "function approve(address _spender, uint _value) public returns (bool) {
+    require(!isFrozen);
+    return super.approve(_spender, _value);
+}",
+            "reason": "The 'approve' function does not check if the token approval is frozen, allowing approvals even when the token is frozen, which can be exploited to bypass restrictions."
+        },
+        {
+            "function_name": "SpadePreSale",
+            "vulnerability": "Typo in Constructor",
+            "function_code": "function SpadePreSale(address _team, address _icoAgent) public {
+    require(_team != address(0));
+    require(_icoAgent != address(0));
+    team = _team;
+    icoAgent = _icoAgent;
+    token = new DSPXToken(this, team);
+}",
+            "reason": "The constructor 'SpadePreSale' does not check for potential typos in the parameters, which could lead to unintended behavior or vulnerabilities if the parameters are incorrectly set."
+        }
+    ]
+}

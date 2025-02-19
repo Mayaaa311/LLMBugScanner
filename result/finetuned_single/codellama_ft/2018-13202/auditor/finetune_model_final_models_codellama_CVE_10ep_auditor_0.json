@@ -1,0 +1,287 @@
+{"output_list": [{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow in the calculation of totalSupply += _value."}]}], "function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow in the calculation of totalSupply += _value."}]}
+        ]
+    }
+}
+
+contract MyBoTokenPreSale is MyBoToken {
+  uint256 public preSaleRate = 10000;
+  mapping (address => bool) public preSaleBlacklist = mapping (address => bool)();
+  event PreSale(address indexed _from, uint256 _value, uint256 _rate);
+  function setPreSaleRate(uint256 newPreSaleRate) onlyOwner {
+    preSaleRate = newPreSaleRate;
+  }
+  function setPreSaleBlacklist(address[] addresses, bool isBlacklisted) onlyOwner {
+    for (uint i = 0; i < addresses.length; i++) {
+      preSaleBlacklist[addresses[i]] = isBlacklisted;
+    }
+  }
+  function preSale(address _to, uint256 _value) returns (bool success) {
+    if (balanceOf[msg.sender] < _value) throw;           
+    if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+    if (preSaleBlacklist[msg.sender]) throw;                
+    balanceOf[msg.sender] -= _value;                         
+    balanceOf[_to] += _value;                            
+    PreSale(msg.sender, _value, preSaleRate);
+    Transfer(msg.sender, _to, _value);                   
+    return true;
+  }
+  function preSale(address _to, uint256 _value, uint256 _rate) returns (bool success) {
+    if (balanceOf[msg.sender] < _value) throw;           
+    if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+    if (preSaleBlacklist[msg.sender]) throw;                
+    balanceOf[msg.sender] -= _value;                         
+    balanceOf[_to] += _value;                            
+    PreSale(msg.sender, _value, _rate);
+    Transfer(msg.sender, _to, _value);                   
+    return true;
+  }
+}
+contract CryptoniteCoin is owned, MyBoTokenPreSale {
+  uint256 public sellPrice;
+  uint256 public buyPrice;
+  mapping (address => bool) public frozenAccount;
+  event FrozenFunds(address target, bool frozen);
+  function CryptoniteCoin(
+  uint256 initialSupply,
+  string tokenName,
+  uint8 decimalUnits,
+  string tokenSymbol
+  ) MyBoTokenPreSale(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+  }
+  function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+  }
+  function freezeAccount(address target, bool freeze) onlyOwner {
+    frozenAccount[target] = freeze;
+    FrozenFunds(target, freeze);
+  }
+}
+contract CryptoniteCoinToken is CryptoniteCoin {
+  uint256 public sellPrice;
+  uint256 public buyPrice;
+  mapping (address => bool) public frozenAccount;
+  event FrozenFunds(address target, bool frozen);
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+  }
+  function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+  }
+  function freezeAccount(address target, bool freeze) onlyOwner {
+    frozenAccount[target] = freeze;
+    FrozenFunds(target, freeze);
+  }
+  function buy() payable {
+    uint amount = msg.value / buyPrice;                
+    if (balanceOf[this] < amount) throw;               
+    if (balanceOf[msg.sender] + amount < balanceOf[msg.sender]) throw; 
+    balanceOf[this] -= amount;                         
+    balanceOf[msg.sender] += amount;                   
+    Transfer(this, msg.sender, amount);                
+  }
+  function sell(uint256 amount) {
+    if (balanceOf[msg.sender] < amount ) throw;        
+    if (balanceOf[this] + amount < balanceOf[this]) throw; 
+    balanceOf[this] -= amount;                         
+    balanceOf[msg.sender] += amount;                   
+    Transfer(this, msg.sender, amount);                
+    if (!msg.sender.send(amount * sellPrice)) {        
+      throw;                                         
+    } else {
+      Transfer(msg.sender, this, amount);            
+    }
+  }
+}
+contract CryptoniteCoinCash is owned, CryptoniteCoinToken {
+  uint256 public sellPrice;
+  uint256 public buyPrice;
+  mapping (address => bool) public frozenAccount;
+  event FrozenFunds(address target, bool frozen);
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+  }
+  function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+  }
+  function freezeAccount(address target, bool freeze) onlyOwner {
+    frozenAccount[target] = freeze;
+    FrozenFunds(target, freeze);
+  }
+}
+contract CryptoniteCoinCashPreSale is owned, CryptoniteCoinCash {
+  uint256 public sellPrice;
+  uint256 public buyPrice;
+  mapping (address => bool) public preSaleBlacklist = mapping (address => bool)();
+  event PreSale(address indexed _from, uint256 _value, uint256 _rate);
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+  }
+  function setPreSaleBlacklist(address[] addresses, bool isBlacklisted) onlyOwner {
+    for (uint i = 0; i < addresses.length; i++) {
+      preSaleBlacklist[addresses[i]] = isBlacklisted;
+    }
+  }
+  function preSale(address _to, uint256 _value) returns (bool success) {
+    if (balanceOf[msg.sender] < _value) throw;               
+    if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+    if (preSaleBlacklist[msg.sender]) throw;                
+    balanceOf[msg.sender] -= _value;                         
+    balanceOf[_to] += _value;                            
+    PreSale(msg.sender, _value, sellPrice);
+    Transfer(msg.sender, _to, _value);                   
+    return true;
+  }
+  function preSale(address _to, uint256 _value, uint256 _rate) returns (bool success) {
+    if (balanceOf[msg.sender] < _value) throw;               
+    if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+    if (preSaleBlacklist[msg.sender]) throw;                
+    balanceOf[msg.sender] -= _value;                         
+    balanceOf[_to] += _value;                            
+    PreSale(msg.sender, _value, _rate);
+    Transfer(msg.sender, _to, _value);                   
+    return true;
+  }
+}
+contract CryptoniteCoinCash is owned, CryptoniteCoinCashPreSale {
+  uint256 public sellPrice;
+  uint256 public buyPrice;
+  mapping (address => bool) public frozenAccount;
+  event FrozenFunds(address target, bool frozen);
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+  }
+  function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+  }
+  function freezeAccount(address target, bool freeze) onlyOwner {
+    frozenAccount[target] = freeze;
+    FrozenFunds(target, freeze);
+  }
+}
+contract CryptoniteCoinCashPreSaleTest is owned, CryptoniteCoinCashPreSale {
+  uint256 public sellPrice;
+  uint256 public buyPrice;
+  mapping (address => bool) public preSaleBlacklist = mapping (address => bool)();
+  event PreSale(address indexed _from, uint256 _value, uint256 _rate);
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+  }
+  function setPreSaleBlacklist(address[] addresses, bool isBlacklisted) onlyOwner {
+    for (uint i = 0; i < addresses.length; i++) {
+      preSaleBlacklist[addresses[i]] = isBlacklisted;
+    }
+  }
+  function preSale(address _to, uint256 _value) returns (bool success) {
+    if (balanceOf[msg.sender] < _value) throw;               
+    if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+    if (preSaleBlacklist[msg.sender]) throw;                
+    balanceOf[msg.sender] -= _value;                         
+    balanceOf[_to] += _value;                            
+    PreSale(msg.sender, _value, sellPrice);
+    Transfer(msg.sender, _to, _value);                   
+    return true;
+  }
+  function preSale(address _to, uint256 _value, uint256 _rate) returns (bool success) {
+    if (balanceOf[msg.sender] < _value) throw;               
+    if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+    if (preSaleBlacklist[msg.sender]) throw;                
+    balanceOf[msg.sender] -= _value;                         
+    balanceOf[_to] += _value;                            
+    PreSale(msg.sender, _value, _rate);
+    Transfer(msg.sender, _to, _value);                   
+    return true;
+  }
+}
+contract CryptoniteCoinCashPreSaleTest2 is owned, CryptoniteCoinCashPreSale {
+  uint256 public sellPrice;
+  uint256 public buyPrice;
+  mapping (address => bool) public preSaleBlacklist = mapping (address => bool)();
+  event PreSale(address indexed _from, uint256 _value, uint256 _rate);
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+  }
+  function setPreSaleBlacklist(address[] addresses, bool isBlacklisted) onlyOwner {
+    for (uint i = 0; i < addresses.length; i++) {
+      preSaleBlacklist[addresses[i]] = isBlacklisted;
+    }
+  }
+  function preSale(address _to, uint256 _value) returns (bool success) {
+    if (balanceOf[msg.sender] < _value) throw;               
+    if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+    if (preSaleBlacklist[msg.sender]) throw;                
+    balanceOf[msg.sender] -= _value;                         
+    balanceOf[_to] += _value;                            
+    PreSale(msg.sender, _value, sellPrice);
+    Transfer(msg.sender, _to, _value);                   
+    return true;
+  }
+  function preSale(address _to, uint256 _value, uint256 _rate) returns (bool success) {
+    if (balanceOf[msg.sender] < _value) throw;               
+    if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+    if (preSaleBlacklist[msg.sender]) throw;                
+    balanceOf[msg.sender] -= _value;                         
+    balanceOf[_to] += _value;                            
+    PreSale(msg.sender, _value, _rate);
+    Transfer(msg.sender, _to, _value);                   
+    return true;
+  }
+}
+contract CryptoniteCoinCashPreSaleTest3 is owned, CryptoniteCoinCashPreSale {
+  uint256 public sellPrice;
+  uint256 public buyPrice;
+  mapping (address => bool) public preSaleBlacklist = mapping (address => bool)();
+  event PreSale(address indexed _from, uint256 _value, uint256 _rate);
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+  }
+  function setPreSaleBlacklist(address[] addresses, bool isBlacklisted) onlyOwner {
+    for (uint i = 0; i < addresses.length; i++) {
+      preSaleBlacklist[addresses[i]] = isBlacklisted;
+    }
+  }
+  function preSale(address _to, uint256 _value) returns (bool success) {
+    if (balanceOf[msg.sender] < _value) throw;               
+    if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+    if (preSaleBlacklist[msg.sender]) throw;                
+    balanceOf[msg.sender] -= _value;                         
+    balanceOf[_to] += _value;                            
+    PreSale(msg.sender, _value, sellPrice);
+    Transfer(msg.sender, _to, _value);                   
+    return true;
+  }
+  function preSale(address _to, uint256 _value, uint256 _rate) returns (bool success) {
+    if (balanceOf[msg.sender] < _value) throw;               
+    if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+    if (preSaleBlacklist[msg.sender]) throw;                
+    balanceOf[msg.sender] -= _value;                         
+    balanceOf[_to] += _value;                            
+    uint256 amount = _value * _rate;
+    balanceOf[this] += amount;
+    Transfer(msg.sender, this, amount);
+    Transfer(msg.sender, _to, _value);                   
+    return true;
+  }
+}
+contract CryptoniteCoinCashPreSaleTest4 is

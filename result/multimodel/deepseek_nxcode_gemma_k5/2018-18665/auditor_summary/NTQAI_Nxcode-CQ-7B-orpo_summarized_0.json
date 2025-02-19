@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function has an integer overflow vulnerability. The totalSupply and balances[owner] variables are incremented without a check, allowing the owner to set the balance of any user to any value, and subsequently to any total supply, due to a lack of overflow protection in the addition operation."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function has an integer overflow vulnerability. The _value parameter is not checked for overflow in the subtraction operation balances[msg.sender] -= _value, allowing users to set balances to a negative value, and subsequently to any total supply, due to a lack of overflow protection in the subtraction operation."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function has an integer overflow vulnerability. The _value parameter is not checked for overflow in the following operations: balances[_to] += _value, balances[_from] -= _value, and allowed[_from][msg.sender] -= _value, allowing users to set balances to a negative value, and subsequently to any total supply, due to a lack of overflow protection in the subtraction operations."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Wrong Logic",
+            "reason": "The approve function has a wrong logic vulnerability. It allows the owner to set the allowance of any user to any value, without preventing a re-entrancy attack where a spender can repeatedly request funds from an account compromised by this vulnerability."
+        },
+        {
+            "function_name": "disableToken",
+            "vulnerability": "Access Control",
+            "reason": "The disableToken function has an access control vulnerability. It allows the owner to disable the token transfer function, but the owner can also enable it, due to a wrong logic in the function."
+        }
+    ]
+}

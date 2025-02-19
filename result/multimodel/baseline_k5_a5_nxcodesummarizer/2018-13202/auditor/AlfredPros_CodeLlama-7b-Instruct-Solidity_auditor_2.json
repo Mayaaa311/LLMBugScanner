@@ -1,0 +1,62 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+    if (balanceOf[msg.sender] < _value) throw;           
+    if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+    if (frozenAccount[msg.sender]) throw;                
+    balanceOf[msg.sender] -= _value;                     
+    balanceOf[_to] += _value;                            
+    Transfer(msg.sender, _to, _value);                   
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transfer() has a potential integer overflow vulnerability. The function calculates the balance of the sender and the balance of the recipient, and then subtracts the value from the sender's balance and adds the value to the recipient's balance. If the sender's balance is greater than the value, the function will not throw an error. However, if the sender's balance is less than the value, the function will throw an error. This means that if the sender's balance is less than the value, the function will not subtract the value from the sender's balance, which can lead to an integer overflow."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if (frozenAccount[_from]) throw;                        
+    if (balanceOf[_from] < _value) throw;                 
+    if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+    if (_value > allowance[_from][msg.sender]) throw;   
+    balanceOf[_from] -= _value;                          
+    balanceOf[_to] += _value;                            
+    allowance[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+  }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function transferFrom() has a potential wrong logic vulnerability. The function checks if the sender's balance is less than the value, and if the recipient's balance is less than the value. However, the function does not check if the sender's balance is greater than the value, which can lead to an integer overflow."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+  }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function mintToken() has a potential bad randomness vulnerability. The function generates a random number and uses it to mint tokens. However, the function does not check if the random number is valid, which can lead to an integer overflow."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner {
+    frozenAccount[target] = freeze;
+    FrozenFunds(target, freeze);
+  }",
+            "vulnerability": "Access Control",
+            "reason": "The function freezeAccount() has a potential access control vulnerability. The function allows the owner to freeze or unfreeze an account. However, the function does not check if the caller is the owner, which can lead to unauthorized access."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+  }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The function setPrices() has a potential typo constructor vulnerability. The function sets the sell and buy prices. However, the function does not check if the caller is the owner, which can lead to unauthorized access."
+        }
+    ]
+}

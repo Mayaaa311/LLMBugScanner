@@ -1,0 +1,101 @@
+ Here are the 5 most severe vulnerabilities in the provided smart contract, along with their associated functions, reasons, and explanations:
+
+1. Integer Overflow Vulnerability in the `transferMulti` Function
+
+Function Name: `transferMulti`
+
+Vulnerability: Integer Overflow
+
+Function Code:
+```
+function transferMulti(address[] _to, uint256[] _value) public returns (uint256 amount){
+    require(_to.length == _value.length);
+    uint8 len = uint8(_to.length);
+    for(uint8 j; j<len; j++){
+        amount += _value[j]*10**uint256(decimals);
+    }
+    require(balanceOf[msg.sender] >= amount);
+    for(uint8 i; i<len; i++){
+        address _toI = _to[i];
+        uint256 _valueI = _value[i]*10**uint256(decimals);
+        balanceOf[_toI] += _valueI;
+        balanceOf[msg.sender] -= _valueI;
+        emit Transfer(msg.sender, _toI, _valueI);
+    }
+}
+```
+Reason: The `transferMulti` function uses the `uint8` data type to store the length of the `_to` and `_value` arrays, which can lead to integer overflow when the arrays are too large. This can cause the `require` statement to fail, allowing an attacker to transfer more tokens than they are supposed to.
+
+2. Wrong Logic Vulnerability in the `freeze` Function
+
+Function Name: `freeze`
+
+Vulnerability: Wrong Logic
+
+Function Code:
+```
+function freeze(address _user, uint256 _value, uint8 _step) moreThanZero(_value) onlyController public returns (bool success) {
+    _value=_value*10**uint256(decimals);
+    return _freeze(_user,_value,_step);
+}
+```
+Reason: The `freeze` function calls the `_freeze` function with the `_value` parameter multiplied by 10^decimals. However, the `_freeze` function does not perform any checks to ensure that the `_value` parameter is within the correct range. This can lead to an attacker being able to freeze a large amount of tokens, potentially causing the contract to run out of tokens.
+
+3. Bad Randomness Vulnerability in the `generateTokens` Function
+
+Function Name: `generateTokens`
+
+Vulnerability: Bad Randomness
+
+Function Code:
+```
+function generateTokens(address _user, uint _amount) onlyController public returns (bool) {
+    _amount=_amount*10**uint256(decimals);
+    return _generateTokens(_user,_amount);
+}
+```
+Reason: The `generateTokens` function calls the `_generateTokens` function with the `_amount` parameter multiplied by 10^decimals. However, the `_generateTokens` function does not perform any checks to ensure that the `_amount` parameter is within the correct range. This can lead to an attacker being able to generate a large amount of tokens, potentially causing the contract to run out of tokens.
+
+4. Access Control Vulnerability in the `changeOwner` Function
+
+Function Name: `changeOwner`
+
+Vulnerability: Access Control
+
+Function Code:
+```
+function changeOwner(address newOwner) onlyOwner public returns (bool) {
+    balanceOf[newOwner] += balanceOf[owner];
+    balanceOf[owner] = 0;
+    owner = newOwner;
+    return true;
+}
+```
+Reason: The `changeOwner` function allows any user to call it and change the owner of the contract. However, the function does not perform any checks to ensure that the new owner is a valid user. This can lead to an attacker being able to change the owner of the contract to a malicious user.
+
+5. Typo Constructor Vulnerability in the `Token` Constructor
+
+Function Name: `Token` Constructor
+
+Vulnerability: Typo Constructor
+
+Function Code:
+```
+function Token(
+    uint256 initialSupply,
+    string tokenName,
+    uint8 decimalUnits,
+    string tokenSymbol,
+    address _vaultAddress
+) public {
+    require(_vaultAddress != 0);
+    totalSupply = initialSupply * 10 ** uint256(decimalUnits);
+    balanceOf[msg.sender] = totalSupply;
+    name = tokenName;
+    symbol = tokenSymbol;
+    decimals = decimalUnits;
+    owner = msg.sender;
+    vaultAddress=_vaultAddress;
+}
+```
+Reason: The `Token` constructor has a typo in the `decimalUnits` parameter, which should be `decimals`. This can lead to an attacker being able to create a token with the wrong number of decimals, potentially causing the token to be worth less than its face value.

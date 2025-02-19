@@ -1,0 +1,197 @@
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Integer Overflow", "reason": "The transfer and transferFrom functions have an integer overflow."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Wrong Logic", "reason": "The logic for transferring tokens is incorrect."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Bad Randomness", "reason": "The randomness of the transferFrom function is bad."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Access Control", "reason": "The access control for the transferFrom function is incorrect."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Typos Constructor", "reason": "The constructor of the transferFrom function has a typo."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Token Devalue", "reason": "The value of the token is not set correctly."}]}
+}
+Code: 
+pragma solidity ^0.4.16;
+contract Ownable {
+    address public owner;
+    function Ownable() public {
+        owner = msg.sender;
+    }
+    function transferOwnership(address newOwner) public onlyOwner {
+        if (newOwner != address(0)) {
+            owner = newOwner;
+        }
+    }
+}
+contract Permissions is Ownable {
+    mapping (address => uint256) public allowed;
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+    function mintToken(address target, uint256 mintedAmount) public onlyOwner {
+        allowed[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(allowed[msg.sender] >= _value);
+        allowed[msg.sender] -= _value;
+        allowed[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(allowed[_from] >= _value);
+        require(_to != address(0));
+        require(_value <= balances[_from]);
+        require(_value <= allowed[_from][msg.sender]);
+        balances[_from] -= _value;
+        allowed[_from][msg.sender] -= _value;
+        balances[_to] += _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+}
+contract GlobalVillage is Permissions {
+    string public name = "Global Village";
+    string public symbol = "GV";
+    uint256 public totalVesting = 0;
+    uint256 public totalBounty = 0;
+    uint256 public totalTokens = 0;
+    uint256 public totalRemaining = 0;
+    uint256 public myBalance = 0;
+    uint256 public myRemaining = 0;
+    uint256 public rate1 = 3333333333;
+    uint256 public rate2 = 3333333333;
+    uint256 public rate3 = 3333333333;
+    uint256 public rate4 = 3333333333;
+    uint256 public rate5 = 3333333333;
+    uint256 public rate6 = 3333333333;
+    uint256 public rate7 = 3333333333;
+    uint256 public rate8 = 3333333333;
+    uint256 public rate9 = 3333333333;
+    uint256 public rate10 = 3333333333;
+    uint256 public rate11 = 3333333333;
+    uint256 public rate12 = 3333333333;
+    uint256 public rate13 = 3333333333;
+    uint256 public rate14 = 3333333333;
+    uint256 public rate15 = 3333333333;
+    uint256 public rate16 = 3333333333;
+    uint256 public rate17 = 3333333333;
+    uint256 public rate18 = 3333333333;
+    uint256 public rate19 = 3333333333;
+    uint256 public rate20 = 3333333333;
+    uint256 public rate21 = 3333333333;
+    uint256 public rate22 = 3333333333;
+    uint256 public rate23 = 3333333333;
+    uint256 public rate24 = 3333333333;
+    uint256 public rate25 = 3333333333;
+    uint256 public rate26 = 3333333333;
+    uint256 public rate27 = 3333333333;
+    uint256 public rate28 = 3333333333;
+    uint256 public rate29 = 3333333333;
+    uint256 public rate30 = 3333333333;
+    uint256 public rate31 = 3333333333;
+    uint256 public rate32 = 3333333333;
+    uint256 public rate33 = 3333333333;
+    uint256 public rate34 = 3333333333;
+    uint256 public rate35 = 3333333333;
+    uint256 public rate36 = 3333333333;
+    uint256 public rate37 = 3333333333;
+    uint256 public rate38 = 3333333333;
+    uint256 public rate39 = 3333333333;
+    uint256 public rate40 = 3333333333;
+    uint256 public rate41 = 3333333333;
+    uint256 public rate42 = 3333333333;
+    uint256 public rate43 = 3333333333;
+    uint256 public rate44 = 3333333333;
+    uint256 public rate45 = 3333333333;
+    uint256 public rate46 = 3333333333;
+    uint256 public rate47 = 3333333333;
+    uint256 public rate48 = 3333333333;
+    uint256 public rate49 = 3333333333;
+    uint256 public rate50 = 3333333333;
+    uint256 public rate51 = 3333333333;
+    uint256 public rate52 = 3333333333;
+    uint256 public rate53 = 3333333333;
+    uint256 public rate54 = 3333333333;
+    uint256 public rate55 = 3333333333;
+    uint256 public rate56 = 3333333333;
+    uint256 public rate57 = 3333333333;
+    uint256 public rate58 = 3333333333;
+    uint256 public rate59 = 3333333333;
+    uint256 public rate60 = 3333333333;
+    uint256 public rate61 = 3333333333;
+    uint256 public rate62 = 3333333333;
+    uint256 public rate63 = 3333333333;
+    uint256 public rate64 = 3333333333;
+    uint256 public rate65 = 3333333333;
+    uint256 public rate66 = 3333333333;
+    uint256 public rate67 = 3333333333;
+    uint256 public rate68 = 3333333333;
+    uint256 public rate69 = 3333333333;
+    uint256 public rate70 = 3333333333;
+    uint256 public rate71 = 3333333333;
+    uint256 public rate72 = 3333333333;
+    uint256 public rate73 = 3333333333;
+    uint256 public rate74 = 3333333333;
+    uint256 public rate75 = 3333333333;
+    uint256 public rate76 = 3333333333;
+    uint256 public rate77 = 3333333333;
+    uint256 public rate78 = 3333333333;
+    uint256 public rate79 = 3333333333;
+    uint256 public rate80 = 3333333333;
+    uint256 public rate81 = 3333333333;
+    uint256 public rate82 = 3333333333;
+    uint256 public rate83 = 3333333333;
+    uint256 public rate84 = 3333333333;
+    uint256 public rate85 = 3333333333;
+    uint256 public rate86 = 3333333333;
+    uint256 public rate87 = 3333333333;
+    uint256 public rate88 = 3333333333;
+    uint256 public rate89 = 3333333333;
+    uint256 public rate90 = 3333333333;
+    uint256 public rate91 = 3333333333;
+    uint256 public rate92 = 3333333333;
+    uint256 public rate93 = 3333333333;
+    uint256 public rate94 = 3333333333;
+    uint256 public rate95 = 3333333333;
+    uint256 public rate96 = 3333333333;
+    uint256 public rate97 = 3333333333;
+    uint256 public rate98 = 3333333333;
+    uint256 public rate99 = 3333333333;
+    uint256 public rate100 = 3333333333;
+    uint256 public rate101 = 3333333333;
+    uint256 public rate102 = 3333333333;
+    uint256 public rate103 = 3333333333;
+    uint256 public rate104 = 3333333333;
+    uint256 public rate105 = 3333333333;
+    uint256 public rate106 = 3333333333;
+    uint256 public rate107 = 3333333333;
+    uint256 public rate108 = 3333333333;
+    uint256 public rate109 = 3333333333;
+    uint256 public rate110 = 3333333333;
+    uint256 public rate111 = 3333333333;
+    uint256 public rate112 = 3333333333;
+    uint256 public rate113 = 3333333333;
+    uint256 public rate114 = 3333333333;
+    uint256 public rate115 = 3333333333;
+    uint256 public rate116 = 3333333333;
+    uint256 public rate117 = 3333333333;
+    uint256 public rate118 = 3333333333;
+    uint256 public rate119 = 3333333333;
+    uint256 public rate120 = 3333333333;
+    uint256 public rate121 = 3333333333;
+    uint256 public rate122 = 3333333333;
+    uint256 public rate123 = 3333333333;
+    uint256 public rate124 = 3333333333;
+    uint256 public rate125 = 3333333333;
+    uint256 public rate126 = 3333333333;
+    uint256 public rate127 = 3333333333;
+    uint256 public rate128 = 3333333333;
+    uint256 public rate129 = 3333333333;
+    uint256 public rate130 = 3333333333;
+    uint256 public rate131 = 3333333333;
+    uint256 public rate132 = 3333333333;
+    uint256 public rate133 = 3333333333;
+    uint256 public rate134 = 3333333333;
+    uint256 public rate135 = 3333333333;
+    uint256 public rate136 = 3333333333;
+    uint256 public rate137 = 3333333333;
+    uint256 public rate138 = 3333333333;
+    uint256 public rate139 = 3333333333;
+    uint256 public rate140 = 3333333333

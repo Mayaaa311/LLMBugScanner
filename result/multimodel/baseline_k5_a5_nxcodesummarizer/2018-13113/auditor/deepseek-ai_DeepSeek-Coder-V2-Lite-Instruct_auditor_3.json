@@ -1,0 +1,34 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) { if (balances[msg.sender] >= _value && _value > 0) { balances[msg.sender] -= _value; balances[_to] += _value; Transfer(msg.sender, _to, _value); return true; } else { return false; } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function does not check for the possibility of an overflow of the 'balances[msg.sender]' variable when subtracting '_value'. If '_value' is large enough, it can cause an integer overflow, leading to incorrect balance updates and potentially allowing attackers to transfer more tokens than actually owned."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) { if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) { balances[_to] += _value; balances[_from] -= _value; allowed[_from][msg.sender] -= _value; Transfer(_from, _to, _value); return true; } else { return false; } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Similar to the 'transfer' function, this function does not check for overflow when updating the balances of '_from' and '_to'. An attacker can exploit this by sending a transaction with a large '_value' to cause an overflow, leading to unauthorized token transfers."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) returns (bool success) { allowed[msg.sender][_spender] = _value; Approval(msg.sender, _spender, _value); return true; }",
+            "vulnerability": "Access Control",
+            "reason": "The 'approve' function does not check if the allowance is being set to zero. This can lead to a situation where a user's tokens can be locked in the contract if the allowance is not reset to zero after each transaction. This is a significant vulnerability as it can lead to loss of funds."
+        },
+        {
+            "function_name": "receiveApproval",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) { allowed[msg.sender][_spender] = _value; Approval(msg.sender, _spender, _value); if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) { throw; } return true; }",
+            "vulnerability": "Access Control",
+            "reason": "The 'approveAndCall' function allows a third party to call a function on another address with the approval. This introduces a significant security risk because it bypasses the normal transfer restrictions. If the called function does not properly handle the data, it can lead to unauthorized actions."
+        },
+        {
+            "function_name": "constructor",
+            "code": "function HashnodeTestCoin() { balances[msg.sender] = 100000000000000000000000000; totalSupply = 100000000000000000000000000; name = "Easy Trading Token"; decimals = 18; symbol = "ETT"; unitsOneEthCanBuy = 40000; fundsWallet = msg.sender; }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor of the contract misspells the function name 'name' as 'naem' in the line 'name = "Easy Trading Token";'. This typo can lead to unexpected behavior and potential vulnerabilities, as the contract's state variables might not be initialized as intended."
+        }
+    ]
+}

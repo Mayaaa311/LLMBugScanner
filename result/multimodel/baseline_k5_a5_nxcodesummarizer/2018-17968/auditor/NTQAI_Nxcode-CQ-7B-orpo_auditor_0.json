@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "enter",
+            "code": "function enter(uint256 _roomId) public payable {...}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `enter` allows anyone to enter a room for a given price. The `entryPrice` is not checked for overflow, which could lead to a loss of funds for the player."
+        },
+        {
+            "function_name": "enterWithReferral",
+            "code": "function enterWithReferral(uint256 _roomId, address referrer) public payable {...}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `enterWithReferral` also allows anyone to enter a room for a given price. The `entryPrice` is not checked for overflow, which could lead to a loss of funds for the player."
+        },
+        {
+            "function_name": "random",
+            "code": "function random() private view returns (uint256) {...}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function `random` uses the block timestamp and difficulty to generate a random number. However, the difficulty is not checked for overflow, which could lead to a predictable random number sequence."
+        },
+        {
+            "function_name": "refundPlayersInRoom",
+            "code": "function refundPlayersInRoom(uint256 _roomId) public onlyCTO{...}",
+            "vulnerability": "Access Control",
+            "reason": "The function `refundPlayersInRoom` is only accessible to the contract owner (`CTO`). However, it does not check if the contract has enough balance to refund all players. This could lead to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "payout",
+            "code": "function payout(address _to) public onlyCTO {...}",
+            "vulnerability": "Access Control",
+            "reason": "The function `payout` is only accessible to the contract owner (`CTO`). However, it does not check if the contract has enough balance to pay out to the specified address. This could lead to a loss of funds for the contract owner."
+        }
+    ]
+}

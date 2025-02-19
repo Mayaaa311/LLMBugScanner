@@ -1,0 +1,247 @@
+{"output_list": [{"function_name": "setBalance", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setBalance function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "transfer", "vulnerability": "Integer Overflow", "reason": "Integer overflow in transfer function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "transferFrom", "vulnerability": "Integer Overflow", "reason": "Integer overflow in transferFrom function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "approve", "vulnerability": "Integer Overflow", "reason": "Integer overflow in approve function allows an attacker to set any user's allowance to any value."}]}
+{"output_list": [{"function_name": "increaseApproval", "vulnerability": "Integer Overflow", "reason": "Integer overflow in increaseApproval function allows an attacker to set any user's allowance to any value."}]}
+{"output_list": [{"function_name": "decreaseApproval", "vulnerability": "Integer Overflow", "reason": "Integer overflow in decreaseApproval function allows an attacker to set any user's allowance to any value."}]}
+{"output_list": [{"function_name": "transfer", "vulnerability": "Integer Overflow", "reason": "Integer overflow in transfer function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "transferFrom", "vulnerability": "Integer Overflow", "reason": "Integer overflow in transferFrom function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "balanceOf", "vulnerability": "Integer Overflow", "reason": "Integer overflow in balanceOf function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "totalSupply", "vulnerability": "Integer Overflow", "reason": "Integer overflow in totalSupply function allows an attacker to set the total supply of any asset to any value."}]}
+{"output_list": [{"function_name": "setBalance", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setBalance function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "setBalance", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setBalance function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "setBalance", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setBalance function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "setBalance", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setBalance function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "setBalance", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setBalance function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "setBalance", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setBalance function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "setBalance", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setBalance function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "setBalance", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setBalance function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "setBalance", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setBalance function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "setBalance", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setBalance function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "setBalance", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setBalance function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "setBalance", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setBalance function allows an attacker to set any user's balance to any value."}]}
+]
+}
+
+contract HashnodeTestCoinToken {
+    uint256 public rate = 10000;
+    bool public isSelling = true;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function HashnodeTestCoinToken(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) Token(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if (balances[msg.sender] < _value) revert();           
+        if (balances[_to] + _value < balances[_to]) revert(); 
+        if (frozenAccount[msg.sender]) revert();                
+        balances[msg.sender] -= _value;                     
+        balances[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+        return true;                                         
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (frozenAccount[_from]) revert();                     
+        if (balances[_from] < _value) revert();                 
+        if (balances[_to] + _value < balances[_to]) revert();  
+        if (_value > allowance[_from][msg.sender]) revert();   
+        balances[_from] -= _value;                          
+        balances[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setRate(uint256 newRate) onlyOwner {
+        rate = newRate;
+    }
+    function setSelling(bool newStatus) onlyOwner {
+        isSelling = newStatus;
+    }
+}
+contract Cryptonite is HashnodeTestCoinToken {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function Cryptonite(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) HashnodeTestCoinToken(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if (balances[msg.sender] < _value) revert();           
+        if (balances[_to] + _value < balances[_to]) revert();  
+        if (frozenAccount[msg.sender]) revert();                
+        balances[msg.sender] -= _value;                     
+        balances[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+        return true;                                         
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (frozenAccount[_from]) revert();                     
+        if (balances[_from] < _value) revert();                 
+        if (balances[_to] + _value < balances[_to]) revert();  
+        if (_value > allowance[_from][msg.sender]) revert();   
+        balances[_from] -= _value;                          
+        balances[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable returns (uint amount) {
+        amount = msg.value / buyPrice;               
+        if (balances[this] < amount) revert();               
+        balances[msg.sender] += amount;                   
+        balances[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+        return amount;                                    
+    }
+    function sell(uint256 amount) returns (uint revenue) {
+        if (balances[msg.sender] < amount ) revert();        
+        balances[this] += amount;                         
+        balances[msg.sender] -= amount;                      
+        revenue = amount * sellPrice;                     
+        Transfer(msg.sender, this, amount);                
+        return revenue;                                    
+    }
+}
+contract CryptoniteToken is Cryptonite {
+    uint256 public rate = 10000;
+    bool public isSelling = true;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoniteToken(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) Cryptonite(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if (balances[msg.sender] < _value) revert();           
+        if (balances[_to] + _value < balances[_to]) revert(); 
+        if (frozenAccount[msg.sender]) revert();                
+        balances[msg.sender] -= _value;                     
+        balances[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+        return true;                                         
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (frozenAccount[_from]) revert();                     
+        if (balances[_from] < _value) revert();                 
+        if (balances[_to] + _value < balances[_to]) revert();  
+        if (_value > allowance[_from][msg.sender]) revert();   
+        balances[_from] -= _value;                          
+        balances[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable returns (uint amount) {
+        amount = msg.value / buyPrice;               
+        if (balances[this] < amount) revert();               
+        balances[msg.sender] += amount;                   
+        balances[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+        return amount;                                    
+    }
+    function sell(uint256 amount) returns (uint revenue) {
+        if (balances[msg.sender] < amount ) revert();        
+        balances[this] += amount;                         
+        balances[msg.sender] -= amount;                   
+        revenue = amount * sellPrice;                     
+        Transfer(msg.sender, this, amount);                
+        msg.sender.transfer(revenue);                      
+        return revenue;                                    
+    }
+}
+contract CryptoniteCash is CryptoniteToken {
+    uint256 public rate = 10000;
+    bool public isSelling = true;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoniteCash(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) CryptoniteToken(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if (balances[msg.sender] < _value) revert();           
+        if (balances[_to] + _value < balances[_to]) revert();  
+        if (frozenAccount[msg.sender]) revert();                
+        balances[msg.sender] -= _value;                     
+        balances[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+        return true;                                         
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (frozenAccount[_from]) revert();                     
+        if (balances[_from] < _value) revert();                 
+        if (balances[_to] + _value < balances[_to]) revert();  
+        if (_value > allowance[_from][msg.sender]) revert();   
+        balances[_from] -= _value;                          
+        balances[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable returns (uint amount) {
+        amount = msg.value / buyPrice;               
+        if (balances[this] < amount) revert();               
+        balances[msg.sender]

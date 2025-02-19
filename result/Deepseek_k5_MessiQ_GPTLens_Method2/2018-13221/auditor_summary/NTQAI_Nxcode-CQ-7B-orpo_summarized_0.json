@@ -1,0 +1,41 @@
+{
+    "output_list": [
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The setPrices function has an integer overflow vulnerability. The function allows the owner to set the sellPrice and buyPrice, but the buyPrice can be set to a value that causes an integer overflow, allowing the owner to gain unintended funds."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable returns (uint amount)
+    {
+        amount = msg.value / buyPrice;
+        if (balances[this] < amount) throw; 
+        balances[msg.sender] += amount;
+        balances[this] -= amount;
+        Transfer(this, msg.sender, amount);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The buy function has an integer overflow vulnerability. The function allows users to buy tokens with ether, but the amount of tokens bought can be manipulated to cause an integer overflow, allowing the contract owner to gain unintended funds."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) {
+        if (balances[msg.sender] < amount ) throw;
+        balances[this] += amount;
+        balances[msg.sender] -= amount;
+        if (!msg.sender.send(amount * sellPrice)) {
+            throw;
+        } else {
+            Transfer(msg.sender, this, amount);
+        }               
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The sell function has an integer overflow vulnerability. The function allows users to sell tokens for ether, but the amount of ether received can be manipulated to cause an integer overflow, allowing the contract owner to gain unintended funds. Additionally, the sell function allows the owner to devalue the token, making it less valuable."
+        }
+    ]
+}

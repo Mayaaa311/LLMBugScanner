@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "auditor_idx": 3,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function does not check for the possibility of an integer overflow, which can occur if `_value` is very large, causing `balances[msg.sender]` to become negative. This can lead to unexpected behavior and potential control over the contract's balance.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 5
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 3,
+            "vulnerability": "Integer Overflow",
+            "criticism": "Similar to the `transfer` function, this function does not check for integer overflow when updating `balances[_from]` and `allowed[_from][msg.sender]`. An attacker can exploit this to manipulate balances and allowances, leading to potential loss of funds.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 5
+        },
+        {
+            "function_name": "approve",
+            "auditor_idx": 3,
+            "vulnerability": "Access Control",
+            "criticism": "The `approve` function does not check if the allowance is set to zero before setting a new allowance. This can lead to a situation where an attacker can repeatedly call `approve` with a small value and then a large value, increasing the allowance each time, which can be problematic in some scenarios.",
+            "correctness": 6,
+            "severity": 7,
+            "profitability": 4
+        },
+        {
+            "function_name": "approveAndCall",
+            "auditor_idx": 3,
+            "vulnerability": "Access Control",
+            "criticism": "This function introduces an additional vulnerability by allowing the spender to call a function on the contract using the allowance. The check `if(!_spender.call(...)) { throw; }` does not handle reentrancy attacks effectively. An attacker can exploit this to manipulate the contract's state, potentially leading to loss of funds or other vulnerabilities.",
+            "correctness": 6,
+            "severity": 7,
+            "profitability": 4
+        },
+        {
+            "function_name": "ChuCunLingAIGO",
+            "auditor_idx": 3,
+            "vulnerability": "Typo Constructor",
+            "criticism": "The constructor of the `ChuCunLingAIGO` contract does not perform any input validation or checks. If an attacker can manipulate the constructor parameters, they can potentially exploit the contract in various ways, such as setting initial balances or other contract states.",
+            "correctness": 5,
+            "severity": 6,
+            "profitability": 3
+        }
+    ]
+}

@@ -1,0 +1,17 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "uint256 fromBalance = balances[msg.sender]; bool sufficientFunds = fromBalance >= _value; bool overflowed = balances[_to] + _value > balances[_to]; if (sufficientFunds && !overflowed) { balances[msg.sender] -= _value; balances[_to] += _value; Transfer(msg.sender, _to, _value); return true; } else { return false; }"
+            "reason": "The function 'transfer' is vulnerable to Integer Overflow. If the value of the token being transferred is very high, it can cause an overflow in the balance of the receiver, leading to potential loss of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "function_code": "if (sufficientFunds && sufficientAllowance && !overflowed) { balances[_to] += _value; balances[_from] -= _value; allowed[_from][msg.sender] -= _value; Transfer(_from, _to, _value); return true; } else { return false; }"
+            "reason": "The function 'transferFrom' is vulnerable to Wrong Logic. The conditions for the transfer are not properly checked, which can lead to incorrect transfer of tokens and potential loss of funds."
+        }
+    ]
+}<eos>

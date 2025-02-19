@@ -1,0 +1,29 @@
+[
+  {
+    "function_name": "distribute",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The vulnerability exists in the line `totalAmount += _amounts[a];`. If the sum exceeds the maximum value representable by the `uint` type (`2^256 - 1`), it causes an integer overflow. This bypasses the subsequent `require` check, leading to unauthorized deductions and logical inconsistencies. The severity is high because an attacker can exploit this to manipulate the contract's state, potentially leading to financial loss or unauthorized transfers. The correctness is low because the overflow can cause the function to behave unpredictably, making it difficult to reason about the code's behavior. The profitability is medium because exploiting this vulnerability might require a specific sequence of transactions, making it less likely for attackers to profit consistently.",
+    "correctness": 3,
+    "severity": 8,
+    "profitability": 5
+  },
+  {
+    "function_name": "transferFrom",
+    "auditor_idx": 0,
+    "vulnerability": "Wrong Logic",
+    "criticism": "The vulnerability arises from the conditions used to verify the sender's balance and allowance. The `require` statements should ensure that the transfer only proceeds if the sender has enough balance and the allowance allows the transfer. However, the current implementation does not properly check these conditions, allowing unauthorized transfers. This is a significant issue as it can lead to financial losses for token holders. The severity is high because it directly impacts the integrity of the token transfers. The correctness is medium because the logic error can cause unpredictable behavior, but it is less likely to lead to a direct exploit without additional conditions being met. The profitability is low because the vulnerability is relatively easy to detect and exploit, but the conditions required to exploit it might be restrictive.",
+    "correctness": 4,
+    "severity": 9,
+    "profitability": 2
+  },
+  {
+    "function_name": "PayWinner",
+    "auditor_idx": 0,
+    "vulnerability": "Bad Randomness",
+    "criticism": "The function `PayWinner` relies on predictable or non-random selection for choosing the winner, which can be exploited by attackers to influence the outcome. This vulnerability is significant because it can lead to financial losses for users who rely on the randomness for their benefit. The severity is high because it directly impacts the fairness and integrity of the contract's operations. The correctness is low because the lack of randomness can lead to unpredictable behavior. The profitability is medium because while the vulnerability can be exploited, the conditions under which it can be exploited might be restrictive.",
+    "correctness": 3,
+    "severity": 8,
+    "profitability": 4
+  }
+]

@@ -1,0 +1,74 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) returns (bool success) {
+    if (block.number < tokenFrozenUntilBlock) throw;    
+    if (restrictedAddresses[_to]) throw;                
+    if (balances[msg.sender] < _value) throw;           
+    if (balances[_to] + _value < balances[_to]) throw;  
+    balances[msg.sender] -= _value;                     
+    balances[_to] += _value;                            
+    Transfer(msg.sender, _to, _value);                  
+    return true;
+}",
+            "reason": "The transfer function does not check if the sum of the sender's balance and the transfer amount exceeds the maximum value that can be stored in a uint256 variable. This can lead to an integer overflow, where the balance of the sender becomes negative. This vulnerability can be exploited by an attacker who sends a large amount of tokens to the contract, causing the contract to revert and prevent the transfer from being executed."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint256 _value) returns (bool success) {
+    if (block.number < tokenFrozenUntilBlock) throw;    
+    allowances[msg.sender][_spender] = _value;          
+    Approval(msg.sender, _spender, _value);             
+    return true;
+}",
+            "reason": "The approve function does not check if the sum of the sender's allowance and the approval amount exceeds the maximum value that can be stored in a uint256 variable. This can lead to an integer overflow, where the allowance of the sender becomes negative. This vulnerability can be exploited by an attacker who approves a large amount of tokens to be spent by another address, causing the contract to revert and prevent the approval from being executed."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {      
+    if (block.number < tokenFrozenUntilBlock) throw;    
+    if (restrictedAddresses[_to]) throw;                
+    if (balances[_from] < _value) throw;                
+    if (balances[_to] + _value < balances[_to]) throw;  
+    if (_value > allowances[_from][msg.sender]) throw;  
+    balances[_from] -= _value;                          
+    balances[_to] += _value;                            
+    allowances[_from][msg.sender] -= _value;            
+    Transfer(_from, _to, _value);                       
+    return true;     
+}",
+            "reason": "The transferFrom function does not check if the sum of the sender's balance and the transfer amount exceeds the maximum value that can be stored in a uint256 variable. This can lead to an integer overflow, where the balance of the sender becomes negative. This vulnerability can be exploited by an attacker who sends a large amount of tokens from another address to the contract, causing the contract to revert and prevent the transfer from being executed."
+        },
+        {
+            "function_name": "mintTokens",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintTokens(address _to, uint256 _amount) {         
+    if (msg.sender != icoContractAddress) throw;            
+    if (restrictedAddresses[_to]) throw;                    
+    if (balances[_to] + _amount < balances[_to]) throw;     
+    supply += _amount;                                      
+    balances[_to] += _amount;                               
+    Mint(_to, _amount);                                     
+    Transfer(0x0, _to, _amount);                            
+}",
+            "reason": "The mintTokens function does not check if the sum of the total supply and the minted amount exceeds the maximum value that can be stored in a uint256 variable. This can lead to an integer overflow, where the total supply becomes negative. This vulnerability can be exploited by an attacker who mints a large amount of tokens to the contract, causing the contract to revert and prevent the minting from being executed."
+        },
+        {
+            "function_name": "burnTokens",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function burnTokens(uint256 _amount) onlyOwner {
+    if(balances[msg.sender] < _amount) throw;               
+    if(supply < _amount) throw;                             
+    supply -= _amount;                                      
+    balances[msg.sender] -= _amount;                        
+    Burn(msg.sender, _amount);                              
+    Transfer(msg.sender, 0x0, _amount);                     
+}",
+            "reason": "The burnTokens function does not check if the sum of the total supply and the burned amount exceeds the maximum value that can be stored in a uint256 variable. This can lead to an integer overflow, where the total supply becomes negative. This vulnerability can be exploited by an attacker who burns a large amount of tokens from their own balance, causing the contract to revert and prevent the burning from being executed."
+        }
+    ]
+}

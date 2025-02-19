@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "auditor_idx": 3,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function does not check for the possibility of an overflow of the 'balances[msg.sender]' variable when subtracting '_value'. If '_value' is large enough, it can cause an integer overflow, leading to incorrect balance updates and potentially allowing attackers to transfer more tokens than actually owned.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 6
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 3,
+            "vulnerability": "Integer Overflow",
+            "criticism": "Similar to the 'transfer' function, this function does not check for overflow when updating the balances of '_from' and '_to'. An attacker can exploit this by sending a transaction with a large '_value' to cause an overflow, leading to unauthorized token transfers.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 6
+        },
+        {
+            "function_name": "approve",
+            "auditor_idx": 3,
+            "vulnerability": "Access Control",
+            "criticism": "The 'approve' function does not check if the allowance is being set to zero. This can lead to a situation where a user's tokens can be locked in the contract if the allowance is not reset to zero after a transaction. This is a significant vulnerability as it can lead to loss of funds.",
+            "correctness": 8,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "approveAndCall",
+            "auditor_idx": 3,
+            "vulnerability": "Access Control",
+            "criticism": "This function introduces an additional approval mechanism that calls a contract on approval. However, it does not validate the return value of the called contract's receiveApproval function. If the called contract does not implement the receiveApproval function or throws an error, the transaction will still proceed, leading to potential vulnerabilities.",
+            "correctness": 8,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "constructor",
+            "auditor_idx": 3,
+            "vulnerability": "Typo Constructor",
+            "criticism": "The constructor of the contract 'HashnodeTestCoin' is susceptible to a typo vulnerability. If there's a typo in the variable names or operations within the constructor, it could lead to unintended behavior, such as incorrect initializations or even contract deployment failure. This is a critical vulnerability as it can render the contract unusable or lead to unexpected outcomes.",
+            "correctness": 9,
+            "severity": 9,
+            "profitability": 9
+        }
+    ]
+}

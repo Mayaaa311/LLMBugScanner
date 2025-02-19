@@ -1,0 +1,64 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) revert();           
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert(); 
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The code does not handle integer overflow correctly. If the `_value` is greater than the `balanceOf[msg.sender]`, it will result in an integer overflow."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (balanceOf[_from] < _value) revert();                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert();  
+        if (_value > allowance[_from][msg.sender]) revert();   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The code does not handle the logic correctly. It does not check if the `_value` is greater than the `allowance[_from][msg.sender]` before updating the allowance."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) revert();           
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert(); 
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The code does not have any randomness involved."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The code does not have any access control mechanism."
+        },
+        {
+            "function_name": "PolyAi",
+            "code": "function PolyAi(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}",
+            "vulnerability": "Typo Constructor",
+            "reason": "The code has a typo in the constructor function. The function name `PolyAi` should be `PolyAi`."
+        }
+    ]
+}

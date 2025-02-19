@@ -1,0 +1,313 @@
+{"output_list": [{"function_name": "RC", "vulnerability": "Integer Overflow", "description": "Integer overflow in the RC function 'buyFromRC' allows an attacker to set the balance of an arbitrary user to any value."}]}
+{"function_name": "RC", "vulnerability": "Integer Overflow", "description": "Integer overflow in the RC function 'buyFromRC' allows an attacker to set the balance of an arbitrary user to any value."}]}
+{"output_list": [
+  {
+    "function_name": "RC",
+    "vulnerability": "Integer Overflow",
+    "description": "Integer overflow in the RC function 'buyFromRC' allows an attacker to set the balance of an arbitrary user to any value."
+  }
+]
+}
+
+{"output_list": [
+  {
+    "function_name": "buyFromRC",
+    "vulnerability": "Integer Overflow",
+    "description": "Integer overflow in the RC function 'buyFromRC' allows an attacker to set the balance of an arbitrary user to any value."
+  }
+]
+}
+```
+
+pragma solid 1686e - Wrong Logic
+pragma solidity ^0.4.19;
+contract EIP20Interface {
+    uint256 public totalSupply;
+    function balanceOf(address _owner) constant returns (uint256 balance);
+    function transfer(address _to, uint256 _value) returns (bool success);
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success);
+    function approve(address _spender, uint256 _value) returns (bool success);
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining);
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+}
+contract EIP20 is EIP20Interface {
+    uint256 constant private MAX_UINT256 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+    mapping (address => uint256) private balances;
+    mapping (address => mapping (address => uint256)) private allowed;
+    uint256 private totalSupply;
+    function EIP20() {
+        totalSupply = 0;
+        balances[msg.sender] = 0;
+    }
+    function totalSupply() constant returns (uint256 _totalSupply) {
+        _totalSupply = totalSupply;
+    }
+    function balanceOf(address _owner) constant returns (uint256 balance) {
+        return balances[_owner];
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if(balances[msg.sender] >= _value && _value > 0) {
+            balances[msg.sender] -= _value;
+            balances[_to] += _value;
+            Transfer(msg.sender, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if(balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
+            balances[_to] += _value;
+            balances[_from] -= _value;
+            allowed[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        if (_value != 0 && allowed[msg.sender][_spender] != 0) { return false; }
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+        return allowed[_owner][_spender];
+    }
+}
+contract EIP20 is EIP20Interface {
+    uint256 constant private MAX_UINT256 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+    mapping (address => uint256) private balances;
+    mapping (address => mapping (address => uint256)) private allowed;
+    uint256 private totalSupply;
+    string public name;                   
+    uint8 public decimals;                
+    string public symbol;                 
+    function EIP20(
+        uint256 _initialAmount,
+        string _tokenName,
+        uint8 _decimalUnits,
+        string _tokenSymbol
+    ) {
+        balances[msg.sender] = _initialAmount;              
+        totalSupply = _initialAmount;                        
+        name = _tokenName;                                      
+        decimals = _decimalUnits;                            
+        symbol = _tokenSymbol;                               
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if(balances[msg.sender] >= _value && _value > 0) {
+            balances[msg.sender] -= _value;
+            balances[_to] += _value;
+            Transfer(msg.sender, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if(balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
+            balances[_to] += _value;
+            balances[_from] -= _value;
+            allowed[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function balanceOf(address _owner) constant returns (uint256 balance) {
+        return balances[_owner];
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        if(_value != 0 && allowed[msg.sender][_spender] != 0) { return false; }
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+        return allowed[_owner][_spender];
+    }
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+}
+contract EIP20Token is EIP20, SafeMath {
+    uint256 public buyRate = 10**18; 
+    uint256 public sellRate = 10**18; 
+    bool public isSelling = false; 
+    bool public isBuying = true; 
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function EIP20Token(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) EIP20(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if(balances[msg.sender] >= _value && _value > 0 && frozenAccount[msg.sender] == false) {
+            balances[msg.sender] -= _value;
+            balances[_to] += _value;
+            Transfer(msg.sender, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if(balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0 && frozenAccount[_from] == false) {
+            balances[_to] += _value;
+            balances[_from] -= _value;
+            allowed[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setBuyRate(uint256 newBuyRate) onlyOwner {
+        buyRate = newBuyRate;
+    }
+    function setSellRate(uint256 newSellRate) onlyOwner {
+        sellRate = newSellRate;
+    }
+    function setPrices(uint256 newSellRate, uint256 newBuyRate) onlyOwner {
+        sellRate = newSellRate;
+        buyRate = newBuyRate;
+    }
+    function buy() payable returns (uint amount) {
+        amount = msg.value / buyRate;               
+        require(balances[this] >= amount);               
+        balances[msg.sender] += amount;                   
+        balances[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+        return amount;                                      
+    }
+    function sell(uint amount) returns (uint revenue) {
+        require(this.balance >= amount * sellRate);      
+        require(balances[msg.sender] >= amount);        
+        balances[this] += amount;                         
+        balances[msg.sender] -= amount;                   
+        revenue = amount * sellRate;                      
+        msg.sender.transfer(revenue);                   
+        Transfer(msg.sender, this, amount);                        
+        return revenue;                                     
+    }
+}
+contract Cryptonite is EIP20Token {
+    uint256 public buyRate = 10**18; 
+    uint256 public sellRate = 10**18; 
+    bool public isSelling = false; 
+    bool public isBuying = true; 
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function Cryptonite(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) EIP20(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if(balances[msg.sender] >= _value && _value > 0 && frozenAccount[msg.sender] == false) {
+            balances[msg.sender] -= _value;
+            balances[_to] += _value;
+            Transfer(msg.sender, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if(balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0 && frozenAccount[_from] == false) {
+            balances[_to] += _value;
+            balances[_from] -= _value;
+            allowed[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setBuyRate(uint256 newBuyRate) onlyOwner {
+        buyRate = newBuyRate;
+    }
+    function setSellRate(uint256 newSellRate) onlyOwner {
+        sellRate = newSellRate;
+    }
+    function setPrices(uint256 newSellRate, uint256 newBuyRate) onlyOwner {
+        sellRate = newSellRate;
+        buyRate = newBuyRate;
+    }
+    function buy() payable returns (uint amount) {
+        amount = msg.value / buyRate;               
+        require(balances[this] >= amount);               
+        balances[msg.sender] += amount;                   
+        balances[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+        return amount;                                      
+    }
+    function sell(uint amount) returns (uint revenue) {
+        require(this.balance >= amount * sellRate);      
+        require(balances[msg.sender] >= amount);        
+        balances[this] += amount;                         
+        balances[msg.sender] -= amount;                   
+        revenue = amount * sellRate;                      
+        msg.sender.transfer(revenue);                   
+        Transfer(msg.sender, this, amount);                
+        return revenue;                                     
+    }
+}
+contract CryptoniteToken is EIP20Token {
+    uint256 public buyRate = 10**18; 
+    uint256 public sellRate = 10**18; 
+    bool public isSelling = false; 
+    bool public isBuying = true; 
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoniteToken(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) EIP20Token(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if(balances[msg.sender] >= _value && _value > 0 && frozenAccount[msg.sender] == false) {
+            balances[msg.sender] -= _value;
+            balances[_to] += _value;
+            Transfer(msg.sender, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if(balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0 && frozenAccount[_from] == false) {
+            balances[_to] += _value;
+            balances[_from] -= _value;
+            allowed[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setBuyRate(uint256 newBuyRate) onlyOwner {
+        buyRate = newBuyRate;
+    }
+    function setSellRate(uint256 newSellRate) onlyOwner {
+        sellRate = newSellRate;
+    }
+    function setPrices(uint256 newSellRate, uint256 newBuyRate) onlyOwner {
+        sell

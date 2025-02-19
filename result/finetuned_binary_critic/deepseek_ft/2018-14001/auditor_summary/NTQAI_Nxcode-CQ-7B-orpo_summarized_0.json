@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "batchTransfer",
+            "code": "function batchTransfer(address[] _receivers, uint256 _value) public returns (bool) {  uint256 cnt = _receivers.length;  uint256 amount = cnt * _value;  if(amount == 0) return false;  if(balanceOf[msg.sender] < amount) return false;  balanceOf[msg.sender] -= amount;  for (uint i = 0; i < cnt; i++) {    balanceOf[_receivers[i]] += _value;    Transfer(msg.sender, _receivers[i], _value);  }  return true;}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'amount' variable in the 'batchTransfer' function is calculated using the multiplication of 'cnt' and '_value'. If 'cnt' is sufficiently large, 'amount' can underflow, causing a denial of service to legitimate users."
+        },
+        {
+            "function_name": "Trade",
+            "code": "function Trade(uint256 _qty, uint256 _price, bytes32 _data, address _seller, address _buyer) payable onlyManager{  if(balanceOf[_seller]<_qty)return;  if(balanceOf[_buyer]+_qty<balanceOf[_buyer])return;  uint256 total = _qty*_price;  _seller.transfer(total);  balanceOf[_seller]-=_qty;  balanceOf[_buyer]+=_qty;  Transfer(_seller,_buyer,_qty);  deal(_seller,_buyer,_qty,_price,_data);}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'total' variable in the 'Trade' function is calculated using the multiplication of '_qty' and '_price'. If '_qty' and '_price' are sufficiently large, 'total' can underflow, causing a denial of service to legitimate users."
+        },
+        {
+            "function_name": "Buy",
+            "code": "function Buy()  payable  onlyHuman{  if(msg.value<price*1 ether)throw;  this.Trade(msg.value/price,price,"",owner,msg.sender);  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'msg.value/price' in the 'Buy' function can overflow if 'price' is sufficiently large, causing a denial of service to legitimate users."
+        },
+        {
+            "function_name": "Sell",
+            "code": "function Sell(uint256 _qty)  payable  onlyHuman{  if(this.balance<_qty*price)throw;  this.Trade(_qty,price,"buyback",msg.sender,owner);  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The '_qty*price' in the 'Sell' function can overflow if '_qty' is sufficiently large, causing a denial of service to legitimate users."
+        },
+        {
+            "function_name": "airDrop",
+            "code": "function airDrop(address[] _adr,uint256 _val)  public  payable  {    if(msg.value >= _adr.length * _val)    {      Buy();      batchTransfer(_adr,_val);    }  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The '_adr.length * _val' in the 'airDrop' function can overflow if '_adr.length' is sufficiently large, causing a denial of service to legitimate users."
+        }
+    ]
+}

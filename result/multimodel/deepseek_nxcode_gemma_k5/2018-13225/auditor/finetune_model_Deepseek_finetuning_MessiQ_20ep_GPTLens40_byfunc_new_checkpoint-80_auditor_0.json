@@ -1,0 +1,29 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function has an integer overflow vulnerability. The issue is in the mintToken function where the balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0, this, mintedAmount); Transfer(this, target, mintedAmount); The mintedAmount is added to the target's balance without a check, allowing the total supply and the target's balance to increase arbitrarily, resulting in a negative token balance for the target."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function has an integer overflow vulnerability. The issue is in the transfer function where the balanceOf[msg.sender] -= _value; balanceOf[_to] += _value; Transfer(msg.sender, _to, _value); The _value is not checked for underflow, allowing it to become negative, resulting in a stuck token balance for the target."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function has an integer overflow vulnerability. The issue is in the transferFrom function where the assert (balanceOf[_from] >= _value); assert (balanceOf[_to] + _value >= balanceOf[_to]); assert (_value <= allowance[_from][msg.sender]); balanceOf[_from] -= _value; balanceOf[_to] += _value; allowance[_from][msg.sender] -= _value; The _value is not checked for underflow, allowing it to become negative, resulting in a stuck token balance for the target."
+        },
+        {
+            "function_name": "buy",
+            "vulnerability": "Integer Overflow",
+            "reason": "The buy function has an integer overflow vulnerability. The issue is in the buy function where the uint amount = msg.value / buyPrice; assert (balanceOf[this] >= amount); balanceOf[msg.sender] += amount; balanceOf[this] -= amount; Transfer(this, msg.sender, amount); The buyPrice is set by the owner, allowing it to be extremely large, causing an overflow in the buy function, resulting in a stuck token balance for the target."
+        },
+        {
+            "function_name": "sell",
+            "vulnerability": "Integer Overflow",
+            "reason": "The sell function has an integer overflow vulnerability. The issue is in the sell function where the assert (balanceOf[msg.sender] >= amount ); balanceOf[this] += amount; balanceOf[msg.sender] -= amount; assert (msg.sender.send(amount * sellPrice)); The sellPrice is set by the owner, allowing it to be extremely large, causing an overflow in the sell function, resulting in a stuck token balance for the target."
+        }
+    ]
+}

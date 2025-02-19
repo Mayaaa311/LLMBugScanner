@@ -1,0 +1,29 @@
+{"output_list": [
+            {
+                "function_name": "sellOffline",
+                "code": "function sellOffline(address rec_address,uint256 token_amount) public onlyOwner 
+                {
+                    if (remaining > 0)
+                    {
+                        uint finalTokens =  (token_amount  * (10 ** 18));              
+                        if(finalTokens < remaining)
+                            {
+                                remaining = remaining - finalTokens;
+                                _transfer(owner,rec_address, finalTokens);    
+                                TransferSell(owner, rec_address, finalTokens,'Offline');
+                            }
+                        else
+                            {
+                                revert();
+                            }
+                    }
+                    else
+                    {
+                        revert();
+                    }        
+                }
+                ",
+                "vulnerability": "Integer Overflow",
+                "reason": "Integer overflow in sellOffline function allows the owner to set any user's balance arbitrarily, aka the 'tradeTrap' issue."
+            }
+        ]

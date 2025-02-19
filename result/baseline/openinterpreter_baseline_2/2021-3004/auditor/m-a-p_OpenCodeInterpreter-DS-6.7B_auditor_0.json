@@ -1,0 +1,74 @@
+{
+    "output_list": [
+        {
+            "function_name": "stake",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function stake(uint256 amount) external nonReentrant updateReward(msg.sender) {
+        require(amount > 0, "Cannot stake 0");
+        stakedSupply += amount;
+        stakes[msg.sender] += amount;
+        _transferTokens(msg.sender, address(this), amount);
+        emit Staked(msg.sender, amount);
+    }",
+            "reason": "In the stake function, the stakedSupply and stakes[msg.sender] are incremented by the amount. If the amount is greater than the maximum uint256 value, it will result in an integer overflow."
+        },
+        {
+            "function_name": "unstake",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function unstake(uint amount) public nonReentrant updateReward(msg.sender) {
+        require(amount > 0, "Cannot withdraw 0");
+        stakedSupply -= amount;
+        stakes[msg.sender] -= amount;
+        _transferTokens(address(this), msg.sender, amount);
+        emit Unstaked(msg.sender, amount);
+    }",
+            "reason": "In the unstake function, the stakedSupply and stakes[msg.sender] are decremented by the amount. If the amount is greater than the current value of stakedSupply, it will result in an integer overflow."
+        },
+        {
+            "function_name": "getReward",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function getReward() public nonReentrant updateReward(msg.sender) {
+        uint256 reward = rewards[msg.sender];
+        if (reward > 0) {
+            rewards[msg.sender] = 0;
+            _transferTokens(address(this), msg.sender, reward);
+            emit Earned(msg.sender, reward);
+        }
+    }",
+            "reason": "In the getReward function, the rewards[msg.sender] is set to 0. If the current value of rewards[msg.sender] is greater than the maximum uint256 value, it will result in an integer overflow."
+        },
+        {
+            "function_name": "notifyFeeAmount",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function notifyFeeAmount(uint reward) internal updateReward(address(0)) {
+        if (block.timestamp >= periodFinish) {
+            rewardRate = reward / DURATION;
+        } else {
+            uint remaining = periodFinish - block.timestamp;
+            uint leftover = remaining * rewardRate;
+            rewardRate = (reward + leftover) / DURATION;
+        }
+        uint balance = balances[address(this)];
+        require(rewardRate <= balance / DURATION, "Provided reward too high");
+        lastUpdateTime = block.timestamp;
+        periodFinish = block.timestamp + DURATION;
+        emit Fees(reward);
+    }",
+            "reason": "In the notifyFeeAmount function, the rewardRate is calculated based on the provided reward and the current block timestamp. If the reward is greater than the maximum uint256 value, it will result in an integer overflow."
+        },
+        {
+            "function_name": "updateReward",
+            "vulnerability": "Integer Overflow",
+            "function_code": "modifier updateReward(address account) {
+        rewardPerTokenStored = rewardPerToken();
+        lastUpdateTime = lastTimeRewardApplicable();
+        if (account != address(0)) {
+            rewards[account] = earned(account);
+            userRewardPerTokenPaid[account] = rewardPerTokenStored;
+        }
+        _;
+    }",
+            "reason": "In the updateReward modifier, the rewardPerTokenStored and userRewardPerTokenPaid[account] are updated based on the current block timestamp. If the current value of rewardPerTokenStored is greater than the maximum uint256 value, it will result in an integer overflow."
+        }
+    ]
+}

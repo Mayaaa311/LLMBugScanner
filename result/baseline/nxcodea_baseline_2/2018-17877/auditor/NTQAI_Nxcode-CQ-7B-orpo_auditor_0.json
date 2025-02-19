@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "buyHeart",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function buyHeart(address referred) public payable { require(msg.value >= 1000000000, "pocket lint: not a valid currency"); require(msg.value <= 100000000000000000000000, "no vitalik, no"); address _addr = msg.sender; uint256 _codeLength; assembly {_codeLength := extcodesize(_addr)} require(_codeLength == 0, "sorry humans only"); uint256 _hearts = (RoundETH[Round]).keysRec(msg.value); uint256 _pearn; require(_hearts >= 1000000000000000000); require(RoundTime[Round] > now || RoundTime[Round] == 0); updateTimer(_hearts); RoundHeart[Round] += _hearts; RoundMyHeart[Round][msg.sender] += _hearts; if (referred != address(0) && referred != msg.sender) { _pearn = (((msg.value.mul(30) / 100).mul(1000000000000000000)) / (RoundHeart[Round])).mul(_hearts)/ (1000000000000000000); onwerfee += (msg.value.mul(4) / 100); RoundETH[Round] += msg.value.mul(54) / 100; Luckybuy += msg.value.mul(2) / 100; MyreferredRevenue[referred] += (msg.value.mul(10) / 100); RoundPayMask[Round] += ((msg.value.mul(30) / 100).mul(1000000000000000000)) / (RoundHeart[Round]); RoundMyPayMask[Round][msg.sender] = (((RoundPayMask[Round].mul(_hearts)) / (1000000000000000000)).sub(_pearn)).add(RoundMyPayMask[Round][msg.sender]); emit referredEvent(msg.sender, referred, msg.value.mul(10) / 100); } else { _pearn = (((msg.value.mul(40) / 100).mul(1000000000000000000)) / (RoundHeart[Round])).mul(_hearts)/ (1000000000000000000); RoundETH[Round] += msg.value.mul(54) / 100; Luckybuy += msg.value.mul(2) / 100; onwerfee +=(msg.value.mul(4) / 100); RoundPayMask[Round] += ((msg.value.mul(40) / 100).mul(1000000000000000000)) / (RoundHeart[Round]); RoundMyPayMask[Round][msg.sender] = (((RoundPayMask[Round].mul(_hearts)) / (1000000000000000000)).sub(_pearn)).add(RoundMyPayMask[Round][msg.sender]); } if (msg.value >= 100000000000000000){ luckybuyTracker_++; if (luckyBuy() == true) { msg.sender.transfer(Luckybuy); emit luckybuyEvent(msg.sender, Luckybuy, Round); luckybuyTracker_ = 0; Luckybuy = 0; } } RoundLastGreedyMan[Round] = msg.sender; emit buyheartEvent(msg.sender, _hearts, msg.value, Round, referred); }",
+            "reason": "The function buyHeart has an integer overflow vulnerability. The variable _hearts is calculated by multiplying msg.value with a constant value and then adding the current value of RoundHeart[Round]. If msg.value is large enough, the result of the multiplication could cause an integer overflow. This could lead to incorrect calculations and potentially incorrect behavior of the contract."
+        },
+        {
+            "function_name": "luckyBuy",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function luckyBuy() private view returns(bool) { uint256 seed = uint256(keccak256(abi.encodePacked( (block.timestamp).add (block.difficulty).add (((uint256(keccak256(abi.encodePacked(block.coinbase)))) / (now)).add (block.gaslimit).add (((uint256(keccak256(abi.encodePacked(msg.sender)))) / (now)).add (block.number) )))); if((seed - ((seed / 1000) * 1000)) < luckybuyTracker_) return(true); else return(false); }",
+            "reason": "The function luckyBuy has an integer overflow vulnerability. The variable seed is calculated by performing a series of operations on the block and message sender data. If the result of the operations is large enough, the result of the subtraction could cause an integer overflow. This could lead to incorrect calculations and potentially incorrect behavior of the contract."
+        },
+        {
+            "function_name": "getHeartPrice",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function getHeartPrice() public view returns(uint256) { return ( (RoundHeart[Round].add(1000000000000000000)).ethRec(1000000000000000000) ); }",
+            "reason": "The function getHeartPrice has an integer overflow vulnerability. The variable _hearts is calculated by adding 1000000000000000000 to the current value of RoundHeart[Round]. If the current value of RoundHeart[Round] is large enough, the result of the addition could cause an integer overflow. This could lead to incorrect calculations and potentially incorrect behavior of the contract."
+        },
+        {
+            "function_name": "getMyRevenue",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function getMyRevenue(uint _round) public view returns(uint256) { return(  (((RoundPayMask[_round]).mul(RoundMyHeart[_round][msg.sender])) / (1000000000000000000)).sub(RoundMyPayMask[_round][msg.sender])  ); }",
+            "reason": "The function getMyRevenue has an integer overflow vulnerability. The variable _revenue is calculated by multiplying RoundPayMask[_round] with RoundMyHeart[_round][msg.sender] and then dividing the result by 1000000000000000000. If the current value of RoundPayMask[_round] or RoundMyHeart[_round][msg.sender] is large enough, the result of the multiplication could cause an integer overflow. This could lead to incorrect calculations and potentially incorrect behavior of the contract."
+        },
+        {
+            "function_name": "getTimeLeft",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function getTimeLeft() public view returns(uint256) { if(RoundTime[Round] == 0 || RoundTime[Round] < now) return 0; else return( (RoundTime[Round]).sub(now) ); }",
+            "reason": "The function getTimeLeft has an integer overflow vulnerability. The variable _newTime is calculated by adding the result of the multiplication of _hearts and RoundIncrease to the current value of RoundTime[Round]. If the current value of RoundTime[Round] is large enough, the result of the addition could cause an integer overflow. This could lead to incorrect calculations and potentially incorrect behavior of the contract."
+        }
+    ]
+}

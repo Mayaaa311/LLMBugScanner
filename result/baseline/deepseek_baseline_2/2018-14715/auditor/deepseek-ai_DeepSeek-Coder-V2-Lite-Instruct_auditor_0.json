@@ -1,0 +1,81 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mint",
+            "vulnerability": "Access Control",
+            "function_code": "function mint(bytes32 _image,address _owner) public onlyOwner returns (uint)
+{
+  uint256 newId = _mint(_image);
+  _transfer(0, _owner, newId);
+  Mint(items[newId].image,tokenIndexToOwner[newId],newId);
+  return newId;
+}",
+            "reason": "The mint function is restricted to only the owner, allowing anyone to mint new tokens. This can be exploited by an attacker to mint unlimited tokens, devaluing the NFT."
+        },
+        {
+            "function_name": "mintPack",
+            "vulnerability": "Access Control",
+            "function_code": "function mintPack(uint256 _price,bytes32 _image1,bytes32 _image2,bytes32 _image3,bytes32 _image4,bytes32 _image5,bytes32 _image6,bytes32 _image7,bytes32 _image8,bytes32 _image9,bytes32 _image10) public onlyOwner returns (bool)
+{
+  uint256[10] memory tokens;
+  tokens[0] = _mint(_image1);
+  tokens[1] = _mint(_image2);
+  tokens[2] = _mint(_image3);
+  tokens[3] = _mint(_image4);
+  tokens[4] = _mint(_image5);
+  tokens[5] = _mint(_image6);
+  tokens[6] = _mint(_image7);
+  tokens[7] = _mint(_image8);
+  tokens[8] = _mint(_image9);
+  tokens[9] = _mint(_image10);
+  Pack memory _pack = Pack({
+    tokens: tokens,
+    price: _price
+  });
+  MintPack(packs.push(_pack) - 1, _price,tokens[0],tokens[1],tokens[2],tokens[3],tokens[4],tokens[5],tokens[6],tokens[7],tokens[8],tokens[9]);
+  return true;
+}",
+            "reason": "Similar to the mint function, mintPack is restricted to only the owner, allowing anyone to mint new packs. This can be exploited to mint unlimited packs, devaluing the NFT."
+        },
+        {
+            "function_name": "buyPack",
+            "vulnerability": "Access Control",
+            "function_code": "function buyPack(uint256 packId) public payable returns (bool)
+{
+  require( packs[packId].price > 0 );
+  require( msg.value >= packs[packId].price );
+  packs[packId].price=0;
+  for(uint8 i=0;i<10;i++){
+    tokenIndexToOwner[packs[packId].tokens[i]]=msg.sender;
+    _transfer(0, msg.sender, packs[packId].tokens[i]);
+  }
+  delete packs[packId];
+  BuyPack(msg.sender,packId,msg.value);
+}",
+            "reason": "The buyPack function does not enforce any access control, allowing anyone to call it and purchase packs. This can lead to financial loss for the contract owner as anyone can buy packs and potentially drain the contract's funds."
+        },
+        {
+            "function_name": "submitStack",
+            "vulnerability": "Access Control",
+            "function_code": "function submitStack(uint256 _id,uint256 _id2,uint256 _id3,uint256 _id4,uint256 _id5, bool _public) public returns (bool)
+{
+  require(slammerTime!=address(0));
+  require(tokenIndexToOwner[_id]==msg.sender);
+  require(tokenIndexToOwner[_id2]==msg.sender);
+  require(tokenIndexToOwner[_id3]==msg.sender);
+  require(tokenIndexToOwner[_id4]==msg.sender);
+  require(tokenIndexToOwner[_id5]==msg.sender);
+  require(approve(slammerTime,_id));
+  require(approve(slammerTime,_id2));
+  require(approve(slammerTime,_id3));
+  require(approve(slammerTime,_id4));
+  require(approve(slammerTime,_id5));
+  bytes32 stack = keccak256(nonce++,msg.sender);
+  uint256[5] memory ids = [_id,_id2,_id3,_id4,_id5];
+  stacks[stack] = Stack(ids,msg.sender,uint32(block.number));
+  SubmitStack(msg.sender,now,stack,_id,_id2,_id3,_id4,_id5,_public);
+}",
+            "reason": "The submitStack function does not enforce proper access control. It allows any user to submit a stack, which can lead to unauthorized stacking operations and potential exploitation."
+        }
+    ]
+}

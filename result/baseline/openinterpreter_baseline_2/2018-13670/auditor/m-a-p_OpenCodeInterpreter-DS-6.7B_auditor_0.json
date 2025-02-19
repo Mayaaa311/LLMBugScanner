@@ -1,0 +1,65 @@
+{
+    "output_list": [
+        {
+            "function_name": "setMinBalance",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function setMinBalance(uint minimumBalanceInFinney) onlyOwner public {
+        minBalanceForAccounts = minimumBalanceInFinney * 1 finney;
+    }",
+            "reason": "The function multiplies the input value with 1 finney, which is a constant value of 1800000000000000000. If the input value is too large, it may cause an integer overflow and underflow the uint256 data type."
+        },
+        {
+            "function_name": "_transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);
+        require (balanceOf[_from] >= _value);
+        require (balanceOf[_to] + _value > balanceOf[_to]);
+        require(!frozenAccount[_from]);
+        require(!frozenAccount[_to]);
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        emit Transfer(_from, _to, _value);
+    }",
+            "reason": "The function subtracts the value from the sender's balance and adds the value to the receiver's balance. If the value is too large, it may cause an integer overflow and underflow the uint256 data type."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        emit Transfer(0, owner, mintedAmount);
+        emit Transfer(owner, target, mintedAmount);
+    }",
+            "reason": "The function adds the minted amount to the target's balance and the total supply. If the minted amount is too large, it may cause an integer overflow and underflow the uint256 data type."
+        },
+        {
+            "function_name": "buy",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function buy() payable public returns (uint amount) {
+        amount = msg.value / buyPrice;
+        require(balanceOf[this] >= amount);
+        balanceOf[msg.sender] += amount;
+        balanceOf[this] -= amount;
+        emit Transfer(this, msg.sender, amount);
+        return amount;
+    }",
+            "reason": "The function calculates the amount to be transferred from the sender to the contract. If the amount is too large, it may cause an integer overflow and underflow the uint256 data type."
+        },
+        {
+            "function_name": "sell",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function sell(uint amount) public returns (uint revenue) {
+        require(balanceOf[msg.sender] >= amount);
+        balanceOf[this] += amount;
+        balanceOf[msg.sender] -= amount;
+        revenue = amount * sellPrice;
+        msg.sender.transfer(revenue);
+        emit Transfer(msg.sender, this, amount);
+        return revenue;
+    }",
+            "reason": "The function calculates the revenue from selling the tokens. If the amount is too large, it may cause an integer overflow and underflow the uint256 data type."
+        }
+    ]
+}

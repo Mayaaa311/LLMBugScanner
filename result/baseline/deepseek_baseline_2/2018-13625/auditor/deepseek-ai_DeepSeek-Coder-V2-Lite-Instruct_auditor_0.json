@@ -1,0 +1,72 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "function_code": "function transfer(address _to, uint256 _value) {
+    if (_to == 0x0) revert();
+    if (balanceOf[msg.sender] < _value) revert();
+    if (balanceOf[_to] + _value < balanceOf[_to]) revert();
+    if (frozenAccount[msg.sender]) revert();
+    balanceOf[msg.sender] -= _value;
+    balanceOf[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+}",
+            "reason": "The `transfer` function does not check if the recipient is the contract owner, allowing anyone to transfer tokens to the contract owner's address, effectively locking their tokens."
+        },
+        {
+            "function_name": "lend",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function lend(address _to, uint256 _value, uint256 _duration_in_days) {
+    if (_to == 0x0) revert();
+    if (balanceOf[msg.sender] < _value) revert();
+    if (balanceOf[_to] + _value < balanceOf[_to]) revert();
+    if (frozenAccount[msg.sender]) revert();
+    if (_duration_in_days > 36135) revert();
+    balanceOf[msg.sender] -= _value;
+    balanceOf[_to] += _value;
+    InterestFreeLending(msg.sender, _to, _value, _duration_in_days);
+}",
+            "reason": "The function does not check for integer overflow when updating the balance of the recipient, which could lead to an attacker gaining more tokens than intended."
+        },
+        {
+            "function_name": "repayLoan",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function repayLoan(address _to, uint256 _value, string _reference) {
+    if (_to == 0x0) revert();
+    if (balanceOf[msg.sender] < _value) revert();
+    if (balanceOf[_to] + _value < balanceOf[_to]) revert();
+    if (frozenAccount[msg.sender]) revert();
+    if (bytes(_reference).length != 66) revert();
+    balanceOf[msg.sender] -= _value;
+    balanceOf[_to] += _value;
+    LoanRepaid(msg.sender, _to, _value, _reference);
+}",
+            "reason": "Similar to the `lend` function, this function does not check for integer overflow when updating the balance of the recipient, potentially allowing an attacker to repay more tokens than intended."
+        },
+        {
+            "function_name": "notifyAuthority",
+            "vulnerability": "Access Control",
+            "function_code": "function notifyAuthority(string _notes, string _reference) {
+    if (balanceOf[msg.sender] < notificationFee) revert();
+    if (bytes(_reference).length > 66) revert();
+    if (bytes(_notes).length > 64) revert();
+    balanceOf[msg.sender] -= notificationFee;
+    balanceOf[centralAuthority] += notificationFee;
+    AuthorityNotified( _notes, _reference);
+}",
+            "reason": "The `notifyAuthority` function allows any user to notify the central authority by paying a fee, which could be exploited by anyone to trigger unauthorized actions on behalf of the contract."
+        },
+        {
+            "function_name": "mintlvlToken",
+            "vulnerability": "Access Control",
+            "function_code": "function mintlvlToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+}",
+            "reason": "The `mintlvlToken` function is restricted to the contract owner only, but the function does not check if the caller is the owner, allowing any address to mint new tokens."
+        }
+    ]
+}

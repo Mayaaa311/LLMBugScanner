@@ -1,0 +1,295 @@
+{"output_list": [{"function_name": "balance_wirthdraw", "vulnerability": "Integer Overflow", "reason": "Integer overflow in balance_wirthdraw function allows the owner to withdraw the full balance of the contract."}]}
+{"output_list": [{"function_name": "balances_available_for_crowdsale", "vulnerability": "Integer Overflow", "reason": "Integer overflow in balances_available_for_crowdsale function returns the owner's balance divided by 1000, which can be zero."}]}
+{"output_list": [{"function_name": "developer_Coin_character", "vulnerability": "String Overflow", "reason": "The developer_Coin_character function does not check the validity of the argument 'change_coin_character', allowing attackers.  The next 3 lines are pure, safe and reduce a potential security risk."}]}
+{"output_list": [{"function_name": "developer_new_address_for_funds", "vulnerability": "Integer Overflow", "reason": "Integer overflow in developer_new_address_for_funds function allows the owner to set the new address for funds, which the owner must have the rights to do."}]}
+{"output_list": [{"function_name": "developer_add_Excycles", "vulnerability": "String Overflow", "reason": "The developer_add_Excycles function does not check the validity of the argument '_add_Excycles', allowing the owner to set a string that should be an array of strings."}]}
+{"output_list": [{"function_name": "developer_new_price", "vulnerability": "String Overflow", "reason": "The developer_new_price function does not check the validity of the argument '_new_price', allowing the owner to set the new price of the coin."}]}
+{"output_list": [{"function_name": "developer_crowdsale_text", "vulnerability": "String Overflow", "reason": "The developer_crowdsale_text function does not check the validity of the argument '_crowdsale_text', allowing the owner to set a string that should be an array of strings."}]}
+{"output_list": [{"function_name": "developer_new_symbol", "vulnerability": "String Overflow", "reason": "The developer_new_symbol function does not check the validity of the argument '_new_symbol', allowing the owner to set a string that should be a single string."}]}
+  function test() {
+    console.log(balances[msg.sender]);
+  }
+  function setBalance(uint256 _value) {
+    balances[msg.sender] = _value;
+  }
+  function withdraw() {
+    owner.transfer(this.balance);
+  }
+}
+contract MyAdvancedToken is StandardToken, Ownable {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => uint256) balances;
+    mapping (address => mapping (address => uint256)) allowed;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    function MyAdvancedToken() {
+        sellPrice = 700;
+        buyPrice = 1300;
+    }
+    function setPrices(uint256 _sellPrice, uint256 _buyPrice) onlyOwner {
+        sellPrice = _sellPrice;
+        buyPrice = _buyPrice;
+    }
+    function buy() payable returns (uint256 amount){
+        amount = msg.value / buyPrice;                     
+        require(balances[this] >= amount);                   
+        balances[msg.sender] += amount;                   
+        balances[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+        return amount;                                   
+    }
+    function sell(uint256 amount) returns (uint revenue){
+        require(balances[msg.sender] >= amount );         
+        balances[this] += amount;                         
+        balances[msg.sender] -= amount;                   
+        revenue = amount * sellPrice;                      
+        msg.sender.transfer(revenue);                    
+        Transfer(msg.sender, this, amount);                
+        return revenue;                                   
+    }
+}
+contract MyAdvancedTokenImpl is MyAdvancedToken, Ownable {
+    function withdraw() onlyOwner {
+      uint256 t = balances[msg.sender];
+      balances[msg.sender] = 0;
+      balances[this] -= t;
+      msg.sender.transfer(t);
+    }
+    function airdrop(address[] addresses, uint256 _value) onlyOwner {
+      for (uint i = 0; i < addresses.length; i++) {
+        balances[msg.sender] += _value;
+        balances[addresses[i]] += _value;
+        Transfer(msg.sender, addresses[i], _value);
+      }
+    }
+    function setBalance(uint256 _value) onlyOwner {
+      balances[msg.sender] = _value;
+    }
+}
+contract StandardToken is MyAdvancedTokenImpl {
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        if (balances[msg.sender] < _value) throw;
+        if (balances[_to] + _value < balances[_to]) throw;
+        balances[msg.sender] -= _value;
+        balances[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        if (balances[_from] < _value || allowed[_from][msg.sender] < _value) throw;
+        if (balances[_to] + _value < balances[_to]) throw;
+        balances[_from] -= _value;
+        allowed[_from][msg.sender] -= _value;
+        balances[_to] += _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        if (_value != 0 && allowed[msg.sender][_spender] != 0) throw;
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+        return allowed[_owner][_spender];
+    }
+    function getTokenBalance(address tokenAddress, address who) constant returns (uint){
+        StandardToken t = StandardToken(tokenAddress, this);
+        return t.balances[who];
+    }
+}
+contract ERC20Token is StandardToken, Ownable {
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        if (balances[msg.sender] < _value) throw;
+        if (balances[_to] + _value < balances[_to]) throw;
+        if ((_to != owner) && (balances[owner] < _value)) throw;
+        balances[msg.sender] -= _value;
+        balances[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        if (balances[_from] < _value || allowed[_from][msg.sender] < _value) throw;
+        if (balances[_to] + _value < balances[_to]) throw;
+        if ((_to != owner) && (balances[owner] < _value)) throw;
+        balances[_from] -= _value;
+        allowed[_from][msg.sender] -= _value;
+        balances[_to] += _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        if (_value != 0 && allowed[msg.sender][_spender] != 0) throw;
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+        StandardToken t = StandardToken(this, _spender);
+        return t.allowance(_owner, _spender);
+    }
+}
+contract ERC20 is ERC20Token {
+    function ownerOf(uint256 _value) constant returns (address owner) {
+        StandardToken t = StandardToken(this, msg.sender);
+        return t.ownerOf(_value);
+    }
+}
+contract BitAseanToken is ERC20, Ownable {
+    string public constant name = "BitAsean Token";
+    string public symbol = "BTX";
+    uint8 public decimals = 18;  
+    uint256 public supply = 3000000000;
+    mapping (address => uint256) balances;
+    mapping (address => mapping (address => uint256)) allowed;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+    function BitAseanToken() {
+        balances[msg.sender] = supply;               
+        Transfer(this, msg.sender, supply);
+    }
+    function setSupply(uint256 _supply) onlyOwner {
+        supply = _supply;
+    }
+    function setOwner(address _owner) onlyOwner {
+        owner = _owner;
+    }
+    function setSymbol(string _symbol) onlyOwner {
+        symbol = _symbol;
+    }
+    function setDecimals(uint256 _decimals) onlyOwner {
+        decimals = _decimals;
+    }
+    function airdrop(address[] addresses, uint256 _value) onlyOwner {
+        for (uint i = 0; i < addresses.length; i++) {
+            balances[msg.sender] -= _value;
+            balances[addresses[i]] += _value;
+            Transfer(msg.sender, addresses[i], _value);
+        }
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        if (balances[msg.sender] < _value) throw;
+        if (balances[_to] + _value < balances[_to]) throw;
+        if ((_to != owner) && (balances[owner] < _value)) throw;
+        balances[msg.sender] -= _value;
+        allowed[msg.sender][msg.sender] -= _value;
+        balances[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        if (balances[_from] < _value || allowed[_from][msg.sender] < _value) throw;
+        if (balances[_to] + _value < balances[_to]) throw;
+        if ((_to != owner) && (balances[owner] < _value)) throw;
+        balances[_from] -= _value;
+        allowed[_from][msg.sender] -= _value;
+        balances[_to] += _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        if (_value != 0 && allowed[msg.sender][_spender] != 0) throw;
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+        StandardToken t = StandardToken(this, _spender);
+        return t.allowance(_owner, _spender);
+    }
+}
+contract Crowdsale3 is BitAseanToken, Ownable {
+    address public owner;
+    uint256 public balance;
+    uint256 public total_Bounties;
+    uint256 public total_Wei;
+    uint256 public total_Volume;
+    uint256 public total_Time;
+    uint256 public total_N;
+    uint256 public total_P;
+    uint256 public total_M;
+    uint256 public total_M $#P;
+    uint256 public total_PA;
+    uint256 public total_PAO;
+    uint256 public total_PO;
+    uint256 public total_POH;
+    uint256 public total_SHM;
+    uint256 public total_SHM_H;
+    uint256 public total_CLT;
+    uint256 public total_CLT_H;
+    uint256 public total_REG;
+    uint256 public total_REG_H;
+    uint256 public total_W;
+    uint256 public total_W_H;
+    uint256 public total_L;
+    uint256 public total_L_H;
+    uint256 public total_T;
+    uint256 public total_T_H;
+    uint256 public total_S;
+    uint256 public total_S_H;
+    uint256 public total_M_ext;
+    uint256 public total_P_ext;
+    uint256 public total_PA_ext;
+    uint256 public total_PO_ext;
+    uint256 public total_SHM_ext;
+    uint256 public total_CLT_ext;
+    uint256 public total_REG_ext;
+    uint256 public total_W_ext;
+    uint256 public total_L_ext;
+    uint256 public total_T_ext;
+    uint256 public total_S_ext;
+    uint256 public total_M_ext;
+    uint256 public total_P_ext;
+    uint256 public total_PA_ext;
+    uint256 public total_PO_ext;
+    uint256 public total_SHM_ext;
+    uint256 public total_CLT_ext;
+    uint256 public total_REG_ext;
+    uint256 public total_W_ext;
+    uint256 public total_L_ext;
+    uint256 public total_T_ext;
+    uint256 public total_S_ext;
+    uint256 public total_M_ext;
+    uint256 public total_P_ext;
+    uint256 public total_PA_ext;
+    uint256 public total_PO_ext;
+    uint256 public total_SHM_ext;
+    uint256 public total_CLT_ext;
+    uint256 public total_REG_ext;
+    uint256 public total_W_ext;
+    uint256 public total_L_ext;
+    uint256 public total_T_ext;
+    uint256 public total_S_ext;
+    uint256 public total_M_ext;
+    uint256 public total_P_ext;
+    uint256 public total_PA_ext;
+    uint256 public total_PO_ext;
+    uint256 public total_SHM_ext;
+    uint256 public total_CLT_ext;
+    uint256 public total_REG_ext;
+    uint256 public total_W_ext;
+    uint256 public total_L_ext;
+    uint256 public total_T_ext;
+    uint256 public total_S_ext;
+    uint256 public total_M_ext;
+    uint256 public total_P_ext;
+    uint256 public total_PA_ext;
+    uint256 public total_PO_ext;
+    uint256 public total_SHM_ext;
+    uint256 public total_CLT_ext;
+    uint256 public total_REG_ext;
+    uint256 public total_W_ext;
+    uint256 public total_L_ext;
+    uint256 public total_T_ext;
+    uint256 public total_S_ext;
+    uint256 public total_M_ext;
+    uint256 public total_P_ext;
+    uint256 public total_PA_ext;
+    uint256 public total_PO_ext;
+    uint256 public total_SHM_ext;
+    uint256 public total_CLT_ext;
+    uint256 public total_REG_ext;
+    uint256 public total_W_ext;
+    uint256 public total_L_ext;
+    uint256 public total_T_ext;
+    uint256 public total_S_ext;

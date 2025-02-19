@@ -1,0 +1,62 @@
+{
+    "output_list": [
+        {
+            "function_name": "EAI_TokenERC20",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function EAI_TokenERC20(uint256 initialSupply, string tokenName, string tokenSymbol) public {
+        totalSupply = initialSupply * 10 ** uint256(decimals);  
+        balanceOf[msg.sender] = totalSupply;                
+        name = tokenName;                                   
+        symbol = tokenSymbol;                               
+    }",
+            "reason": "The multiplication operation can result in an integer overflow if the initialSupply is too large. The multiplication is performed before the casting to uint256, which can cause the totalSupply to exceed the maximum value of uint256."
+        },
+        {
+            "function_name": "_transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function _transfer(address _from, address _to, uint _value) internal {
+        require(_to != 0x0);
+        require(balanceOf[_from] >= _value);
+        require(balanceOf[_to] + _value >= balanceOf[_to]);
+        uint previousBalances = balanceOf[_from] + balanceOf[_to];
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        emit Transfer(_from, _to, _value);
+        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+    }",
+            "reason": "The addition operation in the require statement can result in an integer overflow if the sum of balanceOf[_from] and balanceOf[_to] exceeds the maximum value of uint256."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+        _transfer(msg.sender, _to, _value);
+        return true;
+    }",
+            "reason": "The transfer function does not have any randomness or external inputs that could be exploited by attackers."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);     
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }",
+            "reason": "The transferFrom function does not have any access control mechanisms in place. It allows any address to call the function, which can be exploited by attackers."
+        },
+        {
+            "function_name": "burn",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function burn(uint256 _value) public returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);   
+        balanceOf[msg.sender] -= _value;            
+        totalSupply -= _value;                      
+        emit Burn(msg.sender, _value);
+        return true;
+    }",
+            "reason": "The burn function does not have any typo constructors. It is a common mistake to use the same name for a function and a constructor."
+        }
+    ]
+}

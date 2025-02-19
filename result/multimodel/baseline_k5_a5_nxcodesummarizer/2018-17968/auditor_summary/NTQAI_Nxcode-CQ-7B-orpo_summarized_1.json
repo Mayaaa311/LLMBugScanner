@@ -1,0 +1,58 @@
+{
+    "output_list": [
+        {
+            "function_name": "createRoom",
+            "code": "function createRoom(string _name, uint256 _entryPrice) public onlyCTO{
+    address[] memory players;
+    Room memory _room = Room({
+      name: _name,
+      players: players,
+      balance: 0,
+      entryPrice: _entryPrice
+    });
+    allRooms.push(_room);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'createRoom' function does not check if the 'allRooms' array length exceeds the maximum value of the 'uint256' data type. This could lead to an integer overflow, potentially causing the contract to behave unpredictably."
+        },
+        {
+            "function_name": "enter",
+            "code": "function enter(uint256 _roomId) public payable {
+        Room storage room = allRooms[_roomId-1]; 
+        require(room.players.length < 6);
+        require(msg.value >= room.entryPrice);
+        room.players.push(msg.sender);
+        room.balance += room.entryPrice;",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'enter' function does not check if the 'room.players.length' exceeds the maximum value of the 'uint256' data type. This could lead to an integer overflow, potentially causing the contract to behave unpredictably."
+        },
+        {
+            "function_name": "executeRoom",
+            "code": "function executeRoom(uint256 _roomId) public {
+        Room storage room = allRooms[_roomId-1]; 
+        require(room.players.length == 6);
+        uint256 halfFee = SafeMath.div(room.entryPrice, 20);
+        CTO.transfer(halfFee);
+        CEO.transfer(halfFee);
+        room.balance -= halfFee * 2;",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'executeRoom' function does not check if the 'room.balance' exceeds the maximum value of the 'uint256' data type. This could lead to an integer overflow, potentially causing the contract to behave unpredictably."
+        },
+        {
+            "function_name": "distributeFunds",
+            "code": "function distributeFunds(uint256 _roomId, uint256 _deadSeat) private returns(uint256) {
+        Room storage room = allRooms[_roomId-1]; 
+        uint256 balanceToDistribute = SafeMath.div(room.balance,5);
+        address victim = room.players[_deadSeat];
+        address[] memory winners = new address[](5);
+        uint256 j = 0; 
+        for (uint i = 0; i<6; i++) {
+            if(i != _deadSeat){
+               room.players[i].transfer(balanceToDistribute);
+               room.balance -= balanceToDistribute;
+               winners[j] = room",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'distributeFunds' function does not check if the 'room.balance' exceeds the maximum value of the 'uint256' data type. This could lead to an integer overflow, potentially causing the contract to behave unpredictably."
+        }
+    ]
+}

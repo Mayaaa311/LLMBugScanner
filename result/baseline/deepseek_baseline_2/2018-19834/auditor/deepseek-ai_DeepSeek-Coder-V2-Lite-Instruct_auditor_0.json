@@ -1,0 +1,66 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mint",
+            "vulnerability": "Access Control",
+            "function_code": "function mint(address wallet, address buyer, uint256 tokenAmount) public onlyOwner {
+  require(tokenBalances[wallet] >= tokenAmount);               
+  tokenBalances[buyer] = tokenBalances[buyer].add(tokenAmount);                  
+  tokenBalances[wallet] = tokenBalances[wallet].add(tokenAmount);                        
+  Transfer(wallet, buyer, tokenAmount); 
+  totalSupply=totalSupply.sub(tokenAmount);
+}",
+            "reason": "The 'mint' function is restricted to the contract owner only. However, the logic inside the function does not check if the 'buyer' address is valid or if the tokenAmount is within any reasonable limits. An attacker could exploit this by calling 'mint' with a high tokenAmount, effectively minting tokens to themselves without any corresponding value, leading to token devaluation."
+        },
+        {
+            "function_name": "pullBack",
+            "vulnerability": "Access Control",
+            "function_code": "function pullBack(address wallet, address buyer, uint256 tokenAmount) public onlyOwner {
+    require(tokenBalances[buyer]>=tokenAmount);
+    tokenBalances[buyer] = tokenBalances[buyer].sub(tokenAmount);
+    tokenBalances[wallet] = tokenBalances[wallet].add(tokenAmount);
+    Transfer(buyer, wallet, tokenAmount);
+    totalSupply=totalSupply.add(tokenAmount);
+}",
+            "reason": "Similar to the 'mint' function, 'pullBack' is also restricted to the contract owner. The vulnerability here is that there is no check to ensure that the 'wallet' address is legitimate or that the 'tokenAmount' is within any reasonable limits. An attacker could exploit this by calling 'pullBack' with a high tokenAmount, effectively stealing tokens from the 'buyer' without any corresponding value, leading to token devaluation."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) public returns (bool) {
+    require(tokenBalances[msg.sender]>=_value);
+    tokenBalances[msg.sender] = tokenBalances[msg.sender].sub(_value);
+    tokenBalances[_to] = tokenBalances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+}",
+            "reason": "The 'transfer' function does not perform any overflow checks. If an attacker can manipulate the 'tokenBalances' mapping in such a way that the subtraction operation results in an integer overflow, it could lead to an unexpected increase in the balance of the recipient, potentially allowing unauthorized transfers."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value <= tokenBalances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    tokenBalances[_from] = tokenBalances[_from].sub(_value);
+    tokenBalances[_to] = tokenBalances[_to].add(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    Transfer(_from, _to, _value);
+    return true;
+}",
+            "reason": "Similar to the 'transfer' function, the 'transferFrom' function also does not perform any overflow checks. If an attacker can manipulate the 'tokenBalances' or 'allowed' mappings in such a way that the subtraction operation results in an integer overflow, it could lead to an unexpected increase in the balance of the recipient, potentially allowing unauthorized transfers."
+        },
+        {
+            "function_name": "quaker",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function quaker(address wallet) public {
+    owner = msg.sender;
+    ownerWallet=wallet;
+    totalSupply = INITIAL_SUPPLY * 10 ** 18;
+    tokenBalances[wallet] = INITIAL_SUPPLY * 10 ** 18;   
+}",
+            "reason": "The constructor function 'quaker' has a typo in its name. This typo makes it look like a regular function and could lead to confusion among developers or users. However, this typo does not directly introduce a vulnerability but could lead to confusion and potential errors in the codebase."
+        }
+    ]
+}

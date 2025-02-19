@@ -1,0 +1,321 @@
+{"output_list": [{"output_list": [{"function_name": "mintTokens", "vulnerability": "Integer Overflow", "reason": "Integer overflow in mintTokens function allows an attacker to set an arbitrary user's balance to any value."}]}
+{"output_list": [{"function_name": "transfer", "vulnerability": "Integer Overflow", "reason": "Integer overflow in transfer function allows an attacker to set an arbitrary user's balance to any value."}]}
+]}
+contract Play2LivePromo {
+    address public owner;
+    string public constant name  = "Level Up Coin Diamond";
+    string public constant symbol = "LUCD";
+    uint8 public constant decimals = 18;
+    uint public totalSupply = 0;
+    uint256 promoValue = 777 * 1e18;
+    mapping(address => uint) balances;
+    mapping(address => mapping (address => uint)) allowed;
+    event Transfer(address _from, address _to, uint256 amount); 
+    event Approval(address indexed _owner, address indexed _spender, uint _value);
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }  
+    function Play2LivePromo() {
+        owner = msg.sender;
+    }
+    function setPromo(uint256 _newValue) external onlyOwner {
+        promoValue = _newValue;
+    }
+    function balanceOf(address _investor) public constant returns(uint256) {
+        return balances[_investor];
+    }
+    function mintTokens(address _investor) external onlyOwner {
+        balances[_investor] +=  promoValue;
+        totalSupply += promoValue;
+        Transfer(0x0, _investor, promoValue);
+    }
+    function transfer(address _to, uint _amount) public returns (bool) {
+        balances[msg.sender] -= _amount;
+        balances[_to] -= _amount;
+        Transfer(msg.sender, _to, _amount);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint _amount) public returns (bool) {
+        balances[_from] -= _amount;
+        allowed[_from][msg.sender] -= _amount;
+        balances[_to] -= _amount;
+        Transfer(_from, _to, _amount);
+        return true;
+     }
+    function approve(address _spender, uint _amount) public returns (bool) {
+        require((_amount == 0) || (allowed[msg.sender][_spender] == 0));
+        allowed[msg.sender][_spender] = _amount;
+        Approval(msg.sender, _spender, _amount);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint) {
+        return allowed[_owner][_spender];
+    }
+}
+contract ERC20Token is Play2LivePromo {
+    uint public buyRate = 3000;
+    uint public sellRate = 300;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function _transfer(address _from, address _to, uint _amount) internal {
+        require(_to != 0x0);
+        require(!frozenAccount[_from]);
+        require(balances[_from] >= _amount);
+        require(balances[_to] + _amount > balances[_to]);
+        uint previousBalances = balances[_from] + balances[_to];
+        balances[_from] -= _amount;
+        balances[_to] += _amount;
+        Transfer(_from, _to, _amount);
+        assert(balances[_from] + balances[_to] == previousBalances);
+    }
+    function transfer(address _to, uint _amount) public returns (bool) {
+        _transfer(msg.sender, _to, _amount);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint _amount) public returns (bool) {
+        require(_amount <= allowed[_from][msg.sender]);     
+        allowed[_from][msg.sender] -= _amount;
+        _transfer(_from, _to, _amount);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint newSellRate, uint newBuyRate) onlyOwner public {
+        sellRate = newSellRate;
+        buyRate = newBuyRate;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyRate;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint amount) public {
+        require(this.balance >= amount * sellRate);      
+        _transfer(msg.sender, this, amount);              
+        uint revenue = amount * sellRate;             
+        msg.sender.transfer(revenue);             
+    }
+}
+contract Cryptonix is ERC20Token {
+    uint256 public sellPrice = 0.0001 ether;
+    uint256 public buyPrice = 0.001 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function _transfer(address _from, address _to, uint _amount) internal {
+        require(_to != 0x0);
+        require(!frozenAccount[_from]);
+        require(balances[_from] >= _amount);
+        require(balances[_to] + _amount > balances[_to]);
+        require(!frozenAccount[_to]);
+        uint previousBalances = balances[_from] + balances[_to];
+        balances[_from] -= _amount;
+        balances[_to] += _amount;
+        Transfer(_from, _to, _amount);
+        assert(balances[_from] + balances[_to] == previousBalances);
+    }
+    function transfer(address _to, uint _amount) public returns (bool) {
+        _transfer(msg.sender, _to, _amount);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint _amount) public returns (bool) {
+        require(_amount <= allowed[_from][msg.sender]);     
+        allowed[_from][msg.sender] -= _amount;
+        _transfer(_from, _to, _amount);
+        return true;
+     }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint newSellRate, uint newBuyRate) onlyOwner public {
+        sellPrice = newSellRate;
+        buyPrice = newBuyRate;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        uint revenue = amount * sellPrice;             
+        msg.sender.transfer(revenue);             
+    }
+}
+contract CryptonixCash is Cryptonix {
+    uint256 public sellPrice = 0.0001 ether;
+    uint256 public buyPrice = 0.0001 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function _transfer(address _from, address _to, uint _amount) internal {
+        require(_to != 0x0);
+        require(!frozenAccount[_from]);
+        require(balances[_from] >= _amount);
+        require(balances[_to] + _amount > balances[_to]);
+        require(!frozenAccount[_to]);
+        uint previousBalances = balances[_from] + balances[_to];
+        balances[_from] -= _amount;
+        balances[_to] += _amount;
+        Transfer(_from, _to, _amount);
+        assert(balances[_from] + balances[_to] == previousBalances);
+    }
+    function transfer(address _to, uint _amount) public returns (bool) {
+        _transfer(msg.sender, _to, _amount);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint _amount) public returns (bool) {
+        require(_amount <= allowed[_from][msg.sender]);     
+        allowed[_from][msg.sender] -= _amount;
+        _transfer(_from, _to, _amount);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint newSellRate, uint newBuyRate) onlyOwner public {
+        sellPrice = newSellRate;
+        buyPrice = newBuyRate;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        uint revenue = amount * sellPrice;             
+        msg.sender.transfer(revenue);             
+    }
+}
+contract CryptonixCash is CryptonixCash {
+    uint256 public sellPrice = 0.0001 ether;
+    uint256 public buyPrice = 0.0001 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function _transfer(address _from, address _to, uint _amount) internal {
+        require(_to != 0x0);
+        require(!frozenAccount[_from]);
+        require(balances[_from] >= _amount);
+        require(balances[_to] + _amount > balances[_to]);
+        require(!frozenAccount[_to]);
+        uint previousBalances = balances[_from] + balances[_to];
+        balances[_from] -= _amount;
+        balances[_to] += _amount;
+        Transfer(_from, _to, _amount);
+        assert(balances[_from] + balances[_to] == previousBalances);
+    }
+    function transfer(address _to, uint _amount) public returns (bool) {
+        _transfer(msg.sender, _to, _amount);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint _amount) public returns (bool) {
+        require(_amount <= allowed[_from][msg.sender]);     
+        allowed[_from][msg.sender] -= _amount;
+        _transfer(_from, _to, _amount);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint newSellRate, uint newBuyRate) onlyOwner public {
+        sellPrice = newSellRate;
+        buyPrice = newBuyRate;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        uint revenue = amount * sellPrice;             
+        msg.sender.transfer(revenue);             
+    }
+}
+contract CryptonixCash2 is CryptonixCash {
+    uint256 public sellPrice = 0.0001 ether;
+    uint256 public buyPrice = 0.0001 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function _transfer(address _from, address _to, uint _amount) internal {
+        require(_to != 0x0);
+        require(!frozenAccount[_from]);
+        require(balances[_from] >= _amount);
+        require(balances[_to] + _amount > balances[_to]);
+        require(!frozenAccount[_to]);
+        uint previousBalances = balances[_from] + balances[_to];
+        balances[_from] -= _amount;
+        balances[_to] += _amount;
+        Transfer(_from, _to, _amount);
+        assert(balances[_from] + balances[_to] == previousBalances);
+    }
+    function transfer(address _to, uint _amount) public returns (bool) {
+        _transfer(msg.sender, _to, _amount);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint _amount) public returns (bool) {
+        require(_amount <= allowed[_from][msg.sender]);     
+        allowed[_from][msg.sender] -= _amount;
+        _transfer(_from, _to, _amount);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint newSellRate, uint newBuyRate) onlyOwner public {
+        sellPrice = newSellRate;
+        buyPrice = newBuyRate;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        uint revenue = amount * sellPrice;             
+        msg.sender.transfer(revenue);             
+    }
+}
+contract CryptonixCash3 is CryptonixCash2 {
+    uint256 public sellPrice = 0.0001 ether;
+    uint256 public buyPrice = 0.00001 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function _transfer(address _from, address _to, uint _amount) internal {
+        require(_to != 0x0);
+        require(!frozenAccount[_from]);
+        require(balances[_from] >= _amount);
+        require(balances[_to] + _amount > balances[_to]);
+        require(!frozenAccount[_to]);
+        uint previousBalances = balances[_

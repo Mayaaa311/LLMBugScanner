@@ -1,0 +1,60 @@
+{"output_list": [{"output_list": [{"function_name": "setAIRDROPBounce", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setAIRDROPBounce function allows an attacker to set the AIRDROPBounce value to any value, including 0, which can lead to an arbitrary user being able to set the AIRDROPBounce value to any value, including 0."}]}
+{"output_list": [{"function_name": "setICORatio", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setICORatio function allows an attacker to set the ICORatio value to any value, including 0, which can lead to an arbitrary user being able to set the ICORatio value to any value, including 0."}]}
+{"output_list": [{"function_name": "setMINfinney", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setMINfinney function allows an attacker to set the MINfinney value to any value, including 0, which can lead to an arbitrary user being able to set the MINfinney value to any value, including 0."}]}
+{"output_list": [{"function_name": "enablePurchasing", "vulnerability": "Integer Overflow", "reason": "Integer overflow in enablePurchasing function allows an attacker to set the totalContribution value to any value, including 0, which can lead to an arbitrary user being able to set the totalContribution value to any value, including 0."}]}
+{"output_list": [{"function_name": "disablePurchasing", "vulnerability": "Integer Overflow", "reason": "Integer overflow in disablePurchasing function allows an attacker to set the totalContribution value to any value, including 0, which can lead to an arbitrary user being able to set the totalContribution value to any value, including 0."}]}
+{"output_list": [{"function_name": "withdrawForeignTokens", "vulnerability": "Integer Overflow", "reason": "Integer overflow in withdrawForeignTokens function allows an attacker to set the totalContribution value to any value, including 0, which can lead to an arbitrary user being able to set the totalContribution value to any value, including 0."}]}
+{"output_list": [{"function_name": "getStats", "vulnerability": "Integer Overflow", "reason": "Integer overflow in getStats function allows an attacker to set the totalContribution value to any value, including 0, which can lead to an arbitrary user being able to set the totalContribution value to any value, including 0."}]}
+{"output_list": [{"function_name": "burn", "vulnerability": "Integer Overflow", "reason": "Integer overflow in burn function allows an attacker to set the totalContribution value to any value, including 0, which can lead to an arbitrary user being able to set the totalContribution value to any value, including 0."}]}
+}
+*/
+contract Virgo_ZodiacToken is owned, SafeMath {
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function Virgo_ZodiacToken(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) owned {
+        balances[msg.sender] = initialSupply;
+        totalSupply = initialSupply;
+        MINfinney = 1e10;
+        AIRDROPBounce = 5000000;
+        ICORatio = 1440000;
+        name = tokenName;                   
+        symbol = tokenSymbol;                   
+        decimals = decimalUnits;                
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if(balances[msg.sender] < _value) { return false; }
+        if(balances[_to] + _value < balances[_to]) { return false; }
+        if(frozenAccount[msg.sender]) { return false; }
+        balances[msg.sender] -= _value;
+        balances[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if(frozenAccount[_from]) { return false; }
+        if(balances[_from] < _value) { return false; }
+        if(balances[_to] + _value < balances[_to]) { return false; }
+        if(_value > allowed[_from][msg.sender]) { return false; }
+        balances[_from] -= _value;
+        balances[_to] += _value;
+        allowed[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+}
+contract Virgo_ZodiacToken_PreSale is Virgo_ZodiacToken {
+    uint256 public preSaleRate = 10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

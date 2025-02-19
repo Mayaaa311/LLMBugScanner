@@ -1,0 +1,38 @@
+[
+  {
+    "function_name": "approveAndCall",
+    "auditor_idx": 0,
+    "vulnerability": "Access Control",
+    "criticism": "The function `approveAndCall` does not properly check the return value of the `call` function, which can lead to the contract sending tokens to a malicious contract that reverts the transaction, effectively locking the tokens. This is a severe vulnerability as it can be exploited by any attacker who can craft a malicious contract to call this function.",
+    "correctness": 7,
+    "severity": 9,
+    "profitability": 6
+  },
+  {
+    "function_name": "approveAndCallcode",
+    "auditor_idx": 0,
+    "vulnerability": "Access Control",
+    "criticism": "Similar to `approveAndCall`, the function `approveAndCallcode` also does not check the return value of the `call` function, which can lead to the contract sending tokens to a malicious contract that does not handle the call correctly, causing a revert. This exposes the contract to similar risks as the previous vulnerability.",
+    "correctness": 7,
+    "severity": 9,
+    "profitability": 6
+  },
+  {
+    "function_name": "transfer",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The function `transfer` does not check for integer overflow when updating the balances. If an attacker can manipulate the `_value` or the initial balance of `msg.sender`, they can cause an overflow, leading to incorrect balance updates and potentially gaining unintended tokens from other users. This is a critical vulnerability as it can lead to significant loss of funds.",
+    "correctness": 6,
+    "severity": 8,
+    "profitability": 5
+  },
+  {
+    "function_name": "transferFrom",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The function `transferFrom` also does not check for integer overflow when updating the balances. This vulnerability is similar to the one in the `transfer` function and can be exploited in a similar manner, leading to the same consequences of unintended token transfers.",
+    "correctness": 6,
+    "severity": 8,
+    "profitability": 5
+  }
+]

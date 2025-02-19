@@ -1,0 +1,147 @@
+ Here are the 5 most severe vulnerabilities in the provided smart contract, along with their associated functions, reasons, and function code:
+
+1. Integer Overflow Vulnerability in the `transfer` Function
+
+Function Name: `transfer`
+
+Vulnerability: Integer Overflow
+
+Function Code:
+```
+function transfer(address _to, uint256 _value) {
+    if (balanceOf[msg.sender] < _value) throw;           
+    if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+    if (frozenAccount[msg.sender]) throw;                
+    balanceOf[msg.sender] -= _value;                     
+    balanceOf[_to] += _value;                            
+    Transfer(msg.sender, _to, _value);                   
+}
+```
+Reason: The `transfer` function uses the `+` operator to add the `_value` parameter to the `balanceOf[_to]` variable, which can lead to an integer overflow if the sum exceeds the maximum value that can be represented by the `uint256` type. This can result in the `balanceOf[_to]` variable being set to a value that is not the actual balance of the account, which can lead to a loss of funds.
+
+2. Wrong Logic Vulnerability in the `transferFrom` Function
+
+Function Name: `transferFrom`
+
+Vulnerability: Wrong Logic
+
+Function Code:
+```
+function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if (frozenAccount[_from]) throw;                        
+    if (balanceOf[_from] < _value) throw;                 
+    if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+    if (_value > allowance[_from][msg.sender]) throw;   
+    balanceOf[_from] -= _value;                          
+    balanceOf[_to] += _value;                            
+    allowance[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+}
+```
+Reason: The `transferFrom` function uses the `>` operator to compare the `_value` parameter to the `allowance[_from][msg.sender]` variable, which can lead to a wrong logic vulnerability if the `_value` parameter is greater than the `allowance[_from][msg.sender]` variable. This can result in the `allowance[_from][msg.sender]` variable being set to a value that is not the actual allowance of the account, which can lead to a loss of funds.
+
+3. Bad Randomness Vulnerability in the `buy` Function
+
+Function Name: `buy`
+
+Vulnerability: Bad Randomness
+
+Function Code:
+```
+function buy() payable {
+    uint amount = msg.value / buyPrice;                
+    if (balanceOf[this] < amount) throw;               
+    balanceOf[msg.sender] += amount;                   
+    balanceOf[this] -= amount;                         
+    Transfer(this, msg.sender, amount);                
+}
+```
+Reason: The `buy` function uses the `msg.value` parameter to calculate the amount of tokens to be purchased, which can lead to a bad randomness vulnerability if the `msg.value` parameter is not properly validated. This can result in the `buy` function purchasing more tokens than intended, which can lead to a loss of funds.
+
+4. Access Control Vulnerability in the `freezeAccount` Function
+
+Function Name: `freezeAccount`
+
+Vulnerability: Access Control
+
+Function Code:
+```
+function freezeAccount(address target, bool freeze) onlyOwner {
+    frozenAccount[target] = freeze;
+    FrozenFunds(target, freeze);
+}
+```
+Reason: The `freezeAccount` function uses the `onlyOwner` modifier to restrict access to the function, which can lead to an access control vulnerability if the `onlyOwner` modifier is not properly implemented. This can result in a malicious owner being able to freeze the funds of a target account, which can lead to a loss of funds.
+
+5. Typo Constructor Vulnerability in the `MoneyChainNetToken` Contract
+
+Contract Name: `MoneyChainNetToken`
+
+Vulnerability: Typo Constructor
+
+Contract Code:
+```
+contract MoneyChainNetToken is owned, token {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping(address=>bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    uint256 public constant initialSupply = 35000000 * 10**8;
+    uint8 public constant decimalUnits = 8;
+    string public tokenName = "MoneyChainNet";
+    string public tokenSymbol = "MCN";
+    function MoneyChainNetToken() token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) throw;           
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+        if (frozenAccount[msg.sender]) throw;                
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (frozenAccount[_from]) throw;                        
+        if (balanceOf[_from] < _value) throw;                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+        if (_value > allowance[_from][msg.sender]) throw;   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyPrice;                
+        if (balanceOf[this] < amount) throw;               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+    }
+    function sell(uint256 amount) {
+        if (balanceOf[msg.sender] < amount ) throw;        
+        balanceOf[this] += amount;                         
+        balanceOf[msg.sender] -= amount;                   
+        if (!msg.sender.send(amount * sellPrice)) {        
+            throw;                                         
+        } else {
+            Transfer(msg.sender, this, amount);            
+        }
+    }
+}
+```
+Reason: The `MoneyChainNetToken` contract uses the `token` constructor to initialize the contract, which can lead to a typo constructor vulnerability if the `token` constructor is not properly implemented. This can result in the `MoneyChainNetToken` contract being initialized with incorrect values, which can lead to a loss of funds.

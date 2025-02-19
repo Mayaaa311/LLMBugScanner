@@ -1,0 +1,35 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint _value) onlyPayloadSize(2 * 32)",
+            "reason": "The function does not check for integer overflow, allowing potential attackers to transfer more tokens than the specified amount.",
+        },
+        {
+            "function_name": "balanceOf",
+            "vulnerability": "Wrong Logic",
+            "function_code": "balances[_to] = balances[_to].add(_value);",
+            "reason": "The function logic is incorrect as it does not consider the balance of the sender.",
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "balances[_to] = balances[_to].add(_value);",
+            "reason": "The function does not check whether the sender has sufficient balance or not.",
+        },
+        {
+            "function_name": "mint",
+            "vulnerability": "Typos in constructor",
+            "function_code": "balances[_spender] += _value;",
+            "reason": "The function does not check for underflow, allowing potential attackers to mint more tokens than the system can handle.",
+        },
+        {
+            "function_name": "devalue",
+            "vulnerability": "Token Devalue",
+            "function_code": "balances[_to] = balances[_to].sub(_value);",
+            "reason": "The function does not check for underflow, allowing potential attackers to devalue tokens and potentially cause a catastrophic inflation.",
+        }
+    ]
+}<eos>

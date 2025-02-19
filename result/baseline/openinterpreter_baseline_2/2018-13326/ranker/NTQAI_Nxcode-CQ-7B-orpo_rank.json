@@ -1,0 +1,47 @@
+[
+  {
+    "function_name": "Bittelux",
+    "auditor_idx": 0,
+    "vulnerability": "Typo Constructor",
+    "criticism": "The typo in the constructor can lead to incorrect assignment of the `version` variable. It should be assigned as `version = 'H1.0';` instead of `version = ''H1.0';` to ensure that the version is correctly set.",
+    "correctness": 9,
+    "severity": 9,
+    "profitability": 9
+  },
+  {
+    "function_name": "Bittelux",
+    "auditor_idx": 0,
+    "vulnerability": "Bad Randomness",
+    "criticism": "The initial balance of the contract creator is set to 100,000,000,000,000,000,000. This is a large amount of tokens and can be considered a security risk if the creator wants to withdraw all the tokens at any time. To mitigate this risk, a randomness mechanism or a timelock mechanism should be implemented to prevent the creator from withdrawing all the tokens.",
+    "correctness": 9,
+    "severity": 9,
+    "profitability": 9
+  },
+  {
+    "function_name": "approveAndCall",
+    "auditor_idx": 0,
+    "vulnerability": "Access Control",
+    "criticism": "The `approveAndCall` function calls the `receiveApproval` function on the spender with the approved value. If the spender's function call does not revert the contract's state, it may lead to re-entrancy attacks where the spender can call back into the contract and modify its state. To mitigate this risk, the spender's function call should be made with the `.call()` function and the contract's state should be properly managed to ensure that it does not revert.",
+    "correctness": 9,
+    "severity": 9,
+    "profitability": 9
+  },
+  {
+    "function_name": "transferFrom",
+    "auditor_idx": 0,
+    "vulnerability": "Wrong Logic",
+    "criticism": "The condition `balances[_from] >= _value && allowed[_from][msg.sender] >= _value` checks if the sender has enough balance and allowed value to transfer the specified value. However, it should be `balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0` to ensure that the value being transferred is greater than zero.",
+    "correctness": 9,
+    "severity": 9,
+    "profitability": 9
+  },
+  {
+    "function_name": "transfer",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The check `balances[msg.sender] >= _value` ensures that the sender has enough balance to transfer the specified value. However, if the sender's balance is less than the value being transferred, the subtraction operation `balances[msg.sender] -= _value` may result in an integer overflow.",
+    "correctness": 9,
+    "severity": 9,
+    "profitability": 9
+  }
+]

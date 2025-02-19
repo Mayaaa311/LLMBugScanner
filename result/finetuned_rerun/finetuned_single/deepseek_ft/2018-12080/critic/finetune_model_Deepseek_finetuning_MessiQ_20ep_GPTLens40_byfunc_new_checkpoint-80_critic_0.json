@@ -1,0 +1,50 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "auditor_idx" : 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The mintToken function does not have a check to prevent overflow of the totalSupply, allowing the owner to mint arbitrary amounts of tokens to any user account, causing a buyPrice of 0 and locking the contract. This is a severe vulnerability as it can lead to the complete loss of funds for affected users.",
+            "correctness": 8,
+            "severity": 9,
+            "profitability": 7,
+            Restrict output to only these three attributes: 'correctness', 'severity', 'profitability'. Each attribute must be a number from 0 to 9, with 0 being the lowest and 9 being the highest. Ensure the output is in JSON format. 
+        },
+        {
+            "function_name": "buy",
+            "auditor_idx" : 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The buy function allows users to buy tokens with ether, but does not check if the buy would cause an integer overflow, allowing users to buy an arbitrary large number of tokens, causing a sellPrice of 0 and locking the contract. This is a critical issue as it can result in the contract becoming unusable by its users.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 6,
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx" : 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The transferFrom function does not check if the contract has enough balance to transfer, allowing a contract to transfer tokens on behalf of a user without their knowledge or consent. This is a significant weakness as it can be exploited to perform unauthorized transactions, potentially causing severe financial loss to users.",
+            "correctness": 6,
+            "severity": 7,
+            "profitability": 5,
+        },
+        {
+            "function_name": "burnFrom",
+            "auditor_idx" : 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The burnFrom function allows any user to burn tokens from another user, without requiring the approval of the token owner, which can be exploited to increase the token owner's balance without their knowledge. This is a notable vulnerability as it introduces an insecure and exploitable logic flaw, potentially leading to trade gains in unauthorized transactions.",
+            "correctness": 5,
+            "severity": 8,
+            "profitability": 6,
+        },
+        {
+            "function_name": "setPrices",
+            "auditor_idx" : 0,
+            "vulnerability": "Bad Randomness",
+            "criticism": "The setPrices function allows the owner to set arbitrary buy and sell prices, which can be exploited by attackers to set these prices in a way that benefits attackers, such as setting buyPrice to 0 to lock funds in the contract. This is a severe issue as it can lead to the loss of funds for affected users, making the contract unusable.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 6,
+        }
+    ]
+}

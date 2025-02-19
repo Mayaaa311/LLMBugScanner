@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "distribute",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function 'distribute' does not protect against integer overflow when summing the amounts to be distributed. This can lead to a situation where an attacker can manipulate the total amount to cause an overflow, leading to a significant over-issuance of tokens. The use of SafeMath functions is missing, which would have caught this issue.",
+            "correctness": 8,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "mintToken",
+            "auditor_idx": 0,
+            "vulnerability": "Token Devalue",
+            "criticism": "The 'mintToken' function allows the owner to mint tokens at will without any restrictions, which can lead to a rapid increase in the total supply and a significant decrease in the value of existing tokens. This is particularly dangerous in a contract where there is no clear mechanism to control the minting process or to ensure that minting is justified.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 6
+        },
+        {
+            "function_name": "claimThrone",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The 'claimThrone' function has a refund mechanism that only checks if the contract balance is greater than the amount to be sent, without considering the potential issue of the contract becoming unusable if it receives a very large amount of funds. This could lead to the contract being locked if a large amount is accidentally sent to it.",
+            "correctness": 6,
+            "severity": 7,
+            "profitability": 5
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The 'transferFrom' function does not properly restrict the transfer functionality, allowing users to transfer tokens from other accounts. This can lead to unauthorized transfers, which can be exploited to cause financial losses for token holders.",
+            "correctness": 5,
+            "severity": 6,
+            "profitability": 4
+        },
+        {
+            "function_name": "MorphToken",
+            "auditor_idx": 0,
+            "vulnerability": "Typo Constructor",
+            "criticism": "The 'MorphToken' constructor contains a typo in the 'approveAndCall' function call, where 'ERC20' is mistakenly used instead of 'tokenRecipient'. This allows any user to become a minter, leading to unauthorized control of the token.",
+            "correctness": 4,
+            "severity": 5,
+            "profitability": 3
+        }
+    ]
+}

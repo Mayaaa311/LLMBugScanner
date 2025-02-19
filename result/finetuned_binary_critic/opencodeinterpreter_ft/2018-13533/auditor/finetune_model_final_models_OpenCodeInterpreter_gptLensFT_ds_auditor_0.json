@@ -1,0 +1,21 @@
+{
+  "output_list": [
+    {
+      "function_name": "transferFrom",
+      "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);
+        uint market_value = _value * sellPrice;
+        uint commission = market_value * 4 / 1000;
+        if (commission < minimumCommission){ commission = minimumCommission; }
+        address contr = this;
+        require(contr.balance >= commission);
+        commissionGetter.transfer(commission);
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }",
+      "vulnerability": "Integer Overflow",
+      "reason": "Integer overflow in transferFrom function allows a potential attacker to set the balance of an arbitrary user to any value."
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+tput:
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) returns (bool success) {
+  if (block.number < tokenFrozenUntilBlock) throw;
+  if (restrictedAddresses[_to]) throw;
+  if (balances[msg.sender] < _value) throw;
+  if (balances[_to] + _value < balances[_to]) throw;
+  balances[msg.sender] -= _value;
+  balances[_to] += _value;
+  Transfer(msg.sender, _to, _value);
+  return true;
+}",
+            "reason": "The transfer function is susceptible to integer overflow if the value of the tokens being transferred is high. This can cause the balance of the owner to be incorrect and can potentially lead to loss of tokens."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function approve(address _spender, uint256 _value) returns (bool success) {
+  if (block.number < tokenFrozenUntilBlock) throw;
+  if (restrictedAddresses[_spender]) throw;
+  if (msg.sender != _spender) throw;
+  allowances[msg.sender][_spender] = _value;
+  Approval(msg.sender, _spender, _value);
+  return true;
+}",
+            "reason": "The approve function has incorrect logic. It is supposed to approve the token for a spender but it is checking if the sender is the spender which is incorrect. This can potentially lead to wrongful approvals."
+        }
+    ]
+}<eos>

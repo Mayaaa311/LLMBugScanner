@@ -1,0 +1,109 @@
+ Here is the output in the required JSON format:
+
+{
+    "output_list": [
+        {
+            "function_name": "createChamp",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function createChamp(address _affiliateAddress) external payable
+    whenNotPaused
+    isPaid(createChampFee)
+    distributeInput(_affiliateAddress)
+    {
+        uint256 id = champs.push(Champ(0, 2 + randMod(4), 1 + randMod(4), uint256(1 days)  - uint256(randMod(9) * 1 hours), 0, 0, 0, leaderboard.length + 1, 0, uint256(block.timestamp), 0,0,0, false)) - 1;
+        champs[id].id = id; 
+        leaderboard.push(id); 
+        champToOwner[id] = msg.sender; 
+        addressInfo[msg.sender].champsCount++;
+        emit NewChamp(id, msg.sender);
+    }",
+            "reason": "The function uses the 'randMod' function to generate random numbers, but the modulus is not checked for overflow. If the modulus is large enough, it can cause an integer overflow, which can lead to unexpected behavior and potential security vulnerabilities."
+        },
+        {
+            "function_name": "attack",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function attack(uint256 _champId, uint256 _targetId) external
+    onlyOwnerOfChamp(_champId)
+    isChampReady(_champId)
+    notSelfAttack(_champId, _targetId)
+    targetExists(_targetId) {
+        Champ storage myChamp = champs[_champId];
+        Champ storage enemyChamp = champs[_targetId];
+        uint256 pointsGiven; 
+        uint256 pointsToAttackPower; 
+        uint256 myChampAttackPower;
+        uint256 enemyChampDefencePower;
+        uint256 myChampCooldownReduction;
+        (myChampAttackPower,,myChampCooldownReduction) = getChampStats(_champId);
+        (,enemyChampDefencePower,) = getChampStats(_targetId);
+        if (myChampAttackPower > enemyChampDefencePower) {
+            if(myChampAttackPower - enemyChampDefencePower < 5){
+                (pointsGiven, pointsToAttackPower) = _getPoints(3);
+            }else if(myChampAttackPower - enemyChampDefencePower < 10){
+                (pointsGiven, pointsToAttackPower) = _getPoints(2);
+            }else{
+                (pointsGiven, pointsToAttackPower) = _getPoints(1);
+            }
+            _attackCompleted(myChamp, enemyChamp, pointsGiven, pointsToAttackPower);
+            emit Attack(myChamp.id, enemyChamp.id, true);
+        } else {
+            (pointsGiven, pointsToAttackPower) = _getPoints(1);
+            _attackCompleted(enemyChamp, myChamp, pointsGiven, pointsToAttackPower);
+            emit Attack(enemyChamp.id, myChamp.id, false);
+        }
+        myChamp.readyTime = uint256(block.timestamp + myChamp.cooldownTime - myChampCooldownReduction);
+    }",
+            "reason": "The function uses a wrong logic to determine the winner of the attack. It checks if the attacker's attack power is greater than the defender's defence power, but it does not check if the attack power is greater than the defence power by a certain threshold. This can lead to unexpected behavior and potential security vulnerabilities."
+        },
+        {
+            "function_name": "randMod",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function randMod(uint256 _modulus) internal returns(uint256) {
+    randNonce++;
+    return uint256(keccak256(randNonce, blockhash(block.number - 1))) % _modulus;
+}",
+            "reason": "The function uses the 'keccak256' hash function to generate random numbers, but it does not check if the hash function is secure. The 'keccak256' hash function is not cryptographically secure, and it can be vulnerable to attacks such as collisions and preimages. Using a non-cryptographically secure hash function can lead to unexpected behavior and potential security vulnerabilities."
+        },
+        {
+            "function_name": "transferChamp",
+            "vulnerability": "Access Control",
+            "function_code": "function transferChamp(address _from, address _to, uint256 _champId) internal ifChampForSaleThenCancelSale(_champId){
+        Champ storage champ = champs[_champId];
+        addressInfo[_to].champsCount++;
+        addressInfo[_from].champsCount--;
+        champToOwner[_champId] = _to;
+        if(champ.eq_sword != 0) { transferItem(_from, _to, champ.eq_sword); }
+        if(champ.eq_shield != 0) { transferItem(_from, _to, champ.eq_shield); }
+        if(champ.eq_helmet != 0) { transferItem(_from, _to, champ.eq_helmet); }
+        emit TransferChamp(_from, _to, _champId);
+    }",
+            "reason": "The function does not check if the caller has the permission to transfer the champ. The function should check if the caller is the owner of the champ or has the permission to transfer the champ. Failing to check the permission can lead to unexpected behavior and potential security vulnerabilities."
+        },
+        {
+            "function_name": "setChampForSale",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function setChampForSale(uint256 _id, uint256 _price) external
+      onlyOwnerOfChamp(_id)
+      champIsNotForSale(_id) {
+        Champ storage champ = champs[_id];
+        champ.forSale = true;
+        champ.price = _price;
+        champsForSaleCount++;
+    }",
+            "reason": "The function uses the 'champIsNotForSale' modifier, but it should use the 'champIsForSale' modifier. The 'champIsNotForSale' modifier checks if the champ is not for sale, but the function should check if the champ is for sale. Failing to check the correct condition can lead to unexpected behavior and potential security vulnerabilities."
+        },
+        {
+            "function_name": "buyChamp",
+            "vulnerability": "Token Devalue",
+            "function_code": "function buyChamp(uint256 _id) external payable
+      whenNotPaused
+      onlyNotOwnerOfChamp(_id)
+      champIsForSale(_id)
+      isPaid(champs[_id].price)
+      distributeSaleInput(champToOwner[_id]) {
+        transferChamp(champToOwner[_id], msg.sender, _id);
+    }",
+            "reason": "The function does not check if the price of the champ is correct. The function should check if the price of the champ is correct, and it should also check if the price is not too high. Failing to check the price can lead to token devaluation, which can lead to unexpected behavior and potential security vulnerabilities."
+        }
+    ]
+}

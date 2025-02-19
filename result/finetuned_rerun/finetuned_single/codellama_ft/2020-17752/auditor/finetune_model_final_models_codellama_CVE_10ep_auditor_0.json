@@ -1,0 +1,305 @@
+{"output_list": [{"output_list": [{"function_name": "mintCoin", "vulnerability": "Integer Overflow", "reason": "The mint function has an integer overflow in the calculation of the minted amount."}]}], "function_name": "<function_name>", "vulnerability": "<vulnerability_type>", "reason": "<vulnerability_reason>"}]}
+}
+
+contract MONToken is MON {
+    function MONToken(address _beneficiary, uint256 _start, uint256 _sumMul, uint256 _period) public {
+        MON( _beneficiary, _start, _sumMul, _period);
+    }
+}
+contract MONPreSale is MONToken {
+    function MONPreSale(address _beneficiary, uint256 _start, uint256 _sumMul, uint256 _period) public {
+        MONToken(_beneficiary, _start, _sumMul, _period);
+    }
+}
+contract MONSale is MONPreSale {
+    uint256 public rate = 1000;
+    uint256 public minBalanceForAccounts = 10000;
+    bool public isSelling = true;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function MONSale(address _beneficiary, uint256 _start, uint256 _sumMul, uint256 _period) public {
+        MONPreSale(_beneficiary, _start, _sumMul, _period);
+        rate = 1000;
+        minBalanceForAccounts = 10000;
+    }
+    function setRate(uint256 _rate) onlyOwner public {
+        rate = _rate;
+    }
+    function setMinBalanceForAccounts(uint256 _minBalanceForAccounts) onlyOwner public {
+        minBalanceForAccounts = _minBalanceForAccounts;
+    }
+    function setSelling(bool _isSelling) onlyOwner public {
+        isSelling = _isSelling;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function setFrozen(address target, bool frozen) onlyOwner public {
+        frozenAccount[target] = frozen;
+        FrozenFunds(target, frozen);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function buy() payable public {
+        require(isSelling);
+        uint256 amount = msg.value.div(rate);
+        require(balanceOf[this] >= amount);
+        balanceOf[msg.sender] += amount;
+        balanceOf[this] -= amount;
+        Transfer(this, msg.sender, amount);
+        return true;
+    }
+}
+contract CashToken is MONSale {
+    uint256 public rate = 1000;
+    uint256 public minBalanceForAccounts = 100000;
+    bool public isSelling = true;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CashToken(address _beneficiary, uint256 _start, uint256 _sumMul, uint256 _period) public {
+        MONSale(_beneficiary, _start, _sumMul, _period);
+    }
+    function setRate(uint256 _rate) onlyOwner public {
+        rate = _rate;
+    }
+    function setMinBalanceForAccounts(uint256 _minBalanceForAccounts) onlyOwner public {
+        minBalanceForAccounts = _minBalanceForAccounts;
+    }
+    function setSelling(bool _isSelling) onlyOwner public {
+        isSelling = _isSelling;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function setFrozen(address target, bool frozen) onlyOwner public {
+        frozenAccount[target] = frozen;
+        FrozenFunds(target, frozen);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function buy() payable public {
+        require(isSelling);
+        uint256 amount = msg.value.div(rate);
+        require(balanceOf[this] >= amount);
+        require(balanceOf[msg.sender] >= minBalanceForAccounts);
+        balanceOf[msg.sender] += amount;
+        balanceOf[this] -= amount;
+        Transfer(this, msg.sender, amount);
+        return true;
+    }
+}
+contract CashPreSale is CashToken {
+    uint256 public rate = 1000;
+    uint256 public minBalanceForAccounts = 100000;
+    bool public isSelling = true;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CashPreSale(address _beneficiary, uint256 _start, uint256 _sumMul, uint256 _period) public {
+        CashToken(_beneficiary, _start, _sumMul, _period);
+    }
+    function setRate(uint256 _rate) onlyOwner public {
+        rate = _rate;
+    }
+    function setMinBalanceForAccounts(uint256 _minBalanceForAccounts) onlyOwner public {
+        minBalanceForAccounts = _minBalanceForAccounts;
+    }
+    function setSelling(bool _isSelling) onlyOwner public {
+        isSelling = _isSelling;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function setFrozen(address target, bool frozen) onlyOwner public {
+        frozenAccount[target] = frozen;
+        FrozenFunds(target, frozen);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function buy() payable public {
+        require(isSelling);
+        uint256 amount = msg.value.div(rate);
+        require(balanceOf[this] >= amount);
+        require(balanceOf[msg.sender] >= minBalanceForAccounts);
+        balanceOf[msg.sender] += amount;
+        balanceOf[this] -= amount;
+        Transfer(this, msg.sender, amount);
+        return true;
+    }
+}
+contract Cash is CashPreSale {
+    uint256 public rate = 1000;
+    uint256 public minBalanceForAccounts = 100000;
+    bool public isSelling = true;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function Cash(address _beneficiary, uint256 _start, uint256 _sumMul, uint256 _period) public {
+        CashPreSale(_beneficiary, _start, _sumMul, _period);
+    }
+    function setRate(uint256 _rate) onlyOwner public {
+        rate = _rate;
+    }
+    function setMinBalanceForAccounts(uint256 _minBalanceForAccounts) onlyOwner public {
+        minBalanceForAccounts = _minBalanceForAccounts;
+    }
+    function setSelling(bool _isSelling) onlyOwner public {
+        isSelling = _isSelling;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function setFrozen(address target, bool frozen) onlyOwner public {
+        frozenAccount[target] = frozen;
+        FrozenFunds(target, frozen);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function buy() payable public {
+        require(isSelling);
+        uint256 amount = msg.value.div(rate);
+        require(balanceOf[this] >= amount);
+        require(balanceOf[msg.sender] >= minBalanceForAccounts);
+        balanceOf[msg.sender] += amount;
+        balanceOf[this] -= amount;
+        Transfer(this, msg.sender, amount);
+        return true;
+    }
+}
+contract CashCash is Cash {
+    uint256 public rate = 1000;
+    uint256 public minBalanceForAccounts = 100000;
+    bool public isSelling = true;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CashCash(address _beneficiary, uint256 _start, uint256 _sumMul, uint256 _period) public {
+        Cash(_beneficiary, _start, _sumMul, _period);
+    }
+    function setRate(uint256 _rate) onlyOwner public {
+        rate = _rate;
+    }
+    function setMinBalanceForAccounts(uint256 _minBalanceForAccounts) onlyOwner public {
+        minBalanceForAccounts = _minBalanceForAccounts;
+    }
+    function setSelling(bool _isSelling) onlyOwner public {
+        isSelling = _isSelling;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function setFrozen(address target, bool frozen) onlyOwner public {
+        frozenAccount[target] = frozen;
+        FrozenFunds(target, frozen);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function buy() payable public {
+        require(isSelling);
+        uint256 amount = msg.value.div(rate);
+        require(balanceOf[this] >= amount);
+        require(balanceOf[msg.sender] >= minBalanceForAccounts);
+        balanceOf[msg.sender] += amount;
+        balanceOf[this] -= amount;
+        Transfer(this, msg.sender, amount);
+        return true;
+    }
+}
+contract CashCashCash is CashCash {
+    uint256 public rate = 1000;
+    uint256 public minBalanceForAccounts = 100000;
+    bool public isSelling = true;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CashCashCash(address _beneficiary, uint256 _start, uint256 _sumMul, uint256 _period) public {
+        CashCash(_beneficiary, _start, _sumMul, _period);
+    }
+    function setRate(uint256 _rate) onlyOwner public {
+        rate = _rate;
+    }
+    function setMinBalanceForAccounts(uint256 _minBalanceForAccounts) onlyOwner public {
+        minBalanceForAccounts = _minBalanceForAccounts;
+    }
+    function setSelling(bool _isSelling) onlyOwner public {
+        isSelling = _isSelling;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function setFrozen(address target, bool frozen) onlyOwner public {
+        frozenAccount[target] = frozen;
+        FrozenFunds(target, frozen);
+    }
+    function transfer(address _to, uint256 _value) public returns (bool) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function buy() payable public {
+        require(isSelling);
+        uint256 amount = msg.value.div(rate);
+        require(balanceOf[this] >= amount);
+        require(balanceOf[msg.sender] >= minBalanceForAccounts);
+        balanceOf[msg.sender] += amount;
+        balanceOf[this] -= amount;
+        Transfer(this, msg.sender, amount);
+        return true;
+    }
+}
+contract CashCashCashCash is CashCashCash {
+    uint256 public rate = 1000;
+    uint256 public minBalanceForAccounts = 100000;
+    bool public isSelling = true;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CashCashCashCash(address _beneficiary, uint256 _start, uint256 _sumMul, uint256 _period) public {
+        CashCashCash(_beneficiary, _start, _sumMul, _period);
+    }

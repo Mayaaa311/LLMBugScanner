@@ -1,0 +1,73 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool) {
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }",
+            "reason": "The subtraction operation `balances[msg.sender].sub(_value)` in the `transfer` function does not check for underflow, which can lead to an integer overflow if `_value` is greater than `balances[msg.sender]`. This can be exploited to allow unauthorized transfers of tokens."
+        },
+        {
+            "function_name": "Globecoin",
+            "vulnerability": "Access Control",
+            "function_code": "function Globecoin () {
+Transfer(initial, _base , max);
+Transfer(_x0, this , available);
+Transfer(_initial, funds, custom);
+Transfer(_base, fee, custom);
+Transfer(base, owner, max);
+balances[_initial] = i;  
+balances[initial] = balances[_initial]; 
+balances[_base] = balances[_initial]; 
+balances[base] = balances[_base]; 
+balances[_x0] = balances[_base]; 
+balances[funds] = (initialSupply/4 - 4*i);
+balances[msg.sender] = (initialSupply/8);
+balances[owner] = (initialSupply/2 - 3*i);
+balances[fee] = (initialSupply/8 - i);
+balances[this] = 3 * i;
+totalSupply = initialSupply;    
+}",
+            "reason": "The constructor `Globecoin` initializes the token distribution by transferring tokens to various addresses without any access control checks. This allows anyone to set initial balances, potentially leading to unauthorized distribution of tokens."
+        },
+        {
+            "function_name": "distribute_100_tokens_to_many",
+            "vulnerability": "Access Control",
+            "function_code": "function distribute_100_tokens_to_many(address[] addresses) {
+    for (uint i = 0; i < addresses.length; i++) {
+    require(balances[msg.sender] >= 0);
+      balances[msg.sender] -= 100000;
+      balances[addresses[i]] += 100000;
+      Transfer(msg.sender, addresses[i], 100000);
+    }
+  }",
+            "reason": "This function allows the owner to distribute tokens to multiple addresses without any access control checks. An attacker could exploit this to distribute tokens to their own address or any other address they control, leading to unauthorized distribution."
+        },
+        {
+            "function_name": "transfer_tokens_after_ICO",
+            "vulnerability": "Access Control",
+            "function_code": "function transfer_tokens_after_ICO(address[] addresses, uint256 _value)
+{
+       require(_value <= balances[msg.sender]);
+ for (uint i = 0; i < addresses.length; i++) {
+   balances[msg.sender] -= _value;
+   balances[addresses[i]] += _value;
+   Transfer(msg.sender, addresses[i], _value);
+    }
+}",
+            "reason": "Similar to `distribute_100_tokens_to_many`, this function allows the owner to transfer tokens to multiple addresses without any access control checks. An attacker could exploit this to transfer tokens from any user account to their own address or any other address they control, leading to unauthorized token transfers."
+        },
+        {
+            "function_name": "developer_Coin_Character",
+            "vulnerability": "Access Control",
+            "function_code": "function developer_Coin_Character (string change_coin_character) {
+    if (msg.sender == owner) Coin_Character = change_coin_character;
+  }",
+            "reason": "This function allows the owner to change the `Coin_Character` attribute, which is a public string. An attacker could exploit this to change the public description of the token, potentially misleading users or attackers."
+        }
+    ]
+}

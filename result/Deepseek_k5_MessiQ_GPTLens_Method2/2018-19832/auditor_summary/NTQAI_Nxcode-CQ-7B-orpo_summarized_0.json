@@ -1,0 +1,51 @@
+{
+    "output_list": [
+        {
+            "function_name": "distr",
+            "code": "function distr(address _to, uint256 _amount) canDistr private returns (bool) {
+    totalDistributed = totalDistributed.add(_amount);
+    totalRemaining = totalRemaining.sub(_amount);
+    balances[_to] = balances[_to].add(_amount);
+    emit Distr(_to, _amount);
+    emit Transfer(address(0), _to, _amount);
+    return true;
+    if (totalDistributed >= totalSupply) {
+        distributionFinished = true;
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'distr' function has an integer overflow that can be exploited to increase the balance of a user."
+        },
+        {
+            "function_name": "getTokens",
+            "code": "function getTokens() payable canDistr onlyWhitelist public {
+    if (value > totalRemaining) {
+        value = totalRemaining;
+    }
+    require(value <= totalRemaining);
+    address investor = msg.sender;
+    uint256 toGive = value;
+    distr(investor, toGive);
+    if (toGive > 0) {
+        blacklist[investor] = true;
+    }
+    if (totalDistributed >= totalSupply) {
+        distributionFinished = true;
+    }
+    value = value.div(100000).mul(99999);
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'getTokens' function has a wrong logic that can be exploited to increase the balance of a user."
+        },
+        {
+            "function_name": "transferOwnership",
+            "code": "function transferOwnership(address newOwner) onlyOwner public {
+    if (newOwner != address(0)) {
+        owner = newOwner;
+    }
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'transferOwnership' function has an incorrect access control, allowing the owner to be transferred to any address."
+        }
+    ]
+}

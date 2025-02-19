@@ -1,0 +1,59 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mint",
+            "vulnerability": "Access Control",
+            "function_code": "function mint(address _holder, uint _value) external {
+    require(msg.sender == ico);
+    require(_value != 0);
+    require(totalSupply + _value <= TOKEN_LIMIT);
+    balances[_holder] += _value;
+    totalSupply += _value;
+    Transfer(0x0, _holder, _value);
+}",
+            "reason": "The mint function only allows the ICO contract to mint new tokens, but does not check if the ICO contract is trusted. An attacker could manipulate the ICO contract address to mint unlimited tokens, devaluing the token for legitimate holders."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "function_code": "function transfer(address _to, uint _value) public {
+    require(!tokensAreFrozen);
+    super.transfer(_to, _value);
+}",
+            "reason": "The transfer function does not check if the sender is allowed to transfer tokens. If tokensAreFrozen is set to false by an attacker, they can transfer tokens even if the contract is supposed to be frozen. This can lead to token devaluation."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "function transferFrom(address _from, address _to, uint _value) public {
+    require(!tokensAreFrozen);
+    super.transferFrom(_from, _to, _value);
+}",
+            "reason": "Similar to the transfer function, this function also does not check if the sender is allowed to transfer tokens from the _from address. If tokensAreFrozen is set to false, an attacker can transfer tokens from any address, leading to token devaluation."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Access Control",
+            "function_code": "function approve(address _spender, uint _value) public {
+    require(!tokensAreFrozen);
+    super.approve(_spender, _value);
+}",
+            "reason": "The approve function allows an owner to approve an spender to spend tokens on behalf of the owner. If tokensAreFrozen is set to false, an attacker can approve the spender to spend tokens on behalf of the owner, leading to potential token devaluation."
+        },
+        {
+            "function_name": "ATL",
+            "vulnerability": "Typo Constructor",
+            "function_code": "contract ATL is StandardToken {
+  string public name = "ATLANT Token";
+  string public symbol = "ATL";
+  uint public decimals = 18;
+  uint constant TOKEN_LIMIT = 150 * 1e6 * 1e18;
+  address public ico;
+  bool public tokensAreFrozen = true;
+  function ATL(address _ico) {
+    ico = _ico;
+  }",
+            "reason": "The constructor for the ATL contract has a typo in the function name. This typo does not affect the functionality of the contract but is considered a best practice violation as it can lead to confusion and potential errors."
+        }
+    ]
+}

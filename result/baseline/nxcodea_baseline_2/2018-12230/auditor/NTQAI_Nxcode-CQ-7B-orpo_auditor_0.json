@@ -1,0 +1,67 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address to, uint value) returns (bool success) {
+                if (frozenAccount[msg.sender]) return false;
+                if(balances[msg.sender] < value) return false;
+                if(balances[to] + value < balances[to]) return false;
+                balances[msg.sender] -= value;
+                balances[to] += value;
+                Transfer(msg.sender, to, value);
+                return true;
+            }",
+            "reason": "The transfer function does not check for integer overflow when adding the transferred value to the recipient's balance. This can lead to an overflow if the recipient's balance exceeds the maximum value that can be stored in a uint256. This can be exploited by an attacker to steal tokens from the recipient."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address from, address to, uint value) returns (bool success) {
+                if (frozenAccount[msg.sender]) return false;
+                if(balances[from] < value) return false;
+                if( allowed[from][msg.sender] >= value ) return false;
+                if(balances[to] + value < balances[to]) return false;
+                balances[from] -= value;
+                allowed[from][msg.sender] -= value;
+                balances[to] += value;
+                Transfer(from, to, value);
+                return true;
+            }",
+            "reason": "The transferFrom function does not check for integer overflow when adding the transferred value to the recipient's balance. This can lead to an overflow if the recipient's balance exceeds the maximum value that can be stored in a uint256. This can be exploited by an attacker to steal tokens from the recipient."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner{
+                balances[target] += mintedAmount;
+                totalSupply += mintedAmount;
+                Transfer(0,owner,mintedAmount);
+                Transfer(owner,target,mintedAmount);
+            }",
+            "reason": "The mintToken function does not check for integer overflow when adding the minted amount to the recipient's balance and the total supply. This can lead to an overflow if the recipient's balance or total supply exceeds the maximum value that can be stored in a uint256. This can be exploited by an attacker to mint an excessive amount of tokens."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Access Control",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner{
+                balances[target] += mintedAmount;
+                totalSupply += mintedAmount;
+                Transfer(0,owner,mintedAmount);
+                Transfer(owner,target,mintedAmount);
+            }",
+            "reason": "The mintToken function is only accessible to the contract owner. This means that only the contract owner can mint tokens, which can be exploited by an attacker to mint tokens without the owner's permission."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner{
+                balances[target] += mintedAmount;
+                totalSupply += mintedAmount;
+                Transfer(0,owner,mintedAmount);
+                Transfer(owner,target,mintedAmount);
+            }",
+            "reason": "The function name is misspelled as 'mintToken' instead of 'mintTokens'. This can lead to confusion and potential misuse of the function. This can be exploited by an attacker to call the wrong function."
+        }
+    ]
+}

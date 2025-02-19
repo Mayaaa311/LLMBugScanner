@@ -1,0 +1,51 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
+            balances[_to] += _value;
+            balances[_from] -= _value;
+            allowed[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        } else { return false; }
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check if the transfer operation will cause an integer overflow. If the balances[_from] or allowed[_from][msg.sender] is too large, the transfer operation may result in an overflow, leading to incorrect balances and potentially loss of funds."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The approve function does not check if the msg.sender is the owner of the tokens. If the msg.sender is not the owner, they can approve any address to spend their tokens, potentially leading to unauthorized spending."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) { throw; }
+        return true;
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The approveAndCall function does not check if the msg.sender is the owner of the tokens. If the msg.sender is not the owner, they can approve any address to spend their tokens and call a receiveApproval function on the spender contract, potentially leading to unauthorized spending."
+        },
+        {
+            "function_name": "totalSupply",
+            "code": "function totalSupply() constant returns (uint256 supply) {}",
+            "vulnerability": "Typo Constructor",
+            "reason": "The totalSupply function is not implemented. It should return the total supply of tokens in the contract."
+        },
+        {
+            "function_name": "totalSupply",
+            "code": "function totalSupply() constant returns (uint256 supply) {}",
+            "vulnerability": "Typo Constructor",
+            "reason": "The totalSupply function is not implemented. It should return the total supply of tokens in the contract."
+        }
+    ]
+}

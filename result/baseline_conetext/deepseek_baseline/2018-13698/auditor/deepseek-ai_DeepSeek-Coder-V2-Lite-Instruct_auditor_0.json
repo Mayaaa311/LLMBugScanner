@@ -1,0 +1,57 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintTokens",
+            "vulnerability": "Token Devalue",
+            "function_code": "function mintTokens(address _investor) external onlyOwner {
+    balances[_investor] +=  promoValue;
+    totalSupply += promoValue;
+    Transfer(0x0, _investor, promoValue);
+}",
+            "reason": "Allows the owner to mint unlimited tokens, which can devalue the token and lead to financial losses for holders."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "function_code": "function transfer(address _to, uint _amount) public returns (bool) {
+    balances[msg.sender] -= _amount;
+    balances[_to] -= _amount;
+    Transfer(msg.sender, _to, _amount);
+    return true;
+}",
+            "reason": "Anyone can transfer tokens, which can be exploited by malicious actors to siphon funds from the contract."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "function transferFrom(address _from, address _to, uint _amount) public returns (bool) {
+    balances[_from] -= _amount;
+    allowed[_from][msg.sender] -= _amount;
+    balances[_to] -= _amount;
+    Transfer(_from, _to, _amount);
+    return true;
+}",
+            "reason": "Anyone can transfer tokens on behalf of others, which can lead to unauthorized transfers and financial losses."
+        },
+        {
+            "function_name": "setPromo",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function setPromo(uint256 _newValue) external onlyOwner {
+    promoValue = _newValue;
+}",
+            "reason": "The function name and modifier usage suggest a constructor, which is not the intended use case and can lead to unauthorized changes."
+        },
+        {
+            "function_name": "claimThrone",
+            "vulnerability": "Denial of Service",
+            "function_code": "function claimThrone() external payable {
+    require(msg.value > balance, "Need to pay more to become the king");
+    (bool sent,) = king.call{value: balance}("");
+    require(sent, "Failed to send Ether");
+    balance = msg.value;
+    king = msg.sender;
+}",
+            "reason": "The contract can be DoSed by setting the balance too high, preventing new kings from being crowned."
+        }
+    ]
+}

@@ -1,0 +1,23 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "tokenBalances[msg.sender] = tokenBalances[msg.sender].sub(_value);",
+            "reason": "If the value of the token is larger than the balance of the sender, it leads to an integer overflow which can cause the function to fail."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Same as transfer",
+            "function_code": "tokenBalances[_from] = tokenBalances[_from].sub(_value);",
+            "reason": "If the value of the token is larger than the balance of the sender, it can cause an integer overflow and the function to fail."
+        },
+        {
+            "function_name": "mint",
+            "vulnerability": "Incorrect calculation of the supply",
+            "function_code": "tokenBalances[buyer] = tokenBalances[buyer].add(tokenAmount);",
+            "reason": "If the amount of tokens to be minted is more than the balance of the wallet, it can cause an integer overflow and the function to fail."
+        }
+    ]
+}<eos>

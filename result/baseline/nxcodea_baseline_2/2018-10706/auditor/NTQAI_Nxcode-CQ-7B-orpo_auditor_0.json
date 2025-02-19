@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "generateTokens",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function generateTokens(address _user, uint _amount) onlyController public returns (bool) { _amount=_amount*10**uint256(decimals); return _generateTokens(_user,_amount); }",
+            "reason": "The function `generateTokens` takes in an `uint` parameter `_amount` and multiplies it by 10^decimals. However, the multiplication operation can cause an integer overflow if the input `_amount` is too large. This can be exploited by an attacker to mint more tokens than intended. The fix is to use SafeMath library for multiplication."
+        },
+        {
+            "function_name": "destroyTokens",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function destroyTokens(address _user, uint256 _amount) onlyOwner public returns (bool) { _amount=_amount*10**uint256(decimals); return _destroyTokens(_user,_amount); }",
+            "reason": "The function `destroyTokens` takes in an `uint256` parameter `_amount` and multiplies it by 10^decimals. However, the multiplication operation can cause an integer overflow if the input `_amount` is too large. This can be exploited by an attacker to burn more tokens than intended. The fix is to use SafeMath library for multiplication."
+        },
+        {
+            "function_name": "changeAirdropQty",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function changeAirdropQty(uint256 _airdropQty) onlyController public { airdropQty = _airdropQty; }",
+            "reason": "The function `changeAirdropQty` takes in an `uint256` parameter `_airdropQty` and assigns it to the state variable `airdropQty`. However, the assignment operation can cause an integer overflow if the input `_airdropQty` is too large. This can be exploited by an attacker to set `airdropQty` to a value larger than intended. The fix is to use SafeMath library for assignment."
+        },
+        {
+            "function_name": "changeAirdropTotalQty",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function changeAirdropTotalQty(uint256 _airdropTotalQty) onlyController public { uint256 _token =_airdropTotalQty*10**uint256(decimals); require(balanceOf[owner] >= _token); airdropTotalQty = _airdropTotalQty; }",
+            "reason": "The function `changeAirdropTotalQty` takes in an `uint256` parameter `_airdropTotalQty` and multiplies it by 10^decimals. However, the multiplication operation can cause an integer overflow if the input `_airdropTotalQty` is too large. This can be exploited by an attacker to set `airdropTotalQty` to a value larger than intended. The fix is to use SafeMath library for multiplication."
+        },
+        {
+            "function_name": "changeTokensPerEther",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function changeTokensPerEther(uint256 _newRate) onlyController public { tokensPerEther = _newRate; }",
+            "reason": "The function `changeTokensPerEther` takes in an `uint256` parameter `_newRate` and assigns it to the state variable `tokensPerEther`. However, the assignment operation can cause an integer overflow if the input `_newRate` is too large. This can be exploited by an attacker to set `tokensPerEther` to a value larger than intended. The fix is to use SafeMath library for assignment."
+        }
+    ]
+}

@@ -1,0 +1,274 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow, allowing an attacker to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow, allowing an attacker to set the balance of an arbitrary user to any value."}]}
+]}
+
+contract CryptoKitty {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    uint256 public totalTokens;
+    mapping (address => uint256) public balanceOf;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    event Transfer(address _from, address _to, uint256 _value);
+    function CryptoKitty(uint256 initialSupply, string tokenName, string tokenSymbol) public {
+        totalTokens = initialSupply * 10 ** uint256(decimals);  
+        balanceOf[msg.sender] = totalTokens;                
+        name = tokenName;                                   
+        symbol = tokenSymbol;                               
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require(_to != 0x0);
+        require(balanceOf[_from] >= _value);
+        require(balanceOf[_to] + _value > balanceOf[_to]);
+        uint previousBalances = balanceOf[_from] + balanceOf[_to];
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(_from, _to, _value);
+        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+    }
+    function transfer(address _to, uint256 _value) public {
+        _transfer(msg.sender, _to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);     
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalTokens += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CryptoKittyToken is CryptoKitty {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoKittyToken(uint256 initialSupply, string tokenName, string tokenSymbol) public CryptoKitty(initialSupply, tokenName, tokenSymbol) {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalTokens += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CryptoKittyTokenSale is owned {
+    uint256 public totalTokens = 100000000000000000000000000;
+    uint256 public totalTokensSold = 0;
+    uint256 public totalTokensRemaining = 0;
+    uint256 public totalTokensForSale = 0;
+    uint256 public totalTokensForTeam = 0;
+    uint256 public totalTokensForBounty = 0;
+    uint256 public totalTokensForAirdrop = 0;
+    uint256 public totalTokensForReserve = 0;
+    uint256 public sellPrice = 0.000000001 * 10 ** uint256(decimals);
+    uint256 public buyPrice = 0.000000001 * 10 ** uint256(decimals);
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoKittyTokenSale(uint256 initialSupply, string tokenName, string tokenSymbol) public CryptoKittyToken(initialSupply, tokenName, tokenSymbol) {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalTokens += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function setSellPrice(uint256 newSellPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+    }
+    function setBuyPrice(uint256 newBuyPrice) onlyOwner public {
+        buyPrice = newBuyPrice;
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setTotalTokensForSale(uint256 newTotalTokensForSale) onlyOwner public {
+        totalTokensForSale = newTotalTokensForSale;
+    }
+    function setTotalTokensForTeam(uint256 newTotalTokensForTeam) onlyOwner public {
+        totalTokensForTeam = newTotalTokensForTeam;
+    }
+    function setTotalTokensForBounty(uint256 newTotalTokensForBounty) onlyOwner public {
+        totalTokensForBounty = newTotalTokensForBounty;
+    }
+    function setTotalTokensForAirdrop(uint256 newTotalTokensForAirdrop) onlyOwner public {
+        totalTokensForAirdrop = newTotalTokensForAirdrop;
+    }
+    function setTotalTokensForReserve(uint256 newTotalTokensForReserve) onlyOwner public {
+        totalTokensForReserve = newTotalTokensForReserve;
+    }
+    function setTotalTokens(uint256 newTotalTokens) onlyOwner public {
+        totalTokens = newTotalTokens;
+    }
+    function setTotalTokensRemaining(uint256 newTotalTokensRemaining) onlyOwner public {
+        totalTokensRemaining = newTotalTokensRemaining;
+    }
+    function setTokensForSale(uint256 newTokensForSale) onlyOwner public {
+        totalTokensForSale = newTokensForSale;
+    }
+    function setTokensForTeam(uint256 newTokensForTeam) onlyOwner public {
+        totalTokensForTeam = newTokensForTeam;
+    }
+    function setTokensForBounty(uint256 newTokensForBounty) onlyOwner public {
+        totalTokensForBounty = newTokensForBounty;
+    }
+    function setTokensForAirdrop(uint256 newTokensForAirdrop) onlyOwner public {
+        totalTokensForAirdrop = newTokensForAirdrop;
+    }
+    function setTokensForReserve(uint256 newTokensForReserve) onlyOwner public {
+        totalTokensForReserve = newTokensForReserve;
+    }
+    function setTokensRemaining(uint256 newTokensRemaining) onlyOwner public {
+        totalTokensRemaining = newTokensRemaining;
+    }
+    function setTokens(uint256 newTokens) onlyOwner public {
+        totalTokens = newTokens;
+    }
+    function setTokensSold(uint256 newTokensSold) onlyOwner public {
+        totalTokensSold = newTokensSold;
+    }
+    function mintTokens(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalTokens += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CryptoKittyCash is owned, CryptoKittyTokenSale {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoKittyCash(uint256 initialSupply, string tokenName, string tokenSymbol) public CryptoKittyTokenSale(initialSupply, tokenName, Symbol) {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalTokens += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function setTokensForSale(uint256 newTokensForSale) onlyOwner public {
+        totalTokensForSale = newTokensForSale;
+    }
+    function setTokensForTeam(uint256 newTokensForTeam) onlyOwner public {
+        totalTokensForTeam = newTokensForTeam;
+    }
+    function setTokensForBounty(uint256 newTokensForBounty) onlyOwner public {
+        totalTokensForBounty = newTokensForBounty;
+    }
+    function setTokensForAirdrop(uint256 newTokensForAirdrop) onlyOwner public {
+        totalTokensForAirdrop = newTokensForAirdrop;
+    }
+    function setTokensForReserve(uint256 newTokensForReserve) onlyOwner public {
+        totalTokensForReserve = newTokensForReserve;
+    }
+    function setTokensRemaining(uint256 newTokensRemaining) onlyOwner public {
+        totalTokensRemaining = newTokensRemaining;
+    }
+    function setTokens(uint256 newTokens) onlyOwner public {
+        totalTokens = newTokens;
+    }
+    function setTokensSold(uint256 newTokensSold) onlyOwner public {
+        totalTokensSold = newTokensSold;
+    }
+    function setTokensForTeam(uint256 newTokensForTeam) onlyOwner public {
+        totalTokensForTeam = newTokensForTeam;
+    }
+    function setTokensForBounty(uint256 newTokensForBounty) onlyOwner public {
+        totalTokensForBounty = newTokensForBounty;
+    }
+    function setTokensForAirdrop(uint256 newTokensForAirdrop) onlyOwner public {
+        totalTokensForAirdrop = newTokensForAirdrop;
+    }
+    function setTokensForReserve(uint256 newTokensForReserve) onlyOwner public {
+        totalTokensForReserve = newTokensForReserve;
+    }
+    function setTokensRemaining(uint256 newTokensRemaining) onlyOwner public {
+        totalTokensRemaining = newTokensRemaining;
+    }
+    function setTokens(uint256 newTokens) onlyOwner public {
+        totalTokens = newTokens;
+    }
+    function setTokensSold(uint256 newTokensSold) onlyOwner public {
+        totalTokensSold = newTokensSold;
+    }
+    function setTokensForTeam(uint256 newTokensForTeam) onlyOwner public {
+        totalTokensForTeam = newTokensForTeam;
+    }
+    function setTokensForBounty(uint256 newTokensForBounty) onlyOwner public {
+        totalTokensForBounty = newTokensForBounty;
+    }
+    function setTokensForAirdrop(uint256 newTokensForAirdrop) onlyOwner public {
+        totalTokensForAirdrop = newTokensForAirdrop;
+    }
+    function setTokensForReserve(uint256 newTokensForReserve) onlyOwner public {
+        totalTokensForReserve = newTokensForReserve;
+    }
+    function setTokensRemaining(uint256 newTokensRemaining) onlyOwner public {
+        totalTokensRemaining = newTokensRemaining;
+    }
+    function setTokens(uint256 newTokens) onlyOwner public {
+        totalTokens = newTokens;
+    }
+    function setTokensSold(uint256 newTokensSold) onlyOwner public {
+        totalTokensSold = newTokensSold;
+    }
+    function mintTokens(address target, uint256 mintedAmount) onlyOwner public {
+       

@@ -1,0 +1,64 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+    if (_to == 0x0) revert();
+    if (balanceOf[msg.sender] < _value) revert();
+    if (balanceOf[_to] + _value < balanceOf[_to]) revert();
+    if (frozenAccount[msg.sender]) revert();
+    balanceOf[msg.sender] -= _value;
+    balanceOf[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function does not properly check for overflow when updating the balance of the recipient. If the recipient's balance is already at the maximum uint256 value, adding the transferred amount will cause an overflow, leading to incorrect balance updates and potential loss of funds."
+        },
+        {
+            "function_name": "lend",
+            "code": "function lend(address _to, uint256 _value, uint256 _duration_in_days) {
+    if (_to == 0x0) revert();
+    if (balanceOf[msg.sender] < _value) revert();
+    if (balanceOf[_to] + _value < balanceOf[_to]) revert();
+    if (frozenAccount[msg.sender]) revert();
+    if (_duration_in_days > 36135) revert();
+    balanceOf[msg.sender] -= _value;
+    balanceOf[_to] += _value;
+    InterestFreeLending(msg.sender, _to, _value, _duration_in_days);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "Similar to the 'transfer' function, this function also does not check for overflow when updating the balance of the recipient. If the recipient's balance is already at the maximum uint256 value, adding the lent amount will cause an overflow, leading to incorrect balance updates and potential loss of funds."
+        },
+        {
+            "function_name": "notifyAuthority",
+            "code": "function notifyAuthority(string _notes, string _reference) {
+    if (balanceOf[msg.sender] < notificationFee) revert();
+    if (bytes(_reference).length > 66) revert();
+    if (bytes(_notes).length > 64) revert();
+    balanceOf[msg.sender] -= notificationFee;
+    balanceOf[centralAuthority] += notificationFee;
+    AuthorityNotified( _notes, _reference);
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function does not check the length of the _reference and _notes parameters, which can lead to a denial of service (DoS) attack if these parameters are excessively long. This can cause the function to revert, potentially blocking further operations and affecting the system's functionality."
+        },
+        {
+            "function_name": "notifylvlClients",
+            "code": "function notifylvlClients(string _notes, string _reference) onlyOwner {
+    if (bytes(_reference).length > 66) revert();
+    if (bytes(_notes).length > 64) revert();
+    ClientsNotified( _notes, _reference);
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "This function, while restricted to onlyOwner, does not perform any checks on the input parameters _notes and _reference. An attacker could potentially manipulate these parameters to cause a revert, leading to a denial of service (DoS) attack on the function."
+        },
+        {
+            "function_name": "setlvlSign",
+            "code": "function setlvlSign(string newSign) onlyOwner {
+    sign = newSign;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The function 'setlvlSign' is only restricted to the owner (onlyOwner modifier), but it does not perform any checks on the input parameter 'newSign'. An attacker could potentially set 'newSign' to an empty string or a very long string, leading to potential issues in the system."
+        }
+    ]
+}

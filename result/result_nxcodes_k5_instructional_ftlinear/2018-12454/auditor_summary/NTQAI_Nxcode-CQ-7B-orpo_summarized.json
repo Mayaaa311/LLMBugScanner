@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "setBettingCondition",
+            "code": "function setBettingCondition(uint _contenders, uint _bettingprice) { if(msg.sender != developer) return; arraysize  = _contenders; if(arraysize>1000) arraysize = 1000; bettingprice = _bettingprice; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function setBettingCondition allows the developer to set the number of contenders and betting price. However, the function does not check if the new contenders value is greater than 1000. If the developer sets a large value, it will cause an integer overflow and the arraysize will be set to 1000, which is not the intended behavior. This vulnerability can be exploited by the developer to set a large number of contenders and cause the contract to revert."
+        },
+        {
+            "function_name": "addguess",
+            "code": "function addguess() inState(State.Started) payable { _addguess(); } function _addguess() private inState(State.Started) { require(msg.value >= bettingprice); curhash = sha256(block.timestamp, block.coinbase, block.difficulty, curhash); if((uint)(numguesses+1)<=arraysize) { guesses[numguesses++].addr = msg.sender; if((uint)(numguesses)>=arraysize){ _finish(); } } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function addguess allows anyone to add a guess to the lottery. However, the function does not check if the number of guesses is greater than 1000. If a large number of guesses are added, it will cause an integer overflow and the contract will revert. This vulnerability can be exploited by anyone to add a large number of guesses and cause the contract to revert."
+        },
+        {
+            "function_name": "getBettingPrice",
+            "code": "function getBettingPrice() constant returns(uint){ return bettingprice; }",
+            "vulnerability": "Access Control",
+            "reason": "The function getBettingPrice is public and anyone can call it. However, the function does not check if the caller is the developer. If the caller is not the developer, the function will return the betting price, which is not the intended behavior. This vulnerability can be exploited by anyone to get the betting price and cause the contract to revert."
+        },
+        {
+            "function_name": "getDeveloperAddress",
+            "code": "function getDeveloperAddress() constant returns(address) { return developer; }",
+            "vulnerability": "Access Control",
+            "reason": "The function getDeveloperAddress is public and anyone can call it. However, the function does not check if the caller is the developer. If the caller is not the developer, the function will return the developer address, which is not the intended behavior. This vulnerability can be exploited by anyone to get the developer address and cause the contract to revert."
+        },
+        {
+            "function_name": "getDeveloperFee",
+            "code": "function getDeveloperFee() constant returns(uint) { uint developerfee = this.balance/100; return developerfee; }",
+            "vulnerability": "Access Control",
+            "reason": "The function getDeveloperFee is public and anyone can call it. However, the function does not check if the caller is the developer. If the caller is not the developer, the function will return the developer fee, which is not the intended behavior. This vulnerability can be exploited by anyone to get the developer fee and cause the contract to revert."
+        }
+    ]
+}

@@ -1,0 +1,181 @@
+You are an AI programming assistant, utilizing the Deepseek Coder model, developed by Deepseek Company, and you only answer questions related to computer science. For politically sensitive questions, security and privacy issues, and other non-computer science questions, you will refuse to answer.
+Requirement: You are a smart contract auditor. Identify and explain 5 most severe vulnerability types in the provided smart contract. Ensure your identification is in the following vulnerability types: Integer Overflow, Wrong Logic, Bad Randomness, Access Control, Typo Constructor, Token Devalue, Access Control, Bad Randomness, Token Devalue, Access Control. 
+                        Output only in the following JSON format:
+                        {
+                            "output_list": [
+                                {
+                                    "function_name": "<function_name>",
+                                    "vulnerability": "<vulnerability_type>",
+                                    "description": "<vulnerability_description>"
+                                }
+                            ]
+                        }### Instruction:
+Code Input: 
+
+pragma solidity ^0.4.18;
+contract ERC20Interface {
+    function totalSupply() public constant returns (uint);
+    function balanceOf(address _owner) public constant returns (uint balance);
+    function transfer(address _to, uint _value) public returns (bool success);
+    function transferFrom(address _from, address _to, uint _value) public returns (bool success);
+    function approve(address _spender, uint _value) public returns (bool success);
+    function allowance(address _owner, address _spender) public constant returns (uint remaining);
+    event Transfer(address indexed _from, address indexed _to, uint _value);
+    event Approval(address indexed _owner, address indexed _spender, uint _value);
+}
+contract Owned {
+    address public owner;
+    function Owned() public {
+        owner = msg.sender;
+    }
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+    function transferOwnership(address newOwner) onlyOwner public {
+        owner = newOwner;
+    }
+}
+contract ERC20 is ERC20Interface, Owned {
+    uint public totalSupply;
+    mapping (address => uint) public balanceOf;
+    mapping (address => mapping (address => uint)) public allowance;
+    function ERC20(uint _initialSupply, string _tokenName, string _tokenSymbol) public {
+        totalSupply = _initialSupply * 10 ** uint256(decimals);
+        balanceOf[msg.sender] = totalSupply;
+        name = _tokenName;
+        symbol = _tokenSymbol;
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require(_to != 0x0);
+        require(balanceOf[_from] >= _value);
+        require(balanceOf[_to] + _value > balanceOf[_to]);
+        uint previousBalances = balanceOf[_from] + balanceOf[_to];
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(_from, _to, _value);
+        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+    }
+    function transfer(address _to, uint _value) public {
+        _transfer(msg.sender, _to, _value);
+    }
+    function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint _value) public returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function approveAndCall(address _spender, uint _value, bytes _extraData) public returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function approveAndCall(address _spender, uint _value, bytes _extraData, string _tokenSymbol) public returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function approveAndCall(address _spender, uint _value, bytes _extraData, string _tokenSymbol, address _tokenSaleContractAddress) public returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function approveAndCall(address _spender, uint _value, bytes _extraData, string _tokenSymbol, address _tokenSaleContractAddress, uint _tokenSaleContractID) public returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function approveAndCall(address _spender, uint _value, bytes _extraData, string _tokenSymbol, address _tokenSaleContractAddress, uint _tokenSaleContractID, uint _tokenSaleContractRevenue) public returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function approveAndCall(address _spender, uint _value, bytes _extraData, string _tokenSymbol, address _tokenSaleContractAddress, uint _tokenSaleContractID, uint _tokenSaleContractRevenue, uint _tokenSaleContractTokensSold) public returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function approveAndCall(address _spender, uint _value, bytes _extraData, string _tokenSymbol, address _tokenSaleContractAddress, uint _tokenSaleContractID, uint _tokenSaleContractRevenue, uint _tokenSaleContractTokensSold, uint _tokenSaleContractTokensRemaining) public returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function approveAndCall(address _spender, uint _value, bytes _extraData, string _tokenSymbol, address _tokenSaleContractAddress, uint _tokenSaleContractID, uint _tokenSaleContractRevenue, uint _tokenSaleContractTokensSold, uint _tokenSaleContractTokensRemaining, uint _tokenSaleContractTokensSoldLastBlock) public returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function approveAndCall(address _spender, uint _value, bytes _extraData, string _tokenSymbol, address _tokenSaleContractAddress, uint _tokenSaleContractID, uint _tokenSaleContractRevenue, uint _tokenSaleContractTokensSold, uint _tokenSaleContractTokensRemaining, uint _tokenSaleContractTokensSoldLastBlock, uint _tokenSaleContractTokensSoldLastBlockRevenue) public returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function approveAndCall(address _spender, uint _value, bytes _extraData, string _tokenSymbol, address _tokenSaleContractAddress, uint _tokenSaleContractID, uint _tokenSaleContractRevenue, uint _tokenSaleContractTokensSold, uint _tokenSaleContractTokensRemaining, uint _tokenSaleContractTokensSoldLastBlock, uint _tokenSaleContractTokensSoldLastBlockRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSold) public returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function approveAndCall(address _spender, uint _value, bytes _extraData, string _tokenSymbol, address _tokenSaleContractAddress, uint _tokenSaleContractID, uint _tokenSaleContractRevenue, uint _tokenSaleContractTokensSold, uint _tokenSaleContractTokensRemaining, uint _tokenSaleContractTokensSoldLastBlock, uint _tokenSaleContractTokensSoldLastBlockRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSold, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenue) public returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function approveAndCall(address _spender, uint _value, bytes _extraData, string _tokenSymbol, address _tokenSaleContractAddress, uint _tokenSaleContractID, uint _tokenSaleContractRevenue, uint _tokenSaleContractTokensSold, uint _tokenSaleContractTokensRemaining, uint _tokenSaleContractTokensSoldLastBlock, uint _tokenSaleContractTokensSoldLastBlockRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSold, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenueRevenue) public returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function approveAndCall(address _spender, uint _value, bytes _extraData, string _tokenSymbol, address _tokenSaleContractAddress, uint _tokenSaleContractID, uint _tokenSaleContractRevenue, uint _tokenSaleContractTokensSold, uint _tokenSaleContractTokensRemaining, uint _tokenSaleContractTokensSoldLastBlock, uint _tokenSaleContractTokensSoldLastBlockRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSold, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenueRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenueRevenueRevenue) public returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function approveAndCall(address _spender, uint _value, bytes _extraData, string _tokenSymbol, address _tokenSaleContractAddress, uint _tokenSaleContractID, uint _tokenSaleContractRevenue, uint _tokenSaleContractTokensSold, uint _tokenSaleContractTokensRemaining, uint _tokenSaleContractTokensSoldLastBlock, uint _tokenSaleContractTokensSoldLastBlockRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSold, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenueRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenueRevenueRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenueRevenueRevenueRevenue) public returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function approveAndCall(address _spender, uint _value, bytes _extraData, string _tokenSymbol, address _tokenSaleContractAddress, uint _tokenSaleContractID, uint _tokenSaleContractRevenue, uint _tokenSaleContractTokensSold, uint _tokenSaleContractTokensRemaining, uint _tokenSaleContractTokensSoldLastBlock, uint _tokenSaleContractTokensSoldLastBlockRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSold, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenueRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenueRevenueRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenueRevenueRevenueRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenueRevenueRevenueRevenueRevenue) public returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function approveAndCall(address _spender, uint _value, bytes _extraData, string _tokenSymbol, address _tokenSaleContractAddress, uint _tokenSaleContractID, uint _tokenSaleContractRevenue, uint _tokenSaleContractTokensSold, uint _tokenSaleContractTokensRemaining, uint _tokenSaleContractTokensSoldLastBlock, uint _tokenSaleContractTokensSoldLastBlockRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSold, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenueRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenueRevenueRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenueRevenueRevenueRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenueRevenueRevenueRevenueRevenue, uint _tokenSaleContractTokensSoldLastBlockTokensSoldRevenueRevenueRevenueRevenueRevenueRevenue) public returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            sp

@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "adminClaimAirdrop",
+            "vulnerability": "Access Control",
+            "reason": "The adminClaimAirdrop function allows the owner to distribute tokens to any address, without any restrictions. This can be exploited by granting a malicious attacker the owner role, allowing them to distribute large amounts of tokens to their own address, effectively draining funds from the contract."
+        },
+        {
+            "function_name": "getTokens",
+            "vulnerability": "Integer Overflow",
+            "reason": "The getTokens function allows users to buy tokens with Ether, where the amount of tokens to be distributed is calculated as tokensPerEth * msg.value / 1 ether. If tokensPerEth is sufficiently large, a large msg.value can cause an integer overflow in the multiplication, allowing the owner to steal funds from the buy function."
+        },
+        {
+            "function_name": "distr",
+            "vulnerability": "Integer Overflow",
+            "reason": "The distr function allows the owner to distribute tokens to any address, where totalDistributed is increased by the amount of tokens distributed. If the owner exploits this function, distributing large amounts of tokens, totalDistributed can overflow, causing a buy function freeze."
+        },
+        {
+            "function_name": "burn",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function allows the owner to burn tokens from any address, where totalSupply and totalDistributed are decreased by the amount of tokens burned. If a large amount of tokens is burned, totalDistributed can overflow, causing a buy function freeze."
+        },
+        {
+            "function_name": "Typo Constructor",
+            "vulnerability": "Bad Logic",
+            "reason": "The constructor is misspelled as 'Typo' due to a typo, allowing it to be called multiple times, allowing the owner to arbitrarily increase the totalSupply and distribute tokens."
+        }
+    ]
+}

@@ -1,0 +1,57 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address _x, uint _v) {
+    balances[_x] += _v;
+    totalSupply += _v;
+    Transfer(0x0, _x, _v);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mint function has an integer overflow, allowing a user to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "unpause",
+            "code": "function unpause() {
+    paused = false;
+    Unpause();
+}",
+            "vulnerability": "Access Control",
+            "reason": "The unpause function is owned by the contract owner, allowing unauthorized users to change the contract state."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _value) whenNotPaused returns (bool)",
+            "vulnerability": "Access Control",
+            "reason": "The transfer function is owned by the contract owner, allowing unauthorized users to change the balance of an arbitrary user."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _value) whenNotPaused returns (bool)",
+            "vulnerability": "Access Control",
+            "reason": "The transferFrom function is owned by the contract owner, allowing unauthorized users to change the balance of an arbitrary user."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint _value) returns (bool)",
+            "vulnerability": "Integer Overflow",
+            "reason": "The approve function has an integer overflow, allowing a user to set the allowance of a user to any value."
+        },
+        {
+            "function_name": "unwind",
+            "code": "function unwind(address _owner) {
+    selfdestruct(_owner);
+}",
+            "vulnerability": "Selfdestruct",
+            "reason": "The unwind function allows the contract owner to destroy the contract, providing an easy way for users to get rid of it."
+        },
+        {
+            "function_name": "withdraw",
+            "code": "function withdraw() {
+    teamWallet.transfer(this.balance);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The withdraw function is owned by the contract owner, allowing unauthorized users to change the contract state."
+        }
+    ]
+}

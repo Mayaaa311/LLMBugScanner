@@ -1,0 +1,311 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "buy", "vulnerability": "Integer Overflow", "reason": "The buy function has an integer overflow where the amount of wei given by the user is used to buy tokens from the contract."}]}
+{"output_list": [{"function_name": "sell", "vulnerability": "Integer Overflow", "reason": "The sell function has an integer overflow where the amount of token given by the user is used to sell tokens to the contract."}]}
+{"output_list": [{"function_name": "transfer", "vulnerability": "Integer Overflow", "reason": "The transfer function has an integer overflow where the amount of token given by the user is used to transfer tokens to another user."}]}
+}
+contract YLCToken is ExtremeToken, ExtremeCoin {
+    uint256 public sellPrice = 6000;
+    uint256 public buyPrice = 1300;
+    mapping (address => uint256) balances;
+    mapping (address => mapping (address => uint256)) allowed;
+    event Burn(address indexed burner, uint256 value);
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+        Burn(msg.sender, mintedAmount);
+    }
+    function burn(uint256 amount) onlyOwner {
+        require(balances[msg.sender] > amount);
+        uint256 burnedAmount = 0;
+        if (msg.sender.send(amount * sellPrice)) {
+            burnedAmount = amount;
+        }
+        balances[msg.sender] -= amount;
+        totalSupply -= amount;
+        Transfer(msg.sender, this, amount);
+        Burn(msg.sender, burnedAmount);
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        balances[msg.sender] = balances[msg.sender].sub(_value);
+        balances[_to] = balances[_to].add(_value);
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(_value <= allowed[_from][msg.sender]);
+        balances[_from] = balances[_from].sub(_value);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+        balances[_to] = balances[_to].add(_value);
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+        return allowed[_owner][_spender];
+    }
+}
+contract YLCTokenImpl is YLCToken, ExtremeCoin {
+    uint256 public burnInRate = 24000;
+    bool public burningFinished = false;
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+        Burn(msg.sender, mintedAmount);
+    }
+    function burn(uint256 amount) onlyOwner returns (bool success) {
+        require(!burningFinished);
+        require(amount <= balances[msg.sender]);
+        uint256 burnedAmount = 0;
+        if (msg.sender.send(amount * sellPrice)) {
+            burnedAmount = amount;
+        }
+        balances[msg.sender] = balances[msg.sender].sub(amount);
+        totalSupply -= amount;
+        Transfer(msg.sender, this, amount);
+        Burn(msg.sender, burnedAmount);
+        burningFinished = true;
+        return true;
+    }
+    function finishBurning() onlyOwner returns (bool success) {
+        burningFinished = true;
+        return true;
+    }
+    function startBurning() onlyOwner returns (bool success) {
+        burningFinished = false;
+        return true;
+    }
+    function setBurnInRate(uint newBurnInRate) onlyOwner {
+        burnInRate = newBurnInRate;
+    }
+    function setSellingPrice(uint newSellPrice) onlyOwner {
+        sellPrice = newSellPrice;
+    }
+    function setBuyPrice(uint newBuyPrice) onlyOwner {
+        buyPrice = newBuyPrice;
+    }
+}
+contract YLCTokenFactory {
+    function create(address target, uint256 mintedAmount, uint256 burnInRate, uint256 sellPrice, uint256 buyPrice) returns (ExtremeToken target, uint256 totalBounties, uint256 totalBurned);
+}
+contract Ownable {
+    function YLCTokenFactory() {
+    }
+    function create(address target, uint256 mintedAmount, uint256 burnInRate, uint256 sellPrice, uint256 buyPrice) YLCTokenFactory {
+        target = create(target, mintedAmount, burnInRate, sellPrice, buyPrice);
+        totalBounties = totalBountiesOf(target);
+        totalBurned = totalBurnedOf(target);
+    }
+    function totalBountiesOf(ExtremeToken target) constant returns (uint256) {
+        return target.balanceOf(msg.sender);
+    }
+    function totalBurnedOf(ExtremeToken target) constant returns (uint256) {
+        return target.burnCount();
+    }
+    function transferOwnership(address newOwner) onlyOwner {
+        if (newOwner != address(0)) {
+            owner = newOwner;
+        }
+    }
+}
+contract BitAseanToken is ExtremeToken, Ownable {
+    uint256 public constant TOTAL_SUPPLY = 100000000000000000000000000;
+    uint256 public constant TOTAL_BURNER_COUNT = 2;
+    uint256 public constant TOTAL_BURNER_INT_MAX = 250000000000000000000000;
+    uint256 public constant TOTAL_BURNER_MIN_MAX = 250000000000000000000000;
+    uint256 public constant TOTAL_BURNER_UINT_MAX = 32767;
+    uint256 public constant TOTAL_BURNER_UINT_MIN = 32767;
+    mapping (address => uint256) balances;
+    mapping (address => mapping (address => uint256)) allowed;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Burn(address indexed burner, uint256 value);
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+        Burn(msg.sender, mintedAmount);
+    }
+    function burn(uint256 amount) onlyOwner returns (bool success) {
+        require(!burningFinished);
+        require(amount <= balances[msg.sender]);
+        uint256 burnedAmount = 0;
+        if (msg.sender.send(amount * sellPrice)) {
+            burnedAmount = amount;
+        }
+        balances[msg.sender] = balances[msg.sender].sub(amount);
+        totalSupply -= amount;
+        Transfer(msg.sender, this, amount);
+        Burn(msg.sender, burnedAmount);
+        burningFinished = true;
+        return true;
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(!burningFinished);
+        require(_value <= allowed[msg.sender][msg.sender]);
+        balances[msg.sender] = balances[msg.sender].sub(_value);
+        allowed[msg.sender][msg.sender] = allowed[msg.sender][msg.sender].sub(_value);
+        balances[_to] = balances[_to].add(_value);
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(!burningFinished);
+        require(_value <= allowed[_from][msg.sender]);
+        balances[_to] = balances[_to].add(_value);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+        balances[_from] = balances[_from].sub(_value);
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        require(!burningFinished);
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+        return allowed[_owner][_spender];
+    }
+    function setBurnerCount(uint newBurnerCount) onlyOwner {
+        BurnerCount = newBurnerCount;
+    }
+    function setBurnerIntMax(uint newMaxInt) onlyOwner {
+        BurnIntMax = newMaxInt;
+    }
+    function setBurnerMinMax(uint newMaxInt) onlyOwner {
+        BurnIntMax = newMaxInt;
+    }
+    function setTotalBurnerCount(uint count) onlyOwner {
+        TotalBurnerCount = count;
+    }
+    function create(address target, uint256 mintedAmount, uint256 burnInRate, uint256 sellPrice, uint256 buyPrice) YLCTokenFactory {
+        target = create(target, mintedAmount, burnInRate, sellPrice, buyPrice);
+        totalBountiesOf(target) = totalBountiesOf(target).add(mintedAmount);
+        totalBurnedOf(target) = totalBurnedOf(target).add(mintedAmount);
+    }
+    function finishBurning() onlyOwner returns (bool success) {
+        burningFinished = true;
+        return true;
+    }
+    function startBurning() onlyOwner returns (bool success) {
+        burningFinished = false;
+        return true;
+    }
+    function setBurner(address burner, uint value) onlyOwner {
+        Burner[burner] = value;
+    }
+    function setBurnerCount(uint count) onlyOwner {
+        TotalBurnerCount = count;
+    }
+    function setSellPrice(uint newPrice) onlyOwner {
+        sellPrice = newPrice;
+    }
+    function setBuyPrice(uint newPrice) onlyOwner {
+        buyPrice = newPrice;
+    }
+    function setBurnIntMax(uint newMaxInt) onlyOwner {
+        BurnIntMax = newMaxInt;
+    }
+    function setBurnMinMax(uint newMaxInt) onlyOwner {
+        BurnIntMax = newMaxInt;
+    }
+}
+contract YLCTokenImpl is YLCToken, YLCTokenFactory {
+    uint256 public constant TOTAL_SUPPLY = 100000000000000000000000000;
+    uint256 public constant TOTAL_BURNER_COUNT = 2;
+    uint256 public constant TOTAL_BURNER_INT_MAX = 250000000000000000000000;
+    uint256 public constant TOTAL_BURNER_UINT_MAX = 32767;
+    uint256 public constant TOTAL_BURNER_UINT_MIN = 32767;
+    mapping (address => uint256) balances;
+    mapping (address => mapping (address => uint256)) allowed;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Burn(address indexed burner, uint256 value);
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+        Burn(msg.sender, mintedAmount);
+    }
+    function burn(uint256 amount) onlyOwner returns (bool success) {
+        require(!burningFinished);
+        require(amount <= balances[msg.sender]);
+        uint256 burnedAmount = 0;
+        if (msg.sender.send(amount * sellPrice)) {
+            burnedAmount = amount;
+        }
+        balances[msg.sender] = balances[msg.sender].sub(amount);
+        totalSupply -= amount;
+        Transfer(msg.sender, this, amount);
+        Burn(msg.sender, burnedAmount);
+        burningFinished = true;
+        return true;
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(!burningFinished);
+        require(_value <= allowed[msg.sender][msg.sender]);
+        balances[msg.sender] = balances[msg.sender].sub(_value);
+        allowed[msg.sender][msg.sender] = allowed[msg.sender][msg.sender].sub(_value);
+        balances[_to] = balances[_to].add(_value);
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(!burningFinished);
+        require(_value <= allowed[_from][msg.sender]);
+        balances[_to] = balances[_to].add(_value);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+        balances[_from] = balances[_from].sub(_value);
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        require(!burningFinished);
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+        return allowed[_owner][_spender];
+    }
+    function setBurner(address burner, uint value) onlyOwner {
+        Burner[burner] = value;
+    }
+    function setBurnerCount(uint count) onlyOwner {
+        TotalBurnerCount = count;
+    }
+    function setSellPrice(uint newPrice) onlyOwner {
+        sellPrice = newPrice;
+    }
+    function setBuyPrice(uint newPrice) onlyOwner {
+        buyPrice = newPrice;
+    }
+    function setBurnIntMax(uint newMaxInt) onlyOwner {
+        BurnIntMax = newMaxInt;
+    }
+    function setBurnMinMax(uint newMaxInt) onlyOwner {
+        BurnIntMax = newMaxInt;
+    }
+}
+contract YLCTokenFactory {
+    function create(address target, uint256 mintedAmount, uint256 burnInRate, uint256 sellPrice, uint256 buyPrice) returns (ExtremeToken target, uint256 totalBounties, uint256 totalBurned);
+}
+contract YLCTokenImpl is YLCToken, YLCTokenFactory {
+    uint256 public constant TOTAL_SUPPLY = 100000000000000000000000000;
+    uint256 public constant TOTAL_BURNER_COUNT = 2;
+    uint256 public constant TOTAL_BURNER_INT_MAX = 250000000000000000000000;
+    uint256 public constant TOTAL_BURNER_UINT_MAX = 32767;
+    uint256 public constant TOTAL_BURNER_UINT_MIN = 32767;
+    mapping (address => uint256) balances;
+    mapping (address => mapping (address => uint256)) allowed;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Burn(address indexed burner, uint256 value);
+    function mintToken(address target, uint256 mintedAmount) onlyOwner

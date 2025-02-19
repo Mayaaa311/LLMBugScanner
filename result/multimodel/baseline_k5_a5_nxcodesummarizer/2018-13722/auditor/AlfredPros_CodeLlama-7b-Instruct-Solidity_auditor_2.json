@@ -1,0 +1,268 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address receiver, uint amount) onlyMintAgent public {r
+    totalSupply = totalSupply + amount;r
+    balances[receiver] = balances[receiver] + amount;r
+    Transfer(0, receiver, amount);r
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mint function has a potential integer overflow vulnerability. The totalSupply variable is not checked for overflow before adding the amount. This can lead to a situation where the totalSupply variable overflows and the mint function fails to execute."
+        },
+        {
+            "function_name": "setMintAgent",
+            "code": "function setMintAgent(address addr, bool state) onlyOwner public {r
+    mintAgents[addr] = state;r
+    MintingAgentChanged(addr, state);r
+}",
+            "vulnerability": "Access Control",
+            "reason": "The setMintAgent function allows anyone to change the minting agent. This can lead to a situation where an attacker can gain control over the minting process."
+        },
+        {
+            "function_name": "upgrade",
+            "code": "function upgrade(uint256 value) public {r
+    UpgradeState state = getUpgradeState();r
+    if(!(state == UpgradeState.ReadyToUpgrade || state == UpgradeState.Upgrading)) {r
+        throw;r
+    }r
+    if (value == 0) throw;r
+    balances[msg.sender] = safeSub(balances[msg.sender], value);r
+    totalSupply = safeSub(totalSupply, value);r
+    totalUpgraded = safeAdd(totalUpgraded, value);r
+    upgradeAgent.upgradeFrom(msg.sender, value);r
+    Upgrade(msg.sender, upgradeAgent, value);r
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The upgrade function has a potential integer overflow vulnerability. The totalSupply variable is not checked for overflow before adding the value. This can lead to a situation where the totalSupply variable overflows and the upgrade function fails to execute."
+        },
+        {
+            "function_name": "setUpgradeMaster",
+            "code": "function setUpgradeMaster(address master) public {r
+    if (master == 0x0) throw;r
+    if (msg.sender != upgradeMaster) throw;r
+    upgradeMaster = master;r
+}",
+            "vulnerability": "Access Control",
+            "reason": "The setUpgradeMaster function allows anyone to change the upgrade master. This can lead to a situation where an attacker can gain control over the upgrade process."
+        },
+        {
+            "function_name": "getUpgradeState",
+            "code": "function getUpgradeState() public constant returns(UpgradeState) {r
+    if(!canUpgrade()) return UpgradeState.NotAllowed;r
+    else if(address(upgradeAgent) == 0x00) return UpgradeState.WaitingForAgent;r
+    else if(totalUpgraded == 0) return UpgradeState.ReadyToUpgrade;r
+    else return UpgradeState.Upgrading;r
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The getUpgradeState function has a potential wrong logic vulnerability. The function checks for the upgrade state based on the totalUpgraded variable. However, the totalUpgraded variable is not checked for overflow before adding the value. This can lead to a situation where the totalUpgraded variable overflows and the getUpgradeState function fails to execute."
+        },
+        {
+            "function_name": "canUpgrade",
+            "code": "function canUpgrade() public constant returns(bool) {r
+    return true;r
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The canUpgrade function has a potential wrong logic vulnerability. The function always returns true. This can lead to a situation where an attacker can bypass the upgrade process."
+        },
+        {
+            "function_name": "upgradeAgent",
+            "code": "function upgradeAgent() public constant returns(address) {r
+    return upgradeAgent;r
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The upgradeAgent function has a potential wrong logic vulnerability. The function always returns the upgradeAgent variable. This can lead to a situation where an attacker can bypass the upgrade process."
+        },
+        {
+            "function_name": "mintingFinished",
+            "code": "function mintingFinished() public onlyOwner returns (bool) {r
+    mintingFinished = true;r
+    MintFinished();r
+    return true;r
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The mintingFinished function has a potential wrong logic vulnerability. The function always returns true. This can lead to a situation where an attacker can bypass the minting process."
+        },
+        {
+            "function_name": "finishMinting",
+            "code": "function finishMinting() public onlyOwner returns (bool) {r
+    if (mintingFinished) return false;r
+    mintingFinished = true;r
+    MintFinished();r
+    return true;r
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The finishMinting function has a potential wrong logic vulnerability. The function always returns true. This can lead to a situation where an attacker can bypass the minting process."
+        },
+        {
+            "function_name": "upgradeFrom",
+            "code": "function upgradeFrom(address _from, uint256 _value) public {r
+    if (_value == 0) throw;r
+    if (msg.sender != upgradeMaster) throw;r
+    balances[_from] = safeSub(balances[_from], _value);r
+    totalSupply = safeSub(totalSupply, _value);r
+    totalUpgraded = safeAdd(totalUpgraded, _value);r
+    upgradeAgent.upgradeFrom(_from, _value);r
+    Upgrade(_from, upgradeAgent, _value);r
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The upgradeFrom function has a potential integer overflow vulnerability. The totalSupply variable is not checked for overflow before adding the value. This can lead to a situation where the totalSupply variable overflows and the upgradeFrom function fails to execute."
+        },
+        {
+            "function_name": "setUpgradeAgent",
+            "code": "function setUpgradeAgent(address agent) public onlyOwner {r
+    if (agent == 0x0) throw;r
+    if (upgradeAgent.originalSupply() != totalSupply) throw;r
+    upgradeAgent = UpgradeAgent(agent);r
+    if(!upgradeAgent.isUpgradeAgent()) throw;r
+    if (upgradeAgent.originalSupply() != totalSupply) throw;r
+    UpgradeAgentSet(upgradeAgent);r
+}",
+            "vulnerability": "Access Control",
+            "reason": "The setUpgradeAgent function allows anyone to change the upgrade agent. This can lead to a situation where an attacker can gain control over the upgrade process."
+        },
+        {
+            "function_name": "upgrade",
+            "code": "function upgrade(uint256 value) public {r
+    UpgradeState state = getUpgradeState();r
+    if(!(state == UpgradeState.ReadyToUpgrade || state == UpgradeState.Upgrading)) {r
+        throw;r
+    }r
+    if (value == 0) throw;r
+    balances[msg.sender] = safeSub(balances[msg.sender], value);r
+    totalSupply = safeSub(totalSupply, value);r
+    totalUpgraded = safeAdd(totalUpgraded, value);r
+    upgradeAgent.upgradeFrom(msg.sender, value);r
+    Upgrade(msg.sender, upgradeAgent, value);r
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The upgrade function has a potential integer overflow vulnerability. The totalSupply variable is not checked for overflow before adding the value. This can lead to a situation where the totalSupply variable overflows and the upgrade function fails to execute."
+        },
+        {
+            "function_name": "upgradeAgent",
+            "code": "function upgradeAgent() public constant returns(address) {r
+    return upgradeAgent;r
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The upgradeAgent function has a potential wrong logic vulnerability. The function always returns the upgradeAgent variable. This can lead to a situation where an attacker can bypass the upgrade process."
+        },
+        {
+            "function_name": "mint",
+            "code": "function mint(address receiver, uint amount) onlyMintAgent public {r
+    totalSupply = totalSupply + amount;r
+    balances[receiver] = balances[receiver] + amount;r
+    Transfer(0, receiver, amount);r
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mint function has a potential integer overflow vulnerability. The totalSupply variable is not checked for overflow before adding the amount. This can lead to a situation where the totalSupply variable overflows and the mint function fails to execute."
+        },
+        {
+            "function_name": "setMintAgent",
+            "code": "function setMintAgent(address addr, bool state) onlyOwner public {r
+    mintAgents[addr] = state;r
+    MintingAgentChanged(addr, state);r
+}",
+            "vulnerability": "Access Control",
+            "reason": "The setMintAgent function allows anyone to change the minting agent. This can lead to a situation where an attacker can gain control over the minting process."
+        },
+        {
+            "function_name": "upgradeFrom",
+            "code": "function upgradeFrom(address _from, uint256 _value) public {r
+    if (_value == 0) throw;r
+    if (msg.sender != upgradeMaster) throw;r
+    balances[_from] = safeSub(balances[_from], _value);r
+    totalSupply = safeSub(totalSupply, _value);r
+    totalUpgraded = safeAdd(totalUpgraded, _value);r
+    upgradeAgent.upgradeFrom(_from, _value);r
+    Upgrade(_from, upgradeAgent, _value);r
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The upgradeFrom function has a potential integer overflow vulnerability. The totalSupply variable is not checked for overflow before adding the value. This can lead to a situation where the totalSupply variable overflows and the upgradeFrom function fails to execute."
+        },
+        {
+            "function_name": "finishMinting",
+            "code": "function finishMinting() public onlyOwner returns (bool) {r
+    if (mintingFinished) return false;r
+    mintingFinished = true;r
+    MintFinished();r
+    return true;r
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The finishMinting function has a potential wrong logic vulnerability. The function always returns true. This can lead to a situation where an attacker can bypass the minting process."
+        },
+        {
+            "function_name": "upgrade",
+            "code": "function upgrade(uint256 value) public {r
+    UpgradeState state = getUpgradeState();r
+    if(!(state == UpgradeState.ReadyToUpgrade || state == UpgradeState.Upgrading)) {r
+        throw;r
+    }r
+    if (value == 0) throw;r
+    balances[msg.sender] = safeSub(balances[msg.sender], value);r
+    totalSupply = safeSub(totalSupply, value);r
+    totalUpgraded = safeAdd(totalUpgraded, value);r
+    upgradeAgent.upgradeFrom(msg.sender, value);r
+    Upgrade(msg.sender, upgradeAgent, value);r
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The upgrade function has a potential integer overflow vulnerability. The totalSupply variable is not checked for overflow before adding the value. This can lead to a situation where the totalSupply variable overflows and the upgrade function fails to execute."
+        },
+        {
+            "function_name": "setUpgradeMaster",
+            "code": "function setUpgradeMaster(address master) public {r
+    if (master == 0x0) throw;r
+    if (msg.sender != upgradeMaster) throw;r
+    upgradeMaster = master;r
+}",
+            "vulnerability": "Access Control",
+            "reason": "The setUpgradeMaster function allows anyone to change the upgrade master. This can lead to a situation where an attacker can gain control over the upgrade process."
+        },
+        {
+            "function_name": "getUpgradeState",
+            "code": "function getUpgradeState() public constant returns(UpgradeState) {r
+    if(!canUpgrade()) return UpgradeState.NotAllowed;r
+    else if(address(upgradeAgent) == 0x00) return UpgradeState.WaitingForAgent;r
+    else if(totalUpgraded == 0) return UpgradeState.ReadyToUpgrade;r
+    else return UpgradeState.Upgrading;r
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The getUpgradeState function has a potential wrong logic vulnerability. The function checks for the upgrade state based on the totalUpgraded variable. However, the totalUpgraded variable is not checked for overflow before adding the value. This can lead to a situation where the totalUpgraded variable overflows and the getUpgradeState function fails to execute."
+        },
+        {
+            "function_name": "canUpgrade",
+            "code": "function canUpgrade() public constant returns(bool) {r
+    return true;r
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The canUpgrade function has a potential wrong logic vulnerability. The function always returns true. This can lead to a situation where an attacker can bypass the upgrade process."
+        },
+        {
+            "function_name": "upgradeAgent",
+            "code": "function upgradeAgent() public constant returns(address) {r
+    return upgradeAgent;r
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The upgradeAgent function has a potential wrong logic vulnerability. The function always returns the upgradeAgent variable. This can lead to a situation where an attacker can bypass the upgrade process."
+        },
+        {
+            "function_name": "mintingFinished",
+            "code": "function mintingFinished() public onlyOwner returns (bool) {r
+    mintingFinished = true;r
+    MintFinished();r
+    return true;r
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The mintingFinished function has a potential wrong logic vulnerability. The function always returns true. This can lead to a situation where an attacker can bypass the minting process."
+        },
+        {
+            "function_name": "setUpgradeAgent",
+            "code": "function setUpgradeAgent(address agent) public onlyOwner {r
+    if (agent == 0x0) throw;r
+    if (upgradeAgent.originalSupply() != totalSupply) throw;r
+    upgradeAgent = UpgradeAgent(agent);r
+    if(!upgradeAgent.isUpgradeAgent()) throw;r
+    if (upgradeAgent.originalSupply() != totalSupply) throw;r
+    UpgradeAgentSet(upgradeAgent);r
+}",
+            "vulnerability": "Access Control",
+            "reason": "The setUpgradeAgent function allows anyone to change the upgrade agent.

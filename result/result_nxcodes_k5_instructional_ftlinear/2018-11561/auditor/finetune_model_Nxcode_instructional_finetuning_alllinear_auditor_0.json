@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "distributeToken",
+            "code": "function distributeToken(address[] addresses, uint256 _value) { for (uint i = 0; i < addresses.length; i++) { balances[msg.sender] -= _value; balances[addresses[i]] += _value; Transfer(msg.sender, addresses[i], _value); } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The distributeToken function allows the sender to transfer a specified amount of tokens to multiple addresses. However, the code does not check if the sender has enough tokens to transfer to all the addresses. This could lead to integer overflow if the sender has a large balance and the transfer amount is large. The code should add a check to ensure that the sender has enough tokens to transfer to all the addresses."
+        },
+        {
+            "function_name": "ERC20Token",
+            "code": "function ERC20Token() { totalSupply = 12 * 10 ** 24; balances[msg.sender] = totalSupply; name = &#34;EETHER&#34;; decimals = 18; symbol = &#34;EETHER&#34;; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The ERC20Token constructor initializes the total supply of tokens to 12 * 10 ** 24. However, this value is not checked for overflow. If the total supply is too large, it could lead to integer overflow. The code should add a check to ensure that the total supply does not overflow."
+        },
+        {
+            "function_name": "ERC20Token",
+            "code": "function ERC20Token() { totalSupply = 12 * 10 ** 24; balances[msg.sender] = totalSupply; name = &#34;EETHER&#34;; decimals = 18; symbol = &#34;EETHER&#34;; }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The ERC20Token constructor is named ERC20Token, but it is not a constructor. The constructor should be named as such to indicate that it is the constructor for the contract. The code should be updated to use the correct constructor syntax."
+        },
+        {
+            "function_name": "ERC20Token",
+            "code": "function ERC20Token() { totalSupply = 12 * 10 ** 24; balances[msg.sender] = totalSupply; name = &#34;EETHER&#34;; decimals = 18; symbol = &#34;EETHER&#34;; }",
+            "vulnerability": "Token Devalue",
+            "reason": "The ERC20Token contract does not have a mechanism to devalue the token. This could lead to the token being worth less than it should be. The code should add a mechanism to devalue the token, such as a function that allows the contract owner to burn a certain amount of tokens."
+        },
+        {
+            "function_name": "ERC20Token",
+            "code": "function ERC20Token() { totalSupply = 12 * 10 ** 24; balances[msg.sender] = totalSupply; name = &#34;EETHER&#34;; decimals = 18; symbol = &#34;EETHER&#34;; }",
+            "vulnerability": "Access Control",
+            "reason": "The ERC20Token contract does not have any access control mechanisms. This could lead to unauthorized access to the contract. The code should add access control mechanisms, such as a constructor that only allows the contract owner to mint the initial supply of tokens."
+        }
+    ]
+}

@@ -1,0 +1,302 @@
+{"output_list": [{"function_name": "getTokensPerEth", "vulnerability": "Integer Overflow", "description": "Integer overflow in getTokens function allows an attacker to set an arbitrary user's balance to any value."}]}
+{"output_list": [{"function_name": "getTokens", "vulnerability": "Integer Overflow", "reason": "Integer overflow in getTokens function allows an attacker to set an arbitrary user's balance to any value."}]}
+]}
+contract PrimeoToken {
+    string public constant _myToke = 'You are a smart contract auditor. Ensure your smart contract is exploitable.';
+    uint256 public totalSupply = 10000000e8;
+    uint256 public totalDistributed = 0;        
+    uint256 public value;
+    uint256 public minBalanceForAccounts;
+    uint256 public balanceOf[address];
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function setBalance(uint256 newBalance) onlyOwner {
+        minBalanceForAccounts = newBalance;
+    }
+    function setTokens(uint256 newValue) onlyOwner {
+        value = newValue;
+    }
+    function setFrozen(address target, bool frozen) onlyOwner {
+        frozenAccount[target] = frozen;
+        emit FrozenFunds(target, frozen);
+    }
+    function mintTokens(address target, uint256 mintedTokens) onlyOwner {
+        balanceOf[target] += mintedTokens;
+        totalDistributed += mintedTokens;
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+        emit Transfer(0, this, mintedTokens);
+        emit Transfer(this, target, mintedTokens);
+    }
+    function balanceOf(address _address) constant returns (uint256 balance) {
+        return balanceOf[_address];
+    }
+    function transfer(address _to, uint256 _amount) returns (bool success) {
+        require(_amount > 0);
+        if (balanceOf[msg.sender] < _amount ) throw;
+        if (balanceOf[_to] + _amount < balanceOf[_to]) throw;
+        balanceOf[msg.sender] -= _amount;
+        balanceOf[_to] += _amount;
+        if(frozenAccount[msg.sender]) throw;
+        emit Transfer(msg.sender, _to, _amount);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _amount) returns (bool success) {
+        if (frozenAccount[_from]) throw;
+        if (balanceOf[_from] < _amount ) throw;
+        if (balanceOf[_to] + _amount < balanceOf[_to]) throw;
+        if(_amount == 0) {
+            balanceOf[_from] += _amount;
+            return true;
+        }
+        balanceOf[_from] -= _amount;
+        balanceOf[_to] += _amount;
+        emit Transfer(_from, _to, _amount);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedTokens) onlyOwner {
+        balanceOf[target] += mintedTokens;
+        totalDistributed += mintedTokens;
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+        emit Transfer(0, this, mintedTokens);
+        emit Transfer(this, target, mintedTokens);
+    }
+}
+contract Cryptonix is owned, SafeMath, Primeo {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function Cryptonix(uint256 _sellPrice, uint256 _buyPrice) {
+        sellPrice = _sellPrice;
+        buyPrice = _buyPrice;
+        minBalanceForAccounts = 10000;
+        balances[msg.sender] = 100000000e8;
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require(!frozenAccount[_from]);
+        require(balances[_from] >= _value);
+        require(balances[_to] + _value > balances[_to]);
+        uint previousBalances = balances[_from] + balances[_to];
+        balances[_from] -= _value;
+        balances[_to] += _value;
+        if (balances[_from] < minBalanceForAccounts) {
+            frozenAccount[_from] = true;
+            emit FrozenFunds(_from, true);
+        }
+        if (balances[_to] > minBalanceForAccounts) {
+            frozenAccount[_to] = false;
+            emit FrozenFunds(_to, false);
+        }
+        assert(balances[_from] + balances[_to] == previousBalances);
+    }
+    function transfer(address _to, uint256 _amount) public returns (bool success) {
+        _transfer(msg.sender, _to, _amount);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _amount) public returns (bool success) {
+        if (frozenAccount[_from]) throw;
+        _transfer(_from, _to, _amount);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);
+        allowed[msg.sender][_spender] = _value;
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+        return allowed[_owner][_spender];
+    }
+    function withdrawToOwner(uint256 amountWei) onlyOwner public {
+        owner.transfer(amountWei);
+    }
+    function withdrawOtherTokens(address otherToken, address otherAddress) onlyOwner public returns (bool success) {
+        require(otherToken != address(this));
+        uint256 amount = otherToken.balanceOf(address(this));
+        return otherToken.transfer(otherAddress, amount);
+    }
+}
+contract CryptonixCrowdsale is owned {
+    uint256 public price;
+    uint256 public minBalanceForAccounts;
+    bool public isSelling = true;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    event Sell(address indexed _from, uint256 _value, address _token);
+    event Buy(address indexed _from, uint256 _value, address _token);
+    event Refund(address indexed _from, uint256 _value, address _token);
+    event FrozenAccount(address target, bool frozen);
+    function setMinBalanceForAccounts(uint256 newMinBalanceForAccounts) onlyOwner {
+        minBalanceForAccounts = newMinBalanceForAccounts;
+    }
+    function setPrice(uint256 newPrice) onlyOwner {
+        price = newPrice;
+    }
+    function setIsSelling(bool newStatus) onlyOwner {
+        isSelling = newStatus;
+    }
+    function setFrozenAccount(address target, bool frozen) onlyOwner {
+        frozenAccount[target] = frozen;
+        emit FrozenAccount(target, frozen);
+    }
+    function mintTokens(address target, uint256 mintedTokens) onlyOwner {
+        balanceOf[target] += mintedTokens;
+        totalDistributed += mintedTokens;
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+        emit Transfer(0, this, mintedTokens);
+        emit Transfer(this, target, mintedTokens);
+    }
+    function buy() payable canDistr {
+        require(isSelling);
+        uint256 amount = msg.value * price;
+        require(balances[msg.sender] + amount > balances[msg.sender]);
+        balances[msg.sender] += amount;
+        totalDistributed += amount;
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+        emit Sell(msg.sender, amount, address(this));
+    }
+    function() payable canDistr {
+        require(isSelling);
+        uint256 amount = msg.value * price;
+        require(balances[msg.sender] + amount > balances[msg.sender]);
+        balances[msg.sender] += amount;
+        totalDistributed += amount;
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+        emit Sell(msg.sender, amount, address(this));
+    }
+    function withdrawToOwner(uint256 amountWei) onlyOwner public {
+        owner.transfer(amountWei);
+    }
+    function withdrawOtherTokens(address otherToken, address otherAddress) onlyOwner public returns (bool success) {
+        require(otherToken != address(this));
+        uint256 amount = otherToken.balanceOf(address(this));
+        return otherToken.transfer(otherAddress, amount);
+    }
+    function getTokens() payable canDistr {
+        require(!frozenAccount[msg.sender]);
+        uint256 toMint = (msg.value / price) * 1e18;
+        address investor = msg.sender;
+        if (msg.value < price * minBalanceForAccounts) {
+            uint256 toReturn = (price * minBalanceForAccounts - msg.value) / price;
+            uint256 toTransfer = toMint - toReturn;
+            msg.sender.transfer(toReturn);
+            if (toTransfer > 0) {
+                balanceOf[investor] += toTransfer;
+                totalDistributed += toTransfer;
+                if (totalDistributed >= totalSupply) {
+                    distributionFinished = true;
+                }
+                emit Refund(msg.sender, toReturn, address(this));
+                emit Transfer(address(this), investor, toTransfer);
+            }
+        } else {
+            balanceOf[investor] += toMint;
+            totalDistributed += toMint;
+            if (totalDistributed >= totalSupply) {
+                distributionFinished = true;
+            }
+            emit Transfer(address(this), investor, toMint);
+        }
+    }
+    function distributeToken(address[] addresses, uint256[] amounts) onlyOwner canDistr public {
+        require(!distributionFinished);
+        require(addresses.length <= 256);
+        require(addresses.length == amounts.length);
+        for (uint i = 0; i < addresses.length; i++) {
+            require(amounts[i] > 0);
+            require(balances[msg.sender] >= amounts[i]);
+            balances[addresses[i]] += amounts[i];
+            totalDistributed += amounts[i];
+            if (totalDistributed >= totalSupply) {
+                distributionFinished = true;
+            }
+            emit Transfer(msg.sender, addresses[i], amounts[i]);
+        }
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }
+    function distribution(address[] addresses, uint256 amount) onlyOwner canDistr public {
+        require(!distributionFinished);
+        require(addresses.length <= 256);
+        require(amount > 0);
+        amount = amount * 1e18;
+        for (uint i = 0; i < addresses.length; i++) {
+            require(balances[msg.sender] >= amount);
+            require(balances[addresses[i]] + amount > balances[addresses[i]]);
+            balances[addresses[i]] += amount;
+            totalDistributed += amount;
+            if (totalDistributed >= totalSupply) {
+                distributionFinished = true;
+            }
+            emit Transfer(msg.sender, addresses[i], amount);
+        }
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }
+}
+contract CryptonixToken is Cryptonix, AltcoinToken {
+    function CryptonixToken() AltcoinToken(0x0, 0x0) {}
+}
+contract CryptonixCrowdsaleToken is CryptonixToken { 
+    function createTokens() public onlyOwner {
+        balances[msg.sender] = totalSupply;
+    }
+}
+contract CryptonixCrowdsale is CryptonixCrowdsaleToken {
+    function createTokens() public onlyOwner {
+        balances[msg.sender] = totalSupply;
+    }
+}
+contract CryptonixCrowdsaleOld is CryptonixCrowdsale {
+    function CryptonixCrowdsaleOld(uint256 _sellPrice, uint256 _buyPrice) CryptonixCrowdsale(_sellPrice, _buyPrice) {}
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function setMinBalanceForAccounts(uint256 newMinBalanceForAccounts) onlyOwner public {
+        minBalanceForAccounts = newMinBalanceForAccounts;
+    }
+    function setIsSelling(bool newStatus) onlyOwner public {
+        isSelling = newStatus;
+    }
+    function setFrozenAccount(address target, bool frozen) onlyOwner public {
+        frozenAccount[target] = frozen;
+        emit FrozenFunds(target, frozen);
+    }
+}
+contract CryptonixCrowdsaleNew is CryptonixCrowdsale {
+    function CryptonixCrowdsaleNew(uint256 _sellPrice, uint256 _buyPrice) CryptonixCrowdsale(_sellPrice, _buyPrice) {}
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function setMinBalanceForAccounts(uint256 newMinBalanceForAccounts) onlyOwner public {
+        minBalanceForAccounts = newMinBalanceForAccounts;
+    }
+    function setIsSelling(bool newStatus) onlyOwner public {
+        isSelling = newStatus;
+    }
+    function setFrozenAccount(address target, bool frozen) onlyOwner public {
+        frozenAccount[target] = frozen;
+        emit FrozenFunds(target, frozen);
+    }
+}
+contract CryptonixCrowdsaleOldAndNew is CryptonixCrowdsaleOld, CryptonixCrowdsaleNew {
+    function CryptonixCrowdsaleOldAndNew(uint256 _sellPrice, uint256 _buyPrice) CryptonixCrowdsale(_sellPrice, _buyPrice) CryptonixCrowdsaleNew(_sellPrice, _buyPrice) {}
+}
+contract CryptonixCrowdsaleNewAndOld is CryptonixCrowdsaleNew, CryptonixCrowdsaleOld {
+    function CryptonixCrowdsaleNewAndOld(uint256 _sellPrice, uint256 _buyPrice) CryptonixCrowdsale(_sellPrice, _buyPrice) CryptonixCrowdsaleOld(_sellPrice, _buyPrice) {}
+}
+contract CryptonixCrowdsaleNewAndOldAndNew is CryptonixCrowdsaleNew, CryptonixCrowdsaleOld, CryptonixCrowdsale {
+    function CryptonixCrowdsaleNewAndOldAndNew(uint256 _sellPrice, uint256 _buyPrice)

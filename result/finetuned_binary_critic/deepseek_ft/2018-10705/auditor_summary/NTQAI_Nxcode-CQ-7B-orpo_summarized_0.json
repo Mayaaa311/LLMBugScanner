@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "uploadBalances",
+            "code": "function uploadBalances(address[] recipients, uint256[] balances) onlyOwner {  require(!balancesUploaded);  uint256 sum = 0;  for (uint256 i = 0; i < recipients.length; i++) {    balanceOf[recipients[i]] = safeAdd(balanceOf[recipients[i]], balances[i]);    sum = safeAdd(sum, balances[i]);  }  balanceOf[owner] = safeSub(balanceOf[owner], sum);}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'uploadBalances' function allows the owner to set the balance of multiple recipients in a way that can lead to an integer overflow, causing unexpected behavior in the token distribution."
+        },
+        {
+            "function_name": "unlockToken",
+            "code": "function unlockToken() onlyOwner {  locked = false;}  bool public locked = true;",
+            "vulnerability": "Access Control",
+            "reason": "The 'unlockToken' function allows the owner to disable the 'locked' state, making it possible for any user to transfer tokens from any address, leading to a loss of assets."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {  require(_value <= allowance[_from][msg.sender]);     allowance[_from][msg.sender] -= _value;  _transfer(_from, _to, _value);  return true;}",
+            "vulnerability": "Incorrect Allowance Update",
+            "reason": "The 'transferFrom' function incorrectly updates the allowance, allowing the spender to withdraw more tokens than intended from the owner's account."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public  returns (bool success) {  require(!locked);  allowance[msg.sender][_spender] = _value;  return true;}",
+            "vulnerability": "Incorrect Access Control",
+            "reason": "The 'approve' function does not check if the spender is a contract, allowing it to be spammed by contracts that implement the 'receiveApproval' function without proper checks."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool success) {  _transfer(msg.sender, _to, _value);  return true;}",
+            "vulnerability": "Access Control",
+            "reason": "The 'transfer' function does not check if the token is locked, allowing it to be transferred even when the owner intends to halt token transactions."
+        }
+    ]
+}

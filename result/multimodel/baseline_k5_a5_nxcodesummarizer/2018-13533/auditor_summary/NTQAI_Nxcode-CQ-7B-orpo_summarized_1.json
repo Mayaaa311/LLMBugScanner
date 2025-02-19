@@ -1,0 +1,64 @@
+{
+    "output_list": [
+        {
+            "function_name": "refillTokens",
+            "code": "function refillTokens(uint256 _value) public onlyOwner{
+        _transfer(msg.sender, this, _value);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function does not check if the sum of the current supply and the value being added exceeds the maximum value that can be represented by `uint256`."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public {
+        uint market_value = _value * sellPrice;
+        uint commission = market_value * 4 / 1000;
+        if (commission < minimumCommission){ commission = minimumCommission; }
+        address contr = this;
+        require(contr.balance >= commission);
+        commissionGetter.transfer(commission);
+        _transfer(msg.sender, _to, _value);
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The commission is calculated based on the market value of the tokens being transferred, but there is no check to ensure that the commission does not exceed the balance of the contract."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable public {
+        require(!closeBuy);
+        uint amount = msg.value / buyPrice;
+        uint market_value = amount * buyPrice;
+        uint commission = market_value * 4 / 1000;
+        if (commission < minimumCommission){ commission = minimumCommission; }
+        address contr = this;
+        require(contr.balance >= commission);
+        commissionGetter.transfer(commission);
+        _transfer(this, msg.sender, amount);
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The commission is calculated based on the market value of the tokens being bought, which is not random. This can lead to unfair pricing for the buyer."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(uint256 mintedAmount) onlyOwner public {
+        balanceOf[owner] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, owner, mintedAmount);
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The function is only accessible to the owner, but there is no access control mechanism in place to ensure that only the owner can call this function."
+        },
+        {
+            "function_name": "ALUXToken",
+            "code": "function ALUXToken(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) TokenERC20(initialSupply, tokenName, tokenSymbol) public {}
+",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor function is missing the keyword `constructor`, which is a common mistake in Solidity."
+        }
+    ]
+}

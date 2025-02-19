@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "distribute",
+            "vulnerability": "Integer Overflow",
+            "description": "The distribute function in the GoodTo smart contract allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Bad Randomness",
+            "description": "Integer overflow in the following function: 'function distribute(address[] _addresses, uint[] _amounts) public returns (bool success) {
+    require(_addresses.length < 256 && _addresses.length == _amounts.length);
+    uint totalAmount;
+    for (uint a = 0; a < _amounts.length; a++) {
+        totalAmount += _amounts[a]; // Vulnerable line
+    }
+    require(totalAmount > 0 && balances[msg.sender] >= totalAmount);
+    balances[msg.sender] -= totalAmount;
+    for (uint b = 0; b < _addresses.length; b++) {
+        if (_amounts[b] > 0) {
+            balances[_addresses[b]] += _amounts[b];
+            Transfer(msg.sender, _addresses[b], _amounts[b]);
+        }
+    }
+    return true;
+}'"
+        }
+    ]
+}

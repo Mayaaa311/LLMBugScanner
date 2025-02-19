@@ -1,0 +1,47 @@
+[
+  {
+    "function_name": "_buy",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The calculation of `amount` in the `_buy` function can lead to an integer overflow. If `buyPrice` is very large, `msg.value / buyPrice` could overflow, causing unintended token transfers to the buyer. This is a critical vulnerability as it can lead to loss of funds for users.",
+    "correctness": 7,
+    "severity": 9,
+    "profitability": 6
+  },
+  {
+    "function_name": "_sell",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The calculation of `revenue` in the `_sell` function can lead to an integer overflow. If `sellPrice` is very large, `amount * sellPrice` could overflow, causing unintended token transfers or Ether transfers to the seller. This is a severe vulnerability as it can lead to financial loss for the seller.",
+    "correctness": 7,
+    "severity": 9,
+    "profitability": 6
+  },
+  {
+    "function_name": "transfer",
+    "auditor_idx": 0,
+    "vulnerability": "Access Control",
+    "criticism": "The `transfer` function does not check if the recipient is the contract itself before calling `_sell`. This allows any user to call `_sell` on behalf of the caller, potentially leading to unauthorized token sales. This is a significant vulnerability as it bypasses the intended access control for token sales.",
+    "correctness": 8,
+    "severity": 9,
+    "profitability": 7
+  },
+  {
+    "function_name": "transferFrom",
+    "auditor_idx": 0,
+    "vulnerability": "Access Control",
+    "criticism": "Similar to the `transfer` function, `transferFrom` does not check if the spender is allowed to transfer tokens to the contract itself before calling `_sell`. This allows any user to approve a spender to transfer tokens on their behalf and then call `_sell` on the contract, leading to unauthorized token sales. This is equally concerning as it affects token transfer approvals.",
+    "correctness": 8,
+    "severity": 9,
+    "profitability": 7
+  },
+  {
+    "function_name": "transferOwnership",
+    "auditor_idx": 0,
+    "vulnerability": "Access Control",
+    "criticism": "The `transferOwnership` function does not check if the new owner is the contract itself before calling `_transfer`. This allows any user to call `_transfer` on behalf of the caller, potentially leading to unauthorized token transfers. This is a significant vulnerability as it affects the ownership transfer mechanism.",
+    "correctness": 8,
+    "severity": 8,
+    "profitability": 7
+  }
+]

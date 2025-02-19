@@ -1,0 +1,95 @@
+ Here are the 5 most severe vulnerabilities in the provided smart contract, along with their associated functions and reasons:
+
+1. Integer Overflow Vulnerability in the `transfer` Function
+
+Function Name: `transfer`
+
+Vulnerability: Integer Overflow
+
+Function Code:
+```
+function transfer(address to, uint value) returns (bool success) {
+    if (frozenAccount[msg.sender]) return false;
+    if(balances[msg.sender] < value) return false;
+    if(balances[to] + value < balances[to]) return false;
+    balances[msg.sender] -= value;
+    balances[to] += value;
+    Transfer(msg.sender, to, value);
+    return true;
+}
+```
+Reason: The `transfer` function uses the `+=` operator to add the `value` parameter to the `balances[to]` variable. However, if the `value` parameter is too large, it can cause an integer overflow, which can lead to a loss of funds.
+
+2. Wrong Logic Vulnerability in the `transferFrom` Function
+
+Function Name: `transferFrom`
+
+Vulnerability: Wrong Logic
+
+Function Code:
+```
+function transferFrom(address from, address to, uint value) returns (bool success) {
+    if (frozenAccount[msg.sender]) return false;
+    if(balances[from] < value) return false;
+    if( allowed[from][msg.sender] >= value ) return false;
+    if(balances[to] + value < balances[to]) return false;
+    balances[from] -= value;
+    allowed[from][msg.sender] -= value;
+    balances[to] += value;
+    Transfer(from, to, value);
+    return true;
+}
+```
+Reason: The `transferFrom` function uses the `allowed[from][msg.sender] >= value` condition to check if the sender has enough allowance to transfer the funds. However, this condition is not sufficient to ensure that the sender has enough funds to transfer. If the `allowed[from][msg.sender]` value is too large, it can cause an integer overflow, which can lead to a loss of funds.
+
+3. Bad Randomness Vulnerability in the `mintToken` Function
+
+Function Name: `mintToken`
+
+Vulnerability: Bad Randomness
+
+Function Code:
+```
+function mintToken(address target, uint256 mintedAmount) onlyOwner{
+    balances[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0,owner,mintedAmount);
+    Transfer(owner,target,mintedAmount);
+}
+```
+Reason: The `mintToken` function uses the `Transfer` event to transfer the minted tokens to the `target` address. However, the `Transfer` event is not secure, as it can be easily manipulated by an attacker. An attacker can create a fake `Transfer` event and transfer the minted tokens to their own address, effectively stealing the funds.
+
+4. Access Control Vulnerability in the `freezeAccount` Function
+
+Function Name: `freezeAccount`
+
+Vulnerability: Access Control
+
+Function Code:
+```
+function freezeAccount(address target, bool freeze) onlyOwner {
+    frozenAccount[target] = freeze;
+    FrozenFunds(target, freeze);
+}
+```
+Reason: The `freezeAccount` function uses the `onlyOwner` modifier to ensure that only the owner can freeze an account. However, this modifier is not sufficient to ensure that the owner has the authority to freeze an account. An attacker can call the `freezeAccount` function with a fake `msg.sender` address, effectively freezing an account that they do not own.
+
+5. Typo Constructor Vulnerability in the `FuturXe` Constructor
+
+Function Name: `FuturXe` Constructor
+
+Vulnerability: Typo Constructor
+
+Function Code:
+```
+function FuturXe(uint256 initial_supply, string _name, string _symbol, uint8 _decimal) {
+    balances[msg.sender]  = initial_supply;
+    name                  = _name;
+    symbol                = _symbol;
+    decimals              = _decimal;
+    totalSupply           = initial_supply;
+}
+```
+Reason: The `FuturXe` constructor uses the `msg.sender` address to set the initial balance of the contract. However, this can be exploited by an attacker who can create a fake `msg.sender` address and set the initial balance to a large value. This can lead to a loss of funds for the legitimate owner of the contract.
+
+Note: These vulnerabilities are not exploitable in the current version of the smart contract, but they can be exploited in future versions if the contract is updated.

@@ -1,0 +1,52 @@
+Code Input: 
+
+pragma solidity ^0.4.13;
+contract Tiles {
+    uint public constant NUM_TILES = 256;
+    uint constant SIDE_LENGTH = 16;
+    uint private constant STARTING_GAME_NUMBER = 1;
+    uint public DEFAULT_GAME_COST = 5000000000000000;
+    address private owner;
+    uint public currentGameNumber;
+    uint public currentGameBalance;
+    uint public numTilesClaimed;
+    Tile[16][16] public tiles;
+    bool public gameStopped;
+    uint public gameEarnings;
+    bool public willChangeCost;
+    uint public currentGameCost;
+    uint public nextGameCost;
+    mapping (address => uint) public pendingWithdrawals;
+    mapping (uint => address) public gameToWinner;
+    struct Tile {
+        uint gameClaimed;
+        address claimedBy;
+    }
+    event GameWon(uint indexed gameNumber, address indexed winner);
+    event TileClaimed(uint indexed gameNumber, uint indexed xCoord, uint indexed yCoord, address claimedBy);
+    event WinningsClaimed(address indexed claimedBy, uint indexed amountClaimed);
+    event FailedToClaim(address indexed claimedBy, uint indexed amountToClaim);
+    event PrintWinningInfo(bytes32 hash, uint xCoord, uint yCoord);
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
+    modifier gameRunning() {
+        require(!gameStopped);
+        _;
+    }
+    modifier gameNotRunning() {
+        require(gameStopped == true);
+        _;
+    }
+    function Tiles() payable {
+        owner = msg.sender;
+        currentGameNumber = STARTING_GAME_NUMBER;
+        currentGameCost = DEFAULT_GAME_COST;
+        numTilesClaimed = 0;
+        gameStopped = false;
+        gameEarnings = 0;
+        willChangeCost = false;
+        nextGameCost = DEFAULT_GAME_COST;
+    }
+    function cancelContract() onlyOwner returns (bool) {

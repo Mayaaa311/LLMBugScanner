@@ -1,0 +1,89 @@
+ Here are the 5 most severe vulnerabilities in the provided smart contract, along with their associated functions and reasons:
+
+1. Integer Overflow Vulnerability in the `safeMul` Function
+
+Function Name: `safeMul`
+
+Vulnerability: Integer Overflow
+
+Function Code:
+```
+function safeMul(uint256 a, uint256 b) returns (uint256) {
+    uint256 c = a * b;
+    require(a == 0 || c / a == b);
+    return c;
+}
+```
+Reason: The `safeMul` function uses the `*` operator to multiply two unsigned integers, which can lead to an integer overflow if the result is greater than the maximum value that can be represented by the `uint256` type. This can cause the `require` statement to fail, allowing an attacker to execute arbitrary code.
+
+2. Wrong Logic Vulnerability in the `safeSub` Function
+
+Function Name: `safeSub`
+
+Vulnerability: Wrong Logic
+
+Function Code:
+```
+function safeSub(uint256 a, uint256 b) returns (uint256) {
+    require(b <= a);
+    return a - b;
+}
+```
+Reason: The `safeSub` function uses the `require` statement to check if the second argument is less than or equal to the first argument. However, this check is not sufficient to prevent an underflow attack, as the `require` statement only checks the condition at the time of the function call, and does not check the condition after the subtraction is performed. An attacker can exploit this vulnerability by calling the `safeSub` function with a large first argument and a small second argument, which can cause an underflow and lead to an incorrect result.
+
+3. Bad Randomness Vulnerability in the `approveAndCall` Function
+
+Function Name: `approveAndCall`
+
+Vulnerability: Bad Randomness
+
+Function Code:
+```
+function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+    public
+    returns (bool success) {
+    tokenRecipient spender = tokenRecipient(_spender);
+    if (approve(_spender, _value)) {
+        spender.receiveApproval(msg.sender, _value, this, _extraData);
+        return true;
+    }
+}
+```
+Reason: The `approveAndCall` function uses the `approve` function to approve a transfer of tokens to a spender, and then calls the `receiveApproval` function on the spender. However, the `approve` function does not check if the spender is a valid recipient of the tokens, which can lead to an attacker approving a transfer of tokens to an invalid recipient. This can cause the `receiveApproval` function to fail, allowing an attacker to execute arbitrary code.
+
+4. Access Control Vulnerability in the `uploadBalances` Function
+
+Function Name: `uploadBalances`
+
+Vulnerability: Access Control
+
+Function Code:
+```
+function uploadBalances(address[] recipients, uint256[] balances) onlyOwner {
+  require(!balancesUploaded);
+  uint256 sum = 0;
+  for (uint256 i = 0; i < recipients.length; i++) {
+    balanceOf[recipients[i]] = safeAdd(balanceOf[recipients[i]], balances[i]);
+    sum = safeAdd(sum, balances[i]);
+  }
+  balanceOf[owner] = safeSub(balanceOf[owner], sum);
+}
+```
+Reason: The `uploadBalances` function is only callable by the owner of the contract, but it does not check if the recipients of the balances are valid. An attacker can exploit this vulnerability by calling the `uploadBalances` function with a large number of recipients, which can cause the contract to run out of gas.
+
+5. Typo Constructor Vulnerability in the `AURA` Constructor
+
+Function Name: `AURA` Constructor
+
+Vulnerability: Typo Constructor
+
+Function Code:
+```
+function AURA() public {
+    totalSupply = 1000000000000000000000000000;
+    balanceOf[msg.sender] = totalSupply;
+}
+```
+Reason: The `AURA` constructor sets the total supply of tokens to a large number, but it does not check if the `msg.sender` is a valid recipient of the tokens. An attacker can exploit this vulnerability by calling the `AURA` constructor with a large number of tokens, which can cause the contract to run out of gas.
+
+Note: These vulnerabilities are not exploitable in the current version of the contract, but they can be exploited in future versions if the contract is updated to include additional features or if the contract is deployed on a different blockchain.

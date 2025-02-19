@@ -1,0 +1,455 @@
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Integer Overflow", "reason": "The transfer and transferFrom functions have an integer overflow."}]}
+ 
+
+function setMaster(address _master) external {
+    if(msg.sender != master) throw;
+    master = _master;
+}
+function setOwner(address _owner) external {
+    if(msg.sender != master) throw;
+    owner = _owner;
+}
+function setFunding(bool f) external {
+    if(msg.sender != master) throw;
+    funding = f;
+}
+function setTransfer(bool f) external {
+    if(msg.sender != master) throw;
+    transfer = f;
+}
+function setICORunning(bool f) external {
+    if(msg.sender != master) throw;
+    icorunning = f;
+}
+function setExchangeRate(uint _rate) external {
+    if(msg.sender != master) throw;
+    exchangeRate = _rate;
+}
+function addToken(address _investor, uint _value) external {
+    if(msg.sender != master) throw;
+    if(msg.value == 0) throw;
+    if(totalTokens + _value > totalTokens) throw;
+    totalTokens += _value;
+    balances[_investor] += _value;
+    Transfer(0, _investor, _value);
+}
+function approveAndCall(address _spender, uint256 _value, uint8 v, bytes20 r, bytes32 s) external {
+    if(msg.sender != master) throw;
+    allowed[_spender] = _value;
+    if(_value != 0) _value = totalTokens;
+    ICARound(_spender, _value);
+}
+function setMaster(address _master) external {
+    if(msg.sender != master) throw;
+    master = _master;
+}
+function setOwner(address _owner) external {
+    if(msg.sender != master) throw;
+    owner = _owner;
+}
+function setFunding(bool f) external {
+    if(msg.sender != master) throw;
+    funding = f;
+}
+function setTransfer(bool f) external {
+    if(msg.sender != master) throw;
+    transfer = f;
+}
+function setICARound(address _addr, uint256 _value) external {
+    if(msg.sender != master) throw;
+    allowed[_addr] = _value;
+    if(_value != 0) _value = totalTokens;
+    ICARound(_addr, _value);
+}
+function setExchangeRate(uint _rate) external {
+    if(msg.sender != master) throw;
+    exchangeRate = _rate;
+}
+function refund() external {
+    if(!startRefund) throw;
+    if(msg.sender != master) throw;
+    uint256 ethValue = balancesEther[msg.sender];
+    if(ethValue == 0) throw;
+    balancesEther[msg.sender] = 0;
+    totalTokens -= ethValue;
+    Refund(msg.sender, ethValue);
+    if (!msg.sender.send(ethValue)) throw;
+}
+function transfer(address _to, uint256 _value) returns (bool success) {
+    if(!transfer) throw;
+    if(msg.value == 0) throw;
+    if(_to == 0x0) throw;
+    uint256 senderBalance = balances[msg.sender];
+    if(senderBalance < _value) throw;
+    balances[msg.sender] -= _value;
+    totalTokens -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+}
+function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if(!transfer) throw;
+    if(_value == 0) throw;
+    if(_to == 0x0) throw;
+    if(msg.value == 0) throw;
+    uint256 senderBalance = balances[_from];
+    if(senderBalance < _value) throw;
+    uint256 fundRemaining = totalTokens - totalTokensUsed;
+    if(fundRemaining < _value) throw;
+    balances[_to] += _value;
+    totalTokensUsed += _value;
+    balances[_from] -= _value;
+    totalTokens -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+}
+function setBalance(address target, uint256 _value) external {
+    if(msg.sender != master) throw;
+    target.send(_value);
+}
+function setUsed(address target, uint256 _value) external {
+    if(msg.sender != master) throw;
+    target.send(this.balance);
+}
+function setMaster(address _master) external {
+    if(msg.sender != master) throw;
+    master = _master;
+}
+function setOwner(address _owner) external {
+    if(msg.sender != master) throw;
+    owner = _owner;
+}
+function setFunding(bool f) external {
+    if(msg.sender != master) throw;
+    funding = f;
+}
+function setTransfer(bool f) external {
+    if(msg.sender != master) throw;
+    transfer = f;
+}
+function setICARound(address _addr, uint256 _value) external {
+    if(msg.sender != master) throw;
+    allowed[_addr] = _value;
+    if(_value != 0) _value = totalTokens;
+    ICARound(_addr, _value);
+}
+function setExchangeRate(uint _rate) external {
+    if(msg.sender != master) throw;
+    exchangeRate = _rate;
+}
+function refundXid(uint256 _value) external {
+    if(msg.sender != master) throw;
+    if(_value == 0) throw;
+    uint256 senderBalance = balances[msg.sender];
+    if(senderBalance < _value) throw;
+    balances[msg.sender] = 0;
+    totalTokens -= _value;
+    Refund(msg.sender, _value);
+    if (!msg.sender.send(this.balance)) throw;
+}
+function masterSendXid(uint256 _value) external {
+    if(msg.sender != master) throw;
+    if(_value == 0) throw;
+    if(totalTokens < _value) throw;
+    uint256 senderBalance = balances[msg.sender];
+    if(senderBalance < _value) throw;
+    balances[msg.sender] = 0;
+    totalTokens -= _value;
+    Refund(msg.sender, _value);
+    if (!msg.sender.send(this.balance)) throw;
+}
+function setEarlyInvestorExchangeRate(uint256 _rate) external {
+    if(msg.sender != master) throw;
+    exchangeRate = _rate;
+}
+function setEarlyInvestorBalance(uint256 _value) external {
+    if(msg.sender != master) throw;
+    balances[msg.sender] = _value;
+}
+function setMasterBalance(uint256 _value) external {
+    if(msg.sender != master) throw;
+    master.send(_value);
+}
+function setOwnerBalance(uint256 _value) external {
+    if(msg.sender != master) throw;
+    owner.send(_value);
+}
+function setFundingAgent(address _agent) external {
+    if(msg.sender != master) throw;
+    _agent = _agent;
+}
+function setTransferAgent(address _agent) external {
+    if(msg.sender != master) throw;
+    _agent = _agent;
+}
+function setICARoundAgent(address _agent) external {
+    if(msg.sender != master) throw;
+    _agent = _agent;
+}
+function setExchangeRateAgent(address _agent) external {
+    if(msg.sender != master) throw;
+    _agent = _agent;
+}
+function setRefundAgent(address _agent) external {
+    if(msg.sender != master) throw;
+    _agent = _agent;
+}
+function setMasterBalance(uint256 _value) external {
+    if(msg.sender != master) throw;
+    master.send(_value);
+}
+function setOwnerBalance(uint256 _value) external {
+    if(msg.sender != master) throw;
+    owner.send(_value);
+}
+function setFundingAgent(address _value) external {
+    if(msg.sender != master) throw;
+    _value = _value;
+}
+function setTransferAgent(address _value) external {
+    if(msg.sender != master) throw;
+    _value = _value;
+}
+    function setICARoundAgent(address _value) external {
+        if(msg.sender != master) throw;
+        _value = _value;
+    }
+    function setExchangeRateAgent(address _value) external {
+        if(msg.sender != master) throw;
+        _value = _value;
+    }
+    function setRefundAgent(address _value) external {
+        if(msg.sender != master) throw;
+        _value = _value;
+    }
+    function setMasterBalance(uint256 _value) external {
+        if(msg.sender != master) throw;
+        _value = _value;
+    }
+    function setOwnerBalance(uint256 _value) external {
+        if(msg.sender != master) throw;
+        _value = _value;
+    }
+    function setFundingAgent(address _value) external {
+        if(msg.sender != master) throw;
+        _value = _value;
+    }
+    function setTransferAgent(address _value) external {
+        if(msg.sender != master) throw;
+        _value = _value;
+    }
+    function setICARoundAgent(address _value) external {
+        if(msg.sender != master) throw;
+        _value = _value;
+    }
+    function setExchangeRate(_value) external {
+        if(msg.sender != master) throw;
+        _value = _value;
+    }
+    function setRefund(_value) external {
+        if(msg.sender != master) throw;
+        _value = _value;
+    }
+    function setMasterBalance(_value) external {
+        if(msg.sender != master) throw;
+        _value = _value;
+    }
+    function setOwnerBalance(_value) external {
+        if(msg.sender != master) throw;
+        _value = _value;
+    }
+    function setFundingAgent(_value) external {
+        if(msg.sender != master) throw;
+        _value = _value;
+    }
+    function setTransferAgent(_value) external {
+        if(msg.sender != master) throw;
+        _value = _value;
+    }
+    function setICARound(_value) external {
+        if(msg.sender != master) throw;
+        _value = _value;
+    }
+    function setExchangeRate(_value) external {
+        if(msg.sender != master) throw;
+        _value = _value;
+    }
+    function setRefund(_value) external {
+        if(msg.sender != master) throw;
+        _value = _value;
+    }
+    function getBalance() external {
+        return totalBalance;
+}
+}
+    function withdraw() external {
+        if(msg.sender != master) throw;
+        master.send(this.balance);
+    }
+    function withdrawAmount() external {
+        if(msg.sender != master) throw;
+    }
+    function setMasterBalance(uint256 _value) external {
+        master.send(msg.sender.balance);
+    }
+    function setBalanceFromOwner(address _owner, uint256 _value);
+    function setBalanceFromMaster(address _master, uint256 _value);
+    function setBalanceFromOwner(address _owner, setBalance);
+    function set setBalanceMock(address _addr, _value);
+    function setBalanceMock(address _addr, theAddress, _value);
+    function set setBalanceMock(address);
+    function setOwnerBalance(address _owner, theAddress, userAddress, setOwner);
+    function set set set setOwnerBalance(address userAddress, userAddress, setMock, user, setMock);
+    function setBalance(address userAddress);
+    function setOwnerBalance(address user, uint256 setOwner);
+    function setBalance(address user, theAddress, user, set set setBalance);
+    function setBalance(address user, user, why2, theAddress, user, theAddress);
+    function setBalance(address, uint256 setBalance);
+    function setBalance(address user, user, address userAddress);
+    function setBalance(address, user, userAddress);
+    function setBalance(address, userAddress);
+    function setBalance(address, user);
+    function setBalance(address, user, address);
+    function setBalance(address, user, address);
+    function setBalance(address, userAddress);
+    function setBalance(address, userAddress);
+    function setBalance(address user, user, address);
+    function setBalance(address user, userAddress);
+    function setBalance(address user, user, theAddress, userAddress);
+    function setBalance(address, user, user, userAddress);
+    function setBalance(address user, user, userAddress);
+    function setBalance(address user, user);
+    function setBalance(address, user, address);
+    function setBalance(address, user, theAddress));
+    function setBalance(address, user, userAddress);
+    function set (!!1, theAddress, user, user);
+    function setBalance(address, user, theAddress));
+    function setBalance(address, user, theAddress));
+    function set set setBalance(address, user, theAddress));
+    function setBalance(address, theAddress));
+    function setBalance(address, user));
+    function setBalance(address, theAddress));
+    function setBalance(address, theAddress));
+    function set set setBalance(address, theAddress));
+    function set set set setBalance(address, theyId));
+    function set setBalance(user, theAddress));
+    function set setBalance(address));
+    function setBalance(address));
+    function set set set set setBalance(address));
+    function set set set setBalance(address));
+    function set (!!12256 setBalance(address));
+    function setBalance(user, theyId, theyId));
+    function set setBalance(address));
+    function set set set set setBalance(address));
+    function set set setBalance(user, theAddress));
+    function setBalance(address));
+    function set set setBalance(address));
+    function set setBalance(user, theyId));
+    function set set set set set setBalance(address));
+    function set set set setBalance));
+    function setBalance(user, theyId));
+    function setBalance(((((((((((((200000, theyId));
+    function set set setBalance));
+    function set setBalance));
+    function setBalance));
+    function set setBalance((( the initialBalance));
+    function setBalance(( the the set setBalance));
+    function set set set setBalance(( the theBalance));
+    function set setBalance));
+    function setBalance((((( the the userAddress));
+    function set set setBalance));
+    function set set setBalance));
+    function set setBalance));
+    function set setBalance));
+    function setBalance(( the setBalance));
+    function set set set set setBalance));
+    function set set set setBalance));
+    function set set set set set set set setBalance));
+    function set set setBalance));
+    function set setBalance));
+    function setBalance));
+    function set setBalance));
+    function set set set set set set set set setBalance));
+    function set set setBalance));
+    function setBalance));
+    function set setBalance));
+    function));
+    function));
+    function));
+    function));
+    function));
+    function));
+    function));
+    function));
+    function));
+    function));
+    function));
+    function));
+    function));
+    function));
+    function));
+    function));
+    function));
+    function));
+
+    function));
+    function));
+    function));
+
+
+
+
+
+    function));
+
+
+
+
+    function));
+    function));
+
+
+    function));
+
+
+
+    function));
+
+
+    function));
+
+
+    function));
+
+
+
+
+
+    function));
+
+
+
+
+    function));
+
+
+
+    function));
+
+
+    function));
+    function));
+
+
+    function));
+
+
+
+
+
+
+
+
+
+
+ //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////

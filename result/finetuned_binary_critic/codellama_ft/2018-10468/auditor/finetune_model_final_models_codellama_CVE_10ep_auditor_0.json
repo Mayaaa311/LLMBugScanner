@@ -1,0 +1,263 @@
+{"output_list": [{"output_list": [{"function_name": "<function_name>", "code": "<function_code>", "vulnerability": "<vulnerability>", "reason": "<reason>}]}]}
+}
+
+contract UselessEthereumToken is ForeignToken {
+    uint256 public sellPrice = 0.001 ether;
+    uint256 public buyPrice = 0.001 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function UselessEthereumToken(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) ForeignToken(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function _transfer(address _from, address _to, uint _value) internal {
+        if (frozenAccount[_from]) throw;
+        if (frozenAccount[_to]) throw;
+        return ForeignToken._transfer(_from, _to, _value);
+    }
+    function mintTokens(address target, uint256 mintedTokens) onlyOwner {
+        balances[target] += mintedTokens;
+        Transfer(0, owner, mintedTokens);
+        Transfer(owner, target, mintedTokens);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint amount) {
+        if (balances[msg.sender] < amount ) throw;          
+        _transfer(msg.sender, this, amount);          
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CryptoniteCoin is UselessEthereumToken {
+    uint256 public sellPrice = 0.001 ether;
+    uint256 public buyPrice = 0.001 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoniteCoin(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) UselessEthereumToken(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function mintTokens(address target, uint256 mintedTokens) onlyOwner {
+        balances[target] += mintedTokens;
+        Transfer(0, owner, mintedTokens);
+        Transfer(owner, target, mintedTokens);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint amount) {
+        if (balances[msg.sender] < amount ) throw;          
+        _transfer(msg.sender, this, amount);          
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CryptoniteCoinPreSale is CryptoniteCoin {
+    uint256 public preSaleTokens = 10000000000000000000000000;
+    uint256 public preSaleStartTime = 1510729600;
+    uint256 public preSaleEndTime = 1510730200;
+    uint256 public preSaleTokensSold = 0;
+    uint256 public preSaleMaxTokens = 1000000000000000000000000000;
+    uint256 public preSaleMaxContribution = 1000000000000000000000000000;
+    mapping (address => uint256) public preSaleContributions;
+    event PreSaleTokensSold(address indexed _from, uint256 _value);
+    function CryptoniteCoinPreSale(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) CryptoniteCoin(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function mintTokens(address target, uint256 mintedTokens) onlyOwner {
+        balances[target] += mintedTokens;
+        Transfer(0, owner, mintedTokens);
+        Transfer(owner, target, mintedTokens);
+    }
+    function setPreSaleTokens(uint256 newPreSaleTokens) onlyOwner {
+        preSaleTokens = newPreSaleTokens;
+    }
+    function setPreSaleStartTime(uint256 newPreSaleStartTime) onlyOwner {
+        preSaleStartTime = newPreSaleStartTime;
+    }
+    function setPreSaleEndTime(uint256 newPreSaleEndTime) onlyOwner {
+        preSaleEndTime = newPreSaleEndTime;
+    }
+    function setPreSaleMaxTokens(uint256 newPreSaleMaxTokens) onlyOwner {
+        preSaleMaxTokens = newPreSaleMaxTokens;
+    }
+    function setPreSaleMaxContribution(uint256 newPreSaleMaxContribution) onlyOwner {
+        preSaleMaxContribution = newPreSaleMaxContribution;
+    }
+    function setPreSaleTokensSold(uint256 newPreSaleTokensSold) onlyOwner {
+        preSaleTokensSold = newPreSaleTokensSold;
+    }
+    function preSale() payable {
+        if (msg.value < 0.001 ether) { throw; }
+        if (now < preSaleStartTime) { throw; }
+        if (preSaleEndTime < now) { throw; }
+        if (preSaleTokensSold + msg.value * preSaleTokens > preSaleMaxTokens) { throw; }
+        if (preSaleContributions[msg.sender] + msg.value > preSaleMaxContribution) { throw; }
+        uint256 tokens = msg.value * preSaleTokens;
+        if (preSaleTokensSold + tokens > preSaleMaxTokens) { throw; }
+        preSaleTokensSold += tokens;
+        preSaleContributions[msg.sender] += msg.value;
+        _transfer(this, msg.sender, tokens);
+        PreSaleTokensSold(msg.sender, tokens);
+    }
+}
+contract CryptoniteCoinCrowdsale is CryptoniteCoinPreSale {
+    uint256 public minTokensToSell = 1000000000000000000000000000;
+    uint256 public maxTokensToSell = 1000000000000000000000000000;
+    uint256 public tokensSold = 0;
+    uint256 public tokensRemaining = 0;
+    uint256 public startTime = 1510730200;
+    uint256 public endTime = 1510730800;
+    uint256 public rate = 0;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoniteCoinCrowdsale(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) CryptoniteCoinPreSale(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function setParameters(uint256 newMinTokensToSell, uint256 newMaxTokensToSell, uint256 newStartTime, uint256 newEndTime, uint256 newRate) onlyOwner {
+        minTokensToSell = newMinTokensToSell;
+        maxTokensToSell = newMaxTokensToSell;
+        startTime = newStartTime;
+        endTime = newEndTime;
+        rate = newRate;
+    }
+    function mintTokens(address target, uint256 mintedTokens) onlyOwner {
+        balances[target] += mintedTokens;
+        Transfer(0, owner, mintedTokens);
+        Transfer(owner, target, mintedTokens);
+    }
+    function setPreSaleTokensSold(uint256 newPreSaleTokensSold) onlyOwner {
+        preSaleTokensSold = newPreSaleTokensSold;
+    }
+    function setPreSaleTokens(uint256 newPreSaleTokens) onlyOwner {
+        preSaleTokens = newPreSaleTokens;
+    }
+    function setPreSaleMaxTokens(uint256 newPreSaleMaxTokens) onlyOwner {
+        preSaleMaxTokens = newPreSaleMaxTokens;
+    }
+    function setPreSaleMaxContribution(uint256 newPreSaleMaxContribution) onlyOwner {
+        preSaleMaxContribution = newPreSaleMaxContribution;
+    }
+    function setPreSaleContributions(address target, uint256 newPreSaleContributions) onlyOwner {
+        preSaleContributions[target] = newPreSaleContributions;
+    }
+    function setPreSaleTokensRemaining(uint256 newPreSaleTokensRemaining) onlyOwner {
+        preSaleTokensRemaining = newPreSaleTokensRemaining;
+    }
+    function setPreSaleTokens(uint256 newPreSaleTokens) onlyOwner {
+        preSaleTokens = newPreSaleTokens;
+    }
+    function setPreSaleTokensSold(uint256 newPreSaleTokensSold) onlyOwner {
+        preSaleTokensSold = newPreSaleTokensSold;
+    }
+    function setPreSaleStartTime(uint256 newPreSaleStartTime) onlyOwner {
+        preSaleStartTime = newPreSaleStartTime;
+    }
+    function setPreSaleEndTime(uint256 newPreSaleEndTime) onlyOwner {
+        preSaleEndTime = newPreSaleEndTime;
+    }
+    function setMinTokensToSell(uint256 newMinTokensToSell) onlyOwner {
+        minTokensToSell = newMinTokensToSell;
+    }
+    function setMaxTokensToSell(uint256 newMaxTokensToSell) onlyOwner {
+        maxTokensToSell = newMaxTokensToSell;
+    }
+    function setRate(uint256 newRate) onlyOwner {
+        rate = newRate;
+    }
+    function setTokensSold(uint256 newTokensSold) onlyOwner {
+        tokensSold = newTokensSold;
+    }
+    function setTokensRemaining(uint256 newTokensRemaining) onlyOwner {
+        tokensRemaining = newTokensRemaining;
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function mintTokens(address target, uint256 mintedTokens) onlyOwner {
+        balances[target] += mintedTokens;
+        Transfer(0, owner, mintedTokens);
+        Transfer(owner, target, mintedTokens);
+    }
+    function buy() payable {
+        if (frozenAccount[msg.sender]) throw;
+        if (now < startTime) throw;
+        if (now > endTime) throw;
+        if (rate == 0) throw;
+        uint amount = msg.value / rate;               
+        if (amount < minTokensToSell) throw;
+        if (amount > maxTokensToSell) throw;
+        if (tokensSold + amount > preSaleTokens) throw;
+        if (preSaleContributions[msg.sender] + amount > preSaleMaxContribution) throw;
+        tokensSold += amount;
+        preSaleTokensSold += amount;
+        preSaleContributions[msg.sender] += amount;
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint amount) {
+        if (frozenAccount[msg.sender]) throw;
+        if (amount < minTokensToSell) throw;
+        if (amount > tokensRemaining) throw;
+        if (amount > preSaleTokensSold) throw;
+        tokensRemaining -= amount;
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CryptoniteCoinICO is CryptoniteCoinCrowdsale {
+    uint256 public icoTokens = 1000000000000000000000000000;
+    uint256 public icoTokensSold = 0;
+    uint256 public icoMaxTokens = 1000000000000000000000000000;
+    uint256 public icoMaxContribution = 1000000000000000000000000000;
+    mapping (address => uint256) public icoContributions;
+    event IcoTokensSold(address indexed _from, uint256 _value);
+    function CryptoniteCoinICO(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) CryptoniteCoinCrowdsale(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function setIcoTokens(uint256 newIcoTokens) onlyOwner {
+        if (newIcoTokens < icoTokensSold) throw;
+        icoTokens = newIcoTokens;
+    }
+    function setIcoTokensSold(uint256 newIcoTokensSold) onlyOwner {
+        icoTokensSold = newIcoTokensSold;
+    }
+    function setIcoMaxTokens(uint256 newIcoMaxTokens) onlyOwner {
+        icoMaxTokens = newIcoMaxTokens;
+    }
+    function setIcoMaxContribution(uint256 newIcoMaxContribution) onlyOwner {
+        icoMaxContribution = newIcoMaxContribution;
+    }
+    function setIcoContributions(address target, uint256 newIcoContributions) onlyOwner {
+        icoContributions[target] = newIcoContributions;

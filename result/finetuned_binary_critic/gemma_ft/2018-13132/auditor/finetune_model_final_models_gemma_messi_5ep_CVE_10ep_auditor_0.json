@@ -1,0 +1,334 @@
+{"output_list": [{"function_name": "pauseIco", "code": "<pauseIco code>", "vulnerability": "Memory leak", "reason": "The pauseIco function has no effect, causing the team to rely on the presence of an external agent to halt the team."}]}
+{"output_list": [{"function_name": "resumeIco", "code": "<resumeIco code>", "vulnerability": "Memory leak", "reason": "The resumeIco function has no effect, causing the team to rely on the presence of an external agent to halt the team."}]}
+{"output_list": [{"function_name": "convertPresaleTokens", "code": "<convertPresaleTokens code>", "vulnerability": "Invalid state selection", "reason": "The convertPresaleTokens function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."}]}
+{"output_list": [{"function_name": "creditJackpotTokens", "code": "<creditJackpotTokens code>", "vulnerability": "Invalid state selection", "reason": "The creditJackpotTokens function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."}]}
+{"output_list": [{"function_name": "buyTokens", "code": "<buyTokens code>", "vulnerability": "Invalid state selection", "reason": "The buyTokens function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."}]}
+{"output_list": [{"function_name": "validState", "code": "<validState code>", "vulnerability": "Invalid state selection", "reason": "The validState function is called when the ico is in the creation stage, but the function does not perform any validation, leading to potential unhandled exceptions."}]}
+  function set(address _team, address _icoAgent) external {
+    require(msg.sender == migrationMaster);
+    require(_team != address(0));
+    require(_icoAgent != address(0));
+    team = _team;
+    icoAgent = _icoAgent;
+  }
+  function setMigrationMaster(address _master) external {
+    require(msg.sender == migrationMaster);
+    require(_master != address(0));
+    migrationMaster = _master;
+  }
+  function setICO(address _ico) external {
+    require(msg.sender == icoAgent);
+    require(_ico != address(0));
+    ico = _ico;
+  }
+  function setMigrationAgent(address _agent) external {
+    require(msg.sender == migrationMaster);
+    require(_agent != address(0));
+    migrationAgent = _agent;
+  }
+}
+contract MyAdvancedToken is SP3DToken, MigrationAgent {
+  uint256 public totalMigrated = 0;
+  string public name = "SP3D Token";
+  string public symbol = "SP3D";
+  uint8 public decimals = 18;
+  address public team;
+  address public icoAgent;
+  address public migrationMaster;
+  modifier teamOnly {require(msg.sender == team); _;}
+  modifier icoAgentOnly {require(msg.sender == icoAgent); _;}
+  modifier migrationMasterOnly {require(msg.sender == migrationMaster); _;}
+  function MyAdvancedToken(address _team, address _icoAgent, address _migrationMaster) public {
+    require(_team != address(0));
+    require(_icoAgent != address(0));
+    require(_migrationMaster != address(0));
+    team = _team;
+    icoAgent = _icoAgent;
+    migrationMaster = _migrationMaster;
+    SP3DToken(this, team, icoAgent, migrationMaster);
+  }
+  function migrate(address _buyer, uint256 _value) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_buyer != address(0));
+    require(_value > 0);
+    require(validState());
+    totalMigrated = totalMigrated.add(_value);
+    balances[_buyer] = balances[_buyer].sub(_value);
+    TokenBuy(_buyer, _value, _value, "Migration Master sent it");
+    return true;
+  }
+  function unfreeze() public returns (bool) {
+    require(msg.sender == team);
+    isPaused = false;
+    IcoResumed();
+    return true;
+  }
+  function set(address _team, address _icoAgent) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_team != address(0));
+    require(_icoAgent != address(0));
+    team = _team;
+    icoAgent = _icoAgent;
+    migrationMaster = _migrationMaster;
+    SP3DToken(this, team, icoAgent, migrationMaster);
+    return true;
+  }
+  function setMigrationMaster(address _master) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_master != address(0));
+    migrationMaster = _master;
+    return true;
+  }
+  function setICO(address _ico) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_ico != address(0));
+    ico = _ico;
+    return true;
+  }
+  function setMigrationAgent(address _agent) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_agent != address(0));
+    migrationAgent = _agent;
+    return true;
+  }
+}
+contract SP3DToken is MyAdvancedToken {
+  uint256 public totalSP3DIssued = 0;
+  uint256 public totalSP3DReceived = 0;
+  mapping(address => uint256) public balances;
+  mapping(address => mapping (address => uint256)) public allowed;
+  event TokenBuy(address indexed buyer, uint256 tokens, uint256 factor, string txHash);
+  function SP3DToken(address _team, address _icoAgent, address _migrationMaster) public MyAdvancedToken(_team, _icoAgent, _migrationMaster) {}
+  function getBalance(address _owner) public view returns(uint256){
+      return balances[_owner];
+  }
+  function getTotalSP3DIssued() public view returns(uint256){
+      return totalSP3DIssued;
+  }
+  function getTotalSP3DReceived() public view returns(uint256){
+      return totalSP3DReceived;
+  }
+  function mint(address _buyer, uint256 _value) public returns (bool) {
+    require(msg.sender == icoAgent);
+    require(_value > 0);
+    require(validState());
+    totalSP3DIssued = totalSP3DIssued.add(_value);
+    totalSP3DReceived = totalSP3DReceived.add(_value);
+    balances[_buyer] = balances[_buyer].sub(_value);
+    TokenBuy(_buyer, _value, _value, "Migration Master sent it");
+    return true;
+  }
+  function unfreeze() public returns (bool) {
+    require(msg.sender == team);
+    isPaused = false;
+    IcoResumed();
+    return true;
+  }
+  function set(address _team, address _icoAgent) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_team != address(0));
+    require(_icoAgent != address(0));
+    team = _team;
+    icoAgent = _icoAgent;
+    migrationMaster = _migrationMaster;
+    SP3DToken(this, team, icoAgent, migrationMaster);
+    return true;
+  }
+  function setMigrationMaster(address _master) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_master != address(0));
+    migrationMaster = _master;
+    return true;
+  }
+  function setICO(address _ico) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_ico != address(0));
+    ico = _ico;
+    return true;
+  }
+  function setMigrationAgent(address _agent) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_agent != address(0));
+    migrationAgent = _agent;
+    return true;
+  }
+  function approve(address _spender, uint256 _value) public returns (bool) {
+    require(!isPaused);
+    allowed[msg.sender][_spender] = _value;
+    return true;
+  }
+  function transfer(address _to, uint256 _value) public returns (bool) {
+    require(!isPaused);
+    require(_to != address(0));
+    require(_value <= balances[msg.sender]);
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(!isPaused);
+    require(_to != address(0));
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    balances[_from] = balances[_from].sub(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function setTeam(address _team) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_team != address(0));
+    team = _team;
+    return true;
+  }
+  function setICO(address _ico) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_ico != address(0));
+    ico = _ico;
+    return true;
+  }
+  function setMigrationMaster(address _master) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_master != address(0));
+    migrationMaster = _master;
+    return true;
+  }
+  function setMigrationAgent(address _agent) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_agent != address(0));
+    migrationAgent = _agent;
+    return true;
+  }
+}
+contract TeamTimelock {
+  address public team;
+  address public icoAgent;
+  address public migrationMaster;
+  function TeamTimelock(address _team, address _icoAgent, address _migrationMaster) public {
+    require(_team != address(0));
+    require(_icoAgent != address(0));
+    require(_migrationMaster != address(0));
+    team = _team;
+    icoAgent = _icoAgent;
+    migrationMaster = _migrationMaster;
+  }
+  function set(address _team, address _icoAgent) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_team != address(0));
+    require(_icoAgent != address(0));
+    team = _team;
+    icoAgent = _icoAgent;
+    migrationMaster = _migrationMaster;
+    TeamTimelock(this, team, icoAgent, migrationMaster);
+    return true;
+  }
+  function setMigrationMaster(address _master) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_master != address(0));
+    migrationMaster = _master;
+    return true;
+  }
+  function setICO(address _ico) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_ico != address(0));
+    ico = _ico;
+    return true;
+  }
+  function setMigrationAgent(address _agent) public returns (bool) {
+    require(msg.sender == migrationMaster);
+    require(_agent != address(0));
+    migrationAgent = _agent;
+    return true;
+  }
+}
+contract ERC20Basic {
+  uint256 public totalSupply;
+  function balanceOf(address who) public view returns (uint256);
+  function transfer(address to, uint256 value) public returns (bool);
+  event Transfer(address indexed from, address indexed to, uint256 value);
+}
+contract ERC20 is ERC20Basic {
+  function allowance(address owner, address spender) public view returns (uint256);
+  function transferFrom(address from, address to, uint256 value) public returns (bool);
+  function approve(address spender, uint256 value) public returns (bool);
+  event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+contract SP3DToken is ERC20, TeamTimelock {
+  function SP3DToken(address _team, address _icoAgent, address _migrationMaster) public TeamTimelock(_team, _icoAgent, _migrationMaster) ERC20(_team, _icoAgent, _migrationMaster) {}
+}
+contract SpadeIco is SP3DToken {
+  function SpadeIco(address _team, address _icoAgent) public TeamTimelock(_team, _icoAgent) SP3DToken(_team, _icoAgent, this) {}
+}
+contract MyAdvancedToken is SP3DToken {
+  function getTokensToSell(address _investor) public view returns(uint);
+  function mint(address _investor, uint _amount) public returns (bool);
+  function unfreeze() public returns (bool);
+}
+contract TeamAdvancedToken is TeamTimelock, MyAdvancedToken {
+  function TeamAdvancedToken(address _team, address _icoAgent) public TeamTimelock(_team, _icoAgent) MyAdvancedToken(this) {}
+}
+contract SpadeAdvancedToken is TeamAdvancedToken {
+  function SpadeAdvancedToken(address _team, address _icoAgent) public TeamAdvancedToken(_team, _icoAgent) {}
+}
+contract MigrationAgent {
+  address public target;
+  function setTarget(address _target) public {
+    target = _target;
+  }
+  function migrate(address _from, uint256 _value) public returns (bool) {
+    require(msg.sender == migrationAgent);
+    require(_value <= balances[_from]);
+    balances[_from] = balances[_from].sub(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    balances[target] = balances[target].add(_value);
+    Transfer(_from, target, _value);
+    return true;
+  }
+}
+contract ERC20Token is ERC20, TeamToken {
+  function ERC20Token(address _team, address _icoAgent, address _migrationMaster) public TeamToken(_team, _icoAgent, _migrationMaster) ERC20(_team, _icoAgent, _migrationMaster) {}
+}
+contract TeamToken is TeamTimelock, ERC20Token {
+  function TeamToken(address _team, address _icoAgent, address _migrationMaster) public ERC20Token(_team, _icoAgent, _migrationMaster) TeamToken(this) {}
+}
+contract MigrateAirdale is MigrationAgent, TeamToken {
+  function MigrateAirdale(address _target) public TeamToken(this) {
+    target = _target;
+  }
+}
+contract MigrateAirdaleFactory {
+  function create(address _team, address _icoAgent) public {
+    require(msg.sender == migrationMaster);
+    require(_team != address(0));
+    require(_icoAgent != address(0));
+    MigrateAirdale(this, _team, _icoAgent);
+  }
+}
+contract TeamState is TeamTimelock {
+  function TeamState(address _team, address _icoAgent, address _migrationMaster) public TeamTimelock(_team, _icoAgent, _migrationMaster) {}
+}
+contract State is TeamState {
+  function State(address _team, address _icoAgent, address _migrationMaster) public TeamState(this, _team, _icoAgent, _migrationMaster) {}
+}
+contract TeamICO is TeamState {
+  function TeamICO(address _team, address _icoAgent, address _migrationMaster) public State(this, _team, _icoAgent, _migrationMaster) {}
+}
+contract ICO is TeamICO {
+  function ICO(address _team, address _icoAgent, address _migrationMaster) public TeamICO(this, _team, _icoAgent, _migrationMaster) {}
+}
+contract TeamTeam is TeamToken {
+  function TeamTeam(address _team, address _icoAgent) public TeamToken(this) {
+    require(icoAgent != address(0));
+  }
+}
+contract TeamFactory is TeamFactory, TeamTeam {
+  function create(address _team, address _icoAgent) public TeamTeam(this, _team, _icoAgent) {}
+}
+contract TeamGroundFloor is TeamToken {
+  function TeamGroundFloor(address _team, address _icoAgent) public TeamToken(this) {
+    require(icoAgent != address(0));
+  }
+}
+contract TeamGroundFloorFactory is TeamFactory, TeamGroundFloor {

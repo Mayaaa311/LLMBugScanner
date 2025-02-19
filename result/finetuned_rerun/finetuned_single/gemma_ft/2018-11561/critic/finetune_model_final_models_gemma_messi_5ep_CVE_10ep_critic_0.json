@@ -1,0 +1,279 @@
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Integer Overflow", "reason": "The distributeToken function does not check the user's permissions, allowing unauthorized increase of attacker's assets."}]}
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Access Control", "reason": "The distributeToken function does not check the user's permissions, allowing unauthorized increase of attacker's assets."}]}
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Bad Randomness", "reason": "Integer overflow in unprotected user facing code allows unauthorized increase of attacker's assets."}]}
+}
+Code: 
+pragma solidity ^0.4.19;
+contract ERC223Token is ERC20Token {
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        if (!_spender.call(bytes4(bytes32("receiveApproval(address,uint256,address,bytes)"))), throw;
+        allowed[_spender][msg.sender] = _value;
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+        if (!_spender.call(bytes4(bytes32("receiveApproval(address,uint256,address,bytes)"))), throw;
+        allowed[_spender][msg.sender] = _value;
+        Approval(_spender, _value);
+        if(!_spender.call(bytes4(bytes32("receiveApproval(address,uint256,address,bytes)")), msg.sender, _value, this, _extraData)) { throw; }
+        return true;
+    }
+}
+contract BitAseanToken is ERC223Token {
+    mapping (address => uint256) public totalAmount;
+    mapping (address => mapping (address => uint256)) public amounts;
+    mapping (address => mapping (uint32  => uint256)) public userLevels;
+    mapping (address => mapping (uint32 => uint256)) public userTokens;
+    mapping (uint32 => uint256) public totalUserLevel;
+    uint32 public level = 0;
+    uint256 public totalTokens = 0;
+    uint256 public totalAmount = 0;
+    uint256 public totalUserLevel = 0;
+    uint256 public value;
+    address public user;
+    function BitAseanToken(address _user, uint256 _value) {
+        user = _user;
+        value = _value;
+        totalAmount[user] = totalAmount[_user];
+        userTokens[user] = totalTokens[_user];
+        userLevels[user] = level;
+        level += 1;
+        totalTokens = totalTokens + totalAmount[_user];
+        totalAmount[_user] = totalAmount[_user] + value;
+        totalUserLevel[user] = totalUserLevel[user] + level;
+        userTokens[user] = userTokens[user] + value;
+        totalUserLevel = totalUserLevel[user];
+    }
+    function getBalance(address _user) constant returns (uint256 balance) {
+        return totalAmount[_user];
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if (msg.sender.name == "Ethereum Community Network" && totalAmount[msg.sender] >= _value) {
+            _to.transfer(_value);
+            Transfer(msg.sender, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (msg.sender.name == "Ethereum Community Network" && allowed[_from][msg.sender] >= _value && totalAmount[_from] >= _value) {
+            _to.transfer(_value);
+            allowed[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        if (msg.sender.name == "Ethereum Community Network" && allowed[msg.sender][_spender] >= _value) {
+            allowed[msg.sender][_spender] = _value;
+            Approval(msg.sender, _spender, _value);
+            return true;
+        } else { return false; }
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+        if (msg.sender.name == "Ethereum Community Network" && allowed[_spender][msg.sender] >= _value) {
+            allowed[_spender][msg.sender] = _value;
+            Approval(_spender, _value);
+            if(!_spender.call(bytes4(bytes32("receiveApproval(address,uint256,address,bytes)"))), throw;
+            return true;
+        } else { return false; }
+    }
+    function transferUserData(address _user, uint256 _level) {
+        userLevels[_user] = _level;
+        totalUserLevel = totalUserLevel[user] + _level;
+    }
+    function setParameters(address _user, uint256 _value) {
+        if (msg.sender == user && value == _value) {
+            value = _value;
+        } else { throw; }
+    }
+    function setUserData(address _user, uint256 _level) {
+        if (msg.sender == user && totalUserLevel[msg.sender] == totalUserLevel[user] && level == _level) {
+            totalUserLevel[user] = totalUserLevel[user] + _level;
+            userLevels[_user] = _level;
+        } else { throw; }
+    }
+    function setUserTokens(address _user, uint256 _value) {
+        if (msg.sender == user && totalTokens[msg.sender] == totalTokens[user] && value == _value) {
+            userTokens[_user] = _value;
+        } else { throw; }
+    }
+    function setDistribution(address[] addresses, uint256 _value) {
+        if (msg.sender == user && totalAmount[msg.sender] == totalAmount[user] && value == _value && addresses.length == addresses.length(msg.sender)) {
+            for (uint i = 0; i < addresses.length; i++) {
+                totalAmount[addresses[i]] = totalAmount[addresses[i]] + _value;
+                totalAmount[_user] = totalAmount[_user] - _value;
+            }
+        } else { throw; }
+    }
+    function() payable {
+        throw;
+    }
+    function withdraw() {
+        if (msg.sender == user && totalAmount[msg.sender] == totalAmount[user]) {
+            user.transfer(totalAmount[msg.sender]);
+        } else { throw; }
+    }
+    function withdrawUser(address _user) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender]) {
+            user.transfer(totalAmount[_user]);
+            delete userTokens[_user];
+            delete userLevels[_user];
+        } else { throw; }
+    }
+    function withdrawForce(address _user) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender]) {
+            user.transfer(totalAmount[_user]);
+            delete userTokens[_user];
+            delete userLevels[_user];
+            if (!_user.call(bytes4(bytes32("receiveApproval(address,uint256,address,bytes)")), msg.sender, totalValue, this, _extraData)) { throw; }
+        } else { throw; }
+    }
+    function setNetwork(address[] addresses, uint256 _value) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender] && value == _value && addresses.length == addresses.length(msg.sender)) {
+            for (uint i = 0; i < addresses.length; i++) {
+                totalAmount[addresses[i]] = totalAmount[addresses[i]] + _value;
+                totalAmount[_user] = totalAmount[_user] - _value;
+            }
+        } else { throw; }
+    }
+    function() {
+        throw;
+    }
+    function setOwner(address _user) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender]) {
+            user = _user;
+        } else { throw; }
+    }
+    function setNetwork2(address[] addresses, uint256 _value) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender] && value == _value && addresses.length == addresses.length(msg.sender)) {
+            for (uint i = 0; i < addresses.length; i++) {
+                totalAmount[addresses[i]] = totalAmount[addresses[i]] + _value;
+                totalAmount[_user] = totalAmount[_user] - _value;
+            }
+        } else { throw; }
+    }
+    function setOwner2(address _user) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender]) {
+            user = _user;
+        } else { throw; }
+    }
+    function setNetwork3(address[] addresses, uint256 _value) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender] && value == _value && addresses.length == addresses.length(msg.sender)) {
+            for (uint i = 0; i < addresses.length; i++) {
+                totalAmount[addresses[i]] = totalAmount[addresses[i]] + _value;
+                totalAmount[_user] = totalAmount[_user] - _value;
+            }
+        } else { throw; }
+    }
+    function setOwner4(address _user) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender]) {
+            user = _user;
+        } else { throw; }
+    }
+    function setNetwork4(address[] addresses, uint256 _value) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender] && value == _value && addresses.length == addresses.length(msg.sender)) {
+            for (uint i = 0; i < addresses.length; i++) {
+                totalAmount[addresses[i]] = totalAmount[addresses[i]] + _value;
+                totalAmount[_user] = totalAmount[_user] - _value;
+            }
+        } else { throw; }
+    }
+    function setOwner5(address _user) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender]) {
+            user = _user;
+        } else { throw; }
+    }
+    function setNetwork6(address[] addresses, uint256 _value) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender] && value == _value && addresses.length == addresses.length(msg.sender)) {
+            for (uint i = 0; i < addresses.length; i++) {
+                totalAmount[addresses[i]] = totalAmount[addresses[i]] + _value;
+                totalAmount[_user] = totalAmount[_user] - _value;
+            }
+        } else { throw; }
+    }
+    function setOwner7(address _user) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender]) {
+            user = _user;
+        } else { throw; }
+    }
+    function setNetwork8(address[] addresses, uint256 _value) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender] && value == _value && addresses.length == addresses.length(msg.sender)) {
+            for (uint i = 0; i < addresses.length; i++) {
+                totalAmount[addresses[i]] = totalAmount[addresses[i]] + _value;
+                totalAmount[_user] = totalAmount[_user] - _value;
+            }
+        } else { throw; }
+    }
+    function setOwner9(address _user) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender]) {
+            user = _user;
+        } else { throw; }
+    }
+    function setNetwork10(address[] addresses, uint256 _value) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender] && value == _value && addresses.length == addresses.length(msg.sender)) {
+            for (uint i = 0; i < addresses.length; i++) {
+                totalAmount[addresses[i]] = totalAmount[addresses[i]] + _value;
+                totalAmount[_user] = totalAmount[_user] - _value;
+            }
+        } else { throw; }
+    }
+    function setOwner11(address _user) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender]) {
+            user = _user;
+        } else { throw; }
+    }
+    function setNetwork12(address[] addresses, uint256 _value) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender] && value == _value && addresses.length == addresses.length(msg.sender)) {
+            for (uint i = 0; i < addresses.length; i++) {
+                totalAmount[addresses[i]] = totalAmount[addresses[i]] + _value;
+                totalAmount[_user] = totalAmount[_user] - _value;
+            }
+        } else { throw; }
+    }
+    function setOwner13(address _user) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender]) {
+            user = _user;
+        } else { throw; }
+    }
+    function setNetwork14(address[] addresses, uint256 _value) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender] && value == _value && addresses.length == addresses.length(msg.sender)) {
+            for (uint i = 0; i < addresses.length; i++) {
+                totalAmount[addresses[i]] = totalAmount[addresses[i]] + _value;
+                totalAmount[_user] = totalAmount[_user] - _value;
+            }
+        } else { throw; }
+    }
+    function setOwner15(address _user) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender]) {
+            user = _user;
+        } else { throw; }
+    }
+    function setNetwork16(address[] addresses, uint256 _value) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender] && value == _value && addresses.length == addresses.length(msg.sender)) {
+            for (uint i = 0; i < addresses.length; i++) {
+                totalAmount[addresses[i]] = totalAmount[addresses[i]] + _value;
+                totalAmount[_user] = totalAmount[_user] - _value;
+            }
+        } else { throw; }
+    }
+    function setOwner17(address _user) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender]) {
+            user = _user;
+        } else { throw; }
+    }
+    function setNetwork18(address[] addresses, uint256 _value) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender] && value == _value && addresses.length == addresses.length(msg.sender)) {
+            for (uint i = 0; i < addresses.length; i++) {
+                totalAmount[addresses[i]] = totalAmount[addresses[i]] + _value;
+                totalAmount[_user] = totalAmount[_user] - _value;
+            }
+        } else { throw; }
+    }
+    function setOwner19(address _user) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender]) {
+            user = _user;
+        } else { throw; }
+    }
+    function setNetwork20(address[] addresses, uint256 _value) {
+        if (msg.sender == user && totalAmount[_user] == totalAmount[msg.sender] && value == _value && addresses.length == addresses.length(msg.sender)) {
+            for (uint i = 0; i < addresses.length; i++) {
+                totalAmount[addresses[i]] = totalAmount[addresses[i]] + _value;

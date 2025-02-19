@@ -1,0 +1,37 @@
+Here is the output in JSON format:
+
+```json
+{
+  "output_list": [
+    {
+      "function_name": "distributeToken",
+      "auditor_idx": 0,
+      "vulnerability": "Integer Overflow",
+      "criticism": "The distributeToken function does not check for overflow, allowing the owner to set the balance of any user to a very high value, arbitrarily decreasing the total supply. This vulnerability is severe because it can be exploited to steal funds from users, and it is easy to identify due to the unprotected nature of the function. However, it is not very profitable in a typical setting, as it requires manual exploitation and the owner's cooperation.",
+      "correctness": 8,
+      "severity": 9,
+      "profitability": 3
+    },
+    {
+      "function_name": "transfer",
+      "auditor_idx": 0,
+      "vulnerability": "Wrong Logic",
+      "criticism": "The transfer function allows a user to transfer tokens to a contract that has a fallback function, allowing the attacker to steal the tokens. This vulnerability is incorrect because it does not allow arbitrary token transfers, only to contracts with a fallback function. The exploitative nature of this vulnerability is high, but it is not a typical issue in practical smart contract deployments, making it less profitable.",
+      "correctness": 4,
+      "severity": 8,
+      "profitability": 2
+    },
+    {
+      "function_name": "approve",
+      "auditor_idx": 0,
+      "vulnerability": "Access Control",
+      "criticism": "The approve function does not check if the spender is a smart contract, allowing attackers to exploit the approveAndCall pattern to steal funds. This is a correctness issue because it deviates from expected secure coding practices. The severity is high because it impacts the trust and usability of the system. However, the exploitability in typical deployment scenarios is limited, thus the profitability is medium.",
+      "correctness": 7,
+      "severity": 9,
+      "profitability": 5
+    }
+  ]
+}
+```
+
+The output is sorted by severity in descending order and includes the top 5 most severe vulnerabilities.

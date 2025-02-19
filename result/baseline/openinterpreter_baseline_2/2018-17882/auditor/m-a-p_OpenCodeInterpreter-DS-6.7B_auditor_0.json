@@ -1,0 +1,57 @@
+{
+    "output_list": [
+        {
+            "function_name": "create",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function create(uint _amount) public onlyOwner {
+        balances[msg.sender] = safeAdd(balances[msg.sender], _amount);
+        totalSupply = safeAdd(totalSupply, _amount);
+    }",
+            "reason": "The function uses the safeAdd function to add the amount to the totalSupply and balances of the sender. However, the safeAdd function does not check if the addition will overflow. If the totalSupply or balances of the sender exceed the maximum value of uint256, the addition will wrap around and the result will be incorrect."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+        balances[msg.sender] = safeSub(balances[msg.sender], _value);
+        balances[_to] = safeAdd(balances[_to], _value);
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }",
+            "reason": "The function uses the safeSub and safeAdd functions to subtract and add the value from the sender's balance and the recipient's balance. However, the safeSub and safeAdd functions do not check if the subtraction or addition will underflow or overflow. If the sender's balance or recipient's balance exceed the maximum value of uint256, the subtraction or addition will wrap around and the result will be incorrect."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        balances[_to] = safeAdd(balances[_to], _value);
+        balances[_from] = safeSub(balances[_from], _value);
+        if (_to != fights) {
+            allowed[_from][msg.sender] = safeSub(allowed[_from][msg.sender], _value);
+        }
+        Transfer(_from, _to, _value);
+        return true;
+    }",
+            "reason": "The function uses the safeAdd and safeSub functions to add and subtract the value from the sender's balance, recipient's balance, and allowed mapping. However, the safeSub function does not check if the subtraction will underflow. If the sender's balance or recipient's balance exceed the maximum value of uint256, the subtraction will wrap around and the result will be incorrect."
+        },
+        {
+            "function_name": "safeAdd",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function safeAdd(uint256 a, uint256 b) internal pure returns (uint256) {
+        uint256 c = a + b;
+        assert(c >= a);
+        return c;
+    }",
+            "reason": "The function adds two numbers and checks if the result is greater than or equal to the first number. However, it does not check if the addition will overflow. If the addition of the two numbers exceeds the maximum value of uint256, the result will wrap around and be incorrect."
+        },
+        {
+            "function_name": "safeSub",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function safeSub(uint256 a, uint256 b) internal pure returns (uint256) {
+        assert(b <= a);
+        return a - b;
+    }",
+            "reason": "The function subtracts two numbers and checks if the second number is less than or equal to the first number. However, it does not check if the subtraction will underflow. If the subtraction of the two numbers exceeds the maximum value of uint256, the result will wrap around and be incorrect."
+        }
+    ]
+}

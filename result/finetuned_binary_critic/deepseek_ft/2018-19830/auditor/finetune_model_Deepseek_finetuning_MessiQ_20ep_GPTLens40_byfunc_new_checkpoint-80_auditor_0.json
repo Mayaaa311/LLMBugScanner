@@ -1,0 +1,34 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _value) onlyPayloadSize(2 * 32) unFrozenAccount onlyTransferable { if (frozenAccount[_to]) { InvalidAccount(_to, "The receiver account is frozen"); } else { balances[msg.sender] = balances[msg.sender].sub(_value); balances[_to] = balances[_to].add(_value); Transfer(msg.sender, _to, _value); } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function does not prevent overflow of the balance of the 'to' address, allowing attackers to arbitrarily increase the balance of any user and take away funds."
+        },
+        {
+            "function_name": "transferOwnership",
+            "code": "function transferOwnership(address newOwner) onlyOwner public { if (newOwner != address(0)) { address oldOwner=owner; owner = newOwner; OwnershipTransferred(oldOwner, owner); } }",
+            "vulnerability": "Incorrect Access Control",
+            "reason": "The 'transferOwnership' function does not check if the new owner is a valid user, allowing contracts or attackers to become the owner and take control of the assets."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint _value) unFrozenAccount { if ((_value != 0) && (allowed[msg.sender][_spender] != 0)) throw; allowed[msg.sender][_spender] = _value; Approval(msg.sender, _spender, _value); }",
+            "vulnerability": "Incorrect Access Control",
+            "reason": "The 'approve' function does not check if the spender is a valid user, allowing contracts or attackers to increase their spending limits arbitrarily."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner public { frozenAccount[target]=freeze; FrozenFunds(target, freeze); }",
+            "vulnerability": "Incorrect Access Control",
+            "reason": "The 'freezeAccount' function does not check if the target is a valid user, allowing contracts or attackers to freeze arbitrary accounts and lock out their holders."
+        },
+        {
+            "function_name": "switchLiquidity",
+            "code": "function switchLiquidity (bool _transferable) onlyOwner returns (bool success) { transferable=_transferable; return true; }",
+            "vulnerability": "Incorrect Access Control",
+            "reason": "The 'switchLiquidity' function does not check if the new liquidity status is valid, allowing attackers to arbitrarily change the liquidity status and disrupt trade."
+        }
+    ]
+}

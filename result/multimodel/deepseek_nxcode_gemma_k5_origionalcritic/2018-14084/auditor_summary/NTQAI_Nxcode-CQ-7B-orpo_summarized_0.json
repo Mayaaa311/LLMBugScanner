@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function has an integer overflow vulnerability. The issue is in the function where 'balanceOf[target] += mintedAmount' and 'totalSupply += mintedAmount' are directly increasing the balance and total supply without checking if the minted amount is greater than the maximum supply. This can be exploited to mint tokens out of thin air and make the token valueless."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "reason": "The transfer function has a wrong logic in the function where 'require(balanceOf[_to] + _value > balanceOf[_to]);' is used. The '<' operator is used instead of '>=' operator, causing a buy function to be frozen when the balance is zero."
+        },
+        {
+            "function_name": "burnFrom",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burnFrom function has an integer overflow vulnerability. The issue is in the function where 'require(balanceOf[_from] >= _value);' is used. If the balance of _from is 2 and _value is 1, the '<=' operator is used instead of '>=' operator, causing an overflow attack."
+        },
+        {
+            "function_name": "selfdestructs",
+            "vulnerability": "Typo Constructor",
+            "reason": "The selfdestructs function has a typo constructor vulnerability. The function is intended to allow the owner to destruct and send funds to owner, but it is written in 'selfdestruct' instead of 'destruct'. This causes a functional issue where users cannot destruct and send funds to owner."
+        },
+        {
+            "function_name": "getEth",
+            "vulnerability": "Bad Randomness",
+            "reason": "The getEth function has a bad randomness vulnerability. The function is intended to allow the owner to transfer funds to a specified address, but it uses a predictable value from owner to target, making it prone to front-running attacks."
+        }
+    ]
+}

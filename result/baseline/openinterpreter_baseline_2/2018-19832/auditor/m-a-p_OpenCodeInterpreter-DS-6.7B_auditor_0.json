@@ -1,0 +1,61 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _amount) onlyPayloadSize(2 * 32) public returns (bool success) {
+        require(_to != address(0));
+        require(_amount <= balances[msg.sender]);
+        balances[msg.sender] = balances[msg.sender].sub(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        emit Transfer(msg.sender, _to, _amount);
+        return true;
+    }",
+            "reason": "In the transfer function, the subtraction of _amount from balances[msg.sender] and addition of _amount to balances[_to] does not check for overflow. If _amount is greater than balances[msg.sender], it will result in an underflow, and if _amount is greater than balances[_to], it will result in an overflow."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _amount) onlyPayloadSize(3 * 32) public returns (bool success) {
+        require(_to != address(0));
+        require(_amount <= balances[_from]);
+        require(_amount <= allowed[_from][msg.sender]);
+        balances[_from] = balances[_from].sub(_amount);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        emit Transfer(_from, _to, _amount);
+        return true;
+    }",
+            "reason": "In the transferFrom function, the subtraction of _amount from balances[_from] and allowed[_from][msg.sender] does not check for overflow. If _amount is greater than balances[_from] or allowed[_from][msg.sender], it will result in an underflow, and if _amount is greater than balances[_to], it will result in an overflow."
+        },
+        {
+            "function_name": "getTokenBalance",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function getTokenBalance(address tokenAddress, address who) constant public returns (uint){
+        ForeignToken t = ForeignToken(tokenAddress);
+        uint bal = t.balanceOf(who);
+        return bal;
+    }",
+            "reason": "In the getTokenBalance function, the function ForeignToken(tokenAddress).balanceOf(who) does not seem to be a random number. It seems to be a deterministic function that always returns the balance of the token for the given address."
+        },
+        {
+            "function_name": "withdraw",
+            "vulnerability": "Access Control",
+            "function_code": "function withdraw() onlyOwner public {
+        uint256 etherBalance = address(this).balance;
+        owner.transfer(etherBalance);
+    }",
+            "reason": "In the withdraw function, the owner of the contract can call the withdraw function to withdraw all the Ether from the contract. This function does not have any access control checks, so anyone can call it."
+        },
+        {
+            "function_name": "withdrawForeignTokens",
+            "vulnerability": "Access Control",
+            "function_code": "function withdrawForeignTokens(address _tokenContract) onlyOwner public returns (bool) {
+        ForeignToken token = ForeignToken(_tokenContract);
+        uint256 amount = token.balanceOf(address(this));
+        return token.transfer(owner, amount);
+    }",
+            "reason": "In the withdrawForeignTokens function, the owner of the contract can call the withdrawForeignTokens function to withdraw all the tokens from the contract. This function does not have any access control checks, so anyone can call it."
+        }
+    ]
+}

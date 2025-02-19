@@ -1,0 +1,43 @@
+ Here are the 5 most severe vulnerabilities in the provided smart contract, along with their associated functions and reasons:
+
+1. Integer Overflow:
+
+Function: `AddTicket()`
+
+Vulnerability: Integer overflow in the `numtickets` variable, which can cause the contract to accept more tickets than the maximum allowed.
+
+Reason: The `numtickets` variable is incremented by 1 in the `AddTicket()` function, but it is not checked against the maximum allowed number of tickets. If the maximum number of tickets is set to a large value, the `numtickets` variable can overflow and accept more tickets than the maximum allowed.
+
+2. Wrong Logic:
+
+Function: `PayWinner()`
+
+Vulnerability: Wrong logic in the `PayWinner()` function, which can cause the contract to pay the winner with the wrong amount of tokens.
+
+Reason: The `PayWinner()` function calculates the amount of tokens to pay the winner by subtracting the owner's tax from the total bounty. However, the function does not check if the total bounty is greater than the owner's tax, which can cause the contract to pay the winner with a negative amount of tokens.
+
+3. Bad Randomness:
+
+Function: `AddTicket()`
+
+Vulnerability: Bad randomness in the `AddTicket()` function, which can cause the contract to accept tickets with a higher probability than intended.
+
+Reason: The `AddTicket()` function uses the `now` variable to determine the current time, which can be manipulated by miners to create a skewed probability distribution. If the miners are able to manipulate the `now` variable, they can create a higher probability of accepting tickets than intended.
+
+4. Access Control:
+
+Function: `withdraw()`
+
+Vulnerability: Access control in the `withdraw()` function, which can allow unauthorized users to withdraw the contract's funds.
+
+Reason: The `withdraw()` function requires the `worldOwner` address to be the sender of the transaction, but it does not check if the sender is the actual owner of the contract. If an attacker is able to manipulate the `worldOwner` address, they can withdraw the contract's funds.
+
+5. Typo Constructor:
+
+Function: `LottoCount()`
+
+Vulnerability: Typo in the constructor function, which can cause the contract to be deployed with incorrect values.
+
+Reason: The `LottoCount()` constructor function sets the `ticketPrice` variable to 0.0101 * 10**18, but it should be set to 0.0101 * 10**18. If the typo is not corrected, the contract will be deployed with an incorrect value for the `ticketPrice` variable.
+
+Note: These vulnerabilities are exploitable in real-world scenarios and can be beneficial to attackers. It is important to address these vulnerabilities to ensure the security and integrity of the smart contract.

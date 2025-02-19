@@ -1,0 +1,71 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) public returns (bool) {
+        if( _value > balanceOf[msg.sender] || (balanceOf[_to]+_value) < balanceOf[_to]) return false;
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }",
+            "reason": "In the transfer function, if the value to be transferred is greater than the sender's balance, the function will not execute the transfer and return false. This can lead to an integer overflow if the sender's balance is less than the value to be transferred."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+        if( _value > balanceOf[_from] || _value > allowance[_from][msg.sender] || (balanceOf[_to]+_value) < balanceOf[_to] ) return false;
+        balanceOf[_from] -=_value;
+        balanceOf[_to] += _value;
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }",
+            "reason": "In the transferFrom function, if the value to be transferred is greater than the sender's balance or the allowance, the function will not execute the transfer and return false. This can lead to an integer overflow if the sender's balance or allowance is less than the value to be transferred."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint256 _value) public returns (bool) {
+        allowance[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }",
+            "reason": "In the approve function, if the value to be approved is greater than the maximum uint256 value, the function will not execute the approval and return false. This can lead to an integer overflow if the value to be approved is greater than the maximum uint256 value."
+        },
+        {
+            "function_name": "batchTransfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function batchTransfer(address[] _receivers, uint256 _value) public returns (bool) {
+        uint256 cnt = _receivers.length;
+        uint256 amount = cnt * _value;
+        if(amount == 0) return false;
+        if(balanceOf[msg.sender] < amount) return false;
+        balanceOf[msg.sender] -= amount;
+        for (uint i = 0; i < cnt; i++) {
+            balanceOf[_receivers[i]] += _value;
+            Transfer(msg.sender, _receivers[i], _value);
+        }
+        return true;
+    }",
+            "reason": "In the batchTransfer function, if the value to be transferred is greater than the sender's balance, the function will not execute the transfer and return false. This can lead to an integer overflow if the sender's balance is less than the value to be transferred."
+        },
+        {
+            "function_name": "Trade",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function Trade(uint256 _qty, uint256 _price, bytes32 _data, address _seller, address _buyer) payable onlyManager {
+        if(balanceOf[_seller]<_qty)return;
+        if(balanceOf[_buyer]+_qty<balanceOf[_buyer])return;
+        uint256 total = _qty*_price;
+        _seller.transfer(total);
+        balanceOf[_seller]-=_qty;
+        balanceOf[_buyer]+=_qty;
+        Transfer(_seller,_buyer,_qty);
+        deal(_seller,_buyer,_qty,_price,_data);
+    }",
+            "reason": "In the Trade function, if the value to be transferred is greater than the seller's balance, the function will not execute the trade and return. This can lead to an integer overflow if the seller's balance is less than the value to be transferred."
+        }
+    ]
+}

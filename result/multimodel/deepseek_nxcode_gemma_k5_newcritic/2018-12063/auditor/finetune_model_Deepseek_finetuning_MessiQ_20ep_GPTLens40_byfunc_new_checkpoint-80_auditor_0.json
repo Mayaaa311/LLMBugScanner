@@ -1,0 +1,29 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function has an integer overflow vulnerability. The initialSupply is set to a large value, allowing the owner to mint arbitrary amounts of tokens to any user account."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Wrong Logic",
+            "reason": "The mintToken function has a wrong logic where it calls _transfer(0, this, mintedAmount); Transfer(this, target, mintedAmount);. The mintedAmount is minted to the target, but also to the contract itself, causing a loss of funds."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function has an integer overflow vulnerability. The _transfer function is called, where a large value can overflow the balanceOf mapping, causing a denial of service to the recipients."
+        },
+        {
+            "function_name": "burnFrom",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burnFrom function has an integer overflow vulnerability. The _value is subtracted from the allowance, but if it is larger than the balance, it will overflow and set the balance to zero, allowing an attacker to steal funds."
+        },
+        {
+            "function_name": "burnFrom",
+            "vulnerability": "Wrong Logic",
+            "reason": "The burnFrom function has a wrong logic where it calls _transfer(_from, _to, _value);. If _value is larger than the balance of _from, it will cause an integer overflow, setting _from's balance to zero."
+        }
+    ]
+}

@@ -1,0 +1,53 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) {
+    require(_value <= balances[msg.sender]);
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    emit Transfer(msg.sender, _to, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function does not check for overflow, allowing attackers to exploit an integer overflow in the balanceOf mapping to set the balance of a target user to any value."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    balances[_from] = balances[_from].sub(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    emit Transfer(_from, _to, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferFrom' function does not check for overflow, allowing attackers to exploit an integer overflow in the balanceOf mapping to set the balance of a target user to any value."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address _to, uint256 _value) public onlyOwner returns (bool) {
+    balances[_to] = balances[_to].add(_value);
+    totalSupply = totalSupply.add(_value);
+    emit Transfer(address(0), _to, _value);
+    return true;
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'mintToken' function allows the owner to set the balance of any user to any value, promoting an exploitable wrong logic where users can be banned from accessing their funds."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public onlyOwner returns (bool) {
+    require(_value <= balances[msg.sender]);
+    totalSupply = totalSupply.sub(_value);
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    emit Burn(msg.sender, _value);
+    return true;
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'burn' function allows the owner to set the balance of any user to any value, promoting an exploitable wrong logic where users can be banned from accessing their funds."
+        }
+    ]
+}

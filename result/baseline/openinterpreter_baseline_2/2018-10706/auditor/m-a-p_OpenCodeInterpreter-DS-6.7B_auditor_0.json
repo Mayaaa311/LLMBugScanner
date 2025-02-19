@@ -1,0 +1,70 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) realUser(_to) moreThanZero(_value) public returns (bool) {
+        require(balanceOf[msg.sender] >= _value);           
+        require(balanceOf[_to] + _value > balanceOf[_to]); 
+        balanceOf[msg.sender] = balanceOf[msg.sender] - _value;                     
+        balanceOf[_to] = balanceOf[_to] + _value;                            
+        emit Transfer(msg.sender, _to, _value);                   
+        return true;
+    }",
+            "reason": "In the transfer function, the balanceOf[_to] + _value > balanceOf[_to] condition is not checked. This can lead to integer overflow if the balanceOf[_to] + _value is greater than the maximum value that can be stored in a uint256 variable."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) realUser(_from) realUser(_to) moreThanZero(_value) public returns (bool success) {
+        require(balanceOf[_from] >= _value);                 
+        require(balanceOf[_to] + _value > balanceOf[_to]);  
+        require(_value <= allowance[_from][msg.sender]);     
+        balanceOf[_from] = balanceOf[_from] - _value;                           
+        balanceOf[_to] = balanceOf[_to] + _value;                             
+        allowance[_from][msg.sender] = allowance[_from][msg.sender] + _value;
+        emit Transfer(_from, _to, _value);
+        return true;
+    }",
+            "reason": "In the transferFrom function, the balanceOf[_to] + _value > balanceOf[_to] condition is not checked. This can lead to integer overflow if the balanceOf[_to] + _value is greater than the maximum value that can be stored in a uint256 variable."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint256 _value) moreThanZero(_value) public returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }",
+            "reason": "In the approve function, the allowance[msg.sender][_spender] = _value; assignment does not check for overflow. If _value is greater than the maximum value that can be stored in a uint256 variable, it can lead to integer overflow."
+        },
+        {
+            "function_name": "transferMulti",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferMulti(address[] _to, uint256[] _value) public returns (uint256 amount){
+        require(_to.length == _value.length);
+        uint8 len = uint8(_to.length);
+        for(uint8 j; j<len; j++){
+            amount += _value[j]*10**uint256(decimals);
+        }
+        require(balanceOf[msg.sender] >= amount);
+        for(uint8 i; i<len; i++){
+            address _toI = _to[i];
+            uint256 _valueI = _value[i]*10**uint256(decimals);
+            balanceOf[_toI] += _valueI;
+            balanceOf[msg.sender] -= _valueI;
+            emit Transfer(msg.sender, _toI, _valueI);
+        }
+    }",
+            "reason": "In the transferMulti function, the amount += _value[j]*10**uint256(decimals); line can lead to integer overflow if the sum of _value[j]*10**uint256(decimals) is greater than the maximum value that can be stored in a uint256 variable."
+        },
+        {
+            "function_name": "freeze",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function freeze(address _user, uint256 _value, uint8 _step) moreThanZero(_value) onlyController public returns (bool success) {
+        _value=_value*10**uint256(decimals);
+        return _freeze(_user,_value,_step);
+    }",
+            "reason": "In the freeze function, the _value=_value*10**uint256(decimals); line can lead to integer overflow if the _value is greater than the maximum value that can be stored in a uint256 variable."
+        }
+    ]
+}

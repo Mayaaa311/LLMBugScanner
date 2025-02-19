@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "totalSupply",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function totalSupply() constant returns (uint256 totSupply) { return _totalSupply; }",
+            "reason": "The totalSupply function does not check for integer overflow. If the total supply of tokens exceeds the maximum value that can be stored in a uint256, the function will return an incorrect result. This can be exploited by an attacker to mint more tokens than the total supply, leading to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _amount) notThisContract(_to) returns (bool success) { require(_to != 0x0); require(_amount > 0); require(balances[msg.sender] >= _amount); require(balances[_to] + _amount > balances[_to]); balances[msg.sender] -= _amount; balances[_to] += _amount; Transfer(msg.sender, _to, _amount); return true; }",
+            "reason": "The transfer function does not check for integer overflow when adding the transferred amount to the recipient's balance. If the recipient's balance exceeds the maximum value that can be stored in a uint256, the function will return an incorrect result. This can be exploited by an attacker to transfer more tokens than they have, leading to a loss of funds for the recipient."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _amount) notThisContract(_to) returns (bool success) { require(balances[_from] >= _amount); require(allowed[_from][msg.sender] >= _amount); require(_amount > 0); require(balances[_to] + _amount > balances[_to]); balances[_from] -= _amount; allowed[_from][msg.sender] -= _amount; balances[_to] += _amount; Transfer(_from, _to, _amount); return true; }",
+            "reason": "The transferFrom function does not check for integer overflow when adding the transferred amount to the recipient's balance. If the recipient's balance exceeds the maximum value that can be stored in a uint256, the function will return an incorrect result. This can be exploited by an attacker to transfer more tokens than they have approved for transfer, leading to a loss of funds for the recipient."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint256 _amount) returns (bool) { require((_amount == 0) || (allowed[msg.sender][_spender] == 0)); allowed[msg.sender][_spender] = _amount; Approval(msg.sender, _spender, _amount); return true; }",
+            "reason": "The approve function does not check for integer overflow when setting the allowance for a spender. If the allowance exceeds the maximum value that can be stored in a uint256, the function will return an incorrect result. This can be exploited by an attacker to approve an excessive amount of tokens for transfer, leading to a loss of funds for the spender."
+        },
+        {
+            "function_name": "increaseApproval",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function increaseApproval (address _spender, uint _addedValue) returns (bool success) { allowed[msg.sender][_spender] += _addedValue; Approval(msg.sender, _spender, allowed[msg.sender][_spender]); return true; }",
+            "reason": "The increaseApproval function does not check for integer overflow when adding the added value to the allowance for a spender. If the allowance exceeds the maximum value that can be stored in a uint256, the function will return an incorrect result. This can be exploited by an attacker to increase their approval for an excessive amount of tokens for transfer, leading to a loss of funds for the spender."
+        }
+    ]
+}

@@ -1,0 +1,118 @@
+ Here are the 5 most severe vulnerabilities in the provided smart contract, along with their associated functions and reasons:
+
+1. Integer Overflow Vulnerability in the `transfer` Function
+
+Function Name: `transfer`
+
+Vulnerability: Integer Overflow
+
+Function Code:
+```
+function transfer(address _to, uint256 _value) {
+    if (_to == 0x0) revert();
+    if (balanceOf[msg.sender] < _value) revert();
+    if (balanceOf[_to] + _value < balanceOf[_to]) revert();
+    if (frozenAccount[msg.sender]) revert();
+    balanceOf[msg.sender] -= _value;
+    balanceOf[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+}
+```
+Reason: The `balanceOf[_to] + _value` expression in the `transfer` function can cause an integer overflow, which can lead to a loss of funds. This is because the `balanceOf` mapping is of type `uint256`, which can only hold a maximum value of 2^256-1. If the `balanceOf[_to]` value is close to the maximum value, and the `_value` parameter is large, the addition can cause an overflow, resulting in a loss of funds.
+
+2. Wrong Logic Vulnerability in the `transferFrom` Function
+
+Function Name: `transferFrom`
+
+Vulnerability: Wrong Logic
+
+Function Code:
+```
+function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if (_to == 0x0) revert();
+    if (frozenAccount[_from]) revert();
+    if (balanceOf[_from] < _value) revert();
+    if (balanceOf[_to] + _value < balanceOf[_to]) revert();
+    if (_value > allowance[_from][msg.sender]) revert();
+    balanceOf[_from] -= _value;
+    balanceOf[_to] += _value;
+    allowance[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+}
+```
+Reason: The `transferFrom` function has a wrong logic in the `if` statement. The function checks if the `_value` parameter is greater than the `allowance` of the `_from` address, but it should check if the `_value` parameter is greater than or equal to the `allowance`. This can lead to a situation where the function transfers more tokens than the `_from` address has allowed, which can lead to a loss of funds.
+
+3. Bad Randomness Vulnerability in the `lend` Function
+
+Function Name: `lend`
+
+Vulnerability: Bad Randomness
+
+Function Code:
+```
+function lend(address _to, uint256 _value, uint256 _duration_in_days) {
+    if (_to == 0x0) revert();
+    if (balanceOf[msg.sender] < _value) revert();
+    if (balanceOf[_to] + _value < balanceOf[_to]) revert();
+    if (frozenAccount[msg.sender]) revert();
+    if (_duration_in_days > 36135) revert();
+    balanceOf[msg.sender] -= _value;
+    balanceOf[_to] += _value;
+    InterestFreeLending(msg.sender, _to, _value, _duration_in_days);
+}
+```
+Reason: The `lend` function uses a fixed duration of 36135 days, which is not a random value. This can lead to a situation where the function lends tokens for a fixed period of time, which can lead to a loss of funds.
+
+4. Access Control Vulnerability in the `settlement` Function
+
+Function Name: `settlement`
+
+Vulnerability: Access Control
+
+Function Code:
+```
+function settlement(address _from, uint256 _value, address _to, string _notes, string _reference) onlyOwner {
+    if (_from == plutocrat) revert();
+    if (_to == 0x0) revert();
+    if (balanceOf[_from] < _value) revert();
+    if (balanceOf[_to] + _value < balanceOf[_to]) revert();
+    if (bytes(_reference).length != 66) revert();
+    balanceOf[_from] -= _value;
+    balanceOf[_to] += _value;
+    Settlement( _from, _to, _value, _notes, _reference);
+}
+```
+Reason: The `settlement` function has a vulnerability in the access control. The function can only be called by the owner of the contract, but it does not check if the `_from` address is the owner of the contract. This can lead to a situation where a non-owner can call the function and transfer tokens from the owner's address, which can lead to a loss of funds.
+
+5. Typo Constructor Vulnerability in the `Krown` Contract
+
+Contract Name: `Krown`
+
+Vulnerability: Typo Constructor
+
+Contract Code:
+```
+contract Krown is owned, token {
+    string public nominalValue;
+    string public update;
+    string public sign;
+    string public website;
+    uint256 public totalSupply;
+    uint256 public notificationFee;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function Krown(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol,
+        address centralMinter
+    ) token (initialSupply, tokenName, decimalUnits, tokenSymbol) {
+        if(centralMinter != 0 ) centralAuthority = centralMinter;      
+        balanceOf[centralAuthority] = initialSupply;                   
+    }
+    ...
+}
+```
+Reason: The `Krown` contract has a typo in the constructor. The constructor should be named `Krown`, but it is named `Krown()`. This can lead to a situation where the constructor is not called, and the contract is not initialized properly, which can lead to a loss of funds.

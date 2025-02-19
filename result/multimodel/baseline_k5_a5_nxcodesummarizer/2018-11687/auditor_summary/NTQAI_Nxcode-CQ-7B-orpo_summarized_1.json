@@ -1,0 +1,61 @@
+{
+    "output_list": [
+        {
+            "function_name": "distributeBTR",
+            "code": "function distributeBTR(address[] addresses) onlyOwner {
+        for (uint i = 0; i < addresses.length; i++) {
+            balances[owner] -= 2000 * 10**8;
+            balances[addresses[i]] += 2000 * 10**8;
+            Transfer(owner, addresses[i], 2000 * 10**8);
+        }
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The integer overflow vulnerability in the distributeBTR function allows an attacker to transfer more tokens than the owner has in their balance. This can lead to an integer overflow, allowing the attacker to transfer more tokens than the owner has in their balance."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _amount) returns (bool success) {
+        if (balances[msg.sender] >= _amount 
+            && _amount > 0
+             && balances[_to] + _amount > balances[_to]) {
+             balances[msg.sender] -= _amount;
+             balances[_to] += _amount;
+             Transfer(msg.sender, _to, _amount);
+            return true;
+        
+   - Vulnerability: Wrong Logic",
+            "reason": "The wrong logic in the transfer function allows an attacker to transfer more tokens than the sender has in their balance. This can lead to an attacker transferring more tokens than the sender has in their balance."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _amount) returns (bool success) {
+        allowed[msg.sender][_spender] = _amount;
+    Approval(msg.sender, _spender, _amount);
+         return true;
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The bad randomness in the approve function allows an attacker to approve a spender with a large amount of tokens without any restrictions. This can lead to an attacker approving a spender with a large amount of tokens without any limitations, potentially leading to a potential attacker gaining unlimited access to the approved tokens."
+        },
+        {
+            "function_name": "distributeBTR",
+            "code": "function distributeBTR(address[] addresses) onlyOwner {
+        for (uint i = 0; i < addresses.length; i++) {
+            balances[owner] -= 2000 * 10**8;
+            balances[addresses[i]] += 2000 * 10**8;
+            Transfer(owner, addresses[i], 2000 * 10**8);
+        }
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The access control vulnerability in the distributeBTR function allows an attacker to distribute tokens to multiple addresses without the owner's permission. This can lead to an attacker distributing tokens to multiple addresses without the owner's permission, potentially leading to unauthorized token distribution."
+        },
+        {
+            "function_name": "BitcoinRed",
+            "code": "function BitcoinRed() {
+        owner = msg.sender;
+        balances[owner] = 21000000 * 10**8;
+    }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The typo in the constructor function allows an attacker to set the owner's balance to a large amount without any restrictions. This can lead to an attacker setting the owner's balance to a large amount without any restrictions, potentially leading to a potential attacker gaining unlimited access to the owner's balance."
+        }
+    ]
+}

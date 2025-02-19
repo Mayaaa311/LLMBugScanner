@@ -1,0 +1,82 @@
+{
+    "output_list": [
+        {
+            "function_name": "buyImplementation",
+            "code": "  function buyImplementation(address buyerAddress, uint64 buyerId, uint maxAmount, uint8 v, bytes32 r, bytes32 s) private returns (bool) {
+    bytes32 hash = sha256("Eidoo icoengine authorization", address(0), buyerAddress, buyerId, maxAmount);
+    address signer = ecrecover(hash, v, r, s);
+    if (!isKycSigner[signer]) {
+      revert();
+    } else {
+      uint256 totalPayed = alreadyPayed[buyerId].add(msg.value);
+      require(totalPayed <= maxAmount);
+      alreadyPayed[buyerId] = totalPayed;
+      emit KycVerified(signer, buyerAddress, buyerId, maxAmount);
+      return releaseTokensTo(buyerAddress);
+    }
+  }",
+            "vulnerability": "Access Control",
+            "reason": "The buyImplementation function does not check if the buyerAddress is a contract or not, allowing attackers to exploit it by sending ether to a contract address, allowing attackers to buy tokens without any restrictions."
+        },
+        {
+            "function_name": "takeEther",
+            "code": "  function takeEther(address _buyer) internal {
+    require( now > startTime );
+    require( now < endTime );
+    require( msg.value >= etherMinimum); 
+    require( remainingTokens > 0 );
+    uint256 oneToken = 10 ** uint256(tokenSaleContract.decimals());
+    uint256 tokenValue = tokenSaleContract.tokenValueInEther(oneTokenInUsdWei);
+    uint256 tokenAmount = msg.value.mul(oneToken).div(tokenValue);
+    uint256 unboughtTokens = tokenInterface(tokenSaleContract.tokenContract()).balanceOf(tokenSaleContract);
+    if ( unboughtTokens > remainingTokens ) {
+      unboughtTokens = remainingTokens;
+    }
+    uint256 refund = 0;
+    if ( unboughtTokens < tokenAmount ) {
+      refund = (tokenAmount - unboughtTokens).mul(tokenValue).div(oneToken);
+      tokenAmount = unboughtTokens;
+      _buyer.transfer(refund);
+    }
+    etherUser[_buyer] = etherUser[_buyer].add(msg.value.sub(refund));
+    pendingTokenUser[_buyer] = pendingTokenUser[_buyer].add(tokenAmount);
+    emit Buy( _buyer, msg.value, tokenAmount, oneTokenInUsdWei );
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The tokenAmount is set to unboughtTokens if unboughtTokens is less than tokenAmount, which can be manipulated by attackers to cause an integer overflow, allowing attackers to steal funds."
+        },
+        {
+            "function_name": "giveToken",
+            "code": "  function giveToken(address _buyer) internal {
+    require( pendingTokenUser[_buyer] > 0 );
+    tokenUser[_buyer] = tokenUser[_buyer].add(pendingTokenUser[_buyer]);
+    tokenSaleContract.claim(_buyer, pendingTokenUser[_buyer]);
+    soldTokens = soldTokens.add(pendingTokenUser[_buyer]);
+    pendingTokenUser[_buyer] = 0;
+    tokenSaleContract.wallet().transfer(etherUser[_buyer]);
+    etherUser[_buyer] = 0;
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'soldTokens' variable is updated without checking if it causes an overflow, allowing attackers to exploit it to steal funds."
+        },
+        {
+            "function_name": "claimTokenBonus",
+            "code": "  function claimTokenBonus(address _buyer) internal {
+    require( now > endTime );
+    require( tokenUser[_buyer] > 0 );
+    uint256 bonusApplied = 0;
+    for (uint i = 0; i < tokenThreshold.length; i++) {
+      if ( soldTokens > tokenThreshold[i] ) {
+        bonusApplied = bonusThreshold[i];
+      }
+    }
+    require( bonusApplied > 0 );
+    uint256 addTokenAmount = tokenUser[_buyer].mul( bonusApplied ).div(10**2);
+    tokenUser[_buyer] = 0; 
+    tokenSaleContract.claim(_buyer, addTokenAmount);
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'addTokenAmount' variable is updated without checking if it causes an overflow, allowing attackers to exploit it to steal funds."
+        }
+    ]
+}

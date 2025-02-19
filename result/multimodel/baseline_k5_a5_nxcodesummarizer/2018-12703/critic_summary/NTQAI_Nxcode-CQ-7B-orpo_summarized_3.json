@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "auditor_idx": 3,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'transfer' function does not properly check for integer overflow when updating the balances of the sender and recipient. If _value is such that balances[_to] + _value overflows, it will not revert, leading to incorrect balance updates and potential loss of funds.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 5
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 3,
+            "vulnerability": "Integer Overflow",
+            "criticism": "Similar to the 'transfer' function, the 'transferFrom' function also does not check for integer overflow when updating the balances of the sender and recipient. An attacker could exploit this by crafting a transaction that causes an overflow, leading to unauthorized transfers and potential loss of funds.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 5
+        },
+        {
+            "function_name": "approve",
+            "auditor_idx": 3,
+            "vulnerability": "Access Control",
+            "criticism": "The 'approve' function allows an owner to set an allowance for a spender. However, it does not check if the spender is a contract. If the spender is a contract, it can call the 'receiveApproval' function defined in the contract, which might not exist, leading to a denial of service or other unintended consequences.",
+            "correctness": 6,
+            "severity": 7,
+            "profitability": 4
+        },
+        {
+            "function_name": "approveAndCall",
+            "auditor_idx": 3,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The 'approveAndCall' function allows an owner to approve a spender and then call a specific function on the spender contract. However, it uses 'sha3' to hash the function signature, which is deprecated and unsafe. Instead, it should use 'keccak256' or directly use the function selector for better security.",
+            "correctness": 5,
+            "severity": 6,
+            "profitability": 3
+        },
+        {
+            "function_name": "approveAndCallcode",
+            "auditor_idx": 3,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The 'approveAndCallcode' function is similar to 'approveAndCall', but it uses 'callcode' instead of 'call'. However, 'callcode' is not standard and can lead to unexpected behavior. It should be replaced with 'call' for consistency and safety.",
+            "correctness": 5,
+            "severity": 6,
+            "profitability": 3
+        }
+    ]
+}

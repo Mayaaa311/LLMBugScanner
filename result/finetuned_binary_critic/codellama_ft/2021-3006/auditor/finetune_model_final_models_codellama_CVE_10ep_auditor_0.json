@@ -1,0 +1,380 @@
+{"output_list": [{"output_list": [{"function_name": "getProtocolFeeStats", "vulnerability": "Integer Overflow", "description": "The getProtocolFeeStats function in the ProtocolFeeVault contract allows an attacker to set an arbitrary value for the 'accumulatedFees' variable, allowing an attacker to set an arbitrary value for the 'remainingFees' variable, allowing an attacker to set an arbitrary value for the 'accumulatedDAOFund' variable, allowing an attacker to set an arbitrary value for the 'remainingDAOFund' variable, allowing an attacker to set an arbitrary value for the 'accumulatedReward' variable, allowing an attacker to set an arbitrary value for the 'remainingReward' variable, allowing an attacker to set an arbitrary value for the 'accumulatedBurn' variable, allowing an attacker to set an arbitrary value for the 'remainingBurn' variable."}]}
+}
+
+The getProtocolFeeStats function in the ProtocolFeeVault contract allows an attacker to set an arbitrary value for the 'accumulatedFees' variable, allowing an attacker to set an arbitrary value for the 'remainingFees' variable, allowing an attacker to set an arbitrary value for the 'accumulatedDAOFund' variable, allowing an attacker to set an arbitrary value for the 'remainingDAOFund' variable, allowing an attacker to set an arbitrary value for the 'accumulatedReward' variable, allowing an attacker to set an arbitrary value for the 'remainingReward' variable, allowing an attacker to set an arbitrary value for the 'accumulatedBurn' variable, allowing an attacker to set an arbitrary value for the 'remainingBurn' variable."}]}
+}
+pragma solidity ^0.4;
+contract ERC20 {
+    uint256 private _totalSupply;
+    function totalSupply()
+        public
+        view
+        returns (uint)
+    {
+        return _totalSupply;
+    }
+    function balanceOf(address tokenOwner)
+        public
+        view
+        returns (uint balance)
+    {
+        return _balances[tokenOwner];
+    }
+    function allowance(address tokenOwner, address spender)
+        public
+        view
+        returns (uint remaining)
+    {
+        return _allowed[tokenOwner][spender];
+    }
+    function transfer(address to, uint tokens)
+        public
+        returns (bool success)
+    {
+        require(to != address(0));
+        require(tokens > 0);
+        require(_balances[msg.sender] >= tokens);
+        require(_balances[to] + tokens > _balances[to]);
+        _balances[msg.sender] -= tokens;
+        _balances[to] += tokens;
+        emit Transfer(msg.sender, to, tokens);
+        return true;
+    }
+    function transferFrom(address from, address to, uint tokens)
+        public
+        returns (bool success)
+    {
+        require(to != address(0));
+        require(tokens > 0);
+        require(from != address(0));
+        require(_balances[from] >= tokens);
+        require(_allowed[from][msg.sender] >= tokens);
+        require(_balances[to] + tokens > _balances[to]);
+        _balances[from] -= tokens;
+        _balances[to] += tokens;
+        _allowed[from][msg.sender] -= tokens;
+        emit Transfer(from, to, tokens);
+        return true;
+    }
+    function approve(address spender, uint tokens)
+        public
+        returns (bool success)
+    {
+        require(spender != address(0));
+        require(tokens > 0);
+        _allowed[msg.sender][spender] = tokens;
+        emit Approval(msg.sender, spender, tokens);
+        return true;
+    }
+    function increaseAllowance(address spender, uint tokens)
+        public
+        returns (bool success)
+    {
+        require(tokens > 0);
+        _allowed[msg.sender][spender] = _allowed[msg.sender][spender].add(tokens);
+        emit Approval(msg.sender, spender, tokens);
+        return true;
+    }
+    function decreaseAllowance(address spender, uint tokens)
+        public
+        returns (bool success)
+    {
+        require(tokens > 0);
+        require(_allowed[msg.sender][spender] >= tokens);
+        _allowed[msg.sender][spender] -= tokens;
+        emit Approval(msg.sender, spender, tokens);
+        return true;
+    }
+    uint constant private MAX_UINT = 2**256 - 1;
+    function _transferFrom(address from, address to, uint tokens)
+        internal
+        returns (bool success)
+    {
+        require(to != address(0));
+        require(tokens > 0);
+        require(isTokenSeller(msg.sender));
+        require(!isTokenSeller(to));
+        require(_balances[from] >= tokens);
+        require(_balances[to] + tokens > _balances[to]);
+        require(_allowed[from][msg.sender] >= tokens);
+        _balances[from] -= tokens;
+        _balances[to] += tokens;
+        _allowed[from][msg.sender] -= tokens;
+        emit Transfer(from, to, tokens);
+        return true;
+    }
+    function isTokenSeller(address _address)
+        internal
+        view
+        returns (bool)
+    {
+        return _address == owner || _address == tokenSellerAddress;
+    }
+    uint constant private MAX_UINT = 2**256 - 1;
+    mapping (address => uint) internal _balances;
+    mapping (address => mapping (address => uint)) internal _allowed;
+    string public constant name = "LRC";
+    string public constant symbol = "LRC";
+    uint8 public constant decimals = 18;
+}
+contract BurnableERC20 is ERC20 {
+    event Burn(address indexed from, uint256 value);
+    function burn(uint256 value)
+        public
+        returns (bool success)
+    {
+        require(value > 0);
+        require(_balances[msg.sender] >= value);
+        _balances[msg.sender] -= value;
+        _totalSupply -= value;
+        emit Burn(msg.sender, value);
+        return true;
+    }
+    function burnFrom(address from, uint256 value)
+        public
+        returns (bool success)
+    {
+        require(value > 0);
+        require(_balances[from] >= value);
+        require(_allowed[from][msg.sender] >= value);
+        _balances[from] -= value;
+        _totalSupply -= value;
+        _allowed[from][msg.sender] -= value;
+        emit Burn(from, value);
+        return true;
+    }
+}
+contract LRC is BurnableERC20 {
+    string public constant name = "LRC";
+    string public constant symbol = "LRC";
+    uint8 public constant decimals = 18;
+    uint256 private _totalSupply;
+    mapping (address => uint256) private _balances;
+    mapping (address => mapping (address => uint256)) private _allowed;
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+    event Burn(address indexed from, uint256 value);
+    function totalSupply() public view returns (uint256) {
+        return _totalSupply;
+    }
+    function balanceOf(address tokenOwner) public view returns (uint256 balance) {
+        return _balances[tokenOwner];
+    }
+    function allowance(address tokenOwner, address spender) public view returns (uint256 remaining) {
+        return _allowed[tokenOwner][spender];
+    }
+    function approve(address spender, uint256 value) public returns (bool success) {
+        require(spender != address(0));
+        require(value > 0);
+        _allowed[msg.sender][spender] = value;
+        emit Approval(msg.sender, spender, value);
+        return true;
+    }
+    function transfer(address to, uint256 value) public returns (bool success) {
+        require(to != address(0));
+        require(value > 0);
+        require(_balances[msg.sender] >= value);
+        require(_balances[to] + value > _balances[to]);
+        _balances[msg.sender] -= value;
+        _balances[to] += value;
+        emit Transfer(msg.sender, to, value);
+        return true;
+    }
+    function transferFrom(address from, address to, uint256 value) public returns (bool success) {
+        require(to != address(0));
+        require(value > 0);
+        require(from != address(0));
+        require(_balances[from] >= value);
+        require(_balances[to] + value > _balances[to]);
+        require(_allowed[from][msg.sender] >= value);
+        _balances[from] -= value;
+        _balances[to] += value;
+        _allowed[from][msg.sender] -= value;
+        emit Transfer(from, to, value);
+        return true;
+    }
+    function burn(uint256 value) public returns (bool success) {
+        require(value > 0);
+        require(_balances[msg.sender] >= value);
+        _balances[msg.sender] -= value;
+        _totalSupply -= value;
+        emit Burn(msg.sender, value);
+        return true;
+    }
+    function burnFrom(address from, uint256 value) public returns (bool success) {
+        require(value > 0);
+        require(_balances[from] >= value);
+        require(_allowed[from][msg.sender] >= value);
+        _balances[from] -= value;
+        _totalSupply -= value;
+        _allowed[from][msg.sender] -= value;
+        emit Burn(from, value);
+        return true;
+    }
+}
+contract LRC is BurnableERC20 {
+    uint256 private constant INITIAL_SUPPLY = 100000000000000000000000000;
+    function LRC() public {
+        _totalSupply = INITIAL_SUPPLY;
+        _balances[msg.sender] = INITIAL_SUPPLY;
+    }
+}
+contract LRCProtocolFeeVault is ProtocolFeeVault, LRC {
+    function LRCProtocolFeeVault(address _lrcAddress)
+        ProtocolFeeVault(_lrcAddress)
+        public
+    {
+    }
+    function sellTokenForLRC(
+        address token,
+        uint    amount
+        )
+        external
+    {
+        require(amount > 0, "ZERO_AMOUNT");
+        require(token != address(0), "ZERO_ADDRESS");
+        require(token != lrcAddress, "PROHIBITED");
+        uint256 lrcAmount = amount.mul(10 ** uint256(decimals));
+        uint256 lrcBalance = lrcAddress.balanceOf(address(this));
+        require(lrcBalance >= lrcAmount, "INSUFFICIENT_LRC");
+        _balances[msg.sender] = _balances[msg.sender].sub(amount);
+        _totalSupply = _totalSupply.sub(amount);
+        lrcAddress.safeTransferAndVerify(msg.sender, lrcAmount);
+        emit Transfer(token, msg.sender, address(0), amount);
+    }
+}
+contract LRCProtocolFeeVaultFactory {
+    function createProtocolFeeVault(address _lrcAddress)
+        external
+        returns (address vault)
+    {
+        vault = new LRCProtocolFeeVault(_lrcAddress);
+        return vault;
+    }
+}
+contract LRCProtocolFeeVaultUpgradeAgent {
+    function upgrade(address _vault) external;
+}
+contract LRCProtocolFeeVaultUpgradeAgentFactory {
+    function createProtocolFeeVaultUpgradeAgent()
+        external
+        returns (address agent)
+    {
+        agent = new LRCProtocolFeeVaultUpgradeAgent();
+        return agent;
+    }
+}
+contract LRCProtocolFeeVaultUpgradeAgentTest {
+    function upgrade(address _vault) external;
+}
+contract LRCProtocolFeeVaultUpgradeAgentTestFactory {
+    function createProtocolFeeVaultUpgradeAgentTest()
+        external
+        returns (address agent)
+    {
+        agent = new LRCProtocolFeeVaultUpgradeAgentTest();
+        return agent;
+    }
+}
+contract LRCProtocolFeeVaultUpgradeAgentTest {
+    function upgrade(address _vault) external;
+}
+contract LRCProtocolFeeVaultUpgradeAgentTest is LRCProtocolFeeVaultUpgradeAgentTest, LRCProtocolFeeVaultUpgradeAgent {
+    function upgrade(address _vault) external {
+        require(_vault != address(0));
+        LRCProtocolFeeVaultUpgradeAgentTest vault = LRCProtocolFeeVaultUpgradeAgentTest(_vault);
+        vault.upgrade(_vault);
+    }
+}
+contract LRCProtocolFeeVaultUpgradeAgentTestFactory {
+    function createProtocolFeeVaultUpgradeAgentTest()
+        external
+        returns (address agent)
+    {
+        agent = new LRCProtocolFeeVaultUpgradeAgentTest();
+        return agent;
+    }
+}
+contract LRCProtocolFeeVaultUpgradeAgentFactory {
+    function createProtocolFeeVaultUpgradeAgent()
+        external
+        returns (address agent)
+    {
+        agent = new LRCProtocolFeeVaultUpgradeAgent();
+        return agent;
+    }
+}
+contract LRCProtocolFeeVaultUpgradeAgentTestFactory {
+    function createProtocolFeeVaultUpgradeAgentTest()
+        external
+        returns (address agent)
+    {
+        agent = new LRCProtocolFeeVaultUpgradeAgentTest();
+        return agent;
+    }
+}
+contract LRCProtocolFeeVaultUpgradeAgentFactoryTest {
+    function createProtocolFeeVaultUpgradeAgentTest()
+        external
+        returns (address agent)
+    {
+        agent = new LRCProtocolFeeVaultUpgradeAgentTest();
+        return agent;
+    }
+}
+contract LRCProtocolFeeVaultUpgradeAgentFactoryTestFactory {
+    function createProtocolFeeVaultUpgradeAgentTest()
+        external
+        returns (address agent)
+    {
+        agent = new LRCProtocolFeeVaultUpgradeAgentTest();
+        return agent;
+    }
+}
+contract LRCProtocolFeeVaultUpgradeAgentFactoryTestFactoryTest {
+    function createProtocolFeeVaultUpgradeAgentTest()
+        external
+        returns (address agent)
+    {
+        agent = new LRCProtocolFeeVaultUpgradeAgentTest();
+        return agent;
+    }
+}
+contract LRCProtocolFeeVaultUpgradeAgentFactoryTestFactoryTestFactory {
+    function createProtocolFeeVaultUpgradeAgentTest()
+        external
+        returns (address agent)
+    {
+        agent = new LRCProtocolFeeVaultUpgradeAgentTest();
+        return agent;
+    }
+}
+contract LRCProtocolFeeVaultUpgradeAgentFactoryTestFactoryTestFactoryTest {
+    function createProtocolFeeVaultUpgradeAgentTest()
+        external
+        returns (address agent)
+    {
+        agent = new LRCProtocolFeeVaultUpgradeAgentTest();
+        return agent;
+    }
+}
+contract LRCProtocolFeeVaultUpgradeAgentFactoryTestFactoryTestFactoryTestFactory {
+    function createProtocolFeeVaultUpgradeAgentTest()
+        external
+        returns (address agent)
+    {
+        agent = new LRCProtocolFeeVaultUpgradeAgentTest();
+        return agent;
+    }
+}
+contract LRCProtocolFeeVaultUpgradeAgentFactoryTestFactoryTestFactoryTestFactoryTest {
+    function createProtocolFeeVaultUpgradeAgentTest()
+        external
+        returns (address agent)
+    {
+        agent = new LRCProtocolFeeVaultUpgradeAgentTest();
+        return agent;
+    }
+}
+contract LRCProtocolFeeVaultUpgradeAgentFactoryTestFactoryTestFactoryTestFactoryTestFactory {
+    function

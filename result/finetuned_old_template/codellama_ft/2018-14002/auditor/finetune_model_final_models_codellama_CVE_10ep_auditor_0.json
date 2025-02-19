@@ -1,0 +1,83 @@
+{"output_list": [{"output_list": [{"function_name": "<function_name>", "vulnerability": "<vulnerability>", "reason": "<reason>"}], "function_name": "<function_name>", "vulnerability": "<vulnerability>", "reason": "<reason>"}], "output_list": [{"function_name": "<function_name>", "vulnerability": "<vulnerability>", "reason": "<reason>"}], {"function_name": "<function_name>", "vulnerability": "<vulnerability>", "reason": "<reason>"}], "output_list": [{"function_name": "<function_name>", "vulnerability": "<vulnerability>", "reason": "<reason>"}], "function_name": "<function_name>", "vulnerability": "<vulnerability>", "reason": "<reason>"}]}
+*/
+contract MP3Coin is MP3Coin {
+    function balanceOf(address _owner) public constant returns (uint balance) {
+        return balances[_owner];
+    }
+    function allowance(address _owner, address _spender) public constant returns (uint remaining) {
+        return allowed[_owner][_spender];
+    }
+    function transfer(address _to, uint _amount) public returns (bool success) {
+        require(_amount > 0 && balances[msg.sender] >= _amount);
+        balances[msg.sender] -= _amount;
+        balances[_to] += _amount;
+        Transfer(msg.sender, _to, _amount);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint _amount) public returns (bool success) {
+        require(_amount > 0 && balances[_from] >= _amount && allowed[_from][msg.sender] >= _amount);
+        balances[_from] -= _amount;
+        allowed[_from][msg.sender] -= _amount;
+        balances[_to] += _amount;
+        Transfer(_from, _to, _amount);
+        return true;
+    }
+    function approve(address _spender, uint _amount) public returns (bool success) {
+        allowed[msg.sender][_spender] = _amount;
+        Approval(msg.sender, _spender, _amount);
+        return true;
+    }
+    function distribute(address[] _addresses, uint[] _amounts) public returns (bool success) {
+        require(_addresses.length < 256 && _addresses.length == _amounts.length);
+        uint totalAmount;
+        for (uint a = 0; a < _amounts.length; a++) {
+            totalAmount += _amounts[a];
+        }
+        require(totalAmount > 0 && balances[msg.sender] >= totalAmount);
+        balances[msg.sender] -= totalAmount;
+        for (uint b = 0; b < _addresses.length; b++) {
+            if (_amounts[b] > 0) {
+                balances[_addresses[b]] += _amounts[b];
+                Transfer(msg.sender, _addresses[b], _amounts[b]);
+            }
+        }
+        return true;
+    }
+}
+contract MP3CoinToken is MP3Coin {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function MP3CoinToken(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) MP3Coin(initialSupply, tokenName, decimalUnits, tokenSymbol) public {}
+    function _transfer(address _from, address _to, uint _value) internal {
+        require(_to != 0x0);
+        require(!frozenAccount[_from]);
+        require(!frozenAccount[_to]);
+        return MP3Coin._transfer(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CrypticBounty is MP3CoinToken {
+    uint256 public totalTokens = 1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

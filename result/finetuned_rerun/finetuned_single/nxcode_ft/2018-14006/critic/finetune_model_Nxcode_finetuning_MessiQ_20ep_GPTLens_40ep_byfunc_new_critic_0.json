@@ -1,0 +1,84 @@
+Code Input: 
+
+pragma solidity ^0.4.18;
+interface ERC20 {
+tfunction name() public view returns (string);
+tfunction symbol() public view returns (string);
+tfunction decimals() public view returns (uint8);
+tfunction totalSupply() public view returns (uint256);
+tfunction balanceOf(address _owner) public view returns (uint256);
+tfunction transfer(address _to, uint256 _value) public returns (bool success);
+tfunction transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
+tfunction approve(address _spender, uint256 _value) public returns (bool success);
+tfunction allowance(address _owner, address _spender) public view returns (uint256);
+}
+interface TokenRecipient { 
+tfunction receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public; 
+}
+interface ERC223Receiver {
+    function tokenFallback(address _from, uint256 _value, bytes _data) public;
+}
+contract ERC223 is ERC20 {
+tfunction transfer(address _to, uint256 _value, bytes _data) public returns (bool success);
+tfunction transfer(address _to, uint256 _value, bytes _data, string _customFallback) public returns (bool success);
+tevent Transfer(address indexed _from, address indexed _to, uint256 _value, bytes _data);
+}
+contract NGToken is ERC223 {
+tstring constant private NAME ttt= "NEO Genesis Token";
+tstring constant private SYMBOLt tt= "NGT";
+tuint8 constant private DECIMALS tt= 18;
+tuint256 constant private INITIAL_SUPPLYt= 20000000000 * (10 ** uint256(DECIMALS));
+tuint256 private totalBurnedtttt= 0;
+tmapping(address => uint256) private balances;
+tmapping(address => mapping(address => uint256)) private allowed;
+tfunction NGToken() public {
+t  balances[msg.sender] = INITIAL_SUPPLY;
+t}
+tfunction name() public view returns (string) {
+ttreturn NAME;
+t}
+tfunction symbol() public view returns (string) {
+ttreturn SYMBOL;
+t}
+tfunction decimals() public view returns (uint8) {
+ttreturn DECIMALS;
+t}
+tfunction totalSupply() public view returns (uint256) {
+ttreturn INITIAL_SUPPLY - totalBurned;
+t}
+tfunction balanceOf(address _owner) public view returns (uint256) {
+ttreturn balances[_owner];
+t}
+tfunction transfer(address _to, uint256 _value) public returns (bool success) {
+ttif (isContract(_to)) {
+tttbytes memory empty;
+tttreturn transferToContract(_to, _value, empty);
+tt} else {
+tttrequire(_to != address(0x0));
+tttrequire(balances[msg.sender] >= _value);
+tttbalances[msg.sender] -= _value;
+tttbalances[_to] += _value;
+tttTransfer(msg.sender, _to, _value);
+tt}
+ttreturn true;
+t}
+tfunction multipleTransfer(address[] _to, uint256 _value) public returns (bool success) {
+ttrequire(_value * _to.length > 0);
+ttrequire(balances[msg.sender] >= _value * _to.length);
+ttbalances[msg.sender] -= _value * _to.length;
+ttfor (uint256 i = 0; i < _to.length; ++i) {
+tt tbalances[_to[i]] += _value;
+tt tTransfer(msg.sender, _to[i], _value);
+tt}
+ttreturn true;
+t}
+Output only in the following JSON format:
+{
+    "output_list": [
+        {
+            "function_name": "<function_name_1>",
+            "vulnerability": "<vulnerability_type>"
+            "description": "<vulnerability_description>"
+        }
+    ]
+}

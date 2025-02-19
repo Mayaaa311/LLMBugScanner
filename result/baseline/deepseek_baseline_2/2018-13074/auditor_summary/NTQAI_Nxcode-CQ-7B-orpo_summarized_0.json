@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Token Creation Without Limits",
+            "reason": "This function allows the owner to mint new tokens at will, without any upper limit. This can lead to inflation if minted excessively, devaluing the token and potentially freezing liquidity."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow in Transfer",
+            "reason": "The `_transfer` function includes a check for `balanceOf[_from] >= _value`, but does not check for the possibility of `_value` being zero, which could lead to an integer overflow when updating `balanceOf[_from]`."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Unrestricted Allowance Assignment",
+            "reason": "This function allows any address to set an allowance for another address without any restrictions, which can lead to unauthorized spending if the allowance is not properly managed."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Incorrect Allowance Check",
+            "reason": "The `require` statement checks if `_value` is less than or equal to `allowance[_from][msg.sender]`, but this does not prevent the subtraction from underflowing if `allowance[_from][msg.sender]` is less than `_value`, potentially allowing unauthorized transfers."
+        },
+        {
+            "function_name": "burnFrom",
+            "vulnerability": "Unrestricted Burning of Tokens",
+            "reason": "This function allows any address with allowance to burn tokens, which can lead to the destruction of tokens without any control, potentially devaluing the token and causing financial loss."
+        }
+    ]
+}

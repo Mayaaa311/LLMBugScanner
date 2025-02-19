@@ -1,0 +1,24 @@
+{
+    "output_list": [
+        {
+            "function_name": "distr",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'distr' function in the contract is susceptible to integer overflow. The function adds an amount to 'totalDistributed' and subtracts it from 'totalRemaining' without checking if the result would underflow. This can be exploited by an attacker to set any user's balance arbitrarily high, leading to a loss of funds. The reasoning for this vulnerability is clear as the function does not include sufficient checks to prevent overflow or underflow conditions.",
+            "correctness": 6,
+            "severity": 9,
+            "profitability": 8,
+            "recommendation": "Consider adding a check to ensure that the result of the subtraction does not underflow before performing it. Alternatively, use safe math libraries to handle arithmetic operations safely."
+        },
+        {
+            "function_name": "getTokens",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'getTokens' function also suffers from integer overflow vulnerability. It allows an attacker to distribute tokens to whitelisted addresses, but the check for 'value <= totalRemaining' is insufficient to prevent overflow. This can lead to the distribution of tokens beyond the intended supply, causing a significant loss of value.",
+            "correctness": 6,
+            "severity": 8,
+            "profitability": 7,
+            "recommendation": "Ensure that the 'value' and 'totalRemaining' variables are checked for overflow conditions before performing arithmetic operations. Implementing safe math operations can mitigate this risk."
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "claimTile",
+            "vulnerability": "Integer Overflow",
+            "reason": "The vulnerability exists in the line `currentGameBalance += msg.value;`. If the sum exceeds the maximum value representable by the `uint` type (`2^256 - 1`), it causes an integer overflow. This bypasses the subsequent `require` check, leading to unauthorized deductions and logical inconsistencies."
+        },
+        {
+            "function_name": "claimWinnings",
+            "vulnerability": "Access Control",
+            "reason": "Missing access control checks allow any user to claim ownership and funds. This enables unauthorized reinitialization or Denial of Service."
+        },
+        {
+            "function_name": "updateGameCost",
+            "vulnerability": "Access Control",
+            "reason": "Missing access control checks allow any user to update the game cost. This enables unauthorized reinitialization or Denial of Service."
+        },
+        {
+            "function_name": "claimOwnersEarnings",
+            "vulnerability": "Access Control",
+            "reason": "Missing access control checks allow any user to claim the owner's earnings. This enables unauthorized reinitialization or Denial of Service."
+        },
+        {
+            "function_name": "claimOwnersEarnings",
+            "vulnerability": "Denial of Service",
+            "reason": "The vulnerability exists in the line `if (owner.send(gameEarnings)) { gameEarnings = 0; }`. If the contract fails to send the earnings to the owner, it will remain in an unrecoverable state. This can lead to a loss of funds and a denial of service."
+        }
+    ]
+}

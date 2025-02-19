@@ -1,0 +1,63 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _amount) onlyPayloadSize(2 * 32) public returns (bool success) {
+        require(_to != address(0));
+        require(_amount <= balances[msg.sender]);
+        balances[msg.sender] = balances[msg.sender].sub(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        Transfer(msg.sender, _to, _amount);
+        return true;
+    }",
+            "reason": "In the transfer function, the subtraction of _amount from balances[msg.sender] and addition of _amount to balances[_to] does not check for overflow. If _amount is greater than balances[msg.sender], it will result in an underflow, and if _amount is greater than balances[_to], it will result in an overflow."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _amount) onlyPayloadSize(3 * 32) public returns (bool success) {
+        require(_to != address(0));
+        require(_amount <= balances[_from]);
+        require(_amount <= allowed[_from][msg.sender]);
+        balances[_from] = balances[_from].sub(_amount);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        Transfer(_from, _to, _amount);
+        return true;
+    }",
+            "reason": "In the transferFrom function, the subtraction of _amount from balances[_from] and allowed[_from][msg.sender] and addition of _amount to balances[_to] does not check for overflow. If _amount is greater than balances[_from] or allowed[_from][msg.sender], it will result in an underflow, and if _amount is greater than balances[_to], it will result in an overflow."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint256 _value) public returns (bool success) {
+        if (_value != 0 && allowed[msg.sender][_spender] != 0) { return false; }
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }",
+            "reason": "In the approve function, the assignment of _value to allowed[msg.sender][_spender] does not check for overflow. If _value is greater than the maximum value that can be represented by uint256, it will result in an overflow."
+        },
+        {
+            "function_name": "getTokenBalance",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function getTokenBalance(address tokenAddress, address who) constant public returns (uint){
+        ForeignToken t = ForeignToken(tokenAddress);
+        uint bal = t.balanceOf(who);
+        return bal;
+    }",
+            "reason": "In the getTokenBalance function, the function ForeignToken(tokenAddress).balanceOf(who) does not provide any randomness. It simply returns the balance of the specified token contract for the specified address."
+        },
+        {
+            "function_name": "withdrawForeignTokens",
+            "vulnerability": "Access Control",
+            "function_code": "function withdrawForeignTokens(address _tokenContract) onlyOwner public returns (bool) {
+        ForeignToken token = ForeignToken(_tokenContract);
+        uint256 amount = token.balanceOf(address(this));
+        return token.transfer(owner, amount);
+    }",
+            "reason": "In the withdrawForeignTokens function, the function token.transfer(owner, amount) does not check the access control. Anyone can call this function to withdraw the tokens from the contract."
+        }
+    ]
+}

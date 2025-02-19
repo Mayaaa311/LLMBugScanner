@@ -1,0 +1,55 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint _value) onlyPayloadSize(2 * 32) {
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+}",
+            "reason": "In the transfer function, the subtraction and addition operations on the balances mapping can result in an integer overflow if the subtracted value is greater than the current balance."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint _value) {
+    var _allowance = allowed[_from][msg.sender];
+    balances[_to] = balances[_to].add(_value);
+    balances[_from] = balances[_from].sub(_value);
+    allowed[_from][msg.sender] = _allowance.sub(_value);
+    Transfer(_from, _to, _value);
+}",
+            "reason": "In the transferFrom function, the subtraction and addition operations on the balances and allowed mapping can result in an integer overflow if the subtracted value is greater than the current balance or allowance."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint _value) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+}",
+            "reason": "In the approve function, the assignment to the allowed mapping can result in an integer overflow if the _value is greater than the maximum value that can be represented by the uint data type."
+        },
+        {
+            "function_name": "mint",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mint(address _spender, uint _value)
+    onlyOwner {
+        balances[_spender] += _value;
+        totalSupply += _value;
+    }",
+            "reason": "In the mint function, the addition operations on the balances and totalSupply variables can result in an integer overflow if the sum of the current balance and the value to be minted is greater than the maximum value that can be represented by the uint data type."
+        },
+        {
+            "function_name": "transferOwnership",
+            "vulnerability": "Access Control",
+            "function_code": "function transferOwnership(address newOwner) onlyOwner {
+    if (newOwner != address(0)) {
+      owner = newOwner;
+    }
+}",
+            "reason": "In the transferOwnership function, the assignment to the owner variable can be exploited by an attacker to transfer ownership to an arbitrary address. The onlyOwner modifier does not check if the newOwner is a contract, which can lead to potential re-entrancy attacks."
+        }
+    ]
+}

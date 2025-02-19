@@ -1,0 +1,87 @@
+ {
+    "output_list": [
+        {
+            "function_name": "claimThrone",
+            "vulnerability": "Denial of Service",
+            "function_code": "function claimThrone() external payable {
+    require(msg.value > balance, "Need to pay more to become the king");
+
+    (bool sent,) = king.call{value: balance}("");
+    require(sent, "Failed to send Ether");
+
+    balance = msg.value;
+    king = msg.sender;
+}",
+            "reason": "The function allows users to claim the throne only if they send more ether than the current balance. However, the refund logic is improperly tied to state updates, which can lead to a situation where the contract becomes unusable if the balance is not sufficient to send back the ether. This can result in a Denial of Service (DoS) attack."
+        },
+        {
+            "function_name": "buyHeart",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function buyHeart(address referred) public payable {
+    require(msg.value >= 1000000000, "pocket lint: not a valid currency");
+    require(msg.value <= 100000000000000000000000, "no vitalik, no");
+    address _addr = msg.sender;
+    uint256 _codeLength;
+    assembly {_codeLength := extcodesize(_addr)}
+    require(_codeLength == 0, "sorry humans only");
+    uint256 _hearts = (RoundETH[Round]).keysRec(msg.value);
+    uint256 _pearn;
+    require(_hearts >= 1000000000000000000);
+    require(RoundTime[Round] > now || RoundTime[Round] == 0);
+    updateTimer(_hearts);
+    RoundHeart[Round] += _hearts;
+    RoundMyHeart[Round][msg.sender] += _hearts;
+    if (referred != address(0) && referred != msg.sender) {
+         _pearn = (((msg.value.mul(30) / 100).mul(1000000000000000000)) / (RoundHeart[Round])).mul(_hearts)/ (1000000000000000000);
+        onwerfee += (msg.value.mul(4) / 100);
+        RoundETH[Round] += msg.value.mul(54) / 100;
+        Luckybuy += msg.value.mul(2) / 100;
+        MyreferredRevenue[referred] += (msg.value.mul(10) / 100);
+        RoundPayMask[Round] += ((msg.value.mul(30) / 100).mul(1000000000000000000)) / (RoundHeart[Round]);
+        RoundMyPayMask[Round][msg.sender] = (((RoundPayMask[Round].mul(_hearts)) / (1000000000000000000)).sub(_pearn)).add(RoundMyPayMask[Round][msg.sender]);
+        emit referredEvent(msg.sender, referred, msg.value.mul(10) / 100);
+    } else {
+         _pearn = (((msg.value.mul(40) / 100).mul(1000000000000000000)) / (RoundHeart[Round])).mul(_hearts)/ (1000000000000000000);
+        RoundETH[Round] += msg.value.mul(54) / 100;
+        Luckybuy += msg.value.mul(2) / 100;
+        onwerfee +=(msg.value.mul(4) / 100);
+        RoundPayMask[Round] += ((msg.value.mul(40) / 100).mul(1000000000000000000)) / (RoundHeart[Round]);
+        RoundMyPayMask[Round][msg.sender] = (((RoundPayMask[Round].mul(_hearts)) / (1000000000000000000)).sub(_pearn)).add(RoundMyPayMask[Round][msg.sender]);
+    }
+    if (msg.value >= 100000000000000000){
+        luckybuyTracker_++;
+        if (luckyBuy() == true)
+        {
+            msg.sender.transfer(Luckybuy);
+            emit luckybuyEvent(msg.sender, Luckybuy, Round);
+            luckybuyTracker_ = 0;
+            Luckybuy = 0;
+        }
+    }
+    RoundLastGreedyMan[Round] = msg.sender;
+    emit buyheartEvent(msg.sender, _hearts, msg.value, Round, referred);
+}",
+            "reason": "The function allows users to buy hearts using a value that is added to `RoundHeart[Round]` and `RoundMyHeart[Round][msg.sender]`. The addition operation can lead to an integer overflow if the value of `_hearts` is very large, causing the function to fail and potentially lead to a denial of service."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Token Devalue",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+}",
+            "reason": "The function allows the owner to mint new tokens at will, which can lead to a devaluation of the token as the total supply increases without a corresponding increase in value or utility."
+        },
+        {
+            "function_name": "ToOwner",
+            "vulnerability": "Access Control",
+            "function_code": "function ToOwner() public {
+    balances[msg.sender] = totalSupply;
+    owner = msg.sender;
+}",
+            "reason": "The function allows any user to claim ownership and funds by simply calling this function. This can lead to unauthorized access and loss of funds."
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "stake",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `stake` does not perform a boundary check on the `amount` variable before adding it to the `stakes` mapping, which can lead to an integer overflow if `amount` is very large."
+        },
+        {
+            "function_name": "unstake",
+            "vulnerability": "Integer Overflow",
+            "reason": "Similar to the `stake` function, the `unstake` function does not perform a boundary check on the `amount` variable before subtracting it from the `stakes` mapping, which can lead to an integer overflow if `amount` is very large."
+        },
+        {
+            "function_name": "notifyFeeAmount",
+            "vulnerability": "Integer Overflow",
+            "reason": "The `rewardRate` is calculated by dividing `reward` by `DURATION`. If `reward` is very large, this division can lead to an integer overflow, potentially allowing an attacker to manipulate the reward rate and exploit the system."
+        },
+        {
+            "function_name": "deposit",
+            "vulnerability": "Access Control",
+            "reason": "The `deposit` function allows anyone to mint new tokens by calling `_mint`, which can be exploited if an attacker can manipulate the `_value` and `_fee` calculations. This could lead to the creation of unauthorized tokens and manipulation of the contract's balance."
+        },
+        {
+            "function_name": "withdraw",
+            "vulnerability": "Access Control",
+            "reason": "The `withdraw` function allows users to withdraw tokens based on their credit balance. However, there is no check to ensure that the user has sufficient collateral to cover the withdrawn amount, leading to potential unauthorized withdrawals if the user can manipulate the collateral values."
+        }
+    ]
+}

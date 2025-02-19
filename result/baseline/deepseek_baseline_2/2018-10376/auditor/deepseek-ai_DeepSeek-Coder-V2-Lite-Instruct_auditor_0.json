@@ -1,0 +1,65 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "if (balances[msg.sender] >= _value && balances[_to] + _value > balances[_to]) {
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+} else { return false; }",
+            "reason": "The check `balances[_to] + _value > balances[_to]` can be exploited by an attacker to cause an integer overflow, leading to an uncontrolled increase in the balance of the recipient. This can be particularly harmful if the recipient is a contract that relies on the balance to function correctly."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && balances[_to] + _value > balances[_to]) {
+    balances[_to] += _value;
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+} else { return false; }",
+            "reason": "Similar to the `transfer` function, the check `balances[_to] + _value > balances[_to]` can lead to an integer overflow, allowing an attacker to increase the balance of the recipient beyond what is intended."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Wrong Logic",
+            "function_code": "allowed[msg.sender][_spender] = _value;
+Approval(msg.sender, _spender, _value);
+return true;",
+            "reason": "The `approve` function does not check if the spender's allowance is already set to a higher value before setting it to the new value. This can lead to a situation where a user's tokens can be stolen if they approve a contract to transfer more tokens than they currently have."
+        },
+        {
+            "function_name": "transferProxy",
+            "vulnerability": "Access Control",
+            "function_code": "if(balances[_from] < _feeSmt + _value) revert();
+uint256 nonce = nonces[_from];
+bytes32 h = keccak256(_from,_to,_value,_feeSmt,nonce);
+if(_from != ecrecover(h,_v,_r,_s)) revert();
+if(balances[_to] + _value < balances[_to]
+    || balances[msg.sender] + _feeSmt < balances[msg.sender]) revert();
+balances[_to] += _value;
+Transfer(_from, _to, _value);
+balances[msg.sender] += _feeSmt;
+Transfer(_from, msg.sender, _feeSmt);
+balances[_from] -= _value + _feeSmt;
+nonces[_from] = nonce + 1;
+return true;",
+            "reason": "The `transferProxy` function does not properly check the sender's allowance before transferring tokens, which can lead to unauthorized transfers. Additionally, the use of ECDSA signatures for authorization can be risky if the implementation is not done correctly."
+        },
+        {
+            "function_name": "approveProxy",
+            "vulnerability": "Access Control",
+            "function_code": "uint256 nonce = nonces[_from];
+bytes32 hash = keccak256(_from,_spender,_value,nonce);
+if(_from != ecrecover(hash,_v,_r,_s)) revert();
+allowed[_from][_spender] = _value;
+Approval(_from, _spender, _value);
+nonces[_from] = nonce + 1;
+return true;",
+            "reason": "Similar to `approve`, the `approveProxy` function does not check if the spender's allowance is already set to a higher value before setting it to the new value. This can lead to a situation where a user's tokens can be stolen if they approve a contract to transfer more tokens than they currently have."
+        }
+    ]
+}

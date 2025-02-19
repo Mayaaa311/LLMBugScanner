@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) { if (balanceOf[msg.sender] < _value) revert(); if (balanceOf[_to] + _value < balanceOf[_to]) revert(); balanceOf[msg.sender] -= _value; balanceOf[_to] += _value; Transfer(msg.sender, _to, _value); }",
+            "reason": "The transfer function does not check if the transfer operation will cause an integer overflow. If the balanceOf[_to] + _value exceeds the maximum value of uint256, the transfer operation will cause an integer overflow, leading to incorrect balanceOf values and potentially loss of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) { if (balanceOf[_from] < _value) revert(); if (balanceOf[_to] + _value < balanceOf[_to]) revert(); if (_value > allowance[_from][msg.sender]) revert(); balanceOf[_from] -= _value; balanceOf[_to] += _value; allowance[_from][msg.sender] -= _value; Transfer(_from, _to, _value); return true; }",
+            "reason": "The transferFrom function does not check if the transfer operation will cause an integer overflow. If the balanceOf[_to] + _value exceeds the maximum value of uint256, the transfer operation will cause an integer overflow, leading to incorrect balanceOf values and potentially loss of funds."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { balanceOf[target] += mintedAmount; Transfer(0, owner, mintedAmount); Transfer(owner, target, mintedAmount); }",
+            "reason": "The mintToken function does not check if the mint operation will cause an integer overflow. If the balanceOf[target] + mintedAmount exceeds the maximum value of uint256, the mint operation will cause an integer overflow, leading to incorrect balanceOf values and potentially loss of funds."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "function_code": "function transfer(address _to, uint256 _value) { if (balanceOf[msg.sender] < _value) revert(); if (balanceOf[_to] + _value < balanceOf[_to]) revert(); if (frozenAccount[msg.sender]) revert(); balanceOf[msg.sender] -= _value; balanceOf[_to] += _value; Transfer(msg.sender, _to, _value); }",
+            "reason": "The transfer function does not check if the sender's account is frozen. If the sender's account is frozen, the transfer operation will revert, preventing the transfer of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) { if (frozenAccount[_from]) revert(); if (balanceOf[_from] < _value) revert(); if (balanceOf[_to] + _value < balanceOf[_to]) revert(); if (_value > allowance[_from][msg.sender]) revert(); balanceOf[_from] -= _value; balanceOf[_to] += _value; allowance[_from][msg.sender] -= _value; Transfer(_from, _to, _value); return true; }",
+            "reason": "The transferFrom function does not check if the sender's account is frozen. If the sender's account is frozen, the transfer operation will revert, preventing the transfer of funds."
+        }
+    ]
+}

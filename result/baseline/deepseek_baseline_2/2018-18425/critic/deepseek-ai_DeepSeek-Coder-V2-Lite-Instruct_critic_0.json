@@ -1,0 +1,51 @@
+ ```json
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function `getTokens` uses a multiplication operation `tokens = tokensPerEth.mul(msg.value) / 1 ether;` which can lead to an integer overflow if `tokensPerEth` is very large and `msg.value` is sufficiently large. This is because the multiplication operation does not include a check for overflow, which can cause the result to be truncated incorrectly. This vulnerability can lead to incorrect distribution of tokens, which is a significant issue as it affects the fairness and integrity of the token distribution.",
+            "correctness": 8,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "distr",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The `distr` function does not check if the totalDistributed amount exceeds the totalSupply, allowing anyone to call this function and distribute tokens beyond the intended supply, leading to a potential loss of tokens for legitimate holders. This is a severe vulnerability as it compromises the integrity of the token distribution and can lead to significant financial loss for token holders.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 6
+        },
+        {
+            "function_name": "doAirdrop",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The `doAirdrop` function allows the owner to airdrop tokens to any address, without any checks or restrictions. This can be exploited by an attacker to airdrop tokens to their own address, effectively stealing tokens from the contract. This is a critical vulnerability as it allows unauthorized token transfers and can lead to significant financial loss for the contract owner.",
+            "correctness": 6,
+            "severity": 9,
+            "profitability": 8
+        },
+        {
+            "function_name": "transfer",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The `transfer` function does not check if the sender has enough allowance for the spender, allowing any user to transfer tokens on behalf of another user without their consent, leading to potential unauthorized token transfers. This is a significant vulnerability as it compromises the privacy and control of user tokens.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 6
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "Similar to the `transfer` function, the `transferFrom` function does not check if the sender has enough allowance for the spender, allowing any user to transfer tokens on behalf of another user without their consent, leading to potential unauthorized token transfers. This is a significant vulnerability as it compromises the privacy and control of user tokens.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 6
+        }
+    ]
+}
+```

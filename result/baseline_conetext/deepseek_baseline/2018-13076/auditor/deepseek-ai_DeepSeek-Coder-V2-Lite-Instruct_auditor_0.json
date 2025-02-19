@@ -1,0 +1,83 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Token Devalue",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+}",
+            "reason": "Allows unlimited token minting without constraints, disrupting supply-demand balance. This can lead to financial losses and reputational damage."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if (msg.data.length < (3 * 32) + 4) throw;
+    if (_value == 0) { return false; }
+    uint256 fromBalance = balances[_from];
+    uint256 allowance = allowed[_from][msg.sender];
+    bool sufficientFunds = fromBalance <= _value;
+    bool sufficientAllowance = allowance <= _value;
+    bool overflowed = balances[_to] + _value > balances[_to];
+    if (sufficientFunds && sufficientAllowance && !overflowed) {
+        balances[_to] += _value;
+        balances[_from] -= _value;
+        allowed[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    } else { 
+        return false;
+    }
+}",
+            "reason": "Logical errors in conditions for verifying funds and allowances, allowing transfers only when balances or allowances are insufficient. This enables unauthorized transfers and financial losses."
+        },
+        {
+            "function_name": "PayWinner",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function PayWinner(address winner) private {
+    require(numtickets == maxTickets);
+    uint ownerTax = 6 * totalBounty / 100;
+    uint winnerPrice = totalBounty - ownerTax;
+    LottoComplete(msg.sender, lottoIndex, winnerPrice);
+    lottoIndex += 1;
+    numtickets = 0;
+    totalBounty = 0;
+    if (_direction == 0 && maxTickets < 20) maxTickets += 1;
+    if (_direction == 1 && maxTickets > 10) maxTickets -= 1;
+    if (_direction == 0 && maxTickets == 20) _direction = 1;
+    if (_direction == 1 && maxTickets == 10) _direction = 0;
+    worldOwner.transfer(ownerTax);
+    winner.transfer(winnerPrice);
+}",
+            "reason": "Predictable winner selection without secure randomness enables exploitation. This can lead to financial losses, reputational harm, and unfair system."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "function_code": "function transfer(address _to, uint256 _value) {
+    if (balanceOf[msg.sender] < _value) revert();
+    if (balanceOf[_to] + _value < balanceOf[_to]) revert();
+    if (frozenAccount[msg.sender]) revert();
+    balanceOf[msg.sender] -= _value;
+    balanceOf[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+}",
+            "reason": "Missing access control checks allow any user to transfer tokens. This can lead to complete loss of funds, unauthorized control, and damage to trust."
+        },
+        {
+            "function_name": "claimThrone",
+            "vulnerability": "Denial of Service",
+            "function_code": "function claimThrone() external payable {
+    require(msg.value > balance);
+    (bool sent,) = king.call{value: balance}("");
+    require(sent, "Failed to send Ether");
+    balance = msg.value;
+    king = msg.sender;
+}",
+            "reason": "Refund logic is improperly tied to state updates, enabling DoS attacks. This can lead to contract lockup and loss of usability."
+        }
+    ]
+}

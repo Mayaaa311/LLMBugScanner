@@ -1,0 +1,104 @@
+ Here is the output in the required JSON format:
+
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mint(address _owner, uint32 _heroClassId) onlyAccessMint public returns (uint256) {
+    require(_owner != address(0));
+    require(_heroClassId < numberOfHeroClasses);
+    var _heroClassInfo = heroClasses[_heroClassId];
+    _mint(_owner, numberOfTokenIds);
+    uint32[5] memory _ivForStats;
+    uint32[5] memory _initialStats;
+    for (uint8 i = 0; i < 5; i++) {
+      _ivForStats[i] = (random(_heroClassInfo.maxIVForStats[i] + 1, _heroClassInfo.minIVForStats[i]));
+      _initialStats[i] = _heroClassInfo.baseStats[i] + _ivForStats[i];
+    }
+    HeroInstance memory _heroInstance = HeroInstance({
+      heroClassId: _heroClassId,
+      heroName: "",
+      currentLevel: 1,
+      currentExp: 0,
+      lastLocationId: 0,
+      availableAt: now,
+      currentStats: _initialStats,
+      ivForStats: _ivForStats
+    });
+    tokenIdToHeroInstance[numberOfTokenIds] = _heroInstance;
+    numberOfTokenIds ++;
+    _heroClassInfo.currentNumberOfInstancedHeroes ++;
+    return numberOfTokenIds - 1;
+  }",
+            "reason": "The function mint() has a vulnerability of integer overflow in the for loop where it iterates over the number of stats. The variable i is of type uint8, which can only hold values up to 255. If the number of stats is greater than 255, the loop will not terminate and the function will not return the correct value."
+        },
+        {
+            "function_name": "addExp",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function addExp(uint256 _tokenId, uint32 _exp) onlyAccessDeploy public returns (bool) {
+    require(ownerOf(_tokenId) != address(0));
+    var _heroInstance = tokenIdToHeroInstance[_tokenId];
+    var _newExp = _heroInstance.currentExp + _exp;
+    require(_newExp == uint256(uint128(_newExp)));
+    _heroInstance.currentExp += _newExp;
+  }",
+            "reason": "The function addExp() has a vulnerability of wrong logic. The function checks if the new exp is equal to the old exp, but it does not check if the new exp is greater than the old exp. This means that if the new exp is less than the old exp, the function will not update the exp correctly."
+        },
+        {
+            "function_name": "transferDeposit",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function transferDeposit(uint256 _amount) whenNotPaused public {
+    require(goldContract.allowance(msg.sender, this) >= _amount);
+    if (goldContract.transferFrom(msg.sender, this, _amount)) {
+      addressToGoldDeposit[msg.sender] += _amount;
+    }
+  }",
+            "reason": "The function transferDeposit() has a vulnerability of bad randomness. The function uses the block.blockhash() function to generate a random number, but this function is not cryptographically secure. An attacker can predict the random number and exploit the vulnerability."
+        },
+        {
+            "function_name": "withdrawDeposit",
+            "vulnerability": "Access Control",
+            "function_code": "function withdrawDeposit(uint256 _amount) public {
+    require(addressToGoldDeposit[msg.sender] >= _amount);
+    if (goldContract.transfer(msg.sender, _amount)) {
+      addressToGoldDeposit[msg.sender] -= _amount;
+    }
+  }",
+            "reason": "The function withdrawDeposit() has a vulnerability of access control. The function checks if the sender has enough gold deposit, but it does not check if the sender is the owner of the contract. This means that an attacker can withdraw the gold deposit of another address."
+        },
+        {
+            "function_name": "random",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function random(uint32 _upper, uint32 _lower) private returns (uint32) {
+    require(_upper > _lower);
+    seed = uint32(keccak256(keccak256(block.blockhash(block.number), seed), now));
+    return seed % (_upper - _lower) + _lower;
+  }",
+            "reason": "The function random() has a vulnerability of typo constructor. The function uses the block.blockhash() function to generate a random number, but it uses the wrong constructor. The correct constructor is keccak256(keccak256(block.blockhash(block.number), seed), now), but the function uses keccak256(keccak256(block.blockhash(block.number), seed), now) instead. This means that the function is not cryptographically secure."
+        },
+        {
+            "function_name": "levelUp",
+            "vulnerability": "Token Devalue",
+            "function_code": "function levelUp(uint256 _tokenId) onlyOwnerOf(_tokenId) whenNotPaused public {
+    var _heroInstance = tokenIdToHeroInstance[_tokenId];
+    require(_heroInstance.availableAt <= now);
+    var _heroClassInfo = heroClasses[_heroInstance.heroClassId];
+    require(_heroInstance.currentLevel < _heroClassInfo.maxLevel);
+    var requiredExp = getHeroRequiredExpForLevelUp(_tokenId);
+    require(_heroInstance.currentExp >= requiredExp);
+    var requiredGold = getHeroRequiredGoldForLevelUp(_tokenId);
+    var _ownerOfToken = ownerOf(_tokenId);
+    require(addressToGoldDeposit[_ownerOfToken] >= requiredGold);
+    _heroInstance.currentLevel += 1;
+    for (uint8 i = 0; i < 5; i++) {
+      _heroInstance.currentStats[i] = _heroClassInfo.baseStats[i] + (_heroInstance.currentLevel - 1) * _heroInstance.ivForStats[i];
+    }
+    _heroInstance.currentExp -= requiredExp;
+    addressToGoldDeposit[_ownerOfToken] -= requiredGold;
+    LevelUp(msg.sender, _tokenId, _heroInstance.currentLevel);
+  }",
+            "reason": "The function levelUp() has a vulnerability of token devalue. The function checks if the sender is the owner of the token, but it does not check if the token is still valid. This means that an attacker can exploit the vulnerability by calling the function with a token that has already been levelled up."
+        }
+    ]
+}

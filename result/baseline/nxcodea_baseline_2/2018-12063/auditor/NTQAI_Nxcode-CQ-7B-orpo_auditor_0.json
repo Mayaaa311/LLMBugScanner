@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "INTToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function INTToken(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}",
+            "reason": "The constructor of the INTToken contract does not check if the totalSupply is within the maximum value that can be stored in a uint256 variable. This could lead to an integer overflow if the initialSupply is too large. The fix is to add a require statement that checks if the totalSupply is less than 2^256 - 1."
+        },
+        {
+            "function_name": "INTToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0, this, mintedAmount); Transfer(this, target, mintedAmount); }",
+            "reason": "The mintToken function does not check if the totalSupply is within the maximum value that can be stored in a uint256 variable. This could lead to an integer overflow if the mintedAmount is too large. The fix is to add a require statement that checks if the totalSupply is less than 2^256 - 1."
+        },
+        {
+            "function_name": "INTToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function burn(uint256 _value) returns (bool success) { require (balanceOf[msg.sender] > _value); balanceOf[msg.sender] -= _value; totalSupply -= _value; Burn(msg.sender, _value); return true; }",
+            "reason": "The burn function does not check if the totalSupply is within the maximum value that can be stored in a uint256 variable. This could lead to an integer overflow if the _value is too large. The fix is to add a require statement that checks if the totalSupply is less than 2^256 - 1."
+        },
+        {
+            "function_name": "INTToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function burnFrom(address _from, uint256 _value) returns (bool success) { require(balanceOf[_from] >= _value); require(_value <= allowance[_from][msg.sender]); balanceOf[_from] -= _value; allowance[_from][msg.sender] -= _value; totalSupply -= _value; Burn(_from, _value); return true; }",
+            "reason": "The burnFrom function does not check if the totalSupply is within the maximum value that can be stored in a uint256 variable. This could lead to an integer overflow if the _value is too large. The fix is to add a require statement that checks if the totalSupply is less than 2^256 - 1."
+        },
+        {
+            "function_name": "INTToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function _transfer(address _from, address _to, uint _value) internal { require (_to != 0x0); require (balanceOf[_from] > _value); require (balanceOf[_to] + _value > balanceOf[_to]); require(!frozenAccount[_from]); require(!frozenAccount[_to]); balanceOf[_from] -= _value; balanceOf[_to] += _value; Transfer(_from, _to, _value); }",
+            "reason": "The _transfer function does not check if the totalSupply is within the maximum value that can be stored in a uint256 variable. This could lead to an integer overflow if the _value is too large. The fix is to add a require statement that checks if the totalSupply is less than 2^256 - 1."
+        }
+    ]
+}

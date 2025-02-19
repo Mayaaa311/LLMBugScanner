@@ -1,0 +1,61 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+        _transfer(msg.sender, _to, _value);
+        return true;
+    }",
+            "reason": "The function `transfer` does not perform any checks to prevent integer overflow. The `_transfer` function assumes that `balanceOf[_from]` is always greater than or equal to `_value`, but if `_value` is large, it could lead to an integer overflow, allowing an attacker to transfer more tokens than actually owned by the sender."
+        },
+        {
+            "function_name": "burn",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function burn(uint256 _value) public returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);    
+        balanceOf[msg.sender] -= _value;            
+        totalSupply -= _value;                      
+        emit Burn(msg.sender, _value);              
+        return true;
+    }",
+            "reason": "The `burn` function also does not perform any checks to prevent integer overflow. If `_value` is large, it could lead to an integer overflow, allowing an attacker to burn more tokens than actually owned by the sender."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);     
+        allowance[_from][msg.sender] -= _value;             
+        _transfer(_from, _to, _value);                      
+        return true;
+    }",
+            "reason": "The `transferFrom` function does not check if the caller (`msg.sender`) has the allowance to transfer tokens on behalf of the owner (`_from`). If an attacker can persuade the owner to approve a large allowance, the attacker can then transfer tokens on behalf of the owner without the owner's knowledge, leading to unauthorized token transfers."
+        },
+        {
+            "function_name": "EAI_TokenERC20",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function EAI_TokenERC20(uint256 initialSupply, string tokenName, string tokenSymbol) public {
+        totalSupply = initialSupply * 10 ** uint256(decimals);  
+        balanceOf[msg.sender] = totalSupply;                 
+        name = tokenName;                                    
+        symbol = tokenSymbol;                                
+    }",
+            "reason": "The constructor function `EAI_TokenERC20` has a typo in the line `totalSupply = initialSupply * 10 ** uint256(decimals);`. The correct syntax should be `totalSupply = initialSupply * (10 ** uint256(decimals));`. This typo can lead to incorrect token allocation and potentially allow attackers to exploit the contract in various ways."
+        },
+        {
+            "function_name": "burnFrom",
+            "vulnerability": "Access Control",
+            "function_code": "function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(balanceOf[_from] >= _value);                 
+        require(_value <= allowance[_from][msg.sender]);     
+        balanceOf[_from] -= _value;                          
+        allowance[_from][msg.sender] -= _value;              
+        totalSupply -= _value;                               
+        emit Burn(_from, _value);                           
+        return true;
+    }",
+            "reason": "Similar to `transferFrom`, the `burnFrom` function does not check if the caller (`msg.sender`) has the allowance to burn tokens on behalf of the owner (`_from`). If an attacker can persuade the owner to approve a large allowance, the attacker can then burn tokens on behalf of the owner without the owner's knowledge, leading to unauthorized token burns."
+        }
+    ]
+}

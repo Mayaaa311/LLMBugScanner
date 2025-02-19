@@ -1,0 +1,99 @@
+{
+    "output_list": [
+        {
+            "function_name": "MON",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function MON(address _benef,uint256 _start,uint256 _sumMul,uint256 _period) public{
+     beneficiary = _benef;
+     if(_start==0){
+         start = GetNow();
+     } else{
+         start = _start;
+     }
+     if(_period!=0){
+         period = _period;
+     }
+     if(_sumMul!=0){
+         sumMultiplayer = _sumMul;
+     }
+     stageDataStore.push(StageData(uint128(start+period*151),uint64(50*sumMultiplayer),uint64(5000)));
+     stageDataStore.push(StageData(uint128(start+period*243),uint64(60*sumMultiplayer),uint64(3000)));
+     stageDataStore.push(StageData(uint128(start+period*334),uint64(50*sumMultiplayer),uint64(1666)));
+     stageDataStore.push(StageData(uint128(start+period*455),uint64(60*sumMultiplayer),uint64(1500)));
+     stageDataStore.push(StageData(uint128(start+period*548),uint64(65*sumMultiplayer),uint64(1444)));
+     stageDataStore.push(StageData(uint128(start+period*641),uint64(55*sumMultiplayer),uint64(1000)));
+ }
+",
+            "reason": "In the MON constructor, the values of start, sumMultiplayer, and period are set. If the input values exceed the maximum value of the uint256 data type, an integer overflow will occur."
+        },
+        {
+            "function_name": "GetMaxStageEthAmount",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function GetMaxStageEthAmount() public constant returns(uint256){
+     StageData memory currS = stageDataStore[stageIndex];
+     uint256 retVal = currS.stageSum;
+     retVal = retVal*(10**18);
+     retVal = retVal/currS.stagePrice;
+     retVal = retVal.sub(this.balance);
+     return retVal;
+ }
+",
+            "reason": "In the GetMaxStageEthAmount function, the calculation of retVal may result in an integer overflow if the multiplication of stageSum and 10^18 exceeds the maximum value of the uint256 data type."
+        },
+        {
+            "function_name": "mintCoins",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintCoins(address _to, uint256 _amount)  canMint internal returns (bool) {
+    _amount = _amount.div(10**10);
+    if(totalSupply.add(_amount)<maxTokenSupply){
+        super.mint(_to,_amount.mul(75).div(100));
+        super.mint(address(beneficiary),_amount.mul(25).div(100));
+        return true;
+    }
+    else{
+        return false; 
+    }
+    return true;
+ }
+",
+            "reason": "In the mintCoins function, the calculation of the totalSupply may result in an integer overflow if the addition of _amount and totalSupply exceeds the maximum value of the uint256 data type."
+        },
+        {
+            "function_name": "GetStats",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function GetStats()public constant returns (uint256,uint256,uint256,uint256){
+     uint256 timeToEnd = 0;
+     uint256 round =0;
+     StageData memory _s = stageDataStore[stageIndex];
+     if(GetNow()>=start){
+       round = stageIndex+1;
+       if(_s.stageTime>GetNow())
+       {
+           timeToEnd = _s.stageTime-GetNow();
+       }
+       else{
+           return(0,0,0,0);
+       }
+     }
+     else{
+       timeToEnd = start-GetNow();
+     }
+     return(timeToEnd,
+      round,
+      _s.stageSum*1000/_s.stagePrice,
+      GetMaxStageEthAmount().div(10**15));
+ }
+",
+            "reason": "In the GetStats function, the calculation of timeToEnd may result in an integer overflow if the subtraction of GetNow() and start exceeds the maximum value of the uint256 data type."
+        },
+        {
+            "function_name": "GetNow",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function GetNow() public constant returns(uint256){
+    return now; 
+ }
+",
+            "reason": "In the GetNow function, the value of now may exceed the maximum value of the uint256 data type if the value of now is too large."
+        }
+    ]
+}

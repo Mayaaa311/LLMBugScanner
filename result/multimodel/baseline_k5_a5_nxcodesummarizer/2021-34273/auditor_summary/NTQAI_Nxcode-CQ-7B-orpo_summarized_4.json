@@ -1,0 +1,56 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
+            balances[_to] += _value;
+            balances[_from] -= _value;
+            allowed[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        } else { return false; }
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check if the transfer operation will cause an integer overflow. If the balances[_from] or allowed[_from][msg.sender] is too large, the transfer operation may result in an overflow, leading to incorrect balances and potentially loss of funds."
+        },
+        {
+            "function_name": "balanceOf",
+            "code": "function balanceOf(address _owner) constant returns (uint256 balance) {
+        return balances[_owner];
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The balanceOf function does not check if the caller is the owner of the specified address. This could allow unauthorized access to the balances of other addresses, potentially leading to theft of funds."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The approve function does not check if the caller is the owner of the specified address. This could allow unauthorized approval of spending by other addresses, potentially leading to theft of funds."
+        },
+        {
+            "function_name": "allowance",
+            "code": "function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+      return allowed[_owner][_spender];
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The allowance function does not check if the caller is the owner of the specified address. This could allow unauthorized access to the allowed spending of other addresses, potentially leading to theft of funds."
+        },
+        {
+            "function_name": "distributeToken",
+            "code": "function distributeToken(address[] addresses, uint256 _value) {
+     for (uint i = 0; i < addresses.length; i++) {
+         balances[msg.sender] -= _value;
+         balances[addresses[i]] += _value;
+         Transfer(msg.sender, addresses[i], _value);
+     }
+}",
+            "vulnerability": "Access Control",
+            "reason": "The distributeToken function does not check if the caller is the owner of the specified address. This could allow unauthorized distribution of tokens to other addresses, potentially leading to theft of funds."
+        }
+    ]
+}

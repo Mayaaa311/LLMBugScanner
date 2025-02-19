@@ -1,0 +1,63 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _value) onlyPayloadSize(2 * 32) unFrozenAccount onlyTransferable {
+    if (frozenAccount[_to]) {
+        InvalidAccount(_to, "The receiver account is frozen");
+    } else {
+        balances[msg.sender] = balances[msg.sender].sub(_value);
+        balances[_to] = balances[_to].add(_value);
+        Transfer(msg.sender, _to, _value);
+   
+   ",
+            "vulnerability": "Integer Overflow",
+            "reason": "The `transfer` function allows the transfer of tokens from the sender's balance to the recipient's balance. However, there is no check to ensure that the sender has enough balance to cover the transfer amount. This can lead to an integer overflow, where the balance of the sender becomes negative."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _value) onlyPayloadSize(3 * 32) unFrozenAccount onlyTransferable{
+    var _allowance = allowed[_from][msg.sender];
+    require(!frozenAccount[_from]&&!frozenAccount[_to]);
+    balances[_to] = balances[_to].add(_value);
+    balances[_from] = balances[_from].sub(_value);
+    allowed[_from][msg.sender] = _allowance.sub(_value);
+    Transfer(_from, _to, _value);
+   }
+   ",
+            "vulnerability": "Wrong Logic",
+            "reason": "The `transferFrom` function allows the transfer of tokens from one address to another. However, there is no check to ensure that the sender has enough allowance to cover the transfer amount. This can lead to wrong logic and potential misuse."
+        },
+        {
+            "function_name": "switchLiquidity",
+            "code": "function switchLiquidity (bool _transferable) onlyOwner returns (bool success) {
+    transferable=_transferable;
+    return true;
+   }
+   ",
+            "vulnerability": "Bad Randomness",
+            "reason": "The `switchLiquidity` function allows the owner to switch the liquidity status of the contract. However, there is no randomness involved in the function. This can lead to potential misuse and potential attacks."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner public {
+    frozenAccount[target]=freeze;
+    FrozenFunds(target, freeze);
+   }
+   ",
+            "vulnerability": "Access Control",
+            "reason": "The `freezeAccount` function allows the owner to freeze or unfreeze an account. However, there is no access control mechanism in place to ensure that only the owner can call this function. This can lead to potential misuse and potential attacks."
+        },
+        {
+            "function_name": "UBSexToken",
+            "code": "function UBSexToken() {
+    owner = msg.sender;
+    totalSupply = 1.9 * 10 ** 26;
+    balances[owner] = totalSupply;
+   }
+   ",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor function `UBSexToken` initializes the owner, total supply, and balances of the token. However, there is a typo in the function name. The correct constructor name should be `UBSexToken`, not `UBSexToken`. This can lead to potential misuse and potential attacks."
+        }
+    ]
+}

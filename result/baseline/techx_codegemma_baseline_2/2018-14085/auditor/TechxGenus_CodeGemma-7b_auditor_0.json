@@ -1,0 +1,66 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "Controller.makeWallet()",
+            "vulnerability": "Weak Randomness",
+            "function_code": "makeWallet() returns address wallet {
+    wallet = address(new UserWallet(this));
+    LogNewWallet(wallet);
+    return wallet;
+}",
+            "reason": "The function relies on the internal state of the contract, which could be manipulated by an attacker. This could lead to potential loss of funds or other forms of attack."
+        },
+        {
+            "function_name": "Controller.sweep()",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function sweep(address _token, uint _amount) returns (bool) {
+    bool success = false;
+    address destination = controller.destination();
+    if (_token != address(0)) {
+        Token token = Token(_token);
+        uint amount = _amount;
+        if (amount > token.balanceOf(this)) {
+            return false;
+        }
+        success = token.transfer(destination, amount);
+    } else {
+        uint amountInWei = _amount;
+        if (amountInWei > this.balance) {
+            return false;
+        }
+        success = destination.send(amountInWei);
+    }
+    if (success) {
+        controller.logSweep(this, destination, _token, _amount);
+    }
+    return success;
+}",
+            "reason": "The function `controller.sweep` is susceptible to integer overflow attacks. If a malicious user sends a large amount of tokens to the contract, the balance of the contract may exceed its capacity, leading to a potential overflow and causing a failure of the contract."
+        },
+        {
+            "function_name": "Controller.changeAuthorizedCaller()",
+            "vulnerability": "Access Control",
+            "function_code": "function changeAuthorizedCaller(address _newCaller) onlyOwner {
+    authorizedCaller = _newCaller;
+}",
+            "reason": "The function `Controller.changeAuthorizedCaller` should only be accessible by the contract owner. This vulnerability allows anyone to change the authorized caller, potentially leading to unauthorized actions and manipulation of contract functions."
+        },
+        {
+            "function_name": "Controller.changeDestination()",
+            "vulnerability": "Access Control",
+            "function_code": "function changeDestination(address _dest) onlyOwner {
+    destination = _dest;
+}",
+            "reason": "The function `Controller.changeDestination` should only be accessible by the contract owner. This vulnerability allows anyone to change the destination address, potentially leading to malicious actions such as draining the contract's funds."
+        },
+        {
+            "function_name": "Controller.changeOwner()",
+            "vulnerability": "Access Control",
+            "function_code": "function changeOwner(address _owner) onlyOwner {
+    owner = _owner;
+}",
+            "reason": "The function `Controller.changeOwner` should only be accessible by the contract owner. This vulnerability allows anyone to change the contract owner, potentially leading to unauthorized actions and manipulation of contract functions."
+        }
+    ]
+}<eos>

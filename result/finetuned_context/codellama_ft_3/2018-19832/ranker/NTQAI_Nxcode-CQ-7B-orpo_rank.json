@@ -1,0 +1,22 @@
+[
+  {
+    "function_name": "distr",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The vulnerability in the `distr` function arises from the unchecked addition of `_amount` to `totalDistributed` and `totalRemaining`. This can lead to an integer overflow, allowing an attacker to mint an arbitrary number of tokens. The code does not include checks to prevent overflow, which is a critical flaw in financial applications. The severity is high due to the potential for unlimited token issuance, which can lead to significant financial loss.",
+    "correctness": 6,
+    "severity": 9,
+    "profitability": 5,
+    "recommendation": "Consider using SafeMath for arithmetic operations to prevent overflow and underflow. Additionally, ensure that the `totalDistributed` and `totalRemaining` variables are properly managed to avoid overflow conditions."
+  },
+  {
+    "function_name": "getTokens",
+    "auditor_idx": 0,
+    "vulnerability": "Denial of Service",
+    "criticism": "The `getTokens` function is susceptible to a DoS attack due to the way it updates the `value` variable. Specifically, the line `value = value.div(100000).mul(99999);` can lead to a situation where `value` becomes zero, preventing any further distribution of tokens. This is a critical issue as it effectively blocks users from claiming their tokens, leading to a denial of service. The severity is high because it directly impacts user functionality and trust in the system.",
+    "correctness": 4,
+    "severity": 8,
+    "profitability": 2,
+    "recommendation": "Review the logic for updating the `value` variable to ensure that it does not become zero under any circumstances. Consider adding a fallback mechanism to reset `value` if it becomes too small to avoid DoS."
+  }
+]

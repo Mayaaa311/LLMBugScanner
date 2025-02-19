@@ -1,0 +1,47 @@
+[
+  {
+    "function_name": "transfer",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The check 'require(_value <= balances[msg.sender])' is syntactically correct but misleading. The unprotected _value subtraction in 'balances[msg.sender] -= _value;' can cause a fund overflow, if _value is crafted to be exceptionally large.",
+    "correctness": 7,
+    "severity": 7,
+    "profitability": 4
+  },
+  {
+    "function_name": "transferFrom",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The check 'require(_value <= balances[_from])' is syntactically correct but misleading. The unprotected _value subtraction in 'balances[_from] -= _value;' can cause a fund overflow, if _value is crafted to be exceptionally large.",
+    "correctness": 7,
+    "severity": 7,
+    "profitability": 4
+  },
+  {
+    "function_name": "approveAndCall",
+    "auditor_idx": 0,
+    "vulnerability": "Wrong Logic",
+    "criticism": "Allows the caller to transfer funds to any address, if the spender's receiveApproval function is implemented. This can be exploited to transfer funds to any address, if the spender is a malicious contract.",
+    "correctness": 6,
+    "severity": 6,
+    "profitability": 3
+  },
+  {
+    "function_name": "approveAndCallcode",
+    "auditor_idx": 0,
+    "vulnerability": "Wrong Logic",
+    "criticism": "Allows the caller to execute arbitrary code on behalf of the token owner, if the spender's receiveApproval function is not implemented. This can be exploited to execute arbitrary code, if the spender is a malicious contract.",
+    "correctness": 6,
+    "severity": 6,
+    "profitability": 3
+  },
+  {
+    "function_name": "<constructor>",
+    "auditor_idx": 0,
+    "vulnerability": "Typo Constructor",
+    "criticism": "The 'founder = msg.sender;' should be 'founder = msg.sender;' to set the 'founder' address correctly. This exposes the vulnerability to be exploited to gain unexpected token ownership by an attacker.",
+    "correctness": 2,
+    "severity": 2,
+    "profitability": 1
+  }
+]

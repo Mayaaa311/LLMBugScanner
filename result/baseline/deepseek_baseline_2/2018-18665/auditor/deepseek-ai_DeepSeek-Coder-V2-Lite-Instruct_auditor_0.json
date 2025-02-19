@@ -1,0 +1,53 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "if (disabled != true && balances[msg.sender] >= _value && _value > 0) {
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+} else { return false; }",
+            "reason": "The function does not perform a safe subtraction to prevent integer overflow. If _value is large, it can cause an overflow, leading to incorrect balance updates and potential loss of tokens."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "if (disabled != true && balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
+    balances[_to] += _value;
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+} else { return false; }",
+            "reason": "Similar to the transfer function, this function does not perform a safe subtraction to prevent integer overflow. If _value is large, it can cause an overflow, leading to incorrect balance updates and potential loss of tokens."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Access Control",
+            "function_code": "if (msg.sender == owner) {
+    totalSupply += _amount;
+    balances[owner] += _amount;
+    Transfer(0, owner, _amount);
+}",
+            "reason": "The mintToken function allows anyone to mint new tokens by simply being the owner. This can lead to uncontrolled token creation, devaluing the token and potentially freezing liquidity."
+        },
+        {
+            "function_name": "disableToken",
+            "vulnerability": "Access Control",
+            "function_code": "if (msg.sender == owner)
+    disabled = _disable;",
+            "reason": "The disableToken function can be called by anyone to disable the token functionality, which can be exploited by attackers to disable the token and prevent any further transfers."
+        },
+        {
+            "function_name": "approveAndCall",
+            "vulnerability": "Wrong Logic",
+            "function_code": "allowed[msg.sender][_spender] = _value;
+Approval(msg.sender, _spender, _value);
+if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) { return; }
+return true;",
+            "reason": "The function does not check the return value of the call to the spender contract. If the call fails, the function will still return true, leading to potential misuse and loss of funds."
+        }
+    ]
+}

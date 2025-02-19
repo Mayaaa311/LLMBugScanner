@@ -1,0 +1,65 @@
+{
+    "output_list": [
+        {
+            "function_name": "AzurionToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function AzurionToken(uint256 initialSupply, address centralMinter) {
+        if(centralMinter != 0 ) owner = centralMinter;
+        balanceOf[msg.sender] = initialSupply;
+        totalSupply = initialSupply;
+    }",
+            "reason": "The function AzurionToken constructor has an integer overflow vulnerability. The totalSupply variable is assigned the value of initialSupply, which could potentially lead to an integer overflow if the initialSupply is greater than the maximum value that can be stored in the uint256 data type."
+        },
+        {
+            "function_name": "_transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function _transfer(address _from, address _to, uint _value) internal {
+        require (_to != 0x0);
+        require (balanceOf[_from] > _value);
+        require (balanceOf[_to] + _value > balanceOf[_to]);
+        require(!frozenAccount[_from]);
+        require(!frozenAccount[_to]);
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(_from, _to, _value);
+    }",
+            "reason": "The function _transfer has an integer overflow vulnerability. The balanceOf[_to] += _value line could potentially lead to an integer overflow if the sum of balanceOf[_to] and _value is greater than the maximum value that can be stored in the uint256 data type."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }",
+            "reason": "The function transferFrom has an integer overflow vulnerability. The allowance[_from][msg.sender] -= _value line could potentially lead to an integer overflow if the difference between allowance[_from][msg.sender] and _value is negative."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }",
+            "reason": "The function mintToken has an integer overflow vulnerability. The totalSupply += mintedAmount line could potentially lead to an integer overflow if the sum of totalSupply and mintedAmount is greater than the maximum value that can be stored in the uint256 data type."
+        },
+        {
+            "function_name": "burnFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function burnFrom(address _from, uint256 _value) onlyOwner public returns (bool success) {
+        require(balanceOf[_from] >= _value);
+        require(_value <= allowance[_from][msg.sender]);
+        balanceOf[_from] -= _value;
+        allowance[_from][msg.sender] -= _value;
+        totalSupply -= _value;
+        Burn(_from, _value);
+        return true;
+    }",
+            "reason": "The function burnFrom has an integer overflow vulnerability. The totalSupply -= _value line could potentially lead to an integer overflow if the difference between totalSupply and _value is negative."
+        }
+    ]
+}

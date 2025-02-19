@@ -1,0 +1,58 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _value) whenNotPaused returns (bool) {
+    return super.transfer(_to, _value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transfers tokens from the sender to another address. However, there is no check to ensure that the transfer does not result in an integer overflow. This can potentially allow an attacker to transfer more tokens than the contract has available."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _value) whenNotPaused returns (bool) {
+    return super.transferFrom(_from, _to, _value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transfers tokens from one address to another. However, there is no check to ensure that the transfer does not result in an integer overflow. This can potentially allow an attacker to transfer more tokens than the contract has available."
+        },
+        {
+            "function_name": "mint",
+            "code": "function mint(address _x, uint _v) public onlyOwner {
+    balances[_x] += _v;
+    totalSupply += _v;
+    Transfer(0x0, _x, _v);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function mints new tokens and adds them to the balance of an address. However, there is no check to ensure that the addition does not result in an integer overflow. This can potentially allow an attacker to mint more tokens than the contract can handle."
+        },
+        {
+            "function_name": "pricePerWei",
+            "code": "function pricePerWei() public constant returns(uint) {
+    if     (now <  1511799420) return 800.0 * 1 ether;
+    else if(now <  1511885820) return 750.0 * 1 ether;
+    else if(now <  1513181820) return 675.0 * 1 ether;
+    else if(now <  1515514620) return 575.0 * 1 ether;
+    else if(now <  1516205820) return 537.5 * 1 ether;
+    else                                                return 500.0 * 1 ether;
+}",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function returns a price per wei based on the current time. However, the randomness used to determine the price is not properly randomized. This can potentially allow an attacker to manipulate the price and make unfair trades."
+        },
+        {
+            "function_name": "finish",
+            "code": "function finish(address _team, address _fund, address _bounty, address _backers) external onlyOwner {
+    require(now >= ICO_END_DATE && !isFinished);
+    unlb.unpause();
+    isFinished = true;
+    uint _total = unlb.totalSupply() * 100 / (100 - 12 - 15 - 5 - 3);
+    unlb.mint(_team,   (_total * 12) / 100);
+    unlb.mint(_fund,   (_total * 15) / 100);
+    unlb.mint(_bounty, (_total *  5) / 100);
+    unlb.mint(_backers, (_total *  3) / 100);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function distributes the tokens to different addresses based on predefined percentages. However, there is no check to ensure that the distribution does not result in an integer overflow. This can potentially allow an attacker to distribute more tokens than the contract has available."
+        }
+    ]
+}

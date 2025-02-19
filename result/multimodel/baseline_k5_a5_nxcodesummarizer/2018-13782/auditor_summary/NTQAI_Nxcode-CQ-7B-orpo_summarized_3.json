@@ -1,0 +1,65 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+    if (balanceOf[msg.sender] < _value) throw;
+    if (balanceOf[_to] + _value < balanceOf[_to]) throw;
+    if (frozenAccount[msg.sender]) throw;
+    balanceOf[msg.sender] -= _value;
+    balanceOf[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function does not properly check for integer overflow when updating the balance of the sender and recipient. An attacker can exploit this vulnerability by sending a large amount of tokens to a contract, causing the balance to overflow and potentially gaining control over the contract's funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if (frozenAccount[_from]) throw;
+    if (balanceOf[_from] < _value) throw;
+    if (balanceOf[_to] + _value < balanceOf[_to]) throw;
+    if (_value > allowance[_from][msg.sender]) throw;
+    balanceOf[_from] -= _value;
+    balanceOf[_to] += _value;
+    allowance[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "Similar to the 'transfer' function, this function also does not properly check for integer overflow when updating the balance of the sender and recipient. An attacker can exploit this vulnerability by transferring a large amount of tokens from one account to another, causing the balance to overflow and potentially gaining control over the contract's funds."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'mintToken' function allows the owner to mint new tokens and assign them to any address. This can be exploited by an attacker to create new tokens out of thin air, devaluing the token and potentially freezing them in the process."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'setPrices' function allows the owner to set the prices for buying and selling tokens. An attacker can exploit this by manipulating these prices to their advantage, potentially leading to financial loss for the contract owner."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable {
+    uint amount = msg.value / buyPrice;
+    if (balanceOf[this] < amount) throw;
+    balanceOf[msg.sender] += amount;
+    balanceOf[this] -= amount;
+    Transfer(this, msg.sender, amount);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'buy' function allows anyone to buy tokens using the contract's funds. An attacker can exploit this by repeatedly calling the function, causing the contract to lose funds as it attempts to send tokens to the attacker."
+        }
+    ]
+}

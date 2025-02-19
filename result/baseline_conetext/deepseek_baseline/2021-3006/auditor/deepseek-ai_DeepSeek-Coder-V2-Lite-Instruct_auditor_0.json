@@ -1,0 +1,34 @@
+ {
+    "output_list": [
+        {
+            "function_name": "claimStakingReward",
+            "vulnerability": "Access Control",
+            "function_code": "function claimStakingReward(uint amount) external nonReentrant onlyOwner",
+            "reason": "The function does not check if the caller is the owner, allowing any user to call this function and transfer funds."
+        },
+        {
+            "function_name": "fundDAO",
+            "vulnerability": "Access Control",
+            "function_code": "function fundDAO() external nonReentrant",
+            "reason": "The function does not check if the caller is the owner, allowing any user to call this function and transfer funds to the DAO address."
+        },
+        {
+            "function_name": "sellTokenForLRC",
+            "vulnerability": "Access Control",
+            "function_code": "function sellTokenForLRC(address token, uint amount) external nonReentrant",
+            "reason": "The function does not check if the caller is authorized, allowing any user to call this function and sell tokens for LRC."
+        },
+        {
+            "function_name": "updateSettings",
+            "vulnerability": "Access Control",
+            "function_code": "function updateSettings(address _userStakingPoolAddress, address _tokenSellerAddress, address _daoAddress) external nonReentrant onlyOwner",
+            "reason": "The function does not check if the new addresses are valid, allowing any user to update settings and potentially redirect funds."
+        },
+        {
+            "function_name": "claimStakingReward",
+            "vulnerability": "Reentrancy",
+            "function_code": "function claimStakingReward(uint amount) external nonReentrant onlyOwner",
+            "reason": "The function does not implement reentrancy guard, allowing an attacker to exploit the contract after claiming rewards."
+        }
+    ]
+}

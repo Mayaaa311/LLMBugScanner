@@ -1,0 +1,88 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address to, uint value) returns (bool success) {r
+        if (frozenAccount[msg.sender]) return false;r
+        if(balances[msg.sender] < value) return false;r
+        if(balances[to] + value < balances[to]) return false;r
+        balances[msg.sender] -= value;r
+        balances[to] += value;r
+        Transfer(msg.sender, to, value);r
+        return true;r
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transfer() has a potential integer overflow vulnerability. The function calculates the new balance of the sender and the recipient, and if the calculation overflows, the function will return false. This can allow an attacker to send a large amount of tokens to a recipient, potentially causing a loss of value."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address from, address to, uint value) returns (bool success) {r
+        if (frozenAccount[msg.sender]) return false;r
+        if(balances[from] < value) return false;r
+        if( allowed[from][msg.sender] >= value ) return false;r
+        if(balances[to] + value < balances[to]) return false;r
+        balances[from] -= value;r
+        allowed[from][msg.sender] -= value;r
+        balances[to] += value;r
+        Transfer(from, to, value);r
+        return true;r
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transferFrom() has a potential integer overflow vulnerability. The function calculates the new balance of the sender, the recipient, and the spender, and if the calculation overflows, the function will return false. This can allow an attacker to send a large amount of tokens to a recipient, potentially causing a loss of value."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _amount) returns (bool success) {r
+        allowed[msg.sender][_spender] = _amount;r
+        Approval(msg.sender, _spender, _amount);r
+        return true;r
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function approve() has a potential wrong logic vulnerability. The function sets the allowance of the spender to the amount, but does not check if the amount is greater than the current allowance. This can allow an attacker to increase the allowance of a spender, potentially causing a loss of value."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner{r
+        balances[target] += mintedAmount;r
+        totalSupply += mintedAmount;r
+        Transfer(0,owner,mintedAmount);r
+        Transfer(owner,target,mintedAmount);r
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function mintToken() has a potential wrong logic vulnerability. The function increases the balance of the target address and the total supply, but does not check if the amount is greater than the current balance or supply. This can allow an attacker to mint a large amount of tokens, potentially causing a loss of value."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner {r
+        frozenAccount[target] = freeze;r
+        FrozenFunds(target, freeze);r
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function freezeAccount() has a potential wrong logic vulnerability. The function sets the frozen status of the target address to the freeze status, but does not check if the target address is a valid address. This can allow an attacker to freeze an invalid address, potentially causing a loss of value."
+        },
+        {
+            "function_name": "changeName",
+            "code": "function changeName(string _name) onlyOwner {r
+        name = _name;r
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function changeName() has a potential wrong logic vulnerability. The function sets the name of the token to the new name, but does not check if the new name is a valid string. This can allow an attacker to change the name of the token to an invalid string, potentially causing a loss of value."
+        },
+        {
+            "function_name": "changeSymbol",
+            "code": "function changeSymbol(string _symbol) onlyOwner {r
+        symbol = _symbol;r
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function changeSymbol() has a potential wrong logic vulnerability. The function sets the symbol of the token to the new symbol, but does not check if the new symbol is a valid string. This can allow an attacker to change the symbol of the token to an invalid string, potentially causing a loss of value."
+        },
+        {
+            "function_name": "changeDecimals",
+            "code": "function changeDecimals(uint8 _decimals) onlyOwner {r
+        decimals = _decimals;r
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function changeDecimals() has a potential wrong logic vulnerability. The function sets the decimals of the token to the new decimals, but does not check if the new decimals is a valid value. This can allow an attacker to change the decimals of the token to an invalid value, potentially causing a loss of value."
+        }
+    ]
+}

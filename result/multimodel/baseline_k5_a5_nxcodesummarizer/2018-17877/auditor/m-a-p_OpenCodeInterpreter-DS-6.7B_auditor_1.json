@@ -1,0 +1,75 @@
+{
+    "output_list": [
+        {
+            "function_name": "getHeartPrice",
+            "code": "function getHeartPrice() public view returns(uint256) {
+    return ( (RoundHeart[Round].add(1000000000000000000)).ethRec(1000000000000000000) );
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function calculates the heart price by adding 1000000000000000000 to the current round heart and then calling the ethRec function. If the current round heart is very large, the addition may cause an overflow."
+        },
+        {
+            "function_name": "getMyRevenue",
+            "code": "function getMyRevenue(uint _round) public view returns(uint256) {
+    return(  (((RoundPayMask[_round]).mul(RoundMyHeart[_round][msg.sender])) / (1000000000000000000)).sub(RoundMyPayMask[_round][msg.sender])  );
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function calculates the my revenue by multiplying the round pay mask with the round my heart and then dividing by 1000000000000000000. If the round pay mask is very large, the multiplication may cause an overflow."
+        },
+        {
+            "function_name": "getTimeLeft",
+            "code": "function getTimeLeft() public view returns(uint256) {
+    if(RoundTime[Round] == 0 || RoundTime[Round] < now) 
+        return 0;
+    else 
+        return( (RoundTime[Round]).sub(now) );
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function calculates the time left by subtracting the current time from the round time. If the round time is very large, the subtraction may cause an overflow."
+        },
+        {
+            "function_name": "updateTimer",
+            "code": "function updateTimer(uint256 _hearts) private {
+    if(RoundTime[Round] == 0) {
+        RoundTime[Round] = RoundMaxTime.add(now);
+    }
+    uint _newTime = (((_hearts) / (1000000000000000000)).mul(RoundIncrease)).add(RoundTime[Round]);
+    if (_newTime < (RoundMaxTime).add(now)) {
+        RoundTime[Round] = _newTime;
+    } else {
+        RoundTime[Round] = RoundMaxTime.add(now);
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function updates the timer by adding the current time with the round increase. If the round increase is very large, the addition may cause an overflow."
+        },
+        {
+            "function_name": "buyHeart",
+            "code": "function buyHeart(address referred) public payable {
+    require(msg.value >= 1000000000, "pocket lint: not a valid currency");
+    require(msg.value <= 100000000000000000000000, "no vitalik, no");
+    address _addr = msg.sender;
+    uint256 _codeLength;
+    assembly {_codeLength := extcodesize(_addr)}
+    require(_codeLength == 0, "sorry humans only");
+    uint256 _hearts = (RoundETH[Round]).keysRec(msg.value);
+    uint256 _pearn;
+    require(_hearts >= 1000000000000000000);
+    require(RoundTime[Round] > now || RoundTime[Round] == 0);
+    updateTimer(_hearts);
+    RoundHeart[Round] += _hearts;
+    RoundMyHeart[Round][msg.sender] += _hearts;
+    if (referred != address(0) && referred != msg.sender) {
+         _pearn = (((msg.value.mul(30) / 100).mul(1000000000000000000)) / (RoundHeart[Round])).mul(_hearts)/ (1000000000000000000);
+        onwerfee += (msg.value.mul(4) / 100);
+        RoundETH[Round] += msg.value.mul(54) / 100;
+        Luckybuy += msg.value.mul(2) / 100;
+        MyreferredRevenue[referred] += (msg.value.mul(10) / 100);
+        RoundPayMask[Round] += ((msg.value.mul(30) / 100).mul(1000000000000000000)) / (RoundHeart[Round]);
+        RoundMyPayMask[Round][msg.sender] = (((RoundPayMask[Round].mul(_hearts)) / (1000000000000000000)).sub(_pearn)).add(RoundMyPayMask[Round][msg.sender]);
+        emit referredEvent(msg.sender, referred, msg.value.mul(10) / 100);
+    } else {
+         _pearn = (((msg.value.mul(40) / 100).mul(1000000000000000000)) / (RoundHeart[Round])).mul(_hearts)/ (1000000000000000000);
+        RoundETH[Round] += msg.value.mul(54) / 100;
+        Luckybuy += msg.value.mul(2) / 100;
+        onwerfee +=(msg

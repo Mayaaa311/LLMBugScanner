@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "batchTransfer",
+            "auditor_idx": 3,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function calculates the total amount to be transferred by multiplying the number of receivers (`cnt`) by the value (`_value`). If `cnt` is large, this can lead to an integer overflow, causing `amount` to be zero, and then the function will return `false`. This can be exploited to prevent funds from being transferred to intended recipients.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 5
+        },
+        {
+            "function_name": "Trade",
+            "auditor_idx": 3,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The function does not check if the transfer amount is within the allowed range, which can lead to incorrect state updates. Specifically, it checks if `balanceOf[_seller] < _qty` and `balanceOf[_buyer] + _qty < balanceOf[_buyer]` but does not check if `_qty` multiplied by `_price` exceeds the allowed balance. This can lead to incorrect state updates and potential loss of funds.",
+            "correctness": 6,
+            "severity": 7,
+            "profitability": 4
+        },
+        {
+            "function_name": "Buy",
+            "auditor_idx": 3,
+            "vulnerability": "Access Control",
+            "criticism": "The `Buy` function allows anyone to call it, and it does not check if the `msg.value` is sufficient to cover the transaction cost. This can lead to a situation where an attacker can call this function with a very low value, effectively draining funds from the contract.",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 4
+        },
+        {
+            "function_name": "Sell",
+            "auditor_idx": 3,
+            "vulnerability": "Access Control",
+            "criticism": "Similar to the `Buy` function, the `Sell` function does not check if the contract has enough balance to execute the trade. This can be exploited by an attacker to sell tokens that the contract does not own, leading to potential loss of funds.",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 4
+        },
+        {
+            "function_name": "airDrop",
+            "auditor_idx": 3,
+            "vulnerability": "Access Control",
+            "criticism": "The `airDrop` function allows anyone to call it and transfer tokens based on the value sent. If an attacker can call this function with a high enough value, they can execute the `Buy` function and then transfer tokens to themselves or any other address. This can lead to a loss of funds.",
+            "correctness": 7,
+            "severity": 7,
+            "profitability": 4
+        }
+    ]
+}

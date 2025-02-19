@@ -1,0 +1,64 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+    if (_to == 0x0) revert();                               tif (balanceOf[msg.sender] < _value) revert();           tif (balanceOf[_to] + _value < balanceOf[_to]) revert(); tbalanceOf[msg.sender] -= _value;                        
+    balanceOf[_to] += _value;                               tTransfer(msg.sender, _to, _value);                      t}
+",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not check if the balance of the recipient address will overflow. If the recipient address has a balance of 2^256 - 1 (the maximum possible balance), then adding _value to it will cause an integer overflow, leading to incorrect balances and potentially loss of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if (_to == 0x0) revert();                                  
+    if (frozenAccount[_from]) revert();                        
+    if (balanceOf[_from] < _value) revert();                   tif (balanceOf[_to] + _value < balanceOf[_to]) revert();    
+    if (_value > allowance[_from][msg.sender]) revert();       tbalanceOf[_from] -= _value;                                
+    balanceOf[_to] += _value;                                  
+    allowance[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check if the balance of the recipient address will overflow. If the recipient address has a balance of 2^256 - 1 (the maximum possible balance), then adding _value to it will cause an integer overflow, leading to incorrect balances and potentially loss of funds."
+        },
+        {
+            "function_name": "lend",
+            "code": "function lend(address _to, uint256 _value, uint256 _duration_in_days) {
+    if (_to == 0x0) revert();                               tif (balanceOf[msg.sender] < _value) revert();           tif (balanceOf[_to] + _value < balanceOf[_to]) revert(); tif (frozenAccount[msg.sender]) revert();                
+    if (_duration_in_days > 36135) revert();
+    balanceOf[msg.sender] -= _value;                        
+    balanceOf[_to] += _value;                               tInterestFreeLending(msg.sender, _to, _value, _duration_in_days);    
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The lend function does not check if the balance of the recipient address will overflow. If the recipient address has a balance of 2^256 - 1 (the maximum possible balance), then adding _value to it will cause an integer overflow, leading to incorrect balances and potentially loss of funds."
+        },
+        {
+            "function_name": "repayLoan",
+            "code": "function repayLoan(address _to, uint256 _value, string _reference) {
+    if (_to == 0x0) revert();                               tif (balanceOf[msg.sender] < _value) revert();           tif (balanceOf[_to] + _value < balanceOf[_to]) revert(); tif (frozenAccount[msg.sender]) revert();                
+    if (bytes(_reference).length != 66) revert();
+    balanceOf[msg.sender] -= _value;                        
+    balanceOf[_to] += _value;                               tLoanRepaid(msg.sender, _to, _value, _reference);                   t}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The repayLoan function does not check if the balance of the recipient address will overflow. If the recipient address has a balance of 2^256 - 1 (the maximum possible balance), then adding _value to it will cause an integer overflow, leading to incorrect balances and potentially loss of funds."
+        },
+        {
+            "function_name": "settlvlement",
+            "code": "function settlvlement(address _from, uint256 _value, address _to, string _notes, string _reference) onlyOwner {
+    if (_from == plutocrat) revert();
+    if (_to == 0x0) revert();
+    if (balanceOf[_from] < _value) revert();
+    if (balanceOf[_to] + _value < balanceOf[_to]) revert();
+    if (bytes(_reference).length != 66) revert();
+    balanceOf[_from] -= _value;
+    balanceOf[_to] += _value;
+    Settlement( _from, _to, _value, _notes, _reference);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The settlvlement function does not check if the balance of the recipient address will overflow. If the recipient address has a balance of 2^256 - 1 (the maximum possible balance), then adding _value to it will cause an integer overflow, leading to incorrect balances and potentially loss of funds."
+        }
+    ]
+}

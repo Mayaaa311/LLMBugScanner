@@ -1,0 +1,70 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }",
+            "vulnerability": "Token Issuance Control",
+            "reason": "The mintToken function allows the owner to arbitrarily increase the token balance of any user account, potentially causing a denial of service or other unexpected outcomes."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) throw;            
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+        if (frozenAccount[msg.sender]) throw;                 
+        balanceOf[msg.sender] -= _value;                      
+        balanceOf[_to] += _value;                             
+        Transfer(msg.sender, _to, _value);                    
+    }",
+            "vulnerability": "Account Frozen",
+            "reason": "The transfer function does not check if the target account is frozen, allowing the owner to transfer funds from any user to any other user, including a frozen account, and causing a denial of service."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (frozenAccount[_from]) throw;                         
+        if (balanceOf[_from] < _value) throw;                  
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;   
+        if (_value > allowance[_from][msg.sender]) throw;    
+        balanceOf[_from] -= _value;                           
+        balanceOf[_to] += _value;                             
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }",
+            "vulnerability": "Account Frozen",
+            "reason": "The transferFrom function does not check if the target account is frozen, allowing the owner to transfer funds from any user to any other user, including a frozen account, and causing a denial of service."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) {
+        if (balanceOf[msg.sender] < amount ) throw;         
+        balanceOf[this] += amount;                          
+        balanceOf[msg.sender] -= amount;                   
+        if (!msg.sender.send(amount * sellPrice)) {         
+            throw;                                         
+        } else {
+            Transfer(msg.sender, this, amount);            
+        }
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The sell function allows an integer overflow, where the amount of tokens sold is not correctly checked, allowing the owner to sell an arbitrary large amount of tokens, causing a denial of service."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function allows an integer overflow, where the total supply is not correctly checked, allowing the owner to mint an arbitrary large amount of tokens, causing a denial of service."
+        }
+    ]
+}

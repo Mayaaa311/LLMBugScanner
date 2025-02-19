@@ -1,0 +1,182 @@
+{
+    "output_list": [
+        {
+            "function_name": "setBalance",
+            "code": "function setBalance(address _user, uint256 _balance) public onlyOwner returns (bool) {
+                require(_user != address(0));
+                require(_balance <= maxBalance);
+                balanceOf[_user] = _balance;
+                emit BalanceUpdated(_user, _balance);
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in setBalance function allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+                require(_to != address(0));
+                require(_value <= balanceOf[msg.sender]);
+                require(balanceOf[_to] + _value >= balanceOf[_to]);
+                if (frozenAccount[msg.sender]) {
+                    require(!frozenAccount[_to]);
+                }
+                balanceOf[msg.sender] -= _value;
+                balanceOf[_to] += _value;
+                emit Transfer(msg.sender, _to, _value);
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in transfer function allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+                require(_to != address(0));
+                require(_value <= balanceOf[_from]);
+                require(_value <= allowance[_from][msg.sender]);
+                require(balanceOf[_to] + _value >= balanceOf[_to]);
+                if (frozenAccount[msg.sender]) {
+                    require(!frozenAccount[_from]);
+                    require(!frozenAccount[_to]);
+                }
+                balanceOf[_from] -= _value;
+                allowance[_from][msg.sender] -= _value;
+                balanceOf[_to] += _value;
+                emit Transfer(_from, _to, _value);
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in transferFrom function allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+                require(mintedAmount > 0);
+                balanceOf[target] += mintedAmount;
+                emit Transfer(0, owner, mintedAmount);
+                emit Transfer(owner, target, mintedAmount);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in mintToken function allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner public {
+                frozenAccount[target] = freeze;
+                emit FrozenFunds(target, freeze);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in freezeAccount function allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "setRate",
+            "code": "function setRate(uint256 newRate) onlyOwner public {
+                require(newRate > 0);
+                rate = newRate;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in setRate function allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "setMinBalanceForAccounts",
+            "code": "function setMinBalanceForAccounts(uint256 minimumBalanceInWei) onlyOwner public {
+                minBalanceForAccounts = minimumBalanceInWei;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in setMinBalanceForAccounts function allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "setSelling",
+            "code": "function setSelling(bool newStatus) onlyOwner public {
+                isSelling = newStatus;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in setSelling function allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable canSell public {
+                uint256 amount = msg.value / rate;
+                require(balanceOf[this] >= amount);
+                require(balanceOf[msg.sender] + amount >= balanceOf[msg.sender]);
+                balanceOf[this] -= amount;
+                balanceOf[msg.sender] += amount;
+                emit Transfer(this, msg.sender, amount);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in buy function allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "withdrawToOwner",
+            "code": "function withdrawToOwner(uint256 amountWei) onlyOwner public {
+                balanceOf[msg.sender] += amountWei;
+                emit Transfer(this, msg.sender, amountWei);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in withdrawToOwner function allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal {
+                require (_to != 0x0);
+                require (balanceOf[_from] >= _value);
+                require (balanceOf[_to] + _value >= balanceOf[_to]);
+                require(!frozenAccount[_from]);
+                require(!frozenAccount[_to]);
+                balanceOf[_from] -= _value;
+                balanceOf[_to] += _value;
+                emit Transfer(_from, _to, _value);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in _transfer function allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+                balanceOf[target] += mintedAmount;
+                emit Transfer(0, owner, mintedAmount);
+                emit Transfer(owner, target, mintedAmount);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in mintToken function allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner public {
+                frozenAccount[target] = freeze;
+                emit FrozenFunds(target, freeze);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in freezeAccount function allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+                sellPrice = newSellPrice;
+                buyPrice = newBuyPrice;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in setPrices function allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable canSell public {
+                uint amount = msg.value / buyPrice;
+                _transfer(this, msg.sender, amount);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in buy function allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) public {
+                require(this.balance >= amount * sellPrice);
+                _transfer(msg.sender, this, amount);
+                msg.sender.transfer(amount * sellPrice);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in sell function allows an attacker to set an arbitrary user's balance to any value."
+        }
+    ]
+}

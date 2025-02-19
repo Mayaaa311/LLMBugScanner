@@ -1,0 +1,439 @@
+{"output_list": [{"function_name": "ToOwner", "vulnerability": "Access Control", "impact": "User can change the owner of the contract."}]}
+{"output_list": [{"function_name": "PayWinner", "vulnerability": "Bad Randomness", "impact": "The winner selection is predictable and can be exploited.  Financial losses and reputational harm."}]}
+{"output_list": [{"function_name": "MorphToken", "vulnerability": "Bad Randomness", "impact": "The morphToken function relies on the owner's arbitrary choice, allowing attackers.  Relies on the owner's address as a security measure instead of the token's owner."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "impact": "The mintToken function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "freezeAccount", "vulnerability": "Access Control", "impact": "The freezeAccount function allows the owner to freeze an arbitrary user's account, removing the owner's control over the contract."}]}
+{"output_list": [{"function_name": "setPrices", "vulnerability": "Access Control", "impact": "The setPrices function is public and allows unauthorized access to set the prices."}]}
+{"output_list": [{"function_name": "buy", "vulnerability": "Integer Overflow", "impact": "The buy function has an integer overflow that allows the owner to set the balance of the contract to any value."}]}
+{"output_list": [{"function_name": "sell", "vulnerability": "Integer Overflow", "impact": "The sell function has an integer overflow that allows the owner to set the balance of the contract to any value."}]}
+{"output_list": [{"function_name": "burn", "vulnerability": "Integer Overflow", "impact": "The burn function has an integer overflow that allows the owner to set the balance of the contract to any value."}]}
+  function owner() {
+    return owner;
+  }
+  function setOwner(address newOwner) onlyOwner {
+    owner = newOwner;
+  }
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+  }
+  function buyAndBurn(address target, uint256 amount) onlyOwner returns (bool success) {
+    assert (amount <= balances[target]);             
+    balanceOf[target] -= amount;                      
+    totalSupply -= amount;                            
+    Burn(target, amount);
+    buy(amount);                                   
+    return true;
+  }
+  function burnFrom(address target, uint256 amount) returns (bool success) {
+    assert (amount <= balances[target]);             
+    assert (amount <= allowance[target][msg.sender]);  
+    balanceOf[target] -= amount;                      
+    allowance[target][msg.sender] -= amount;
+    totalSupply -= amount;                            
+    Burn(target, amount);
+    return true;
+  }
+}
+
+---
+
+### Test Cases:
+function shouldForwardFunds() {
+    assert(true);
+}
+function shouldAllowTrade() {
+    assert(true);
+}
+function shouldBurnTokens() {
+    assert(true);
+}
+function shouldSetPrices() {
+    assert(true);
+}
+function shouldFreezeAccount() {
+    assert(true);
+}
+function shouldSetOwner() {
+    assert(true);
+}
+function shouldBuyAndBurn() {
+    assert(true);
+}
+function shouldBurnFrom() {
+    assert(true);
+}
+function shouldSetTokens() {
+    assert(true);
+}
+function shouldUpdateBalance() {
+    assert(true);
+}
+function shouldTransfer() {
+    assert(true);
+}
+function shouldTransferFrom() {
+    assert(true);
+}
+function shouldMintToken() {
+    assert(true);
+}
+function shouldFreezeAccount() {
+    assert(true);
+}
+function shouldSetPrices() {
+    assert(true);
+}
+function shouldBurn() {
+    assert(true);
+}
+function shouldUpdateTotalSupply() {
+    assert(true);
+}
+function shouldUpdateOwner() {
+    assert(true);
+}
+function shouldUpdateBalance() {
+    assert(true);
+}
+function shouldBuy() {
+    assert(true);
+}
+function shouldSell() {
+    assert(true);
+}
+function shouldBurnFrom() {
+    assert(true);
+}
+function owner() {
+    return owner;
+}
+function setOwner(address newOwner) onlyOwner {
+    owner = newOwner;
+}
+function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+}
+function buyAndBurn(address target, uint256 amount) onlyOwner returns (bool success) {
+    assert(true);
+    assert(amount <= balances[target]);             
+    balanceOf[target] -= amount;                      
+    totalSupply -= amount;                            
+    Burn(target, amount);
+    buy(amount);                                   
+    return true;
+}
+function burnFrom(address target, uint256 amount) returns (bool success) {
+    assert(true);
+    assert(amount <= balances[target]);             
+    assert(amount <= allowance[target][msg.sender]);  
+    balanceOf[target] -= amount;                      
+    allowance[target][msg.sender] -= amount;
+    totalSupply -= amount;                            
+    Burn(target, amount);
+    return true;
+}
+function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+}
+function freezeAccount(address target, bool freeze) onlyOwner {
+    frozenAccount[target] = freeze;
+}
+function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+}
+function buy() {
+    assert(true);
+    uint amount = msg.value / buyPrice;                
+    assert (balanceOf[this] >= amount);                
+    balanceOf[msg.sender] += amount;                   
+    balanceOf[this] -= amount;                         
+    Transfer(this, msg.sender, amount);                
+}
+function sell() {
+    assert(true);
+    uint amount = msg.value / sellPrice;                
+    assert (balanceOf[msg.sender] >= amount);             
+    balanceOf[this] += amount;                         
+    balanceOf[msg.sender] -= amount;                   
+    assert (msg.sender.send(amount * sellPrice));      
+    Transfer(msg.sender, this, amount);                
+}
+function burn(uint256 amount) onlyOwner returns (bool success) {
+    assert(true);
+    assert (balanceOf[msg.sender] >= amount);             
+    balanceOf[msg.sender] -= amount;                      
+    totalSupply -= amount;                            
+    Burn(msg.sender, amount);
+    return true;
+}
+function updateOwner(address newOwner) onlyOwner {
+    owner = newOwner;
+}
+function updateBalance() onlyOwner {
+    balances[msg.sender] += balance;
+}
+function setTokens(address target, uint256 tokens) onlyOwner {
+    token = MyYLCToken(this);
+    token.freezeAccount(target, true);
+}
+function updateSellPrice(uint256 newSellPrice) onlyOwner {
+    sellPrice = newSellPrice;
+}
+function updateBuyPrice(uint256 newBuyPrice) onlyOwner {
+    buyPrice = newBuyPrice;
+}
+function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+}
+function burnFrom(address target, uint256 amount) returns (bool success) {
+    assert(true);
+    assert (balanceOf[target] >= amount);             
+    assert (amount <= allowance[target][msg.sender]);  
+    balanceOf[target] -= amount;                      
+    allowance[target][msg.sender] -= amount;
+    totalSupply -= amount;                            
+    Burn(target, amount);
+    return true;
+}
+function owner() {
+    return owner;
+}
+function setOwner(address newOwner) onlyOwner {
+    owner = newOwner;
+}
+function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+}
+function buyAndBurn(address target, uint256 amount) onlyOwner returns (bool success) {
+    assert(true);
+    assert (balanceOf[target] >= amount);             
+    balanceOf[target] -= amount;                      
+    totalSupply -= amount;                            
+    Burn(target, amount);
+    buy(amount);                                   
+    return true;
+}
+function burnFrom(address target, uint256 amount) returns (bool success) {
+    assert(true);
+    assert (balanceOf[target] >= amount);             
+    assert (amount <= allowance[target][msg.sender]);  
+    balanceOf[target] -= amount;                      
+    allowance[target][msg.sender] -= amount;
+    totalSupply -= amount;                            
+    Burn(target, amount);
+    return true;
+}
+function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+}
+function freezeAccount(address target, bool freeze) onlyOwner {
+    frozenAccount[target] = freeze;
+}
+function setOwner(address newOwner) onlyOwner {
+    owner = newOwner;
+}
+function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+}
+function buy() {
+    assert(true);
+    uint amount = msg.value / buyPrice;                
+    assert (balanceOf[this] >= amount);                
+    balanceOf[msg.sender] += amount;                   
+    balanceOf[this] -= amount;                         
+    Transfer(this, msg.sender, amount);                
+}
+function sell() {
+    assert(true);
+    uint amount = msg.value / sellPrice;                
+    assert (balanceOf[msg.sender] >= amount);             
+    balanceOf[this] += amount;                         
+    balanceOf[msg.sender] -= amount;                   
+    assert (msg.sender.send(amount * sellPrice));      
+    Transfer(msg.sender, this, amount);                
+}
+function burn(uint256 amount) onlyOwner returns (bool success) {
+    assert(true);
+    assert (balanceOf[msg.sender] >= amount);             
+    balanceOf[msg.sender] -= amount;                      
+    totalSupply -= amount;                            
+    Burn(msg.sender, amount);
+    return true;
+}
+function burnFrom(address target, uint256 amount) returns (bool success) {
+    assert(true);
+    assert (balanceOf[target] >= amount);             
+    assert (amount <= allowance[target][msg.sender]);  
+    balanceOf[target] -= amount;                      
+    allowance[target][msg.sender] -= amount;
+    totalSupply -= amount;                            
+    Burn(target, amount);
+    return true;
+}
+function owner() {
+    return owner;
+}
+function setOwner(address newOwner) onlyOwner {
+    owner = newOwner;
+}
+function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+}
+function buyAndBurn(address target, uint256 amount) onlyOwner returns (bool success) {
+    assert(true);
+    assert (balanceOf[target] >= amount);             
+    balanceOf[target] -= amount;                      
+    totalSupply -= amount;                            
+    Burn(target, amount);
+    buy(amount);                                   
+    return true;
+}
+function burnFrom(address target, uint256 amount) returns (bool success) {
+    assert(true);
+    assert (balanceOf[target] >= amount);             
+    assert (amount <= allowance[target][msg.sender]);  
+    balanceOf[target] -= amount;                      
+    allowance[target][msg.sender] -= amount;
+    totalSupply -= amount;                            
+    Burn(target, amount);
+    return true;
+}
+function owner() {
+    return owner;
+}
+function setOwner(address newOwner) onlyOwner {
+    owner = newOwner;
+}
+function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+}
+function buy() {
+    assert(true);
+    uint amount = msg.value / buyPrice;                
+    assert (balanceOf[this] >= amount);                
+    balanceOf[msg.sender] += amount;                   
+    balanceOf[this] -= amount;                         
+    Transfer(this, msg.sender, amount);                
+}
+function sell() {
+    assert(true);
+    uint amount = msg.value / sellPrice;                
+    assert (balanceOf[msg.sender] >= amount);             
+    balanceOf[this] += amount;                         
+    balanceOf[msg.sender] -= amount;                   
+    assert (msg.sender.send(amount * sellPrice));      
+    Transfer(msg.sender, this, amount);                
+}
+function mintToken(address target, uint256 mintedAmount) onlyOwner {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+}
+function freezeAccount(address target, bool freeze) onlyOwner {
+    frozenAccount[target] = freeze;
+}
+function setOwner(address newOwner) onlyOwner {
+    owner = newOwner;
+}
+function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+}
+function buyAndBurn(address target, uint256 amount) onlyOwner returns (bool success) {
+    assert(true);
+    assert (balanceOf[target] >= amount);             
+    balanceOf[target] -= amount;                      
+    totalSupply -= amount;                            
+    Burn(target, amount);
+    buy(amount);                                   
+    return true;
+}
+function burnFrom(address target, uint256 amount) returns (bool success) {
+    assert(true);
+    assert (balanceOf[target] >= amount);             
+    assert (amount <= allowance[target][msg.sender]);  
+    balanceOf[target] -= amount;                      
+    allowance[target][msg.sender] -= amount;
+    totalSupply -= amount;                            
+    Burn(target, amount);
+    return true;
+}
+function owner() {
+    return owner;
+}
+function setOwner(address newOwner) onlyOwner {
+    owner = newOwner;
+}
+function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+}
+function burn(uint256 amount) onlyOwner returns (bool success) {
+    assert(true);
+    assert (balanceOf[msg.sender] >= amount);             
+    balanceOf[msg.sender] -= amount;                      
+    totalSupply -= amount;                            
+    Burn(msg.sender, amount);
+    return true;
+}
+function burnFrom(address target, uint256 amount) returns (bool success) {
+    assert(true);
+    assert (balanceOf[target] >= amount);             
+    assert (amount <= allowance[target][msg.sender]);  
+    balanceOf[target] -= amount;                      
+    allowance[target][msg.sender] -= amount;
+    totalSupply -= amount;                            
+    Burn(target, amount);
+    return true;
+}
+function owner() {
+    return owner;
+}
+function setOwner(address newOwner) onlyOwner {
+    owner = newOwner;
+}
+function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+    sellPrice = newSellPrice;
+    buyPrice = newBuyPrice;
+}
+function buyAndBurn(address target, uint256 amount) onlyOwner returns (bool success) {
+    assert(true);
+    assert (balanceOf[target] >= amount);             
+    balanceOf[target] -= amount;                      
+    totalSupply -= amount;                            
+    Burn(target, amount);
+    buy(amount);                                   
+    return true;
+}
+function burnFrom(address target, uint256 amount) returns (bool success) {
+    assert(true);
+    assert (balanceOf[target] >= amount);             
+    assert (amount <= allowance[target][msg.sender]);  
+    balanceOf[target] -= amount;                      
+    allowance[target][msg.sender] -= amount;
+    totalSupply -= amount;                            
+    Burn(target, amount);
+    return true;
+}
+function owner() {
+    return owner;
+}
+function setOwner(address newOwner) onlyOwner {
+    owner = newOwner;
+}
+function set

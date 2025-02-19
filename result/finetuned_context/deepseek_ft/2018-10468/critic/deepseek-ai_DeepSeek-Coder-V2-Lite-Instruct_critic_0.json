@@ -1,0 +1,51 @@
+ ```json
+{
+    "output_list": [
+        {
+            "function_name": "distribute",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The vulnerability arises from the unchecked addition of `_amounts` to `totalAmount` without ensuring that the sum does not cause an overflow. This can lead to a denial of service or unauthorized deductions. The severity is high because it can bypass the subsequent `require` check, allowing unauthorized access to funds. The correctness score is low because the code does not properly handle the potential overflow. The profitability score is low because exploiting this vulnerability would require a coordinated attack, making it less likely for an attacker to profit significantly.",
+            "correctness": 3,
+            "severity": 8,
+            "profitability": 2
+        },
+        {
+            "function_name": "claimThrone",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function suffers from an integer overflow when adding `tokensIssued` to `totalSupply`. This can lead to incorrect state values and potentially allow attackers to exploit other vulnerabilities. The severity is high due to the potential for significant financial loss and control issues. The correctness score is low because the overflow is not checked. The profitability score is low because the vulnerability might be harder to exploit without knowing the exact state of `totalSupply`.",
+            "correctness": 3,
+            "severity": 9,
+            "profitability": 1
+        },
+        {
+            "function_name": "mintToken",
+            "auditor_idx": 0,
+            "vulnerability": "Token Devalue",
+            "criticism": "The function allows the owner to mint an arbitrary amount of tokens, which devalues the token and enables the owner to drain funds from the crowdsale. This is a significant vulnerability as it undermines the economic model of the token. The correctness score is low because there is no validation on the amount to be minted. The severity and profitability scores are high due to the potential for significant financial loss and the ease of exploitation.",
+            "correctness": 4,
+            "severity": 9,
+            "profitability": 9
+        },
+        {
+            "function_name": "ToOwner",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The function lacks any access control, allowing any user to claim ownership and withdraw funds. This is a critical vulnerability as it grants unauthorized access to sensitive operations. The severity is highest because it compromises the security and integrity of the contract. The correctness score is low because the function does not enforce access restrictions. The profitability score is low because the vulnerability might be difficult to exploit without knowing the exact timing and conditions.",
+            "correctness": 2,
+            "severity": 9,
+            "profitability": 1
+        },
+        {
+            "function_name": "getStats",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The function returns unprotected state variables, which can expose sensitive information. While the vulnerability itself is not inherently harmful, it is a poor practice to expose internal state variables directly. The correctness score is low because the function does not provide adequate protection for state variables. The severity and profitability scores are moderate because the impact is limited to information disclosure, and the vulnerability might be difficult to exploit.",
+            "correctness": 4,
+            "severity": 5,
+            "profitability": 3
+        }
+    ]
+}
+```

@@ -1,0 +1,24 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "token.transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function token.transfer(address _to, uint256 _value) {
+                _transfer(_from, _to, _value);
+            }",
+            "reason": "The function `token.transfer` does not check for integer overflow when the `_value` is large enough to cause an overflow. This can be exploited to transfer a large amount of tokens to a target address, thereby gaining an unfair advantage."
+        },
+        {
+            "function_name": "INTToken.mintToken",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+                balanceOf[target] += mintedAmount;
+                totalSupply += mintedAmount;
+                Transfer(0, this, mintedAmount);
+                Transfer(this, target, mintedAmount);
+            }",
+            "reason": "The function `INTToken.mintToken` does not check for the condition that the `mintedAmount` should be less than the `totalSupply`. This can be exploited to mint more tokens than the specified amount, thereby increasing the value of the tokens and gaining an unfair advantage."
+        }
+    ]
+}<eos>

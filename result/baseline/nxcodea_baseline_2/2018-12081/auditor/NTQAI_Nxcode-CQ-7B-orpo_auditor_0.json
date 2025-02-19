@@ -1,0 +1,69 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) {
+                if (balanceOf[msg.sender] < _value) throw;           
+                if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+                balanceOf[msg.sender] -= _value;                     
+                balanceOf[_to] += _value;                            
+                Transfer(msg.sender, _to, _value);                   
+            }",
+            "reason": "In the transfer function, the balanceOf[_to] += _value line can cause an integer overflow if the balanceOf[_to] is close to the maximum value of uint256. This can be exploited by an attacker to steal tokens from other users."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+                if (balanceOf[_from] < _value) throw;                 
+                if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+                if (_value > allowance[_from][msg.sender]) throw;   
+                balanceOf[_from] -= _value;                          
+                balanceOf[_to] += _value;                            
+                allowance[_from][msg.sender] -= _value;
+                Transfer(_from, _to, _value);
+                return true;
+            }",
+            "reason": "In the transferFrom function, the balanceOf[_to] += _value line can cause an integer overflow if the balanceOf[_to] is close to the maximum value of uint256. This can be exploited by an attacker to steal tokens from other users."
+        },
+        {
+            "function_name": "buy",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function buy() payable {
+                uint amount = msg.value / buyPrice;                
+                if (balanceOf[this] < amount) throw;               
+                balanceOf[msg.sender] += amount;                   
+                balanceOf[this] -= amount;                         
+                Transfer(this, msg.sender, amount);                
+            }",
+            "reason": "In the buy function, the amount = msg.value / buyPrice line can cause an integer overflow if the msg.value is close to the maximum value of uint256. This can be exploited by an attacker to buy tokens at a high price."
+        },
+        {
+            "function_name": "sell",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function sell(uint256 amount) {
+                if (balanceOf[msg.sender] < amount ) throw;        
+                balanceOf[this] += amount;                         
+                balanceOf[msg.sender] -= amount;                   
+                if (!msg.sender.send(amount * sellPrice)) {        
+                    throw;                                         
+                } else {
+                    Transfer(msg.sender, this, amount);            
+                }               
+            }",
+            "reason": "In the sell function, the amount * sellPrice line can cause an integer overflow if the amount is close to the maximum value of uint256. This can be exploited by an attacker to sell tokens at a high price."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+                balanceOf[target] += mintedAmount;
+                totalSupply += mintedAmount;
+                Transfer(0, this, mintedAmount);
+                Transfer(this, target, mintedAmount);
+            }",
+            "reason": "In the mintToken function, the balanceOf[target] += mintedAmount line can cause an integer overflow if the balanceOf[target] is close to the maximum value of uint256. This can be exploited by an attacker to mint more tokens than the contract can handle."
+        }
+    ]
+}

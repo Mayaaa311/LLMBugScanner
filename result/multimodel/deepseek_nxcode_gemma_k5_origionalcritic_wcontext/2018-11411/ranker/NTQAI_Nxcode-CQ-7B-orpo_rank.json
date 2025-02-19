@@ -1,0 +1,79 @@
+[
+  {
+    "function_name": "distributeFUD",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The function does not properly check the total value being distributed, leading to potential overflow.",
+    "correctness": 6,
+    "severity": 8,
+    "profitability": 3
+  },
+  {
+    "function_name": "transfer",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The function does not properly check the value being transferred, leading to potential overflow.",
+    "correctness": 6,
+    "severity": 7,
+    "profitability": 3
+  },
+  {
+    "function_name": "transferFrom",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The function does not properly check the value being transferred, leading to potential overflow.",
+    "correctness": 6,
+    "severity": 7,
+    "profitability": 3
+  },
+  {
+    "function_name": "distributeFUD",
+    "auditor_idx": 1,
+    "vulnerability": "Ether balance check bypass",
+    "criticism": "The function does not properly check the recipient's Ether balance before transferring FUD tokens, which can lead to unintended token transfers to addresses with insufficient funds.",
+    "correctness": 6,
+    "severity": 8,
+    "profitability": 4,
+    "reason": "The function does not check if the recipient's Ether balance is less than the specified threshold before transferring FUD tokens, which could allow malicious users to bypass the Ether balance check and transfer FUD tokens to addresses with insufficient Ether balance."
+  },
+  {
+    "function_name": "withdrawForeignTokens",
+    "auditor_idx": 1,
+    "vulnerability": "Unauthorized token withdrawal",
+    "criticism": "The function allows any address to withdraw all tokens from the contract without any authorization check, which poses a significant security risk.",
+    "correctness": 7,
+    "severity": 7,
+    "profitability": 5,
+    "reason": "The function does not require the contract owner's permission before allowing the withdrawal of tokens, making it susceptible to unauthorized token withdrawals."
+  },
+  {
+    "function_name": "transfer",
+    "auditor_idx": 2,
+    "vulnerability": "Potential Reentrancy Attack",
+    "criticism": "The function does not implement reentrancy guards, making it susceptible to attacks where an attacker can exploit contract interactions to drain funds.",
+    "correctness": 6,
+    "severity": 8,
+    "profitability": 5,
+    "reasoning": "The function lacks checks to prevent reentrancy, which can be exploited to manipulate balances and trigger unexpected behavior during transfers."
+  },
+  {
+    "function_name": "approve",
+    "auditor_idx": 2,
+    "vulnerability": "Unchecked Allowance",
+    "criticism": "The function allows an attacker to set the allowance to a non-zero value without ensuring the previous allowance is zero, which can lead to unexpected behavior.",
+    "correctness": 7,
+    "severity": 7,
+    "profitability": 4,
+    "reasoning": "The check for the previous allowance being zero is missing, allowing users to set allowances to non-zero values without resetting the previous allowance, which can lead to unexpected behavior and potential financial loss."
+  },
+  {
+    "function_name": "withdrawForeignTokens",
+    "auditor_idx": 2,
+    "vulnerability": "Unrestricted Withdrawal",
+    "criticism": "The function allows the owner to withdraw any foreign tokens from the contract without any restrictions, which can be risky if the contract interacts with untrusted tokens.",
+    "correctness": 8,
+    "severity": 6,
+    "profitability": 7,
+    "reasoning": "The function does not validate the source of tokens or the trustworthiness of the token contract, exposing the contract to potential risks of unauthorized token withdrawals."
+  }
+]

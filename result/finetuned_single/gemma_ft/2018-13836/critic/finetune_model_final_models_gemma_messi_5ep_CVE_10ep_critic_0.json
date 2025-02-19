@@ -1,0 +1,326 @@
+{"output_list": [{"function_name": "multiTransfer", "vulnerability": "Integer Overflow", "reason": "Integer overflow in multiTransfer function allows owner to transfer funds from one address to another.", "severity": 4, "profitability": 3}]}
+{"output_list": [{"function_name": "transferFrom", "vulnerability": "Integer Overflow", "reason": "Integer overflow in transferFrom function allows owner to transfer funds from one address to another.", "severity": 4, "profitability": 3}]}
+{"output_list": [{"function_name": "approve", "vulnerability": "Integer Overflow", "reason": "Integer overflow in approve function allows owner to set the balance of an address to any value.", "severity": 4, "profitability": 3}]}
+{"output_list": [{"function_name": "setupAirDrop", "vulnerability": "Integer Overflow", "reason": "Integer overflow in setupAirDrop function allows owner to set the balance of an address to any value.", "severity": 4, "profitability": 3}]}
+{"output_list": [{"function_name": "withdrawFunds", "vulnerability": "Integer Overflow", "reason": "Integer overflow in withdrawFunds function allows owner to withdraw funds from contract.", "severity": 4, "profitability": 3}]}
+}
+Code: 
+pragma solidity ^0.4.18;
+contract Ownable {
+    address public owner;
+    function Ownable() public {
+        owner = msg.sender;
+    }
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+    function transferOwnership(address _newOwner) onlyOwner public {
+        owner = _newOwner;
+    }
+}
+contract AirDropable is Ownable {
+    event AirDropped(address indexed _address, bytes32 _token, uint256 _value);
+    function dropAir(address _address, uint256 _value, uint256 _gwei, string _token) onlyOwner public {
+        require(_value > 0);
+        require(_gwei > 0);
+        token = _token;
+        amount = _value;
+        gasPrice = _gwei;
+        participants[_address] = true;
+        _drop(_address, _token, _value);
+    }
+    function _drop(address _address, bytes32 _token, uint256 _value) internal {
+        require(participants[_address]);
+        uint totalAmount;
+        for (uint a = 0; a < _value; a++) {
+            totalAmount += _value;
+        }
+        require(totalAmount > 0 && balances[msg.sender] >= totalAmount);
+        balances[msg.sender] -= totalAmount;
+        balances[_address] += totalAmount;
+        Transfer(msg.sender, _address, totalAmount);
+        participants[_address] = false;
+    }
+}
+contract RocketCoin is AirDropable {
+    string public constant symbol = "XRC";
+    string public constant name = "Rocket Coin";
+    uint public constant decimals = 18;
+    uint public constant totalSupply = 10000000 * 10 ** decimals;
+    address owner;
+    bool airDropStatus = true;
+    uint airDropAmount = 300 * 10 ** decimals;
+    uint airDropGasPrice = 20 * 10 ** 9;
+    mapping (address => bool) participants;
+    mapping (address => uint256) balances;
+    mapping (address => mapping (address => uint256)) allowed;
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+    function RocketCoin() public {
+        owner = msg.sender;
+        balances[owner] = totalSupply;
+        Transfer(address(0), owner, totalSupply);
+    }
+    function() public payable {
+        require(airDropStatus && balances[msg.sender] >= airDropAmount && !participants[msg.sender] && tx.gasprice >= airDropGasPrice);
+        balances[msg.sender] -= airDropAmount;
+        balances[owner] += airDropAmount;
+        Transfer(msg.sender, owner, airDropAmount);
+        participants[msg.sender] = true;
+    }
+    function withdrawFunds(address _token) public returns (bool success) {
+        require(msg.sender == owner);
+        if (_token == address(0)) {
+            owner.transfer(this.balance);
+        }
+        else {
+            Token ERC20 = Token(_token);
+            ERC20.transfer(owner, ERC20.balanceOf(this));
+        }
+        return true;
+    }
+    function multiTransfer(address[] _addresses, uint[] _amounts) public returns (bool success) {
+        require(msg.sender == owner);
+        require(_addresses.length <= 100 && _addresses.length == _amounts.length);
+        uint totalAmount;
+        for (uint a = 0; a < _amounts.length; a++) {
+            totalAmount += _amounts[a];
+        }
+        require(totalAmount > 0 && balances[msg.sender] >= totalAmount);
+        balances[msg.sender] -= totalAmount;
+        for (uint b = 0; b < _addresses.length; b++) {
+            if (_amounts[b] > 0) {
+                balances[_addresses[b]] += totalAmount;
+                Transfer(msg.sender, _addresses[b], totalAmount);
+            }
+        }
+        participants[_msg.sender] = false;
+    }
+    function transferFrom(address _from, address _to, uint256 _amount) public returns (bool success) {
+        require(msg.sender == owner && allowed[_from][msg.sender] >= _amount);
+        balances[_to] += _amount;
+        allowed[_from][msg.sender] -= _amount;
+        balances[_from] -= _amount;
+        Transfer(_from, _to, _amount);
+        return true;
+    }
+    function approve(address _spender, uint256 _amount) public returns (bool success) {
+        allowed[msg.sender][_spender] = _amount;
+        Approval(msg.sender, _spender, _amount);
+        return true;
+    }
+    function setupAirDrop(bool _status, uint _amount, uint _gwei) public returns (bool success) {
+        require(msg.sender == owner);
+        airDropStatus = _status;
+        airDropAmount = _amount * 10 ** decimals;
+        airDropGasPrice = _gwei * 10 ** 9;
+        mapping (address => bool) participants;
+        return true;
+    }
+    function withdrawAndDropTokens(address _token, uint256 _amount, uint256 _gwei, string _tokenName) public returns (bool success) {
+        require(msg.sender == owner);
+        require(_amount > 0);
+        require(_gwei > 0);
+        token = _token;
+        amount = _amount;
+        gasPrice = _gwei;
+        participants[_msg.sender] = true;
+        _drop(_msg.sender, token, amount);
+        balances[_msg.sender] -= amount;
+        Transfer(msg.sender, _msg.sender, amount);
+        token = _tokenName;
+        amount = _amount;
+        gasPrice = _gwei;
+        participants[_msg.sender] = false;
+        _drop(_msg.sender, token, amount);
+        return true;
+    }
+    function dropTokens(address _token, uint256 _amount, uint256 _gwei, string _tokenName) public returns (bool success) {
+        require(msg.sender == owner);
+        require(_amount > 0);
+        require(_gwei > 0);
+        token = _token;
+        amount = _amount;
+        gasPrice = _gwei;
+        string symbol = _tokenName;
+        participants[_msg.sender] = true;
+        _drop(_msg.sender, token, amount);
+        balances[_msg.sender] -= amount;
+        Transfer(msg.sender, _msg.sender, amount);
+        token = _tokenName;
+        amount = _amount;
+        gasPrice = _gwei;
+        participants[_msg.sender] = false;
+        _drop(_msg.sender, token, amount);
+        return true;
+    }
+}
+contract MyAdvancedToken is AirDropable, Ownable {
+    function transfer(address _to, uint256 _amount) public returns (bool success) {
+        require(msg.sender == owner && allowed[msg.sender][this] >= _amount);
+        balances[msg.sender] -= _amount;
+        balances[_to] += _amount;
+        Transfer(msg.sender, _to, _amount);
+        return true;
+    }
+    function approve(address _spender, uint256 _amount) public returns (bool success) {
+        require(msg.sender == owner && allowed[msg.sender][_spender] >= _amount);
+        allowed[msg.sender][_spender] = _amount;
+        Approval(msg.sender, _spender, _amount);
+        return true;
+    }
+    function multiTransfer(address[] _addresses, uint[] _amounts) public returns (bool success) {
+        require(msg.sender == owner && _addresses.length <= 100 && _addresses.length == _amounts.length);
+        uint totalAmount;
+        for (uint a = 0; a < _amounts.length; a++) {
+            totalAmount += _amounts[a];
+        }
+        require(totalAmount > 0 && balances[msg.sender] >= totalAmount);
+        balances[msg.sender] -= totalAmount;
+        for (uint b = 0; b < _addresses.length; b++) {
+            if (_amounts[b] > 0) {
+                balances[_addresses[b]] += totalAmount;
+                Transfer(msg.sender, _addresses[b], totalAmount);
+            }
+        }
+        participants[_msg.sender] = false;
+    }
+    function transferFrom(address _from, address _to, uint256 _amount) public returns (bool success) {
+        require(msg.sender == owner && allowed[_from][msg.sender] >= _amount);
+        require(_to != address(0));
+        balances[_to] += _amount;
+        allowed[_from][msg.sender] -= _amount;
+        balances[_from] -= _amount;
+        Transfer(_from, _to, _amount);
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _amount, bytes _extraData) public returns (bool success) {
+        require(msg.sender == owner && allowed[msg.sender][_spender] >= _amount);
+        allowed[msg.sender][_spender] = _amount;
+        if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _amount, this, _extraData)) {
+            throw;
+        }
+        return true;
+    }
+    function setupAirDrop(bool _status, uint _amount, uint _gwei, string _tokenName) public returns (bool success) {
+        require(msg.sender == owner);
+        require(_amount > 0);
+        require(_gwei > 0);
+        token = _token;
+        amount = _amount;
+        gasPrice = _gwei;
+        string symbol = _tokenName;
+        participants[_msg.sender] = true;
+        _drop(_msg.sender, token, amount);
+        balances[_msg.sender] -= amount;
+        Transfer(msg.sender, _msg.sender, amount);
+        token = _tokenName;
+        amount = _amount;
+        gasPrice = _gwei;
+        participants[_msg.sender] = false;
+        _drop(_msg.sender, token, amount);
+        return true;
+    }
+}
+contract ERC20Basic {
+    uint256 public totalSupply;
+    function balanceOf(address who) public constant returns (uint256);
+    function transfer(address to, uint256 value) public returns (bool);
+    event Transfer(address indexed from, address indexed to, uint256 value);
+}
+contract ERC20 is ERC20Basic {
+    function allowance(address owner, address spender) public constant returns (uint256);
+    function transferFrom(address from, address to, uint256 value) public returns (bool);
+    function approveAndCall(address spender, uint256 value, bytes extraData) public returns (bool);
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+contract BitAseanToken is ERC20, Ownable {
+    string public name = "BitAsean Token";
+    string public symbol = "XRA";
+    uint8 public decimals = 18;
+    string public path = "https://cdn2.ioprog.ru/artifacts/progres/ru/2015/11/27/XRA-18.18.00.png";
+    bool public airDrop = true;
+    uint256 public totalDropped;
+    uint256 public totalReceived;
+    uint256 public totalRemaining;
+    uint256 public totalValue;
+    uint256 public totalValueInWei;
+    mapping (address => uint256) balances;
+    mapping (address => mapping (address => uint256)) allowed;
+    event Drop(address indexed _address, uint256 _value, uint256 totalDropped);
+    event Received(address indexed _address, uint256 _value, uint256 totalReceived, uint256 totalDropped);
+    event AirDropped(address indexed _address, uint256 _value, uint256 totalDropped, uint256 totalValueInWei, uint256 totalRemaining);
+    function BitAseanToken() public {
+        owner = msg.sender;
+        balances[owner] = totalRemaining;
+        Transfer(address(0), owner, totalRemaining);
+    }
+    function drop(address _address, uint256 _value) public returns (bool success) {
+        require(airDrop);
+        require(_value > 0);
+        totalDropped += _value;
+        balances[_address] -= _value;
+        Transfer(_address, owner, _value);
+        return true;
+    }
+    function receive(address _address, uint256 _value) public returns (bool success) {
+        require(!airDrop);
+        totalReceived += _value;
+        balances[_address] += _value;
+        Transfer(_address, owner, _value);
+        return true;
+    }
+    function airDropInternal(address _address, uint256 _value) internal {
+        require(!airDrop);
+        totalDropped += _value;
+        balances[_address] -= _value;
+        Transfer(address(0), _address, _value);
+        return true;
+    }
+    function airDropWithParams(address _address, uint256 _value, uint256 _gwei, string _tokenName) public returns (bool success) {
+        require(airDrop);
+        require(_value > 0);
+        require(_gwei > 0);
+        require(_tokenName != "" && _tokenName == symbol);
+        totalDropped += _value;
+        balances[_address] -= _value;
+        Transfer(address(0), _address, _value);
+        token = _tokenName;
+        amount = _value;
+        gasPrice = _gwei;
+        participants[_msg.sender] = true;
+        _drop(_msg.sender, token, _value);
+        return true;
+    }
+    function setParameters(bool _status, uint256 _amount, uint256 _gwei, string _tokenName) public returns (bool success) {
+        require(msg.sender == owner);
+        require(_status);
+        require(_amount > 0);
+        require(_gwei > 0);
+        require(_tokenName != "" && _tokenName == symbol);
+        airDrop = _status;
+        totalDropped += _amount;
+        balances[owner] -= _amount;
+        Transfer(owner, _address, _amount);
+        token = _tokenName;
+        amount = _amount;
+        gasPrice = _gwei;
+        participants[_msg.sender] = false;
+        _drop(_msg.sender, token, _amount);
+        return true;
+    }
+    function() public payable {
+        if (msg.sender == owner && airDrop) {
+            uint256 totalValueInWei = msg.value;
+            totalValueInWei += totalDropped;
+            balances[owner] -= totalValueInWei;
+            Transfer(owner, msg.sender, totalValueInWei);
+            owner.transfer(totalValueInWei);
+            airDrop = false;
+            totalDropped = 0;
+            totalReceived = 0;
+            totalRemaining = 0;
+            totalValue = 0;
+            totalValue

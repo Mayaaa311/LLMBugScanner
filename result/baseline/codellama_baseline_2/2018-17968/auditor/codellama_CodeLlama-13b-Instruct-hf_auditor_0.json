@@ -1,0 +1,101 @@
+ Here are the 5 most severe vulnerabilities in the provided smart contract, along with their associated functions, reasons, and intermediate reasoning:
+
+1. Integer Overflow Vulnerability in the `enterWithReferral` Function
+
+Function Name: `enterWithReferral`
+
+Vulnerability: Integer Overflow
+
+Function Code:
+```
+function enterWithReferral(uint256 _roomId, address referrer) public payable {
+    Room storage room = allRooms[_roomId-1]; 
+    require(room.players.length < 6);
+    require(msg.value >= room.entryPrice);
+    uint256 referrerCut = SafeMath.div(room.entryPrice, 100); 
+    referrer.transfer(referrerCut);
+    room.players.push(msg.sender);
+    room.balance += room.entryPrice - referrerCut;
+    emit newPlayer(_roomId, msg.sender);
+    if(room.players.length == 6){
+        emit fullRoom(_roomId);
+        executeRoom(_roomId);
+    }
+}
+```
+Reason: The `referrerCut` variable is calculated using the `SafeMath.div` function, which can lead to integer overflow if the `room.entryPrice` is very large. This can cause the `referrerCut` variable to become negative, which can lead to a loss of funds for the referrer.
+
+2. Wrong Logic Vulnerability in the `executeRoom` Function
+
+Function Name: `executeRoom`
+
+Vulnerability: Wrong Logic
+
+Function Code:
+```
+function executeRoom(uint256 _roomId) public {
+    Room storage room = allRooms[_roomId-1]; 
+    require(room.players.length == 6);
+    uint256 halfFee = SafeMath.div(room.entryPrice, 20);
+    CTO.transfer(halfFee);
+    CEO.transfer(halfFee);
+    room.balance -= halfFee * 2;
+    uint256 deadSeat = random();
+    distributeFunds(_roomId, deadSeat);
+    delete room.players;
+}
+```
+Reason: The `executeRoom` function is called when the number of players in the room reaches 6. However, the function does not check if the room is full before executing the game. This can lead to a situation where the game is executed with fewer than 6 players, which can cause the `distributeFunds` function to fail.
+
+3. Bad Randomness Vulnerability in the `random` Function
+
+Function Name: `random`
+
+Vulnerability: Bad Randomness
+
+Function Code:
+```
+function random() private view returns (uint256) {
+    return uint256(uint256(keccak256(block.timestamp, block.difficulty))%6);
+}
+```
+Reason: The `random` function uses the `keccak256` hash function to generate a random number. However, the `keccak256` function is not a cryptographically secure random number generator, and can be predictable. This can lead to a situation where an attacker can predict the outcome of the game, and manipulate the game to their advantage.
+
+4. Access Control Vulnerability in the `refundPlayersInRoom` Function
+
+Function Name: `refundPlayersInRoom`
+
+Vulnerability: Access Control
+
+Function Code:
+```
+function refundPlayersInRoom(uint256 _roomId) public onlyCTO{
+    Room storage room = allRooms[_roomId-1]; 
+    uint256 nbrOfPlayers = room.players.length;
+    uint256 balanceToRefund = SafeMath.div(room.balance,nbrOfPlayers);
+    for (uint i = 0; i<nbrOfPlayers; i++) {
+         room.players[i].transfer(balanceToRefund);
+         room.balance -= balanceToRefund;
+    }
+    emit roomRefunded(_roomId, room.players);
+    delete room.players;
+}
+```
+Reason: The `refundPlayersInRoom` function is only callable by the `CTO` address. However, the function does not check if the room is full before refunding the players. This can lead to a situation where the players are refunded even if the room is not full, which can cause the `distributeFunds` function to fail.
+
+5. Typo Constructor Vulnerability in the `RuletkaIo` Constructor
+
+Function Name: `RuletkaIo` Constructor
+
+Vulnerability: Typo Constructor
+
+Function Code:
+```
+function RuletkaIo() public {
+    CTO = msg.sender;
+    CEO = msg.sender;
+}
+```
+Reason: The `RuletkaIo` constructor sets the `CTO` and `CEO` addresses to the same value, which is the address of the contract creator. However, the constructor does not check if the `CTO` and `CEO` addresses are different, which can lead to a situation where the `CTO` and `CEO` addresses are the same, which can cause the `setCTO` and `setCEO` functions to fail.
+
+Note: These vulnerabilities are exploitable in real-world scenarios and can be beneficial to attackers.

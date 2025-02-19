@@ -1,0 +1,329 @@
+{
+    "output_list": [
+        {
+            "function_name": "burn",
+            "code": "function burn(uint amount) public onlyOwner {
+        require(amount > 0 && _burnRemaining(amount), "Burn_not_allowed");
+        address(this).send(amount);
+        emit Burn(msg.sender, amount);
+    }",
+            "vulnerability": "REENTRANCY",
+            "reason": "The reentrancy guard protects against the same contract being called multiple times by different owners."
+        },
+        {
+            "function_name": "_burnRemaining",
+            "code": "function _burnRemaining(uint amount) internal view returns (bool) {
+        return (amount <= totalB) && (totalB - amount) > gasleft();
+    }",
+            "vulnerability": "REENTRANCY",
+            "reason": "The reentrancy guard protects against the same contract being called multiple times by different owners."
+        },
+        {
+            "function_name": "setOwner",
+            "code": "function setOwner(address owner_)
+    public
+    onlyOwner
+    {
+        owner = owner_;
+    }",
+            "vulnerability": "REENTRANCY",
+            "reason": "The reentrancy guard protects against the same contract being called multiple times by different owners."
+        },
+        {
+            "function_name": "setParams",
+            "code": "function setParams(address userStakingPoolAddress, address tokenSellerAddress, address daoAddress)
+    public
+    onlyOwner
+    {
+        userStakingPoolAddress = userStakingPoolAddress;
+        tokenSellerAddress = tokenSellerAddress;
+        daoAddress = daoAddress;
+    }",
+            "vulnerability": "REENTRANCY",
+            "reason": "The reentrancy guard protects against the same contract being called multiple times by different owners."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable {
+        uint amount = msg.value;
+        require(amount > 0 && _checkMinMax(amount), "Invalid amount");
+        address investor = msg.sender;
+        uint fee = amount.mul(REWARD_PERCENTAGE) / 100;
+        uint balance = amount.sub(fee);
+        require(_burnRemaining(balance), "Burn_not_allowed");
+        _addBalance(investor, balance);
+        emit Trade(msg.sender, userStakingPoolAddress, amount, fee, true);
+    }",
+            "vulnerability": "REENTRANCY",
+            "reason": "The reentrancy guard protects against the same contract being called multiple times by different owners."
+        },
+        {
+            "function_name": "withdraw",
+            "code": "function withdraw(address target, uint amount) public onlyOwner {
+        require(amount > 0 && _checkMinMax(amount), "Invalid amount");
+        address investor = msg.sender;
+        uint fee = amount.mul(REWARD_PERCENTAGE) / 100;
+        uint balance = amount.sub(fee);
+        require(_burnRemaining(balance), "Burn_not_allowed");
+        _addBalance(investor, balance);
+        target.transfer(balance);
+        emit Trade(msg.sender, userStakingPoolAddress, amount, fee, true);
+    }",
+            "vulnerability": "REENTRANCY",
+            "reason": "The reentrancy guard protects against the same contract being called multiple times by different owners."
+        },
+        {
+            "function_name": "setDAO",
+            "code": "function setDAO(address daoAddress) public onlyOwner {
+        daoAddress = daoAddress;
+        emit SettingsUpdated(now);
+    }",
+            "vulnerability": "REENTRANCY",
+            "reason": "The reentrancy guard protects against the same contract being called multiple times by different owners."
+        },
+        {
+            "function_name": "setPoolAddress",
+            "code": "function setPoolAddress(address userStakingPoolAddress) public onlyOwner {
+        userStakingPoolAddress = userStakingPoolAddress;
+        emit SettingsUpdated(now);
+    }",
+            "vulnerability": "REENTRANCY",
+            "reason": "The reentrancy guard protects against the same contract being called multiple times by different owners."
+        },
+        {
+            "function_name": "setTokenSeller",
+            "code": "function setTokenSeller(address tokenSellerAddress) public onlyOwner {
+        tokenSellerAddress = tokenSellerAddress;
+        emit SettingsUpdated(now);
+    }",
+            "vulnerability": "REENTRANCY",
+            "reason": "The reentrancy guard protects against the same contract being called multiple times by different owners."
+        },
+        {
+            "function_name": "buyTokens",
+            "code": "function buyTokens(address token, uint amount) public onlyOwner {
+        require(amount > 0 && _checkMinMax(amount), "Invalid amount");
+        address investor = msg.sender;
+        uint fee = amount.mul(DAO_PERDENTAGE) / 100;
+        uint balance = amount.sub(fee);
+        require(_burnRemaining(balance), "Burn_not_allowed");
+        _addBalance(investor, balance);
+        token.transfer(investor, balance);
+        emit Trade(msg.sender, userStakingPoolAddress, amount, fee, true);
+    }",
+            "vulnerability": "REENTRANCY",
+            "reason": "The reentrancy guard protects against the same contract being called multiple times by different owners."
+        },
+        {
+            "function_name": "addBalance",
+            "code": "function addBalance(address target, uint balance) internal {
+        require(target != address(0), "Invalid target address");
+        uint existingBalance = _getBalance(target);
+        require(balance > existingBalance, "New balance is greater than existing");
+        _balance[target] = _balance[target].add(balance);
+    }",
+            "vulnerability": "REENTRANCY",
+            "reason": "The reentrancy guard protects against the same contract being called multiple times by different owners."
+        },
+        {
+            "function_name": "_checkMinMax",
+            "code": "function _checkMinMax(uint value) internal pure returns (bool) {
+        return (value < 0) || (value > 2**256 - 1);
+    }",
+            "vulnerability": "REENTRANCY",
+            "reason": "The reentrancy guard protects against the same contract being called multiple times by different owners."
+        },
+        {
+            "function_name": "_addBalance",
+            "code": "function _addBalance(address target, uint balance) internal
+    {
+        require(target != address(0), "Invalid target address");
+        uint existingBalance = _getBalance(target);
+        require(balance > existingBalance, "New balance is greater than existing");
+        _balance[target] = _balance[target].add(balance);
+    }",
+            "vulnerability": "REENTRANCY",
+            "reason": "The reentrancy guard protects against the same contract being called multiple times by different owners."
+        },
+        {
+            "function_name": "_getBalance",
+            "code": "function _getBalance(address target) internal pure returns (uint) {
+        return balances[target];
+    }",
+            "vulnerability": "REENTRANCY",
+            "reason": "The reentrancy guard protects against the same contract being called multiple times by different owners."
+        },
+        {
+            "function_name": "()",
+            "code": "function() public payable {
+        totalDAORequests_ += 1;
+        totalDAOProviders_ += 1;
+        totalRewardSize_ += amount;
+        totalRewardMinit_ += amount;
+        if (totalRewardMinit_ > totalRewardMax_) {
+            userChangeBlock_ = 1;
+        }
+        if (totalRewardMinit_ == totalRewardMax_) {
+            userChangeBlocks_ += 1;
+            if (userChangeBlocks_ == userChangeBlockMax_) {
+                userChangeMax_ = 60;
+            }
+        }
+        if (userChangeMax_ == 60) {
+            userChangeBlock_ = 0;
+        }
+        if (totalBurnRemaining_ < totalBurnPassedOut_) {
+            userChangeBlock_ = 1;
+        }
+        if (totalBurnRemaining_ >= totalBurnPassedOut_) {
+            userChangeBlock_ = 0;
+        }
+        if (userChangeBlock_ == 0 && userChangeBlocks_ == 0) {
+            maxBlocks = 52;
+        }
+        totalBurnPassedOut_ = totalBurnPassedOut_;
+        totalBurnRemaining_ = totalBurnRemaining_;
+        totalDAORequests_ += 1;
+        totalDAOProviders_ += 1;
+        totalRewardSize_ += amount;
+        totalRewardMinit_ += amount;
+        if (totalRewardMinit_ > totalRewardMax_) {
+            userChangeBlock_ = 1;
+        }
+        if (totalRewardMinit_ == totalRewardMax_) {
+            userChangeBlocks_ += 1;
+            if (userChangeBlocks_ == userChangeBlockMax_) {
+                userChangeMax_ = 60;
+            }
+        }
+        if (userChangeMax_ == 60) {
+            userChangeBlock_ = 0;
+        }
+        if (totalBurnRemaining_ < totalBurnPassedOut_) {
+            userChangeBlock_ = 1;
+        }
+        if (totalBurnRemaining_ >= totalBurnPassedOut_) {
+            userChangeBlock_ = 0;
+        }
+        if (userChangeBlock_ == 0 && userChangeBlocks_ == 0) {
+            maxBlocks = 52;
+        }
+        totalBurnPassedOut_ = totalBurnPassedOut_;
+        totalBurnRemaining_ = totalBurnRemaining_;
+        totalDAORequests_ += 1;
+        totalDAOProviders_ += 1;
+        totalRewardSize_ += amount;
+        totalRewardMinit_ += amount;
+        if (totalRewardMinit_ > totalRewardMax_) {
+            userChangeBlock_ = 1;
+        }
+        if (totalRewardMinit_ == totalRewardMax_) {
+            userChangeBlocks_ += 1;
+            if (userChangeBlocks_ == userChangeBlockMax_) {
+                userChangeMax_ = 60;
+            }
+        }
+        if (userChangeMax_ == 60) {
+            userChangeBlock_ = 0;
+        }
+        uint balance = _getBalance(msg.sender);
+        require(balance > 0, "Insufficient balance");
+        uint burnAmount = balance.sub(totalBurnRemaining_);
+        if (burnAmount > 0) {
+            _remainingRewards[msg.sender] = _remainingRewards[msg.sender].sub(burnAmount);
+            totalBurnRemaining_ = totalBurnRemaining_.add(burnAmount);
+            totalRewardRemaining_ = totalRewardRemaining_.add(burnAmount);
+            totalBurnPassedOut_ = totalBurnPassedOut_.add(burnAmount);
+        }
+        if (totalBurnRemaining_ >= totalBurnPassedOut_) {
+            userChangeBlock_ = 0;
+        }
+        if (totalBurnRemaining_ < totalBurnPassedOut_) {
+            userChangeBlock_ = 1;
+        }
+        if (totalBurnRemaining_ == totalBurnPassedOut_) {
+            userChangeBlocks_ += 1;
+        }
+        if (userChangeBlocks_ == userChangeBlockMax_) {
+            userChangeMax_ = 60;
+        }
+        if (userChangeMax_ == 60) {
+            userChangeBlock_ = 0;
+        }
+        uint userReward = 0;
+        if (userChangeBlock_ == 1) {
+            userReward = _remainingRewards[msg.sender];
+        }
+        if (userReward > 0) {
+            _rewards[msg.sender] = _rewards[msg.sender].sub(userReward);
+            totalRewardIssuedOut_ = totalRewardIssuedOut_.add(userReward);
+        }
+        if (totalRewardIssuedOut_ >= totalRewardRemaining_) {
+            userChangeBlocks_ += 1;
+        }
+        if (userChangeBlocks_ == userChangeBlockMax_) {
+            userChangeMax_ = 60;
+        }
+        if (userChangeMax_ == 60) {
+            userChangeBlock_ = 0;
+        }
+        uint ownerBalance = _getBalance(msg.sender);
+        require(ownerBalance > 0, "Insufficient owner balance");
+        uint toOwner = ownerBalance.sub(totalBurnRemaining_);
+        if (toOwner > 0) {
+            _DAOFund[msg.sender] = _DAOFund[msg.sender].add(toOwner);
+            totalBurnRemaining_ = totalBurnRemaining_.add(toOwner);
+            totalDAORequests_ += 1;
+            totalDAOProviders_ += 1;
+            totalRewardSize_ += toOwner;
+            totalRewardMinit_ += toOwner;
+            if (totalRewardMinit_ > totalRewardMax_) {
+                userChangeBlock_ = 1;
+            }
+        }
+        if (totalBurnRemaining_ >= totalBurnPassedOut_) {
+            userChangeBlock_ = 0;
+        }
+        if (totalBurnRemaining_ < totalBurnPassedOut_) {
+            userChangeBlock_ = 1;
+        }
+        if (userChangeMax_ == 60) {
+            userChangeBlock_ = 0;
+        }
+        uint balance = _getBalance(msg.sender);
+        require(balance > 0, "Insufficient balance");
+        uint burnAmount = balance.sub(totalBurnRemaining_);
+        if (burnAmount > 0) {
+            _remainingRewards[msg.sender] = _remainingRewards[msg.sender].sub(burnAmount);
+            totalBurnRemaining_ = totalBurnRemaining_.add(burnAmount);
+            totalRewardRemaining_ = totalRewardRemaining_.add(burnAmount);
+            totalBurnPassedOut_ = totalBurnPassedOut_.add(burnAmount);
+        }
+        if (totalBurnRemaining_ >= totalBurnPassedOut_) {
+            userChangeBlocks_ += 1;
+        }
+        if (totalBurnRemaining_ < totalBurnPassedOut_) {
+            userChangeBlock_ = 1;
+        }
+        if (totalBurnRemaining_ == totalBurnPassedOut_) {
+            userChangeBlocks_ += 1;
+        }
+        if (userChangeMax_ == 60) {
+            userChangeBlock_ = 0;
+        }
+        uint ownerFee = 0;
+        if (userChangeBlock_ == 1) {
+            ownerFee = _remainingRewards[msg.sender];
+        }
+        if (ownerFee > 0) {
+            _rewards[msg.sender] = _rewards[msg.sender].sub(ownerFee);
+            totalRewardIssuedOut_ = totalRewardIssuedOut_.add(ownerFee);
+            owner.transfer(ownerFee);
+        }
+        if (totalBurnRemaining_ >= totalBurnPassedOut_) {
+            userChangeBlocks_ += 1;
+        }
+        if (totalBurnRemaining_ < totalBurnPassedOut_) {
+            userChangeBlock_ = 1;
+        }
+        if (totalBurn

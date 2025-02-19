@@ -1,0 +1,35 @@
+tput:
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "balances[msg.sender] -= _value; balances[_to] += _value;",
+            "reason": "If the sender has a larger balance than the receiver, this function will underflow, allowing the sender to gain an unfair advantage."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "balances[_from] -= _value; allowed[_from][msg.sender] -= _value;",
+            "reason": "This function does not check if the sender has enough balance or allowance to transfer the specified amount, allowing potential fraud."
+        },
+        {
+            "function_name": "balanceOf",
+            "vulnerability": "Wrong Logic",
+            "function_code": "return balances[_owner];",
+            "reason": "This function does not differentiate between the owner and the authorized delegate, potentially allowing unauthorized access."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Bad Randomness",
+            "function_code": "allowed[msg.sender][_spender] = _value;",
+            "reason": "This function does not properly validate the sender's authority to approve another account, allowing potential misuse."
+        },
+        {
+            "function_name": "allowance",
+            "vulnerability": "Typo Constructor",
+            "function_code": "return allowed[_owner][_spender];",
+            "reason": "This function does not properly differentiate between the owner and the delegate, allowing a potential attacker to gain access to more funds than intended."
+        }
+    ]
+}<eos>

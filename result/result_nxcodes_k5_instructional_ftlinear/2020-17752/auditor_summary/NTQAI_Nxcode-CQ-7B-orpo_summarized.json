@@ -1,0 +1,22 @@
+{
+    "output_list": [
+        {
+            "function_name": "GetNow",
+            "code": "function GetNow() public constant returns(uint256){ return now; }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The function name 'GetNow' is misspelled as 'GetNow'. This typo could lead to confusion and potential security vulnerabilities."
+        },
+        {
+            "function_name": "GetStats",
+            "code": "function GetStats()public constant returns (uint256,uint256,uint256,uint256){ uint256 timeToEnd = 0; uint256 round =0; StageData memory _s = stageDataStore[stageIndex]; if(GetNow()>=start){ round = stageIndex+1; if(_s.stageTime>GetNow()) { timeToEnd = _s.stageTime-GetNow(); } else{ return(0,0,0,0); } } else{ timeToEnd = start-GetNow(); } return(timeToEnd, round, _s.stageSum*1000/_s.stagePrice, GetMaxStageEthAmount().div(10**15)); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function 'GetStats' uses the 'now' variable, which is a timestamp and can potentially overflow. This could lead to incorrect calculations and potential security vulnerabilities."
+        },
+        {
+            "function_name": "GetMaxStageEthAmount",
+            "code": "function GetMaxStageEthAmount() public constant returns(uint256){ StageData memory currS = stageDataStore[stageIndex]; uint256 retVal = currS.stageSum; retVal = retVal*(10**18); retVal = retVal/currS.stagePrice; retVal = retVal.sub(this.balance); return retVal; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function 'GetMaxStageEthAmount' uses the 'this.balance' variable, which can potentially overflow. This could lead to incorrect calculations and potential security vulnerabilities."
+        }
+    ]
+}

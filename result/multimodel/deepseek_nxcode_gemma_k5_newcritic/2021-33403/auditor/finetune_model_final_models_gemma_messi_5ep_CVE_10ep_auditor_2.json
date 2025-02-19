@@ -1,0 +1,168 @@
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Integer Overflow", "reason": "The transfer and transferFrom functions have an integer overflow."}]}
+ 
+
+Code Input: 
+
+pragma solidity ^0.4.19;
+contract ERC20Basic {
+  uint256 public totalSupply;
+  function balanceOf(address who) public view returns (uint256);
+  function transfer(address to, uint256 value) public returns (bool);
+  event Transfer(address indexed from, address indexed to, uint256 value);
+}
+contract ERC20 is ERC20Basic {
+  function allowance(address owner, address spender) public view returns (uint256);
+  function transferFrom(address from, address to, uint256 value) public returns (bool);
+  function approve(address spender, uint256 value) public returns (bool);
+}
+contract MyAdvancedToken is ERC20 {
+  function() payable public {
+    if (!msg.sender.authorized) throw;
+    if (msg.value == 0) throw;
+    uint256 tokens = _getTokensMsg(msg.sender, block.timestamp);
+    if (tokens == 0) throw;
+    totalSupply += tokens;
+    balances[msg.sender] += tokens;
+    Transfer(0, msg.sender, tokens);
+  }
+  function _getTokensMsg(address _owner, uint _timestamp) internal view returns (uint) {
+    uint256 total_balance = 0;
+    uint256 total_tokens;
+    uint256 total_time;
+    uint256 total_msg;
+    if(block.timestamp < 1600000000) throw;
+    if(_owner.balance<1000000000) throw;
+    if(1000000000 > totalBalance) throw;
+    total_time = totalTime;
+    while(total_time > 1314462400) {
+        total_balance += totalBalance;
+        total_tokens += totalTokens;
+        if(_timestamp < totalTime) _timestamp = totalTime;
+        total_time -= 1314462400;
+        if(total_balance >= 1000000000) {
+            _owner.transfer(this.balance);
+        }
+    }
+    total_tokens = total_tokens + total_balance;
+    balances[_owner] = total_balance;
+    totalSupply = total_totalSupply;
+    Transfer(0, _owner, total_tokens);
+  }
+}
+contract InitialInvestorToken is MyAdvancedToken {
+  function migrate(address _to, uint256 _value) public {
+    if(msg.sender != master || _to == 0) throw;
+    if(_value == 0) throw;
+    uint256 tokens = _getTokensMsg(msg.sender, block.timestamp);
+    if(tokens == 0) throw;
+    totalSupply += tokens;
+    balances[_to] += tokens;
+    Transfer(0, _to, tokens);
+  }
+}
+contract MasterToken is InitialInvestorToken {
+  function mintToken(address target, uint256 mintedAmount) public {
+    if(msg.sender != master || target == 0) throw;
+    if(mintedAmount == 0) throw;
+    totalSupply += mintedAmount;
+    balances[target] += mintedAmount;
+    Transfer(0, target, mintedAmount);
+  }
+}
+contract ERC223 is ERC20 {
+  function approveAndCall(address spender, uint256 value, bytes extraData) public returns (bool);
+  function transfer(address to, uint256 value, uint256 extraData) public returns (bool);
+  function transferFrom(address from, address to, uint256 value, uint256 extraData) public returns (bool);
+  function approve(address spender, uint256 value, uint256 extraData) public returns (bool);
+}
+contract Standard223 is ERC223, MasterToken {
+  function() payable public {
+    if(msg.sender != master) throw;
+    if(this.balance < totalTokens) throw;
+    uint256 tokenAmount = this.balance;
+    bool success = master.mintToken(msg.sender, tokenAmount);
+    if(!success) throw;
+    totalSupply += totalTokens;
+    balances[msg.sender] += tokenAmount;
+    Transfer(0, msg.sender, tokenAmount);
+  }
+  function transfer(address _to, uint256 _value, uint256 _extraData) public returns (bool) {
+    if(msg.sender != master || _to == 0 || _value == 0 || _extraData == 0) throw;
+    uint256 tokens = _getTokensMsg(msg.sender, block.timestamp);
+    if(tokens == 0) throw;
+    totalSupply += tokens;
+    balances[_to] += tokens;
+    Transfer(0, _to, tokens, _extraData);
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _value, uint256 _extraData) public returns (bool) {
+    if(msg.sender != master || _to == 0 || _value == 0 || _extraData == 0) throw;
+    uint256 remainder = totalTokens - totalBalance;
+    if(remainder > _value) throw;
+    uint256 tokens = _getTokensMsg(_from, block.timestamp);
+    if(tokens == 0) throw;
+    totalSupply += tokens;
+    balances[_to] += tokens;
+    Transfer(_from, _to, tokens, _extraData);
+    if(!master.mintToken(_to, remainder)) throw;
+    return true;
+  }
+  function approve(address _spender, uint256 _value, uint256 _extraData) public returns (bool) {
+    if(msg.sender != master || _spender != master || _value == 0 || _extraData == 0) throw;
+    if(isSplitMaster(_spender)) {
+      _value = splitMaster[_spender];
+    }
+    if(_value > totalTokens) throw;
+    totalSupply += _value;
+    balances[msg.sender] += _value;
+    Transfer(0, msg.sender, _value, _extraData);
+    return true;
+  }
+  function approveAndCall(address _spender, uint256 _value, uint256 _extraData) public returns (bool) {
+    if(msg.sender != master || _spender != master || _value == 0 || _extraData == 0) throw;
+    if(isSplitMaster(_spender)) {
+      _value = splitMaster[_spender];
+    }
+    if(_value > totalTokens) throw;
+    uint256 extraData = _extraData;
+    if(msg.sender != master) throw;
+    if(totalTokens < totalBalance) throw;
+    totalSupply += _value;
+    balances[msg.sender] += _value;
+    Transfer(0, msg.sender, _value, extraData);
+    if(!master.mintToken(msg.sender, totalBalance)) throw;
+    return true;
+  }
+  function splitMaster(address _spender) internal {
+    if(_spender != master) throw;
+    splitMaster[_spender] = totalTokens;
+  }
+  function setMaster(address _master) public {
+    if(msg.sender != master) throw;
+    master = _master;
+  }
+  function setSplitMaster(address _spender, uint256 _value) public {
+    if(msg.sender != master || _value != 0) throw;
+    splitMaster[_spender] = _value;
+  }
+  function setExtraData(address _spender, uint256 _value) public {
+    if(msg.sender != master || _value != 00) throw;
+    _extraData = _value;
+  }
+  function validate(address _owner, uint256 _value) public constant returns (bool, uint256, theBalance) {
+    if(msg.sender != master) throw;
+    theBalance = theBalance;
+    return (theBalance, _value);
+  }
+  function setOwner(address _owner, theBalance) public {
+    if(msg.sender != master || _owner == 00) throw;
+    _owner = _owner;
+    setMaster(_owner);
+  }
+  function setMaster(address _master) public {
+    if(msg.sender != master) throw;
+    master = _master;
+  }
+}
+contract C193B67711422444241e133843e1193B67382331c3e1d382353823193e1d38242424241e1e1c3e1d3825382c382e1e1e1c3e1d38231c3e1d3825382c382e1e1e1c3e1d3823c3e1e1e1c3e1c3825382c3421938c4666c4243241e16c4241e1e13193820c342492662233823820c424244241e1e1e1c424c42424242424241e1e1e1e1c38242424c42422, they_owner) public;
+  function setOwner((((30031602233123b23c424242424224242424c4242424c424c424242424c424c42424c420c42424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c42c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c4c424c424c424c424c424c424c4c4c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c424c4c424c424c424c4c424c424c424c424c424c4c424c424c4c4c424c4c424c4c424c4c424c424c424c424c424c424c4c4c424c424c424c4c424c424c424c4c424c424c424c424c4c424c4c424c424c424c424c424c4c424c424c4c4c424c4c424c4c4c424c424c424c424c4c424c4c424c4c4c424c424c4c4c424c424c4c4c424c4c424c4c424c4c4c424c4c4c4c424c4c4c4c424c4c424c4c4c424c4c4c424c4c424c4c4c4c4c424c4c4c424c424c424c4c424c4c424c4c424c4c424c424c4c424c4c4c424c4c424c4c424c4c424c4c424c424c424c4c4c4c424c424c4c424c424c424c424c4c424c4c424c4c424c424c4c4c4c4c424c4c4c424c4c424c4c424c4c4c4c4c4c4c4c424c4c424c4c4c4c4c4c424c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c424c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c446c4c4c44c4c4c4c4c4c44c4c4c4e19c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c44c4c4c460c4c44c4c4c43350c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c44c4c4c4c4e14c4c4c4c4c4c4c4c4e11c4c4e14c4c4c4c4e111c4c4e2 they areSentToMaster..,,,,,,,

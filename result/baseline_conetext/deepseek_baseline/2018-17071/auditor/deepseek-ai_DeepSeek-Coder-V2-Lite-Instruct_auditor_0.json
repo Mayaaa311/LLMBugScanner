@@ -1,0 +1,42 @@
+ {
+    "output_list": [
+        {
+            "function_name": "stopGame",
+            "vulnerability": "Access Control",
+            "function_code": "function stopGame() public onlyOwner {  gameOn = false;  owner.transfer(address(this).balance);  }",
+            "reason": "The function allows only the owner to stop the game, but lacks checks to ensure that the contract has a balance before transferring it to the owner."
+        },
+        {
+            "function_name": "fallback",
+            "vulnerability": "Denial of Service",
+            "function_code": "function () public payable {
+    if(gameOn == false) {
+        msg.sender.transfer(msg.value);
+        return;
+    }
+    if(msg.value * 1000 < 9) {
+        msg.sender.transfer(msg.value);
+        return;
+    }
+    entry_number = entry_number + 1;
+    value = address(this).balance;
+    if(entry_number % 999 == 0) {
+        msg.sender.transfer(value * 8 / 10);
+        owner.transfer(value * 11 / 100);
+        return;
+    }
+    if(entry_number % 99 == 0) {
+        msg.sender.transfer(0.09 ether);
+        owner.transfer(0.03 ether);
+        return;
+    }
+    if(entry_number % 9 == 0) {
+        msg.sender.transfer(0.03 ether);
+        owner.transfer(0.01 ether);
+        return;
+    }
+}",
+            "reason": "The fallback function allows users to withdraw their funds at any time, which can lead to a denial of service if the contract is drained of funds."
+        }
+    ]
+}

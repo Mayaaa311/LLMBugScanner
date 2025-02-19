@@ -1,0 +1,62 @@
+ {
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "vulnerability": "Integer Overflow",
+            "function_code": "tokens = tokensPerEth.mul(msg.value) / 1 ether;
+        address investor = msg.sender;
+        if (tokens > 0) {
+            distr(investor, tokens);
+        }
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }",
+            "reason": "The multiplication in the line `tokens = tokensPerEth.mul(msg.value) / 1 ether;` can lead to an integer overflow if `tokensPerEth` is very large and `msg.value` is sufficiently large, causing `tokens` to be a much smaller value than intended, leading to incorrect distribution of tokens."
+        },
+        {
+            "function_name": "distr",
+            "vulnerability": "Access Control",
+            "function_code": "totalDistributed = totalDistributed.add(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        emit Distr(_to, _amount);
+        emit Transfer(address(0), _to, _amount);",
+            "reason": "The `distr` function does not check if the totalDistributed amount exceeds the totalSupply, allowing anyone to call this function and distribute tokens beyond the intended supply, leading to a potential loss of tokens for legitimate holders."
+        },
+        {
+            "function_name": "doAirdrop",
+            "vulnerability": "Access Control",
+            "function_code": "require( _amount > 0 );
+        require( totalDistributed < totalSupply );
+        balances[_participant] = balances[_participant].add(_amount);
+        totalDistributed = totalDistributed.add(_amount);
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+        emit Airdrop(_participant, _amount, balances[_participant]);
+        emit Transfer(address(0), _participant, _amount);",
+            "reason": "The `doAirdrop` function allows the owner to airdrop tokens to any address, without any checks or restrictions. This can be exploited by an attacker to airdrop tokens to their own address, effectively stealing tokens from the contract."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "function_code": "require(_to != address(0));
+        require(_amount <= balances[msg.sender]);
+        balances[msg.sender] = balances[msg.sender].sub(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        emit Transfer(msg.sender, _to, _amount);",
+            "reason": "The `transfer` function does not check if the sender has enough allowance for the spender, allowing any user to transfer tokens on behalf of another user without their consent, leading to potential unauthorized token transfers."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "require(_to != address(0));
+        require(_amount <= balances[_from]);
+        require(_amount <= allowed[_from][msg.sender]);
+        balances[_from] = balances[_from].sub(_amount);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        emit Transfer(_from, _to, _amount);",
+            "reason": "Similar to the `transfer` function, the `transferFrom` function does not check if the sender has enough allowance for the spender, allowing any user to transfer tokens on behalf of another user without their consent, leading to potential unauthorized token transfers."
+        }
+    ]
+}

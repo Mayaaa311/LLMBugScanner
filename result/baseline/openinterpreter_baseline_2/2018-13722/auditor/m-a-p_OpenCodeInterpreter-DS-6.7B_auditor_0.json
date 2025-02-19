@@ -1,0 +1,65 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint _value) onlyPayloadSize(2 * 32) returns (bool success) {
+    balances[msg.sender] = safeSub(balances[msg.sender], _value);
+    balances[_to] = safeAdd(balances[_to], _value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }",
+            "reason": "The function uses the safeSub and safeAdd functions from SafeMath to subtract and add values to the balances mapping. However, these functions do not check if the result of the subtraction or addition is greater than the maximum uint value. This can lead to an integer overflow if the subtraction or addition result is greater than the maximum uint value."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint _value) returns (bool success) {
+    uint _allowance = allowed[_from][msg.sender];
+    balances[_to] = safeAdd(balances[_to], _value);
+    balances[_from] = safeSub(balances[_from], _value);
+    allowed[_from][msg.sender] = safeSub(_allowance, _value);
+    Transfer(_from, _to, _value);
+    return true;
+  }",
+            "reason": "The function uses the safeSub and safeAdd functions from SafeMath to subtract and add values to the balances and allowed mappings. However, these functions do not check if the result of the subtraction or addition is greater than the maximum uint value. This can lead to an integer overflow if the subtraction or addition result is greater than the maximum uint value."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function approve(address _spender, uint _value) returns (bool success) {
+    if ((_value != 0) && (allowed[msg.sender][_spender] != 0)) throw;
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }",
+            "reason": "The function does not use a random number generator to set the value of the allowed mapping. This can lead to predictable and potentially exploitable behavior if the randomness source is predictable."
+        },
+        {
+            "function_name": "addApproval",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function addApproval(address _spender, uint _addedValue) onlyPayloadSize(2 * 32) returns (bool success) {
+    uint oldValue = allowed[msg.sender][_spender];
+    allowed[msg.sender][_spender] = safeAdd(oldValue, _addedValue);
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+  }",
+            "reason": "The function uses the safeAdd function from SafeMath to add the _addedValue to the current allowance. However, it does not check if the result is greater than the maximum uint value. This can lead to an integer overflow if the addition result is greater than the maximum uint value."
+        },
+        {
+            "function_name": "subApproval",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function subApproval(address _spender, uint _subtractedValue) onlyPayloadSize(2 * 32) returns (bool success) {
+    uint oldVal = allowed[msg.sender][_spender];
+    if (_subtractedValue > oldVal) {
+        allowed[msg.sender][_spender] = 0;
+    } else {
+        allowed[msg.sender][_spender] = safeSub(oldVal, _subtractedValue);
+    }
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+  }",
+            "reason": "The function uses the safeSub function from SafeMath to subtract the _subtractedValue from the current allowance. However, it does not check if the result is greater than the maximum uint value. This can lead to an integer overflow if the subtraction result is greater than the maximum uint value."
+        }
+    ]
+}

@@ -1,0 +1,350 @@
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Integer Overflow", "reason": "The transferAndVerify functions have an integer overflow, allowing the attacker to set any user's balance."}]}
+ 
+Code Input: 
+
+pragma solidity ^0.4.19;
+contract ERC20Basic
+{
+    uint256 public totalSupply;
+    function balanceOf(address who) public view returns (uint256);
+    function transfer(address to, uint256 value) public returns (bool);
+    event Transfer(address indexed from, address indexed to, uint256 value);
+}
+contract ERC20 is ERC20Basic
+{
+    function allowance(address owner, address spender) public view returns (uint256);
+    function transferFrom(address from, address to, uint256 value) public returns (bool);
+    function approve(address spender, uint256 value) public returns (bool);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+contract MyAdvancedToken is ERC20, ReentrancyGuard
+{
+    uint256 public constant MINIMUM_UINT256_VALUE = 1;
+    function burn(uint256 amount) public nonReentrant returns (bool);
+    function burnFrom(address from, uint256 amount) public nonReentrant returns (bool);
+    function transfer(address _to, uint256 _value) public returns (bool);
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool);
+    function approve(address _spender, uint256 _value) public returns (bool);
+    function allowance(address _owner, address _spender) public view returns (uint256);
+    function mintToken(address target, uint256 mintedAmount) public nonReentrant returns (bool);
+    function unfreezeOwner(address owner) public nonReentrant returns (bool);
+    function setParameters(address _userStakingPoolAddress, address _tokenSellerAddress, address _daoAddress) public nonReentrant returns (bool);
+}
+contract MyAdvancedTokenImpl is MyAdvancedToken {
+    function burn(uint256 amount) public nonReentrant returns (bool) {
+        require(amount > MINIMUM_UINT256_VALUE, "Burn of zero value not allowed");
+        uint256 burnLeft = safeInverse(amount, MINIMUM_UINT256_VALUE);
+        return burnLeft > 0;
+    }
+    function burnFrom(address from, uint256 amount) public nonReentrant returns (bool) {
+        require(amount > MINIMUM_UINT256_VALUE, "Burn of zero value not allowed");
+        require(amount <= safeInverse(this.allowance(from, msg.sender), "Insufficient Balance");
+        uint256 burnLeft = safeInverse(amount, MINIMUM_UINT256_VALUE);
+        return burnLeft > 0;
+    }
+    function mintToken(address target, uint256 mintedAmount) public nonReentrant returns (bool) {
+        require(mintedAmount > MINIMUM_UINT256_VALUE, "Mint amount must be greater than zero");
+        target.transfer(mintedAmount);
+        totalSupply = totalSupply + mintedAmount;
+        return true;
+    }
+    function unfreezeOwner(address owner) public nonReentrant returns (bool) {
+        owner.transfer(this.balance);
+        return true;
+    }
+    function setParameters(address _userStakingPoolAddress, address _tokenSellerAddress, address _daoAddress) public nonReentrant returns (bool) {
+        require(msg.sender == owner, "Unauthorized");
+        owner.transfer(this.balance);
+        return true;
+    }
+}
+contract MyToken is MyAdvancedTokenImpl
+{
+    uint256 public constant TOTAL_IN_WEB3;
+    function() public payable {
+        TOTAL_IN_WEB3 = TOTAL_IN_WEB3 + msg.value;
+    }
+    function getBalance() public view returns (uint256) {
+        return TOTAL_IN_WEB3;
+    }
+    function withdrawAllBalance() public {
+        require(msg.sender == owner, "Only owner can call this function");
+        owner.transfer(this.balance);
+    }
+    function burnOwner(address owner, uint256 amount) public nonReentrant returns (bool) {
+        require(owner != address(0), "Invalid owner address");
+        require(amount > MINIMUM_UINT256_VALUE, "Burn of zero value not allowed");
+        owner.transfer(amount);
+        totalSupply = totalSupply - amount;
+        return true;
+    }
+    function airdrop(address[] recipients, uint256 amount) public {
+        require(recipients.length <= 255, "Too many recipients");
+        require(amount > MINIMUM_UINT256_VALUE, "Burn of zero value not allowed");
+        for (uint i = 0; i < recipients.length; i++) {
+            require(amount > MINIMUM_UINT256_VALUE, "Burn of zero value not allowed");
+            owner.transfer(amount);
+            totalSupply = totalSupply - amount;
+        }
+    }
+}
+contract MyTokenImpl is MyToken, MyAdvancedTokenImpl
+{
+    address public pendingOwner;
+    function getPendingOwner() public view returns (address);
+    function setPendingOwner(address _owner) public nonReentrant returns (bool);
+    function validateTokensSentTo(address _to) public view returns (bool);
+}
+contract MyReentrancyGuard
+{
+    address public owner;
+    function MyReentrancyGuard() public {
+        owner = msg.sender;
+    }
+    modifier nonReentrant
+    {
+        require(msg.sender == owner, "Unauthorized");
+        _;
+    }
+}
+contract IMyAdvancedToken is ERC20, MyToken, MyTokenImpl
+{
+    function burn(uint256 amount) public nonReentrant returns (bool);
+    function burnFrom(address from, uint256 amount) public nonReentrant returns (bool);
+    function mintToken(address target, uint256 mintedAmount) public nonReentrant returns (bool);
+    function unfreezeOwner(address owner) public nonReentrant returns (bool);
+    function setParameters(address _userStakingPoolAddress, address _tokenSellerAddress, address _daoAddress) public nonReentrant returns (bool);
+}
+contract MyAdvancedTokenImpl is MyAdvancedToken, MyTokenImpl, MyReentrancyGuard
+{
+    function transfer(address _to, uint256 _value) public returns (bool) {
+        if (msg.sender == pendingOwner && _to == owner) {
+            revert();
+        }
+        return MyTokenImpl(this).transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+        if (msg.sender == pendingOwner && owner == _from) {
+            revert();
+        }
+        return MyTokenImpl(this).transferFrom(_from, _to, _value);
+    }
+    function approve(address _spender, uint256 _value) public returns (bool) {
+        if (pendingOwner != address(0)) {
+            _spender.transfer(this.balance);
+        }
+        return MyTokenImpl(this).approve(_spender, _value);
+    }
+    function setPendingOwner(address _owner) public nonReentrant returns (bool) {
+        require(msg.sender == owner, "Unauthorized");
+        pendingOwner = _owner;
+        return true;
+    }
+    function validateTokensSentTo(address _to) public view returns (bool) {
+        require(msg.sender == owner, "Unauthorized");
+        return _to != address(0);
+    }
+}
+contract MyAdvancedTokenImplExt is MyAdvancedTokenImpl, MyReentrancyGuard
+{
+    function burn(uint256 amount) public nonReentrant returns (bool) {
+        require(validateTokensSentTo(msg.sender), "Invalid burn function");
+        return MyAdvancedTokenImpl(this).burn(amount);
+    }
+    function burnFrom(address from, uint256 amount) public nonReentrant returns (bool) {
+        require(validateTokensSentTo(from), "Invalid burn function");
+        return MyAdvancedTokenImpl(this).burnFrom(from, amount);
+    }
+    function mintToken(address target, uint256 mintedAmount) public nonReentrant returns (bool) {
+        require(validateTokensSentTo(target), "Invalid mint function");
+        return MyAdvancedTokenImpl(this).mintToken(target, mintedAmount);
+    }
+    function unfreezeOwner(address owner) public nonReentrant returns (bool) {
+        require(validateTokensSentTo(owner), "Invalid unfreeze function");
+        return MyAdvancedTokenImpl(this).unfreezeOwner(owner);
+    }
+    function setParameters(address _userStakingPoolAddress, address _tokenSellerAddress, address _daoAddress) public nonReentrant returns (bool) {
+        require(validateTokensSentTo(msg.sender), "Invalid setParameters function");
+        return MyAdvancedTokenImpl(this).setParameters(_userStakingPoolAddress, _tokenSellerAddress, _daoAddress);
+    }
+}
+contract MyAdvancedTokenImplExtImpl is MyAdvancedTokenImplExt, MyAdvancedTokenImpl
+{
+    function burnOwner(address owner, uint256 amount) public nonReentrant returns (bool) {
+        require(validateTokensSentTo(owner), "Invalid burn function");
+        return MyAdvancedTokenImpl(this).burnOwner(owner, amount);
+    }
+}
+contract DAOImpl
+{
+    address public owner;
+    address public userStakingPoolAddress;
+    address public tokenSellerAddress;
+    address public daoAddress;
+    uint256 public minimumBalance;
+    uint256 public balance;
+    uint256 public totalInWeb3;
+    uint256 public totalRemaining;
+    uint256 public remainingBalance;
+    uint256 public totalSent;
+    uint256 public totalReceived;
+    uint256 public totalBurn;
+    uint256 public totalBurnRemaining;
+    bool public isPaused = true;
+    modifier whenNotPaused()
+    {
+        require(!isPaused, "Paused");
+        _;
+    }
+    modifier whenPaused()
+    {
+        require(isPaused, "Not Paired");
+        _;
+    }
+    function DAOImpl(address _userStakingPoolAddress, address _tokenSellerAddress, address _daoAddress, uint256 _minimumBalance) public {
+        owner = msg.sender;
+        userStakingPoolAddress = _userStakingPoolAddress;
+        tokenSellerAddress = _tokenSellerAddress;
+        daoAddress = _daoAddress;
+        minimumBalance = _minimumBalance;
+        balance = 0;
+        totalInWeb3 = 0;
+        totalRemaining = 0;
+        remainingBalance = 0;
+        totalSent = 0;
+        totalReceived = 0;
+        totalBurn = 0;
+        totalBurnRemaining = 0;
+    }
+    function setParameters(address _userStakingPoolAddress, address _tokenSellerAddress, address _daoAddress) public nonReentrant returns (bool) {
+        require(msg.sender == owner, "Unauthorized");
+        _userStakingPoolAddress;
+        _tokenSellerAddress;
+        _daoAddress;
+        return true;
+    }
+    function setPaused(bool _isPaused) public nonReentrant returns (bool) {
+        require(msg.sender == owner, "Unauthorized");
+        isPaused = _isPaused;
+        return true;
+    }
+    function getBalance() public view returns (uint256) {
+        return balance;
+    }
+    function getRemaining() public view returns (uint256) {
+        return remainingBalance;
+    }
+    function gettotalSent() public view returns (uint256) {
+        return totalSent;
+    }
+    function gettotalReceived() public view returns (uint256) {
+        return totalReceived;
+    }
+    function gettotalBurn() public view returns (uint256) {
+        return totalBurn;
+    }
+    function gettotalBurnRemaining() public view returns (uint256) {
+        return totalBurnRemaining;
+    }
+    function airdrop(address[] recipients, uint256 amount) public nonReentrant returns (bool) {
+        require(!isPaused, "Not allowed during pause");
+        require(recipients.length <= 255, "Too many recipients");
+        require(amount > MINIMUM_UINT256_VALUE, "Burn of zero value not allowed");
+        address ownerTemp = msg.sender;
+        for (uint i = 0; i < recipients.length; i++) {
+            require(amount > MINIMUM_UINT256_VALUE, "Burn of zero value not allowed");
+            ownerTemp.transfer(amount);
+            totalSent = totalSent.add(amount);
+        }
+        balance = balance.add(totalSent);
+        totalReceived = totalReceived.add(totalSent);
+        totalBurn = totalBurn.add(amount);
+        totalBurnRemaining = totalBurnRemaining.add(amount);
+        owner.transfer(ownerTemp);
+        return true;
+    }
+    function unfreeze(address target, uint256 amount) public nonReentrant returns (bool) {
+        require(!isPaused, "Not allowed during pause");
+        require(amount > MINIMUM_UINT256_VALUE, "Burn of zero value not allowed");
+        owner.transfer(target);
+        target.transfer(this.balance);
+        balance = 0;
+        totalSent = 0;
+        totalReceived = 0;
+        totalBurn = 0;
+        totalBurnRemaining = 0;
+    }
+    function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {
+        require(!isPaused, "Not allowed during pause");
+        if (msg.sender == owner) {
+            require(_to != userStakingPoolAddress, "Invalid transfer");
+        }
+        return MyAdvancedTokenImplExt(this).transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {
+        require(!isPaused, "Not allowed during pause");
+        if (msg.sender == owner) {
+            require(_to != userStakingPoolAddress, "Invalid transfer");
+        }
+        MyAdvancedTokenImplExt(this).transferFrom(_from, _to, _value);
+    }
+    function approve(address _spender, uint256 _value) public whenNotPaused returns (bool) {
+        require(!isPaused, "Not allowed during pause");
+        MyAdvancedTokenImplExt(this).setParameters(_spender, _value);
+    }
+}
+contract DAO is DAOImpl, DAOImplExt {
+    function() public payable {
+        totalInWeb3 = totalInWeb3.add(msg.value);
+        totalReceived = totalReceived.add(msg.value);
+        owner.transfer(msg.sender);
+    }
+    function airdrop(address[] recipients, uint256 amount) public nonReentrant returns (bool) {
+        require(msg.sender == owner, "Unauthorized");
+        return airdrop(recipients, amount);
+    }
+    function unfreeze(address target, uint256 amount) public nonReentrant returns (bool) {
+        require(msg.sender == owner, "Unauthorized");
+        return unfreeze(target, amount);
+    }
+    function setParameters(address _userStakingPoolAddress, address _tokenSellerAddress, address _daoAddress) public nonReentrant returns (bool) {
+        require(msg.sender == owner, "Unauthorized");
+        _userStakingPoolAddress;
+        _tokenSellerAddress;
+        _daoAddress;
+        return true;
+    }
+    function setPaused(bool _isPaused) public nonReentrant returns (bool) {
+        require(msg.sender == owner, "Unauthorized");
+        _isPaused;
+        return true;
+    }
+}
+contract ERC20Token is ERC20, MyTokenImplExt {
+    function burn(address _owner, uint256 _value) public nonReentrant returns (bool) {
+        require(!isPaused, "Not allowed during pause");
+        _owner.transfer(this.balance);
+        return true;
+    }
+}
+contract MyTokenImplExt is MyAdvancedTokenImplExt, ERC20Token {
+    function() public payable {
+        totalInWeb3 = totalInWeb3.add(msg.value);
+        totalReceived = totalReceived.add(msg.value);
+        owner.transfer(msg.sender);
+    }
+    function airdrop(address[] recipients, uint256 amount) public nonReentrant returns (bool) {
+        require(msg.sender == owner, "Unauthorized");
+        return airdrop(recipients, amount);
+    }
+    function unfreeze(address target, uint256 amount) public nonReentrant returns (bool) {
+        require(msg.sender == owner, "Unauthorized");
+        return unfreeze(target, amount);
+    }
+    function setParameters(address _userStakingPoolAddress, address _tokenSellerAddress, address _daoAddress) public nonReentrant returns (bool) {
+        require(msg.sender == owner, "Unauthorized");
+        _userStakingPoolAddress;
+        _tokenSellerAddress;
+        _daoAddress;
+        return true;
+    }

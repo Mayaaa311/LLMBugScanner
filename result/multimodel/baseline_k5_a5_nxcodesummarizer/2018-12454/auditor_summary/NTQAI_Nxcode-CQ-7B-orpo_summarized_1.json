@@ -1,0 +1,60 @@
+{
+    "output_list": [
+        {
+            "function_name": "setBettingCondition",
+            "code": "function setBettingCondition(uint _contenders, uint _bettingprice)
+    {
+      if(msg.sender != developer)
+        return;
+      arraysize  = _contenders;
+      if(arraysize>1000)
+        arraysize = 1000;
+      bettingprice = _bettingprice;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function allows the developer to set the maximum number of contenders and the betting price. However, there is no check to ensure that the input values do not exceed the maximum value of the uint data type. This can lead to an integer overflow, where the value of arraysize or bettingprice exceeds the maximum value of uint. This can result in incorrect behavior and potential loss of funds."
+        },
+        {
+            "function_name": "findWinner",
+            "code": "function findWinner(uint value)
+    {
+      uint i = value % numguesses;
+      _winner = guesses[i].addr;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function findWinner selects the winner based on the value passed to it. However, it does not check if the value is within the range of the number of guesses. This can lead to an out-of-bounds array access, where the function attempts to access an index that does not exist in the guesses array. This can result in undefined behavior and potential security vulnerabilities."
+        },
+        {
+            "function_name": "getDeveloperFee",
+            "code": "function getDeveloperFee() constant returns(uint)
+    {
+      uint developerfee = this.balance/100;
+      return developerfee;
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function getDeveloperFee calculates the developer fee based on the contract's balance. However, it does not ensure that the balance is random and does not depend on any external factors. This can lead to unfair distribution of developer fees and potential manipulation of the contract's balance."
+        },
+        {
+            "function_name": "getLotteryMoney",
+            "code": "function getLotteryMoney() constant returns(uint)
+    {
+      uint developerfee = getDeveloperFee();
+      uint prize = (this.balance - developerfee);
+      return prize;
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The function getLotteryMoney calculates the prize money by subtracting the developer fee from the contract's balance. However, it does not check the access control to ensure that only the developer can call this function. This can lead to unauthorized access and potential manipulation of the contract's balance."
+        },
+        {
+            "function_name": "finish",
+            "code": "function finish()
+    {
+      if(msg.sender != developer)
+        return;
+      _finish();
+    }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The function finish checks if the sender is the developer before calling the private function _finish. However, there is a typo in the function name, which leads to a constructor name collision. This can result in incorrect function calls and potential security vulnerabilities."
+        }
+    ]
+}

@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferOwnership",
+            "code": "function transferOwnership(address newOwner) onlyOwner public { owner = newOwner; }",
+            "vulnerability": "Access Control",
+            "reason": "The transferOwnership function allows anyone to change the owner of the contract. This can lead to unauthorized access and loss of funds if the new owner is malicious."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public returns (bool success) { allowance[msg.sender][_spender] = _value; return true; }",
+            "vulnerability": "Access Control",
+            "reason": "The approve function allows anyone to approve spending of their tokens by another address. This can lead to unauthorized spending if the approved address is malicious."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData)  public returns (bool success) { tokenRecipient spender = tokenRecipient(_spender); if (approve(_spender, _value)) { spender.receiveApproval(msg.sender, _value, this, _extraData); return true; } }",
+            "vulnerability": "Access Control",
+            "reason": "The approveAndCall function allows anyone to approve spending of their tokens by another address and call a function on the approved address. This can lead to unauthorized spending if the approved address is malicious."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) { require(balanceOf[msg.sender] >= _value); balanceOf[msg.sender] -= _value; totalSupply -= _value; Burn(msg.sender, _value); return true; }",
+            "vulnerability": "Access Control",
+            "reason": "The burn function allows anyone to burn their own tokens. This can lead to unauthorized burning if the burner is malicious."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) public returns (bool success) { require(balanceOf[_from] >= _value); require(_value <= allowance[_from][msg.sender]); balanceOf[_from] -= _value; allowance[_from][msg.sender] -= _value; totalSupply -= _value; Burn(_from, _value); return true; }",
+            "vulnerability": "Access Control",
+            "reason": "The burnFrom function allows anyone to burn tokens on behalf of another address. This can lead to unauthorized burning if the burner is malicious."
+        }
+    ]
+}

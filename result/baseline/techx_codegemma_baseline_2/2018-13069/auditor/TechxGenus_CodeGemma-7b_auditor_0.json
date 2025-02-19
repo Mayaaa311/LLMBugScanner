@@ -1,0 +1,53 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "TokenERC20.transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) public {
+    _transfer(msg.sender, _to, _value);
+}",
+            "reason": "If the value of the transaction is larger than the balance of the sender, it will cause an integer overflow, which can lead to incorrect transaction processing and potential loss of funds."
+        },
+        {
+            "function_name": "DYC.freezeAccount",
+            "vulnerability": "Access Control",
+            "function_code": "function freezeAccount(address target, bool freeze) onlyOwner public {
+    frozenAccount[target] = freeze;
+    FrozenFunds(target, freeze);
+}",
+            "reason": "The function freezeAccount should only be called by the owner. However, there is no check to ensure that the caller is the owner, which allows anyone to freeze the account of another user."
+        },
+        {
+            "function_name": "DYC.mintToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+    balanceOf[target] += mintedAmount;
+    totalSupply += mintedAmount;
+    Transfer(0, this, mintedAmount);
+    Transfer(this, target, mintedAmount);
+}",
+            "reason": "The function mintToken can potentially create more tokens than the specified amount, leading to an integer overflow and potential misreporting of the token balance."
+        },
+        {
+            "function_name": "DYC.buy",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function buy() public {
+    uint amount = msg.value / buyPrice;
+    _transfer(this, msg.sender, amount);
+    msg.sender.transfer(amount * sellPrice);
+}",
+            "reason": "The function buy can cause an integer overflow if the value of the transaction is larger than the balance of the sender, which can lead to incorrect transaction processing and potential loss of funds."
+        },
+        {
+            "function_name": "DYC.sell",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function sell(uint256 amount) public {
+    require(this.balance >= amount * sellPrice);
+    _transfer(msg.sender, this, amount);
+    msg.sender.transfer(amount * sellPrice);
+}",
+            "reason": "The function sell can cause an integer overflow if the amount is larger than the balance of the sender, which can lead to incorrect transaction processing and potential loss of funds."
+        }
+    ]
+}<eos>

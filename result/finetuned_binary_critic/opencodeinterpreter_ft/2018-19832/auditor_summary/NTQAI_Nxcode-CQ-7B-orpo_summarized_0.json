@@ -1,0 +1,20 @@
+{
+    "output_list": [
+        {
+            "function_name": "distr",
+            "code": "function distr(address _to, uint256 _amount) canDistr private returns (bool) {
+        totalDistributed = totalDistributed.add(_amount);
+        totalRemaining = totalRemaining.sub(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        emit Distr(_to, _amount);
+        emit Transfer(address(0), _to, _amount);
+        return true;
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "Integer overflow in distr function allows the owner to set the balance of an arbitrary user to any value."
+        }
+    ]
+}

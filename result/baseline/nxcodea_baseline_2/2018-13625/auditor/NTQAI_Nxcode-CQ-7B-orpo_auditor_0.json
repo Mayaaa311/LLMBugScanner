@@ -1,0 +1,76 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "function_code": "function transfer(address _to, uint256 _value) {
+                if (_to == 0x0) revert();                               
+                if (balanceOf[msg.sender] < _value) revert();           
+                if (balanceOf[_to] + _value < balanceOf[_to]) revert(); 
+                if (frozenAccount[msg.sender]) revert();                
+                balanceOf[msg.sender] -= _value;                        
+                balanceOf[_to] += _value;                               
+                Transfer(msg.sender, _to, _value);                      
+            }",
+            "reason": "The transfer function does not check if the recipient address is valid (i.e., it is not 0x0). This could allow anyone to send tokens to the 0x0 address, which is not a valid address and could lead to loss of funds. The function also does not check if the sender's account is frozen, which could allow the sender to send tokens to a frozen account, which could lead to loss of funds. The function also does not check if the recipient's account is frozen, which could allow the recipient to receive tokens from a frozen account, which could lead to loss of funds."
+        },
+        {
+            "function_name": "lend",
+            "vulnerability": "Access Control",
+            "function_code": "function lend(address _to, uint256 _value, uint256 _duration_in_days) {
+                if (_to == 0x0) revert();                               
+                if (balanceOf[msg.sender] < _value) revert();           
+                if (balanceOf[_to] + _value < balanceOf[_to]) revert(); 
+                if (frozenAccount[msg.sender]) revert();                
+                if (_duration_in_days > 36135) revert();
+                balanceOf[msg.sender] -= _value;                        
+                balanceOf[_to] += _value;                               
+                InterestFreeLending(msg.sender, _to, _value, _duration_in_days);    
+            }",
+            "reason": "The lend function does not check if the recipient address is valid (i.e., it is not 0x0). This could allow anyone to lend tokens to the 0x0 address, which is not a valid address and could lead to loss of funds. The function also does not check if the sender's account is frozen, which could allow the sender to lend tokens to a frozen account, which could lead to loss of funds. The function also does not check if the recipient's account is frozen, which could allow the recipient to receive tokens from a frozen account, which could lead to loss of funds. The function also does not check if the duration of the lending is within a reasonable range, which could allow the sender to lend tokens for an extremely long period of time, which could lead to loss of funds."
+        },
+        {
+            "function_name": "repayLoan",
+            "vulnerability": "Access Control",
+            "function_code": "function repayLoan(address _to, uint256 _value, string _reference) {
+                if (_to == 0x0) revert();                               
+                if (balanceOf[msg.sender] < _value) revert();           
+                if (balanceOf[_to] + _value < balanceOf[_to]) revert(); 
+                if (frozenAccount[msg.sender]) revert();                
+                if (bytes(_reference).length != 66) revert();
+                balanceOf[msg.sender] -= _value;                        
+                balanceOf[_to] += _value;                               
+                LoanRepaid(msg.sender, _to, _value, _reference);                   
+            }",
+            "reason": "The repayLoan function does not check if the recipient address is valid (i.e., it is not 0x0). This could allow anyone to repay loans to the 0x0 address, which is not a valid address and could lead to loss of funds. The function also does not check if the sender's account is frozen, which could allow the sender to repay loans to a frozen account, which could lead to loss of funds. The function also does not check if the recipient's account is frozen, which could allow the recipient to receive tokens from a frozen account, which could lead to loss of funds. The function also does not check if the reference string length is exactly 66 characters, which could allow the sender to repay loans with a reference string of any length, which could lead to loss of funds."
+        },
+        {
+            "function_name": "settlvlement",
+            "vulnerability": "Access Control",
+            "function_code": "function settlvlement(address _from, uint256 _value, address _to, string _notes, string _reference) onlyOwner {
+                if (_from == plutocrat) revert();
+                if (_to == 0x0) revert();
+                if (balanceOf[_from] < _value) revert();
+                if (balanceOf[_to] + _value < balanceOf[_to]) revert();
+                if (bytes(_reference).length != 66) revert();
+                balanceOf[_from] -= _value;
+                balanceOf[_to] += _value;
+                Settlement( _from, _to, _value, _notes, _reference);
+            }",
+            "reason": "The settlvlement function does not check if the sender is the owner of the contract. This could allow anyone to settle settlements on behalf of the contract owner, which could lead to loss of funds. The function also does not check if the recipient address is valid (i.e., it is not 0x0). This could allow anyone to settle settlements to the 0x0 address, which is not a valid address and could lead to loss of funds. The function also does not check if the sender's account is frozen, which could allow the sender to settle settlements on behalf of a frozen account, which could lead to loss of funds. The function also does not check if the recipient's account is frozen, which could allow the recipient to receive tokens from a frozen account, which could lead to loss of funds. The function also does not check if the reference string length is exactly 66 characters, which could allow the sender to settle settlements with a reference string of any length, which could lead to loss of funds."
+        },
+        {
+            "function_name": "notifyAuthority",
+            "vulnerability": "Access Control",
+            "function_code": "function notifyAuthority(string _notes, string _reference) {
+                if (balanceOf[msg.sender] < notificationFee) revert();
+                if (bytes(_reference).length > 66) revert();
+                if (bytes(_notes).length > 64) revert();
+                balanceOf[msg.sender] -= notificationFee;
+                balanceOf[centralAuthority] += notificationFee;
+                AuthorityNotified( _notes, _reference);
+            }",
+            "reason": "The notifyAuthority function does not check if the sender has enough tokens to pay the notification fee. This could allow anyone to notify authorities with a notification fee of any amount, which could lead to loss of funds. The function also does not check if the reference string length is more than 66 characters, which could allow the sender to notify authorities with a reference string of any length, which could lead to loss of funds. The function also does not check if the notes string length is more than 64 characters, which could allow the sender to notify authorities with a notes string of any length, which could lead to loss of funds. The function also does not check if the sender is the owner of the contract, which could allow anyone to notify authorities on behalf of the contract owner, which could lead to loss of funds."
+        }
+    ]
+}

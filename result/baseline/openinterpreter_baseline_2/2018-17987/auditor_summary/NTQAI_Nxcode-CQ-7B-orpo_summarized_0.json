@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "getRightCoordinate",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function returns the right coordinate of a byte input. The byte input is masked with byte(15) to get the right 4 bits. If the input is greater than 15, the result will be an overflow. This can lead to incorrect results and potential exploitation."
+        },
+        {
+            "function_name": "getLeftCoordinate",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function returns the left coordinate of a byte input. The byte input is right-shifted by 4 bits to get the left 4 bits. If the input is greater than 15, the result will be an overflow. This can lead to incorrect results and potential exploitation."
+        },
+        {
+            "function_name": "claimTile",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function allows users to claim a tile by specifying the x and y coordinates and the game number. The function checks if the game number matches the current game number and if the tile has not been claimed in the current game. However, it does not check if the user has already claimed a tile in the current game. This can lead to potential exploitation by users who repeatedly claim tiles without winning the game."
+        },
+        {
+            "function_name": "resetGame",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function resets the game by updating the game number, winner, and other relevant variables. It calculates the winning amount by multiplying the current game balance by 9/10. If the current game balance is greater than the calculated winning amount, the result will be an overflow. This can lead to incorrect results and potential exploitation."
+        },
+        {
+            "function_name": "updateGameCost",
+            "vulnerability": "Access Control",
+            "reason": "The function allows the owner to update the game cost. It checks if the new game cost is greater than 0 and if the caller is the owner. However, it does not check if the new game cost is within a reasonable range or if it is a valid price. This can lead to potential exploitation by malicious actors who attempt to set an unusually high or low game cost."
+        }
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "output_list": [
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal {
+                if (balanceOf[_from] < _value) throw;                 
+                if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+                if (frozenAccount[_from]) throw;                      
+                if (frozenAccount[_to]) throw;                        
+                balanceOf[_from] -= _value;                          
+                balanceOf[_to] += _value;                            
+                Transfer(_from, _to, _value);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The '_transfer' function has an integer overflow vulnerability. The function does not check if the subtraction of the transferred amount from the sender's balance would result in a non-positive value, allowing attackers to exploit this vulnerability to increase their balance."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+                if (balanceOf[msg.sender] < _value) throw;           
+                if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+                balanceOf[msg.sender] -= _value;                     
+                balanceOf[_to] += _value;                            
+                Transfer(msg.sender, _to, _value);                   
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function has an integer overflow vulnerability. The function does not check if the addition of the transferred amount to the recipient's balance would result in a non-positive value, allowing attackers to exploit this vulnerability to increase their balance."
+        }
+    ]
+}

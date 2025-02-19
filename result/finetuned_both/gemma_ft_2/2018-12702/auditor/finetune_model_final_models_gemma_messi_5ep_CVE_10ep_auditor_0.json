@@ -1,0 +1,392 @@
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Integer Overflow", "reason": "The transfer and transferFrom functions have an integer overflow."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Wrong Logic", "reason": "The logic for transferring tokens is incorrect."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Bad Randomness", "reason": "The randomness of the transferFrom function is bad."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Access Control", "reason": "The access control for the transferFrom function is incorrect."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Typos Constructor", "reason": "The constructor of the transferFrom function has a typo."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Token Devalue", "reason": "The value of the token is not set correctly."}]}
+}
+contract Owned {
+    address public owner;
+    function Owned() {
+        owner = msg.sender;
+    }
+    function setOwner(address _owner) returns (bool success) {
+        owner = _owner;
+        return true;
+    }
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+}
+contract EcoChain is Owned {
+    Token public token;
+    EcoChain public ecoChain;
+    function EcoChain() {
+        ecoChain = this;
+        token = new Token();
+        token.setBalance(this, 1000000000);
+        allowed[msg.sender][this] = 1000000000;
+    }
+    function getBalance(address _owner) constant returns (uint256 balance) {
+        return token.balanceOf(_owner);
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        token.transfer(_to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        token.transferFrom(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        token.approve(_spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+        return token.allowance(_owner, _spender);
+    }
+    function getTokenBalance(address _owner, uint256 _value) constant returns (uint){
+        return _value;
+    }
+    function withdraw() onlyOwner {
+        address(this).transfer(this.balance);
+    }
+}
+contract MyAdvancedToken is EcoChain, GVE {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => uint256) public myBalance;
+    bool public isSelling = true;
+    bool public isBuying = true;
+    uint256 public totalBounties;
+    uint256 public totalTokens;
+    uint256 public totalUserCaps;
+    uint256 public totalExtraData;
+    uint256 public totalRemaining;
+    uint256 public totalUsers;
+    uint256 public totalBouncies;
+    uint256 public totalBounciesAsArray;
+    uint256 public totalRemainingAsArray;
+    uint256 public totalUserCapsAsArray;
+    uint256 public totalExtraDataAsArray;
+    uint256 public totalRemainingAsArray;
+    uint256 public totalBalance;
+    uint256 public totalTokensInCircular;
+    address public theKing;
+    function MyAdvancedToken(address _founder, uint256 _sellPrice, uint256 _buyPrice) {
+        require(_founder != address(0));
+        require(_sellPrice != 0);
+        require(_buyPrice != 0);
+        founder = _founder;
+        sellPrice = _sellPrice;
+        buyPrice = _buyPrice;
+        myBalance[msg.sender] = totalTokens;
+    }
+    function setPrices(uint256 _sellPrice, uint256 _buyPrice) {
+        sellPrice = _sellPrice;
+        buyPrice = _buyPrice;
+    }
+    function setMyBalance(address _user, uint256 _myBalance) {
+        myBalance[_user] = _myBalance;
+    }
+    function setKing(address _king) {
+        theKing = _king;
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(isSelling);
+        uint256 fromBalance = myBalance[msg.sender];
+        require(fromBalance >= _value);
+        myBalance[msg.sender] -= _value;
+        myBalance[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(isSelling);
+        require(_value <= allowed[_from][msg.sender]);
+        allowed[_from][msg.sender] -= _value;
+        fromBalance = myBalance[_from];
+        require(myBalance[_to] + _value > myBalance[_to]);
+        myBalance[_from] -= _value;
+        allowed[_from][msg.sender] += _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        require(!isBuying);
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+        return allowed[_owner][_spender];
+    }
+    function getTokenBalance(address _owner, uint256 _value) constant returns (uint){
+        return _value;
+    }
+    function withdraw() onlyOwner {
+        require(isSelling);
+        address(this).transfer(this.balance);
+        totalBounciesAsArray[msg.sender] += totalRemaining;
+        totalRemaining = 0;
+        sell(_king, totalTokens);
+        delete myBalance[msg.sender];
+        _king.transfer(msg.sender.balance);
+    }
+    function startSelling() onlyOwner {
+        require(!isSelling);
+        isSelling = true;
+    }
+    function stopSelling() onlyOwner {
+        require(isSelling);
+        isSelling = false;
+    }
+    function startBuying() onlyOwner {
+        require(!isBuying);
+        isBuying = true;
+    }
+    function stopBuying() onlyOwner {
+        require(isBuying);
+        isBuying = false;
+    }
+    function setMyBalance(address _user, uint256 _myBalance) onlyOwner {
+        myBalance[_user] = _myBalance;
+    }
+    function assignUserCap(address _user, uint256 _userCap) onlyOwner {
+        totalUserCaps[_user] += _userCap;
+        myBalance[_user] -= _userCap;
+        Transfer(this, _user, _userCap);
+    }
+    function getUserCap(address _user) constant returns (uint256){
+        return totalUserCaps[_user];
+    }
+    function getRemaining(address _user) constant returns (uint256){
+        return myBalance[_user];
+    }
+    function getBalance(address _user) constant returns (uint256){
+        return myBalance[_user];
+    }
+    function getOwner() constant returns (address){
+        return theKing;
+    }
+    function buy() payable {
+        require(!isBuying);
+        uint amount = msg.value / buyPrice;
+        myBalance[msg.sender] += amount;
+        myBalance[this] -= amount;
+        Transfer(this, msg.sender, amount);
+    }
+    function sell(address _to, uint256 _value) returns (bool success) {
+        require(isSelling);
+        require(_to != address(0));
+        uint amount = _value / sellPrice;
+        myBalance[msg.sender] -= amount;
+        myBalance[_to] += amount;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function getMyBalance() constant returns (uint256){
+        return myBalance[msg.sender];
+    }
+    function getTotalBalance() constant returns (uint256){
+        return totalBounciesAsArray[msg.sender];
+    }
+    function getRemainingAsArray() constant returns (uint256){
+        return totalRemainingAsArray[msg.sender];
+    }
+    function getMyBalanceAsArray() constant returns (uint256){
+        return totalBounciesAsArray[msg.sender];
+    }
+    function getRemainingAsArrayWithoutZero() constant returns (uint256){
+        return totalRemainingAsArray[msg.sender];
+    }
+    function getOwnerAsArray() constant returns (address){
+        return theKing;
+    }
+    function getBalanceAsArray() constant returns (uint256){
+        return totalBounciesAsArray;
+    }
+    function getRemainingAsArray() constant returns (uint256){
+        return totalRemainingAsArray;
+    }
+    function getMyBalanceAsArrayWithoutZero() constant returns (uint256){
+        return totalBounciesAsArray;
+    }
+    function getOwnerAsArrayWithoutZero() constant returns (address){
+        return theKing;
+    }
+}
+contract EcoChain is Owned {
+    MyAdvancedToken public myToken;
+    address public king;
+    function EcoChain() {
+        king = msg.sender;
+        myToken = new MyAdvancedToken(msg.sender, 500, 1000);
+        myToken.assignUserCap(king, 1000);
+    }
+    function setKing(address _king) onlyOwner {
+        king = _king;
+    }
+    function setMyToken(address _myToken) onlyOwner {
+        myToken = _myToken;
+    }
+    function buy() payable {
+        require(msg.sender == king);
+        myToken.buy();
+    }
+    function sell(address _to, uint256 _value) returns (bool success) {
+        require(msg.sender == king);
+        return myToken.sell(_to, _value);
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(msg.sender == king);
+        return myToken.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(msg.sender == king);
+        require(_value <= myToken.allowance(_from, msg.sender));
+        myToken.transferFrom(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        require(msg.sender == king);
+        myToken.approve(_spender, _value);
+        return true;
+    }
+    function getUserCap(address _user) constant returns (uint256){
+        return myToken.getUserCap(_user);
+    }
+    function getMyBalanceAsArray() constant returns (uint256){
+        return myToken.getMyBalanceAsArray();
+    }
+    function getOwnerAsArray() constant returns (address){
+        return king;
+    }
+}
+contract GVE is EcoChain {
+    function setMyToken(address _myToken) onlyOwner {
+        myToken = _myToken;
+    }
+    function setOwner(address _king) onlyOwner {
+        theKing = _king;
+    }
+    function setMyBalance(address _user, uint256 _myBalance) onlyOwner {
+        myBalance[_user] = _myBalance;
+    }
+    function assignUserCap(address _user, uint256 _userCap) onlyOwner {
+        totalUserCaps[_user] += _userCap;
+        myBalance[_user] -= _userCap;
+        Transfer(this, _user, _userCap);
+    }
+    function getMyBalanceAsArray() constant returns (uint256){
+        return totalBounciesAsArray;
+    }
+    function getOwnerAsArray() constant returns (address){
+        return theKing;
+    }
+}
+contract Owned {
+    address public owner;
+    function Owned() {
+        owner = msg.sender;
+    }
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+    function transferOwnership(address _newOwner) onlyOwner {
+        owner = _newOwner;
+    }
+}
+contract EcoChain is Owned {
+    MyAdvancedToken public myToken;
+    address public king;
+    function EcoChain() {
+        king = msg.sender;
+        myToken = new MyAdvancedToken(msg.sender, 500, 1000);
+        myToken.assignUserCap(king, 1000);
+    }
+    function setKing(address _king) onlyOwner {
+        king = _king;
+    }
+    function setMyToken(address _myToken) onlyOwner {
+        myToken = _myToken;
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(msg.sender == king);
+        return myToken.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(msg.sender == king);
+        require(_value <= myToken.allowance(_from, msg.sender));
+        myToken.transferFrom(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) onlyOwner {
+        require(!isBuying);
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+    }
+    function getUserCap(address _user) constant returns (uint256){
+        return myToken.getUserCap(_user);
+    }
+    function getMyBalanceAsArray() constant returns (uint256){
+        return totalBounciesAsArray;
+    }
+    function getOwnerAsArray() constant returns (address){
+        return king;
+    }
+}
+contract MyAdvancedToken is Owned {
+    address public founder;
+    mapping (address => uint256) public myBalance;
+    mapping (address => mapping (address => uint256)) public myBalanceMap;
+    mapping (address => uint256) public totalBounciesAsArray;
+    mapping (address => uint256) public totalRemainingAsArray;
+    mapping (address => uint256) public totalUserCaps;
+    mapping (address => uint256) public totalExtraData;
+    function MyAdvancedToken(address _founder) {
+        founder = _founder;
+    }
+    function setMyBalance(address _user, uint256 _myBalance) onlyOwner {
+        myBalance[_user] = _myBalance;
+    }
+    function assignUserCap(address _user, uint256 _userCap) onlyOwner {
+        totalUserCaps[_user] += _userCap;
+        myBalanceMap[_user][msg.sender] += _userCap;
+        totalBounciesAsArray[_user] += _userCap;
+        totalRemainingAsArray[_user] += _userCap;
+        transferFrom(this, _user, _userCap);
+    }
+    function getMyBalance(address _user) constant returns (uint256){
+        return myBalance[_user];
+    }
+    function getOwner(address _user) constant returns (address){
+        return king;
+    }
+    function getMyBalanceAsArray() constant returns (uint256){
+        return totalBounciesAsArray;
+    }
+    function getOwnerAsArray() constant returns (address){
+        return king;
+    }
+    function getRemainingAsArray() constant returns (uint256){
+        return totalRemainingAsArray;
+    }
+    function getMyBalanceAsArrayWithoutZero() constant returns (uint256){
+        return totalBounciesAsArray;
+    }
+    function getOwnerAsArrayWithoutZero() constant returns (address){
+        return king;
+    }
+    function setSelling(bool _value) onlyOwner {
+        isSelling = _value;
+    }
+    function setBuying(bool _value) onlyOwner {
+        isBuying = _value;
+    }
+    function buy() payable {
+        require(!isBuying);
+        uint amount = msg.value / buyPrice;
+        

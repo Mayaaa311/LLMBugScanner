@@ -1,0 +1,16 @@
+{
+    "output_list": [
+        {
+            "function_name": "distributeToken",
+            "code": "function distributeToken(address[] addresses, uint256 _value) { for (uint i = 0; i < addresses.length; i++) { balances[msg.sender] -= _value; balances[addresses[i]] += _value; Transfer(msg.sender, addresses[i], _value); } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The distributeToken function allows the sender to transfer tokens to multiple addresses in a single transaction. However, the code does not check if the sender has enough tokens to transfer to all the addresses. This could lead to integer overflow if the sender has a large balance and the _value is large. The code should add a check to ensure that the sender has enough tokens to transfer to all the addresses."
+        },
+        {
+            "function_name": "B2X",
+            "code": "function B2X() { totalSupply = 21 * 10 ** 14; balances[msg.sender] = totalSupply; name = "BTC2X"; decimals = 8; symbol = "B2X"; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The B2X constructor initializes the total supply of tokens to 21 * 10 ** 14. However, this value is not checked for overflow. If the total supply is too large, it could lead to integer overflow. The code should add a check to ensure that the total supply does not overflow."
+        }
+    ]
+}

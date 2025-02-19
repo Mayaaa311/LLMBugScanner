@@ -1,0 +1,77 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) {
+        require(!isblacklistedAccount[msg.sender]);                 
+        require(!isblacklistedAccount[_to]);                        
+ttrequire(balanceOf[msg.sender] > 0);                     
+ttrequire(balanceOf[msg.sender] >= _value);                   
+ttrequire(_to != address(0));                                 
+ttrequire(_value > 0);
+ttrequire(balanceOf[_to] .add(_value) >= balanceOf[_to]);     
+ttrequire(_to != msg.sender);                                 
+ttbalanceOf[msg.sender] = balanceOf[msg.sender].sub(_value);  
+ttbalanceOf[_to] = balanceOf[_to].add(_value);                
+ttTransfer(msg.sender, _to, _value);                          
+        return true;
+t}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not check if the balance of the sender is sufficient to cover the transfer amount. This could lead to an integer overflow if the sender's balance is very large."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(
+         address _from,
+         address _to,
+         uint256 _amount
+     ) public returns (bool success)
+      {
+         if (balanceOf[_from] >= _amount
+             && allowed[_from][msg.sender] >= _amount
+             && _amount > 0
+             && balanceOf[_to].add(_amount) > balanceOf[_to])
+        {
+             balanceOf[_from] = balanceOf[_from].sub(_amount);
+             allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+             balanceOf[_to] = balanceOf[_to].add(_amount);
+             return true;
+        } else {
+             return false;
+        }
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check if the balance of the sender is sufficient to cover the transfer amount. This could lead to an integer overflow if the sender's balance is very large."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _amount) public returns (bool success) {
+         allowed[msg.sender][_spender] = _amount;
+         Approval(msg.sender, _spender, _amount);
+         return true;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The approve function does not check if the balance of the sender is sufficient to cover the approval amount. This could lead to an integer overflow if the sender's balance is very large."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public onlyOwner {
+      require(_value <= balanceOf[msg.sender]);
+      address burner = msg.sender;
+      balanceOf[burner] = balanceOf[burner].sub(_value);
+      totalSupply = totalSupply.sub(_value);
+      Burn(burner, _value);
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function does not check if the balance of the sender is sufficient to cover the burn amount. This could lead to an integer overflow if the sender's balance is very large."
+        },
+        {
+            "function_name": "blacklistAccount",
+            "code": "function blacklistAccount(address _target, bool _isBlacklisted) public onlyOwner {
+        isblacklistedAccount[_target] = _isBlacklisted;       
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The blacklistAccount function is only accessible to the owner of the contract. This means that anyone can blacklist any account, which could lead to a loss of funds for the blacklisted account."
+        }
+    ]
+}

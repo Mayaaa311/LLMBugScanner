@@ -1,0 +1,71 @@
+{
+    "output_list": [
+        {
+            "function_name": "increaseTotalSupply",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function increaseTotalSupply (address target,  uint256 increaseBy )  onlyOwner {
+        balanceOf[target] += increaseBy;
+        totalSupply += increaseBy;
+        Transfer(0, owner, increaseBy);
+        Transfer(owner, target, increaseBy);
+    }",
+            "reason": "In the function increaseTotalSupply, the addition operation for totalSupply may cause an integer overflow if the sum of increaseBy and the current totalSupply exceeds the maximum value that can be stored in a uint256 variable."
+        },
+        {
+            "function_name": "transferAndFreeze",
+            "vulnerability": "Access Control",
+            "function_code": "function transferAndFreeze (address target,  uint256 amount )  onlyAdmin {
+        _transfer(msg.sender, target, amount);
+        freeze(target, true);
+    }",
+            "reason": "In the function transferAndFreeze, the function freeze is called without any access control checks. This means that any address can call the function to freeze another address, which is a serious security vulnerability."
+        },
+        {
+            "function_name": "setMinBalance",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function setMinBalance(uint minimumBalanceInWei) onlyOwner {
+        minBalanceForAccounts = minimumBalanceInWei;
+    }",
+            "reason": "In the function setMinBalance, the function does not have any randomness or other form of non-deterministic behavior. This means that the minimum balance for accounts can be set to any value by any address with the 'onlyOwner' role, which is a serious security vulnerability."
+        },
+        {
+            "function_name": "reward",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function reward(address _to, uint256 _value, bool locked, string data) {
+        require(_to != 0x0);
+        require(!frozen[msg.sender]);                        
+        if(!locked) {
+            _transfer(msg.sender, _to, _value);
+        }else{
+            require(balanceOf[msg.sender] >= _value);                 
+            require(totalLockedRewardsOf[_to] + _value > totalLockedRewardsOf[_to]); 
+            balanceOf[msg.sender] -= _value;
+            totalLockedRewardsOf[_to] += _value;
+            lockedRewardsOf[_to][msg.sender] += _value;
+            if(userRewardCount[_to][msg.sender]==0) {
+                userRewarderCount[_to] += 1;
+                userRewarders[_to][userRewarderCount[_to]]=msg.sender;
+            }
+            userRewardCount[_to][msg.sender]+=1;
+            totalRewardIssuedOut[msg.sender]+= _value;
+            Transfer(msg.sender, _to, _value);
+        }
+        Reward(msg.sender, _to, _value, data, now);
+    }",
+            "reason": "In the function reward, the addition operation for totalLockedRewardsOf may cause an integer overflow if the sum of _value and the current totalLockedRewardsOf exceeds the maximum value that can be stored in a uint256 variable."
+        },
+        {
+            "function_name": "transferReward",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferReward(address _to, uint256 _value) {
+        require(lockedRewardsOf[msg.sender][_to] >= _value );
+        require(totalLockedRewardsOf[msg.sender] >= _value);
+        totalLockedRewardsOf[msg.sender] -= _value;
+        lockedRewardsOf[msg.sender][_to] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+    }",
+            "reason": "In the function transferReward, the subtraction operation for totalLockedRewardsOf may cause an integer underflow if the difference between _value and the current totalLockedRewardsOf is less than zero."
+        }
+    ]
+}

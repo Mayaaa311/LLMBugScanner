@@ -1,0 +1,70 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mint(address receiver, uint amount) public {
+      tokenAmount = ((msg.value*rate)/(1 ether));
+    if (tokenAmount != amount || amount == 0 || receiver != msg.sender)
+    {
+        revert();
+    }
+    totalSupply = totalSupply + (amount*1 ether);
+    balances[receiver] += (amount*1 ether);
+    Transfer(0, receiver, (amount*1 ether));
+  }
+",
+            "reason": "In the mint function, the calculation of tokenAmount may result in an integer overflow if the multiplication of msg.value and rate is greater than the maximum value of uint256. This can cause the totalSupply to be incorrectly calculated and potentially lead to an integer overflow."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint _value) returns (bool success) {
+    uint _allowance = allowed[_from][msg.sender];
+    balances[_to] = safeAdd(balances[_to], _value);
+    balances[_from] = safeSub(balances[_from], _value);
+    allowed[_from][msg.sender] = safeSub(_allowance, _value);
+    Transfer(_from, _to, _value);
+    return true;
+  }
+",
+            "reason": "In the transferFrom function, the calculation of _allowance may result in an integer overflow if the subtraction of _value from allowed[_from][msg.sender] is greater than the maximum value of uint. This can cause the allowed[_from][msg.sender] to be incorrectly calculated and potentially lead to an integer overflow."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint _value) returns (bool success) {
+    balances[msg.sender] = safeSub(balances[msg.sender], _value);
+    balances[_to] = safeAdd(balances[_to], _value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+",
+            "reason": "In the transfer function, the calculation of balances[msg.sender] may result in an integer overflow if the subtraction of _value from balances[msg.sender] is greater than the maximum value of uint. This can cause the balances[msg.sender] to be incorrectly calculated and potentially lead to an integer overflow."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint _value) returns (bool success) {
+    if ((_value != 0) && (allowed[msg.sender][_spender] != 0)) throw;
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+",
+            "reason": "In the approve function, the calculation of allowed[msg.sender][_spender] may result in an integer overflow if the subtraction of _value from allowed[msg.sender][_spender] is greater than the maximum value of uint. This can cause the allowed[msg.sender][_spender] to be incorrectly calculated and potentially lead to an integer overflow."
+        },
+        {
+            "function_name": "Burn",
+            "vulnerability": "Access Control",
+            "function_code": "function Burn () {
+    if (msg.sender == owner && totalSupply < 1000000)
+    {
+        totalSupply = 1000000;
+    } else {throw;}
+  }
+",
+            "reason": "In the Burn function, the owner of the contract can call the Burn function to set the totalSupply to 1000000. However, there is no access control mechanism in place to ensure that only the owner can call the Burn function. This can lead to unauthorized access and potential misuse."
+        }
+    ]
+}

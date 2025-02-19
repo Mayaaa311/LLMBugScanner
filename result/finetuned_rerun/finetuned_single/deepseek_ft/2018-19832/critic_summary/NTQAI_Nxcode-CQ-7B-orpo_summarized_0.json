@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The vulnerability is a typical integer overflow where the value variable is initialized to '2500e18', which is a large number that can lead to overflow when interacting with the totalRemaining variable during distribution. The typo in the function code might have been intentional for attacking users, but it is also a mistake in the code logic. The exploitative nature of this vulnerability is high due to the unexpected token increase, and the requirement of user interaction makes it more profitable. However, the identification requirement is strict, so the profitability score is set to 3.",
+            "correctness": 8,
+            "severity": 9,
+            "profitability": 3
+        },
+        {
+            "function_name": "getTokens",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The function 'getTokens' is restricted to whitelist addresses only, but there is no way to add addresses to this whitelist, leaving it entirely in the control of the owner. This is a severe access control issue, allowing the owner to distribute tokens to any address at will, which can be very detrimental to user trust and value of the token. The requirement of user interaction to join the whitelist can be seen as exploitative, but the identification of this issue is straightforward, so the severity score is set to 8.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 4
+        },
+        {
+            "function_name": "distr",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The 'totalDistributed' and 'totalRemaining' variables are manipulated without any overflow checks, allowing the contract owner to overflow the 'balances' mapping and gain unexpected funds. This is a critical mistake in the code, enabling the owner to print unlimited token balances for any user, making the token valueless. The exploitative nature of this vulnerability is very high, and the requirement of user interaction does not mitigate the severity, so the correctness, severity, and profitability scores are set to 9.",
+            "correctness": 9,
+            "severity": 9,
+            "profitability": 9
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The 'transferFrom' function allows users to transfer tokens from one address to another without any rate limits or restrictions, which can be exploited to drain large amounts of tokens in a single transaction. This is a severe mistake in the token distribution logic, enabling a very profitable attack on the token value. The exploitative nature of this vulnerability is very high, and the requirement of user interaction does not mitigate the severity, so the correctness, severity, and profitability scores are set to 9.",
+            "correctness": 9,
+            "severity": 9,
+            "profitability": 9
+        },
+        {
+            "function_name": "approve",
+            "auditor_idx": 0,
+            "vulnerability": "Bad Randomness",
+            "criticism": "The 'approve' function allows users to approve a spender multiple times, with the new approval value overwriting the old one. This can be exploited by a spender to repeatedly call 'transferFrom' and drain funds from the token owner. This is a severe mistake in the token distribution logic, enabling a very profitable attack on the token value. The exploitative nature of this vulnerability is very high, and the requirement of user interaction does not mitigate the severity, so the correctness, severity, and profitability scores are set to 9.",
+            "correctness": 9,
+            "severity": 9,
+            "profitability": 9
+        }
+    ]
+}

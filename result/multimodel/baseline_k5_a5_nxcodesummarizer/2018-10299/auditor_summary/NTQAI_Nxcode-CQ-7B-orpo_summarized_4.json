@@ -1,0 +1,55 @@
+{
+    "output_list": [
+        {
+            "function_name": "mul",
+            "code": "function mul(uint256 a, uint256 b) internal constant returns (uint256) {
+    uint256 c = a * b;
+    assert(a == 0 || c / a == b);
+    return c;
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The multiplication operation in the SafeMath library can lead to an integer overflow if the input values are too large. This can be exploited by attackers to cause the contract to behave unexpectedly or even revert the transaction."
+        },
+        {
+            "function_name": "div",
+            "code": "function div(uint256 a, uint256 b) internal constant returns (uint256) {
+    uint256 c = a / b;
+    return c;
+  }",
+            "vulnerability": "Integer Division by Zero",
+            "reason": "The division operation in the SafeMath library can lead to a division by zero error if the divisor is zero. This can be exploited by attackers to cause the contract to behave unexpectedly or even revert the transaction."
+        },
+        {
+            "function_name": "sub",
+            "code": "function sub(uint256 a, uint256 b) internal constant returns (uint256) {
+    assert(b <= a);
+    return a - b;
+  }",
+            "vulnerability": "Integer Underflow",
+            "reason": "The subtraction operation in the SafeMath library can lead to an integer underflow if the result is negative. This can be exploited by attackers to cause the contract to behave unexpectedly or even revert the transaction."
+        },
+        {
+            "function_name": "add",
+            "code": "function add(uint256 a, uint256 b) internal constant returns (uint256) {
+    uint256 c = a + b;
+    assert(c >= a);
+    return c;
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The addition operation in the SafeMath library can lead to an integer overflow if the input values are too large. This can be exploited by attackers to cause the contract to behave unexpectedly or even revert the transaction."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value > 0 && _value <= balances[msg.sender]);
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The subtraction operation in the transfer function can lead to an integer overflow if the sender's balance is too large. This can be exploited by attackers to cause the contract to behave unexpectedly or even revert the transaction."
+        }
+    ]
+}

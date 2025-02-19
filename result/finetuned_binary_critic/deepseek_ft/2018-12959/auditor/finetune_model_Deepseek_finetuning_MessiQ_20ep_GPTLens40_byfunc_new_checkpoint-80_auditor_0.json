@@ -1,0 +1,60 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) {
+    if (balances[msg.sender] >= _value && _value > 0) {
+        balances[msg.sender] -= _value;
+        balances[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    } else { return false; }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function does not check for overflow of the 'balances' mapping, allowing users to transfer more tokens than available, causing a permanent loss of funds."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) { throw; }
+    return true;
+}",
+            "vulnerability": "Incorrect Access Control",
+            "reason": "The 'approveAndCall' function allows any user to approve another address to spend tokens on their behalf, and then execute arbitrary code in the spender contract. This is due to the incorrect assumption that the spender contract must have a 'receiveApproval' function."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
+        balances[_to] += _value;
+        balances[_from] -= _value;
+        allowed[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    } else { return false; }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferFrom' function does not check for overflow of the 'balances' mapping, allowing users to transfer more tokens than available, causing a permanent loss of funds."
+        },
+        {
+            "function_name": "balanceOf",
+            "code": "function balanceOf(address _owner) constant returns (uint256 balance) {
+    return balances[_owner];
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'balanceOf' function does not check for overflow of the 'balances' mapping, allowing users to view more tokens than available, causing a permanent loss of funds."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) returns (bool success) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'approve' function does not check for overflow of the 'allowed' mapping, allowing users to approve more tokens than available, causing a permanent loss of funds."
+        }
+    ]
+}

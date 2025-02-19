@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "distribute",
+            "code": "function distribute(address[] _addresses, uint[] _amounts) public returns (bool success) {require(_addresses.length < 256 && _addresses.length == _amounts.length);uint totalAmount;for (uint a = 0; a < _amounts.length; a++) {totalAmount += _amounts[a];}require(totalAmount > 0 && balances[msg.sender] >= totalAmount);balances[msg.sender] -= totalAmount;for (uint b = 0; b < _addresses.length; b++) {if (_amounts[b] > 0) {balances[_addresses[b]] += _amounts[b];Transfer(msg.sender, _addresses[b], _amounts[b]);}}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'distribute' function allows the owner to distribute tokens to a list of recipients in a batch. However, it fails to check if the addition of the recipient's balance will overflow the safe integer limit, causing a buyable issue where the owner can arbitrarily increase the balance of any user to a large amount."
+        },
+        {
+            "function_name": "distribute",
+            "code": "function distribute(address[] _addresses, uint[] _amounts) public returns (bool success) {require(_addresses.length < 256 && _addresses.length == _amounts.length);uint totalAmount;for (uint a = 0; a < _amounts.length; a++) {totalAmount += _amounts[a];}require(totalAmount > 0 && balances[msg.sender] >= totalAmount);balances[msg.sender] -= totalAmount;for (uint b = 0; b < _addresses.length; b++) {if (_amounts[b] > 0) {balances[_addresses[b]] += _amounts[b];Transfer(msg.sender, _addresses[b], _amounts[b]);}}",
+            "vulnerability": "Block Reward",
+            "reason": "The owner can arbitrarily increase the balance of any user to a large amount due to integer overflow, which is exploitable in real world. The owner can also arbitrarily decrease the balance of any user to zero due to integer overflow, which is exploitable in real world. The owner can also arbitrarily decrease the total supply of the token due to integer overflow, which is exploitable in real world."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _amount) public returns (bool success) {require(_amount > 0 && balances[_from] >= _amount && allowed[_from][msg.sender] >= _amount);balances[_from] -= _amount;allowed[_from][msg.sender] -= _amount;balances[_to] += _amount;Transfer(_from, _to, _amount);return true;}",
+            "vulnerability": "Integer Underflow",
+            "reason": "The 'transferFrom' function allows a spender to transfer funds to an address, but it does not check if the remaining allowance is sufficient. If the spender's allowance is set to a large value, it can be exploited to transfer more tokens than the owner intends to transfer."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint _amount) public returns (bool success) {allowed[msg.sender][_spender] = _amount;Approval(msg.sender, _spender, _amount);return true;}",
+            "vulnerability": "Race Condition",
+            "reason": "The 'approve' function does not consider race conditions, allowing attackers to exploit these issues by creating a front-running attack, where an attacker can steal funds by tricking a user into approving a large amount to an attacker's address."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _amount) public returns (bool success) {require(_amount > 0 && balances[msg.sender] >= _amount);balances[msg.sender] -= _amount;balances[_to] += _amount;Transfer(msg.sender, _to, _amount);return true;}",
+            "vulnerability": "Integer Underflow",
+            "reason": "The 'transfer' function allows a user to transfer funds to an address, but it does not check if the sender's balance is sufficient. If the sender's balance is set to a large value, it can be exploited to transfer more tokens than the sender intends to transfer."
+        }
+    ]
+}

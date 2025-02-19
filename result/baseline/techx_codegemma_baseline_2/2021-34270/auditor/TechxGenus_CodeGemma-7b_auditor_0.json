@@ -1,0 +1,62 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Weak Randomness",
+            "function_code": "function mintToken(address _target, uint256 _mintedAmount) onlyOwner {
+    require (_target != 0x0);
+    balanceOf[_target] += _mintedAmount;
+    _totalSupply += _mintedAmount;
+    Transfer(0, this, _mintedAmount);
+    Transfer(this, _target, _mintedAmount);
+}",
+            "reason": "The function relies on a hardcoded value for the new amount to mint, which can be manipulated by a potential attacker. This could allow an attacker to mint more coins than the stated amount, creating a potential inflation in the currency."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint _value) returns (bool success) {
+    _transfer(_from, _to, _value);
+    return true;
+}",
+            "reason": "The function doesn't check for the value of `_value` before executing the transfer. A potential attacker could exploit this by sending a larger value than the balance of the sender, thus creating a negative balance for the sender and potentially causing a fail in the contract."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint _value) returns (bool success) {
+    require (_value <= allowance[_from][msg.sender]);
+    allowance[_from][msg.sender] -= _value;
+    _transfer(_from, _to, _value);
+    return true;
+}",
+            "reason": "The function doesn't check for the value of `_value` before executing the transfer. A potential attacker could exploit this by sending a larger value than the balance of the sender, thus creating a potential inflation in the currency."
+        },
+        {
+            "function_name": "setPrices",
+            "vulnerability": "Access Control",
+            "function_code": "function setPrices(uint256 _newSellPrice, uint256 _newBuyPrice) onlyDoftManager {
+    sellPrice = _newSellPrice;
+    buyPrice = _newBuyPrice;
+}",
+            "reason": "The function is only accessible to the doftManager. This means that a potential attacker could never change the prices, which could lead to an indefinite manipulation of the prices."
+        },
+        {
+            "function_name": "mine",
+            "vulnerability": "Weak Randomness",
+            "function_code": "function mine(address _target, uint256 _minedAmount) onlyDoftManager {
+    require (_minedAmount > 0);
+    require (_target != 0x0);
+    require (miningStorage - _minedAmount >= 0);
+    require (balanceOf[doftManager] >= _minedAmount);
+    require (balanceOf[_target] + _minedAmount > balanceOf[_target]);
+    balanceOf[doftManager] -= _minedAmount;
+    balanceOf[_target] += _minedAmount;
+    miningStorage -= _minedAmount;
+    Mine(_target, _minedAmount);
+}",
+            "reason": "The function relies on a hardcoded value for the new amount to mine, which can be manipulated by a potential attacker. This could allow an attacker to mine more coins than the stated amount, creating a potential inflation in the currency."
+        }
+    ]
+}<eos>

@@ -1,0 +1,130 @@
+{"output_list": [{"function_list": [{"function_name": "output_list", "output_list": [{"function_name": "<function_name>", "auditor_idx": 0, "vulnerability": "<vulnerability>", "criticism": "<criticism>", "correctness": "<correctness>", "severity": "<severity>", "profitability": "<profitability>"}]} ] }
+}
+}
+}
+}
+}
+contract SafeMath {
+  function safeAdd(uint a, uint b) returns (uint) {
+    uint256 private constant private MAX_UINT256 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+    function safeAdd(uint a, uint b) returns (uint) {
+      uint256 c = a + b;
+      assert(c >= a);
+      assert(c <= MAX_UINT256);
+      return c;
+    }
+  function safeSub(uint a, uint b) returns (uint) {
+      assert(b <= a);
+      return a - b;
+    }
+  function safeMul(uint a, uint b) returns (uint) {
+      uint256 c = a * b;
+      assert(a == 0 || c / a == b);
+      return c;
+    }
+  function safeDiv(uint a, uint b) returns (uint) {
+      assert(b > 0);
+      uint256 c = a / b;
+      assert(a == b * c + a % b);
+      return c;
+    }
+  function safeDiv(uint a, uint b, uint8 rounding) returns (uint) {
+      if (rounding == 1) {
+          uint c = a / b;
+          if (a % b != 0) {
+              c += 1;
+          }
+          assert(a == b * c + a % b);
+          return c;
+      } else {
+          return a / b;
+      }
+    }
+  function safeFloor(uint a, uint b) returns (uint) {
+      uint c = a / b;
+      return c;
+    }
+  function safeMod(uint a, uint b) returns (uint) {
+      uint c = a % b;
+      return c;
+    }
+}
+contract ERC20 {
+    uint public totalSupply;
+    function balanceOf(address _owner) constant returns (uint256);
+    function transfer(address _to, uint256 _value) returns (bool success);
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success);
+    function approve(address _spender, uint256 _value) returns (bool success);
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining);
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+}
+contract ERC20Token is ERC20 {
+    uint256 public constant private MAX_UINT256 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+    mapping (address => uint256) public balanceOf;
+    mapping (address => mapping (address => uint256)) public allowance;
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+    function ERC20() {
+        balanceOf[msg.sender] = 0;
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require(_to != 0x0);
+        require(balanceOf[_from] >= _value);
+        require(balanceOf[_to] + _value > balanceOf[_to]);
+        uint previousBalances = balanceOf[_from] + balanceOf[_to];
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(_from, _to, _value);
+        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        _transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);     
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        require((_value == 0) || (allowance[msg.sender][_spender] == 0));
+        allowance[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+      return allowance[_owner][_spender];
+    }
+}
+contract StandardToken is ERC20, SafeMath {
+    mapping (address => mapping (address => uint)) public allowed;
+    function isToken() public constant returns (bool weAre) {
+        return true;
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(balanceOf[_from] >= _value);
+        require(_value <= allowance[_from][msg.sender]);
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        require((_value == 0) || (allowance[msg.sender][_spender] == 0));
+        allowance[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+}
+contract Cryptonite is StandardToken { 
+    uint256 public constant private totalSupply = 10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

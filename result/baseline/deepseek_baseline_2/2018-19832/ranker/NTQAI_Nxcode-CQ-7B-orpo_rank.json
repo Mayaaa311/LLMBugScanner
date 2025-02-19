@@ -1,0 +1,53 @@
+Here is the output in JSON format:
+
+```json
+{
+  "output_list": [
+    {
+      "function_name": "getTokens",
+      "auditor_idx": 0,
+      "vulnerability": "Integer Overflow",
+      "criticism": "The function 'getTokens' does not check for integer overflow when updating the 'value' variable. If 'value' is set to 'totalRemaining' and 'totalRemaining' is very large, it could lead to an integer overflow, causing unexpected behavior in subsequent calculations. The use of SafeMath functions is present, but it seems that the specific overflow scenario is not adequately addressed.",
+      "correctness": 6,
+      "severity": 8,
+      "profitability": 5
+    },
+    {
+      "function_name": "getTokens",
+      "auditor_idx": 0,
+      "vulnerability": "Access Control",
+      "criticism": "The function 'getTokens' allows any user to call it, which can lead to unintended consequences if the 'blacklist' mapping is used incorrectly. Specifically, calling 'getTokens' could inadvertently add the caller to the blacklist, restricting their ability to receive tokens in the future. The function does not enforce any access control checks before allowing distribution, which is a critical oversight.",
+      "correctness": 5,
+      "severity": 7,
+      "profitability": 4
+    },
+    {
+      "function_name": "distr",
+      "auditor_idx": 0,
+      "vulnerability": "Access Control",
+      "criticism": "The function 'distr' uses a modifier 'canDistr' which only checks if the distribution is not finished. This does not ensure that the caller is authorized to perform the distribution, potentially allowing any user to distribute tokens without proper authorization. The modifier does not check for any additional permissions or roles that might be required for this function.",
+      "correctness": 4,
+      "severity": 7,
+      "profitability": 3
+    },
+    {
+      "function_name": "transfer",
+      "auditor_idx": 0,
+      "vulnerability": "Access Control",
+      "criticism": "The function 'transfer' does not enforce any access control before allowing transfers. This means that any user can transfer tokens from any other address, which can lead to unauthorized transactions. The function does not check who is allowed to perform the transfer operation.",
+      "correctness": 3,
+      "severity": 8,
+      "profitability": 2
+    },
+    {
+      "function_name": "approve",
+      "auditor_idx": 0,
+      "vulnerability": "Access Control",
+      "criticism": "The function 'approve' does not check if the caller has already approved a spender for the same amount. This can lead to a situation where a user can approve multiple spenders for the same amount, which might not be the intended behavior. The function does not perform any checks to ensure that the approval is unique for each spender.",
+      "correctness": 2,
+      "severity": 6,
+      "profitability": 5
+    }
+  ]
+}
+```

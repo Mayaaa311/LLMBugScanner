@@ -1,0 +1,10 @@
+{
+    "output_list": [
+        {
+            "function_name": "addguess",
+            "code": "function _addguess() private inState(State.Started) { require(msg.value >= bettingprice); curhash = sha256(block.timestamp, block.coinbase, block.difficulty, curhash); if((uint)(numguesses+1)<=arraysize) { guesses[numguesses++].addr = msg.sender; if((uint)(numguesses)>=arraysize){ _finish(); } } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The numguesses variable is incremented by one in the _addguess() function, and then it is compared to the arraysize. If the numguesses is set to arraysize, it will call the _finish() function, which will then call the findWinner() function. However, due to the comparison (numguesses >= arraysize), it will always execute the _finish() function, regardless of the value of numguesses. This allows an attacker to control the value of numguesses, and cause the contract to always call the _finish() function, regardless of the betting price. This will cause a potential loss of funds for the contract."
+        }
+    ]
+}

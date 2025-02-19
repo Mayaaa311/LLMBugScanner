@@ -1,0 +1,21 @@
+{"output_list": [
+            {
+                "function_name": "transferFrom",
+                "code": "function transferFrom(address _from, address _to, uint256 _amount) returns (bool success) {
+         if (balances[_from] >= _amount
+             && allowed[_from][msg.sender] >= _amount
+             && _amount > 0
+             && balances[_to] + _amount > balances[_to]) {
+             balances[_from] -= _amount;
+             allowed[_from][msg.sender] -= _amount;
+             balances[_to] += _amount;
+             Transfer(_from, _to, _amount);
+             return true;
+         } else {
+             return false;
+         }
+     }",
+                "vulnerability": "Wrong Logic",
+                "reason": "The transferFrom function allows attackers to steal assets due to incorrect computations involving _from, _to, and _amount. Inputs are not validated, allowing attackers to steal assets of an attacker's balance."
+            }
+        ]

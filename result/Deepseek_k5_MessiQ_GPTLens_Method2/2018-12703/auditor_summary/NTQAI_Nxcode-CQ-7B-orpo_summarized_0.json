@@ -1,0 +1,58 @@
+{
+    "output_list": [
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) public returns (bool success) {
+                require(approve(_spender, _value));
+                ApproveAndCallFallBack(_spender).receiveApproval(msg.sender, _value, this, _extraData);
+                return true;
+            }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function 'approveAndCall' allows the caller to approve an address and then call an arbitrary function in the contract's address. This can be exploited if the caller is malicious, causing the contract to execute unintended functions."
+        },
+        {
+            "function_name": "approveAndCallcode",
+            "code": "function approveAndCallcode(address _spender, uint256 _value, bytes _extraData) public returns (bool success) {
+                require(approve(_spender, _value));
+                ApproveAndCallFallBack(_spender).receiveApproval.value(msg.value)(msg.sender, _value, this, _extraData);
+                return true;
+            }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function 'approveAndCallcode' allows the caller to approve an address and then execute arbitrary code in the contract's address. This can be exploited if the caller is malicious, causing the contract to execute unintended code."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+                require(_value <= balances[msg.sender]);
+                balances[msg.sender] = balances[msg.sender].sub(_value);
+                balances[_to] = balances[_to].add(_value);
+                Transfer(msg.sender, _to, _value);
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function has an integer overflow vulnerability. The function does not check if the subtraction of balances results in a non-positive number, allowing attackers to overflow balances and transfer more tokens than they own."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+                require(_value <= balances[_from]);
+                require(_value <= allowed[_from][msg.sender]);
+                balances[_from] = balances[_from].sub(_value);
+                allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+                balances[_to] = balances[_to].add(_value);
+                Transfer(_from, _to, _value);
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transferFrom' function has an integer overflow vulnerability. The function does not check if the subtraction of balances results in a non-positive number, allowing attackers to overflow balances and transfer more tokens than they are allowed to."
+        },
+        {
+            "function_name": "constructor",
+            "code": "constructor() public {
+                founder = msg.sender;
+            }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor is misspelled as 'founder = msg.sender;' instead of 'founder = msg.sender;'. This typo in the constructor can cause the founder address to be incorrectly set, allowing attackers to exploit the vulnerability."
+        }
+    ]
+}

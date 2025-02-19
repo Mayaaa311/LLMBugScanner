@@ -1,0 +1,40 @@
+{
+    "output_list": [
+        {
+            "function_name": "convertPresaleTokens",
+            "code": "function convertPresaleTokens(address buyer, uint256 tokens, uint256 factor, string txHash) external icoAgentOnly returns (uint) { require(buyer != address(0)); require(tokens > 0); require(validState()); uint256 tokensToSell = SafeMath.add(tokensSold, tokens); require(tokensToSell <= TOKENS_FOR_SALE); tokensSold = tokensToSell;            token.mint(buyer, tokens); TokenBuyPresale(buyer, tokens, factor, txHash); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `convertPresaleTokens` is vulnerable to integer overflow. The variable `tokensToSell` is incremented by `tokens` in each iteration of the loop. If `tokens` is large enough, the sum of `tokensSold` and `tokens` may exceed the maximum value that can be stored in `tokensToSell`. This can lead to an incorrect value of `tokensToSell` and potentially incorrect behavior of the contract."
+        },
+        {
+            "function_name": "creditJackpotTokens",
+            "code": "function creditJackpotTokens(address buyer, uint256 tokens, uint256 jackpot) external icoAgentOnly returns (uint) { require(buyer != address(0)); require(tokens > 0); require(validState()); token.mint(buyer, tokens); TokenWin(buyer, tokens, jackpot); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `creditJackpotTokens` is also vulnerable to integer overflow. The variable `tokensToSell` is incremented by `tokens` in each iteration of the loop. If `tokens` is large enough, the sum of `tokensSold` and `tokens` may exceed the maximum value that can be stored in `tokensToSell`. This can lead to an incorrect value of `tokensToSell` and potentially incorrect behavior of the contract."
+        },
+        {
+            "function_name": "buyTokens",
+            "code": "function buyTokens(address buyer, uint256 tokens, uint256 factor, string txHash) external icoAgentOnly returns (uint) { require(buyer != address(0)); require(tokens > 0); require(validState()); uint256 tokensToSell = SafeMath.add(tokensSold, tokens); require(tokensToSell <= TOKENS_FOR_SALE); tokensSold = tokensToSell;            token.mint(buyer, tokens); TokenBuy(buyer, tokens, factor, txHash); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `buyTokens` is also vulnerable to integer overflow. The variable `tokensToSell` is incremented by `tokens` in each iteration of the loop. If `tokens` is large enough, the sum of `tokensSold` and `tokens` may exceed the maximum value that can be stored in `tokensToSell`. This can lead to an incorrect value of `tokensToSell` and potentially incorrect behavior of the contract."
+        },
+        {
+            "function_name": "convertPresaleTokens",
+            "code": "function convertPresaleTokens(address buyer, uint256 tokens, uint256 factor, string txHash) external icoAgentOnly returns (uint) { require(buyer != address(0)); require(tokens > 0); require(validState()); uint256 tokensToSell = SafeMath.add(tokensSold, tokens); require(tokensToSell <= TOKENS_FOR_SALE); tokensSold = tokensToSell;            token.mint(buyer, tokens); TokenBuyPresale(buyer, tokens, factor, txHash); }",
+            "vulnerability": "Access Control",
+            "reason": "The function `convertPresaleTokens` is only accessible to the `icoAgent` address. However, it does not check whether the `icoAgent` is the actual sender of the transaction. This can lead to unauthorized access to the function and potentially incorrect behavior of the contract."
+        },
+        {
+            "function_name": "creditJackpotTokens",
+            "code": "function creditJackpotTokens(address buyer, uint256 tokens, uint256 jackpot) external icoAgentOnly returns (uint) { require(buyer != address(0)); require(tokens > 0); require(validState()); token.mint(buyer, tokens); TokenWin(buyer, tokens, jackpot); }",
+            "vulnerability": "Access Control",
+            "reason": "The function `creditJackpotTokens` is only accessible to the `icoAgent` address. However, it does not check whether the `icoAgent` is the actual sender of the transaction. This can lead to unauthorized access to the function and potentially incorrect behavior of the contract."
+        },
+        {
+            "function_name": "buyTokens",
+            "code": "function buyTokens(address buyer, uint256 tokens, uint256 factor, string txHash) external icoAgentOnly returns (uint) { require(buyer != address(0)); require(tokens > 0); require(validState()); uint256 tokensToSell = SafeMath.add(tokensSold, tokens); require(tokensToSell <= TOKENS_FOR_SALE); tokensSold = tokensToSell;            token.mint(buyer, tokens); TokenBuy(buyer, tokens, factor, txHash); }",
+            "vulnerability": "Access Control",
+            "reason": "The function `buyTokens` is only accessible to the `icoAgent` address. However, it does not check whether the `icoAgent` is the actual sender of the transaction. This can lead to unauthorized access to the function and potentially incorrect behavior of the contract."
+        }
+    ]
+}

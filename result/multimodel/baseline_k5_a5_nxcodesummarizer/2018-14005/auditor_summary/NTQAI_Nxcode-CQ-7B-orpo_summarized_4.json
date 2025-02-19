@@ -1,0 +1,73 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool) {
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `transfer` does not check if the transfer operation will cause an integer overflow. If `_value` is large enough, the balance of `_to` could exceed the maximum value that can be stored in a `uint256` variable, leading to an integer overflow. This could allow an attacker to steal all the tokens of the contract."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    balances[_from] = balances[_from].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    Transfer(_from, _to, _value);
+    return true;
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `transferFrom` does not check if the transfer operation will cause an integer overflow. If `_value` is large enough, the balance of `_to` could exceed the maximum value that can be stored in a `uint256` variable, leading to an integer overflow. This could allow an attacker to steal all the tokens of the contract."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public returns (bool) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `approve` does not check if the approval operation will cause an integer overflow. If `_value` is large enough, the allowance of `_spender` for `msg.sender` could exceed the maximum value that can be stored in a `uint256` variable, leading to an integer overflow. This could allow an attacker to approve a large amount of tokens for spending by another account."
+        },
+        {
+            "function_name": "allowance",
+            "code": "function allowance(address _owner, address _spender) public constant returns (uint256 remaining) {
+    return allowed[_owner][_spender];
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `allowance` does not check if the allowance operation will cause an integer overflow. If the allowance of `_spender` for `_owner` is large enough, the allowance could exceed the maximum value that can be stored in a `uint256` variable, leading to an integer overflow. This could allow an attacker to approve a large amount of tokens for spending by another account."
+        },
+        {
+            "function_name": "increaseApproval",
+            "code": "function increaseApproval (address _spender, uint _addedValue) public returns (bool success) {
+    allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `increaseApproval` does not check if the increase operation will cause an integer overflow. If `_addedValue` is large enough, the allowance of `_spender` for `msg.sender` could exceed the maximum value that can be stored in a `uint256` variable, leading to an integer overflow. This could allow an attacker to approve a large amount of tokens for spending by another account."
+        },
+        {
+            "function_name": "decreaseApproval",
+            "code": "function decreaseApproval (address _spender, uint _subtractedValue) public returns (bool success) {
+    uint oldValue = allowed[msg.sender][_spender];
+    if (_subtractedValue > oldValue) {
+      allowed[msg.sender][_spender] = 0;
+    } else {
+      allowed[msg.sender][_spender] = oldValue.sub(_subtractedValue);
+    }
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function `decreaseApproval` does not check if the decrease operation will cause an integer overflow. If `_subtractedValue` is large enough, the allowance of `_spender` for `msg.sender` could exceed the maximum value that can be stored in a `uint256` variable, leading to an integer overflow. This could allow an attacker to decrease the allowance of a large amount of tokens for spending by another account."
+        }
+    ]
+}

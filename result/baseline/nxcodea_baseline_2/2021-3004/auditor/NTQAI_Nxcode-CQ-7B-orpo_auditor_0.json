@@ -1,0 +1,70 @@
+{
+    "output_list": [
+        {
+            "function_name": "stake",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function stake(uint256 amount) external nonReentrant updateReward(msg.sender) {
+                require(amount > 0, 'Cannot stake 0');
+                stakedSupply += amount;
+                stakes[msg.sender] += amount;
+                _transferTokens(msg.sender, address(this), amount);
+                emit Staked(msg.sender, amount);
+            }",
+            "reason": "The function stake() is vulnerable to integer overflow. The variable stakedSupply is incremented by the amount of tokens staked by the user. If the user stakes a large amount of tokens, the value of stakedSupply may exceed the maximum value that can be stored in a uint256 variable. This can lead to incorrect results and potentially loss of funds."
+        },
+        {
+            "function_name": "unstake",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function unstake(uint amount) public nonReentrant updateReward(msg.sender) {
+                require(amount > 0, 'Cannot withdraw 0');
+                stakedSupply -= amount;
+                stakes[msg.sender] -= amount;
+                _transferTokens(address(this), msg.sender, amount);
+                emit Unstaked(msg.sender, amount);
+            }",
+            "reason": "The function unstake() is also vulnerable to integer overflow. The variable stakedSupply is decremented by the amount of tokens unstaked by the user. If the user unstakes a large amount of tokens, the value of stakedSupply may become negative, leading to incorrect results and potentially loss of funds."
+        },
+        {
+            "function_name": "notifyFeeAmount",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function notifyFeeAmount(uint reward) internal updateReward(address(0)) {
+                if (block.timestamp >= periodFinish) {
+                    rewardRate = reward / DURATION;
+                } else {
+                    uint remaining = periodFinish - block.timestamp;
+                    uint leftover = remaining * rewardRate;
+                    rewardRate = (reward + leftover) / DURATION;
+                }
+                uint balance = balances[address(this)];
+                require(rewardRate <= balance / DURATION, 'Provided reward too high');
+                lastUpdateTime = block.timestamp;
+                periodFinish = block.timestamp + DURATION;
+                emit Fees(reward);
+            }",
+            "reason": "The function notifyFeeAmount() is vulnerable to integer overflow. The variable rewardRate is calculated based on the reward amount and the remaining time until the periodFinish. If the reward amount is large and the remaining time is short, the value of rewardRate may exceed the maximum value that can be stored in a uint256 variable. This can lead to incorrect results and potentially loss of funds."
+        },
+        {
+            "function_name": "rewardPerToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function rewardPerToken() public view returns (uint) {
+                if (stakedSupply == 0) {
+                    return rewardPerTokenStored;
+                }
+                return
+                    rewardPerTokenStored +
+                        ((lastTimeRewardApplicable() - 
+                        lastUpdateTime) * 
+                        rewardRate * 1e18 / stakedSupply);
+            }",
+            "reason": "The function rewardPerToken() is vulnerable to integer overflow. The variable rewardPerTokenStored is incremented by the product of the difference between the lastTimeRewardApplicable() and lastUpdateTime, the rewardRate, and 1e18. If the stakedSupply is large and the difference between the lastTimeRewardApplicable() and lastUpdateTime is short, the value of rewardPerTokenStored may exceed the maximum value that can be stored in a uint256 variable. This can lead to incorrect results and potentially loss of funds."
+        },
+        {
+            "function_name": "earned",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function earned(address account) public view returns (uint) {
+                return (stakes[account] * (rewardPerToken() - userRewardPerTokenPaid[account]) / 1e18) + rewards[account];
+            }",
+            "reason": "The function earned() is vulnerable to integer overflow. The variable rewards[account] is incremented by the product of the difference between the rewardPerToken() and userRewardPerTokenPaid[account], and 1e18. If the stakedSupply is large and the difference between the rewardPerToken() and userRewardPerTokenPaid[account] is short, the value of rewards[account] may exceed the maximum value that can be stored in a uint256 variable. This can lead to incorrect results and potentially loss of funds."
+        }
+    ]
+}

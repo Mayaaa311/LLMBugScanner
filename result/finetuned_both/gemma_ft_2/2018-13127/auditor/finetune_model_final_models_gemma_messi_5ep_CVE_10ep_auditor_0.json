@@ -1,0 +1,344 @@
+{"output_list": [{"function_name": "mint", "vulnerability": "Integer Overflow", "reason": "The mint function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "unfreeze", "vulnerability": "Access Control", "reason": "The unfreeze function has an access control flaw where only the team members can call it."}]}
+{"output_list": [{"function_name": "transfer", "vulnerability": "Integer Overflow", "reason": "The transfer function has an integer overflow where the attacker can manipulate the balance of the victim."}]}
+{"output_list": [{"function_name": "transferFrom", "vulnerability": "Integer Overflow", "reason": "The transferFrom function has an integer overflow where the attacker can manipulate the balance of the victim."}]}
+{"output_list": [{"function_name": "approve", "vulnerability": "Integer Overflow", "reason": "The approve function has an integer overflow where the attacker can manipulate the balance of the victim."}]}
+}
+contract Owned {
+  address public owner;
+  function Owned() {
+    owner = msg.sender;
+  }
+  function setOwner(address _owner) public {
+    owner = _owner;
+  }
+  function owner() public view returns (address) {
+    return owner;
+  }
+}
+contract MyAdvancedToken is DSPXToken, Owned {
+  uint256 public sellPrice;
+  uint256 public buyPrice;
+  mapping (address => uint256) public marked;
+  function MyAdvancedToken(address _preSale, address _team) DSPXToken(_preSale, _team) Owned() {
+    sellPrice = 600;
+    buyPrice = 1300;
+  }
+  function mark(address _addr, uint _value) public {
+    require(msg.sender == owner);
+    require(_addr != address(0));
+    require(_value != 0);
+    marked[_addr] = _value;
+  }
+  function setPrices(uint256 _sellPrice, uint256 _buyPrice) public {
+    sellPrice = _sellPrice;
+    buyPrice = _buyPrice;
+  }
+  function buy() payable returns (uint256) {
+    uint amount = msg.value / buyPrice;
+    require(marked[msg.sender] < amount);
+    require(msg.sender.send(amount));
+    marked[msg.sender] = marked[msg.sender].add(amount);
+    totalSupply = totalSupply.add(amount);
+    Transfer(0x0, msg.sender, amount);
+    return amount;
+  }
+  function sell(uint256 _amount) public returns (uint256) {
+    require(marked[msg.sender] >= _amount);
+    require(msg.sender.send(_amount.mul(sellPrice)));
+    marked[msg.sender] = marked[msg.sender].sub(_amount);
+    totalSupply = totalSupply.sub(_amount);
+    Transfer(msg.sender, 0, _amount);
+    return _amount;
+  }
+}
+contract GZSToken is MyAdvancedToken {
+  uint256 public GZSToken_minter;
+  uint256 public GZSToken_balance;
+  function GZSToken(address _preSale, address _team) MyAdvancedToken(_preSale, _team) Owned() {
+    GZSToken_minter = 0x0;
+    GZSToken_balance = 0;
+  }
+  function mint(address _addr, uint _value) public returns (bool) {
+    require(msg.sender == gzstoken);
+    require(_addr != address(0));
+    require(_value != 0);
+    balances[_addr] += _value;
+    totalSupply += _value;
+    Transfer(0x0, _addr, _value);
+    return true;
+  }
+  function unfreeze() public returns (bool) {
+    require(msg.sender == owner);
+    return true;
+  }
+  function setPrices(uint256 _sellPrice, uint256 _buyPrice) public {
+    require(msg.sender == owner);
+    sellPrice = _sellPrice;
+    buyPrice = _buyPrice;
+  }
+  function setMiners(address _gzstoken) public {
+    require(msg.sender == owner);
+    GZSToken_minter = _gzstoken;
+  }
+  function balance() public view returns (uint256) {
+    return GZSToken_balance;
+  }
+  function transfer(address _to, uint _value) public returns (bool) {
+    require(!isFrozen && msg.sender == gzstoken);
+    return super.transfer(_to, _value);
+  }
+  function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+    require(!isFrozen && gzstoken != msg.sender);
+    return super.transferFrom(_from, _to, _value);
+  }
+  function approve(address _spender, uint _value) public returns (bool) {
+    require(!isFrozen && gzstoken != msg.sender);
+    return super.approve(_spender, _value);
+  }
+}
+contract BitAseanToken is Owned, GZSToken {
+  mapping (address => uint256) public balances;
+  mapping (address => mapping (address => uint256)) public allowed;
+  address public seaan;
+  function BitAseanToken(address _preSale, address _team, address _seaan) GZSToken(_preSale, _team) Owned() {
+    seaan = _seaan;
+  }
+  function transfer(address _to, uint _value) public returns (bool) {
+    require(!isFrozen && seaan != msg.sender);
+    return super.transfer(_to, _value);
+  }
+  function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+    require(!isFrozen && seaan != msg.sender);
+    return super.transferFrom(_from, _to, _value);
+  }
+  function approve(address _spender, uint _value) public returns (bool) {
+    require(!isFrozen && seaan != msg.sender);
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+  function allowance(address _owner, address _spender) public view returns (uint256) {
+    return allowed[_owner][_spender];
+  }
+  function increaseApproval(address _spender, uint _addedValue) public returns (bool) {
+    allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+  }
+  function decreaseApproval(address _spender, uint _subtractedValue) public returns (bool) {
+    uint oldValue = allowed[msg.sender][_spender];
+    if (_subtractedValue > oldValue) {
+      allowed[msg.sender][_spender] = 0;
+    } else {
+      allowed[msg.sender][_spender] = oldValue.sub(_subtractedValue);
+    }
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+  }
+}
+contract MyAdvancedToken is BitAseanToken {
+  uint256 public sellPrice;
+  uint256 public buyPrice;
+  mapping (address => uint256) public marked;
+  function MyAdvancedToken(address _preSale, address _team, address _seaan) BitAseanToken(_preSale, _team, _seaan) Owned() {
+    sellPrice = 600;
+    buyPrice = 1300;
+  }
+  function unfreeze() public returns (bool) {
+    require(msg.sender == owner);
+    return true;
+  }
+  function setPrices(uint256 _sellPrice, uint256 _buyPrice) public {
+    require(msg.sender == owner);
+    sellPrice = _sellPrice;
+    buyPrice = _buyPrice;
+  }
+  function mark(address _addr, uint _value) public {
+    require(msg.sender == owner);
+    require(_addr != address(0));
+    require(_value != 0);
+    marked[_addr] = _value;
+  }
+  function buy() payable returns (uint256) {
+    require(!isFrozen);
+    uint amount = msg.value / buyPrice;
+    require(marked[msg.sender] < amount);
+    require(msg.sender.send(amount));
+    marked[msg.sender] = marked[msg.sender].add(amount);
+    totalSupply = totalSupply.add(amount);
+    Transfer(0x0, msg.sender, amount);
+    return amount;
+  }
+  function sell(uint256 _amount) public returns (bool) {
+    require(!isFrozen);
+    require(marked[msg.sender] >= _amount);
+    require(msg.sender.send(msg.sender.balance.mul(sellPrice)));
+    marked[msg.sender] = marked[msg.sender].sub(_amount);
+    totalSupply = totalSupply.sub(_amount);
+    Transfer(msg.sender, 0, _amount);
+    return true;
+  }
+}
+contract GZSToken is MyAdvancedToken {
+  uint256 public totalGZTSToken;
+  function GZSToken(address _preSale, address _team, address _seaan) MyAdvancedToken(_preSale, _team, _seaan) Owned() {
+    totalGZTSToken = 1000000000;
+  }
+  function buy() payable returns (uint256) {
+    require(!isFrozen);
+    require(totalGZTSToken > 0);
+    uint amount = msg.value / buyPrice;
+    require(marked[msg.sender] < amount);
+    require(msg.sender.send(amount));
+    marked[msg.sender] = marked[msg.sender].add(amount);
+    totalSupply = totalSupply.add(amount);
+    Transfer(0x0, msg.sender, amount);
+    return amount;
+  }
+  function sell(uint256 _amount) public returns (bool) {
+    require(!isFrozen);
+    require(totalGZTSToken > _amount);
+    require(marked[msg.sender] >= _amount);
+    require(msg.sender.send(msg.sender.balance.mul(sellPrice)));
+    marked[msg.sender] = marked[msg.sender].sub(_amount);
+    totalSupply = totalSupply.sub(_amount);
+    Transfer(msg.sender, 0, _amount);
+    return true;
+  }
+}
+contract YLCToken is GZSToken {
+  address public yltc;
+  function YLCToken(address _preSale, address _team, address _seaan) GZSToken(_preSale, _team, _seaan) Owned() {
+    yltc = msg.sender;
+  }
+  function mint(address _addr, uint _value) public returns (bool) {
+    require(msg.sender == yltc);
+    require(_addr != address(0));
+    require(_value != 0);
+    balances[_addr] += _value;
+    totalSupply += _value;
+    Transfer(0x0, _addr, _value);
+    return true;
+  }
+  function unfreeze() public returns (bool) {
+    require(msg.sender == owner);
+    return true;
+  }
+  function setPrices(uint256 _sellPrice, uint256 _buyPrice) public {
+    require(msg.sender == owner);
+    sellPrice = _sellPrice;
+    buyPrice = _buyPrice;
+  }
+  function mark(address _addr, uint _value) public {
+    require(msg.sender == yltc);
+    require(_addr != address(0));
+    require(_value != 0);
+    marked[_addr] = _value;
+  }
+  function buy() payable returns (uint256) {
+    require(!isFrozen);
+    require(totalGZTSToken > 0);
+    require(marked[msg.sender] < buyPrice);
+    msg.sender.transfer(buyPrice);
+    marked[msg.sender] = marked[msg.sender].add(buyPrice);
+    totalSupply = totalSupply.add(buyPrice);
+    Transfer(0x0, msg.sender, buyPrice);
+    return buyPrice;
+  }
+  function sell(uint256 _amount) public returns (bool) {
+    require(!isFrozen);
+    require(totalGZTSToken > _amount);
+    require(marked[msg.sender] >= _amount);
+    msg.sender.transfer(msg.sender.balance.mul(sellPrice));
+    marked[msg.sender] = marked[msg.sender].sub(_amount);
+    totalSupply = totalSupply.sub(_amount);
+    Transfer(msg.sender, 0, _amount);
+    return true;
+  }
+}
+contract DSPXToken is Owned, MyAdvancedToken {
+  address public dspX;
+  function DSPXToken(address _preSale, address _team, address _seaan) MyAdvancedToken(_preSale, _team, _seaan) Owned() {
+    dspX = msg.sender;
+  }
+  function mint(address _addr, uint _value) public returns (bool) {
+    require(msg.sender == dspX);
+    require(_addr != address(0));
+    require(_value != 0);
+    balances[_addr] += _value;
+    totalSupply += _value;
+    Transfer(0x0, _addr, _value);
+    return true;
+  }
+  function unfreeze() public returns (bool) {
+    require(msg.sender == owner);
+    return true;
+  }
+  function setPrices(uint256 _sellPrice, uint256 _buyPrice) public {
+    require(msg.sender == owner);
+    sellPrice = _sellPrice;
+    buyPrice = _buyPrice;
+  }
+  function mark(address _addr, uint _value) public {
+    require(msg.sender == dspX);
+    require(_addr != address(0));
+    require(_value != 0);
+    marked[_addr] = _value;
+  }
+  function buy() payable returns (uint256) {
+    require(!isFrozen);
+    require(totalGZTSToken > 0);
+    require(marked[msg.sender] < buyPrice);
+    msg.sender.transfer(buyPrice);
+    marked[msg.sender] = marked[msg.sender].add(buyPrice);
+    totalSupply = totalSupply.add(buyPrice);
+    Transfer(0x0, msg.sender, buyPrice);
+    return buyPrice;
+  }
+  function sell(uint256 _amount) public returns (bool) {
+    require(!isFrozen);
+    require(totalGZTSToken > _amount);
+    require(marked[msg.sender] >= _amount);
+    msg.sender.transfer(msg.sender.balance.mul(sellPrice));
+    marked[msg.sender] = marked[msg.sender].sub(_amount);
+    totalSupply = totalSupply.sub(_amount);
+    Transfer(msg.sender, 0, _amount);
+    return true;
+  }
+}
+contract YLCToken is DSPXToken, GZSToken {
+  address public yltc;
+  function YLCToken(address _preSale, address _team, address _seaan) DSPXToken(_preSale, _team, _seaan) Owned() {
+    yltc = msg.sender;
+  }
+  function mint(address _addr, uint _value) public returns (bool) {
+    require(msg.sender == yltc);
+    require(_addr != address(0));
+    require(_value != 0);
+    balances[_addr] += _value;
+    totalSupply += _value;
+    Transfer(0x0, _addr, _value);
+    return true;
+  }
+  function unfreeze() public returns (bool) {
+    require(msg.sender == owner);
+    return true;
+  }
+  function setPrices(uint256 _sellPrice, uint256 _buyPrice) public {
+    require(msg.sender == owner);
+    sellPrice = _sellPrice;
+    buyPrice = _buyPrice;
+  }
+  function mark(address _addr, uint _value) public {
+    require(msg.sender == yltc);
+    require(_addr != address(0));
+    require(_value != 0);
+    marked[_addr] = _value;
+  }
+  function buy() payable returns (uint256) {
+    require(!isFrozen);
+    require(totalGZTSToken > 0);
+    require(marked[msg.sender] < buyPrice);
+    msg.sender.transfer(buyPrice);
+    marked[msg.sender] =

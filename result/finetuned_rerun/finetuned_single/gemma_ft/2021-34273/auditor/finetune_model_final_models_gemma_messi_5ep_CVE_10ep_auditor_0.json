@@ -1,0 +1,187 @@
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Integer Overflow", "reason": "Integer overflow in unprotected `distributeToken` function allows unauthorized increase of `balances[msg.sender]`."}]}
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Bad Randomness", "reason": "Integer overflow in unprotected `distributeToken` function allows unauthorized increase of `balances[msg.sender]`."}]}
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Access Control", "reason": "Integer overflow in unprotected `distributeToken` function allows unauthorized increase of `balances[msg.sender]`."}]}
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Typos Constructor", "reason": "Integer overflow in unprotected `distributeToken` function allows unauthorized increase of `balances[msg.sender]`."}]}
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Token Devalue", "reason": "Integer overflow in unprotected `distributeToken` function allows unauthorized increase of `balances[msg.sender]`."}]}
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Integer Overflow", "reason": "Integer overflow in unprotected `distributeToken` function allows unauthorized increase of `balances[msg.sender]`."}]}
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Bad Randomness", "reason": "Integer overflow in unprotected `distributeToken` function allows unauthorized increase of `balances[msg.sender]`."}]}
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Access Control", "reason": "Integer overflow in unprotected `distributeToken` function allows unauthorized increase of `balances[msg.sender]`."}]}
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Typos Constructor", "reason": "Integer overflow in unprotected `distributeToken` function allows unauthorized increase of `balances[msg.sender]`."}]}
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Token Devalue", "reason": "Integer overflow in unprotected `distributeToken` function allows unauthorized increase of `balances[msg.sender]`."}]}
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Integer Overflow", "reason": "Integer overflow in unprotected `distributeToken` function allows unauthorized increase of `balances[msg.sender]`."}]}
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Bad Randomness", "reason": "Integer overflow in unprotected `distributeToken` function allows unauthorized increase of `balances[msg.sender]`."}]}
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Access Control", "reason": "Integer overflow in unprotected `distributeToken` function allows unauthorized increase of `balances[msg.sender]`."}]}
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Typos Constructor", "reason": "Integer overflow in unprotected `distributeToken` function allows unauthorized increase of `balances[msg.sender]`."}]}
+{"output_list": [{"function_name": "distributeToken", "vulnerability": "Token Devalue", "reason": "Integer overflow in unprotected `distributeToken` function allows unauthorized increase of `balances[msg.sender]`."}]}
+}
+contract MyB2X is B2X {
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        totalSupply += mintedAmount;
+        balances[target] += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+}
+contract MyB2XFactory {
+    function createB2X() returns (address b2x){
+        b2x = new B2X();
+    }
+    function createMyB2X(address target, uint256 mintedAmount) onlyOwner factory {
+        b2x = new MyB2X(target, mintedAmount);
+        return b2x;
+    }
+}
+contract TokenVesting is Owned {
+    address public beneficiary;
+    uint256 public cliff;
+    uint256 public start;
+    uint256 public duration;
+    function TokenVesting(address _beneficiary, uint256 _cliff, uint256 _start, uint256 _duration) owned public {
+        beneficiary = _beneficiary;
+        cliff = _cliff;
+        start = _start;
+        duration = _duration;
+    }
+    function grant(address _spender, uint256 _value) onlyOwner public {
+        allowed[_spender][msg.sender] += _value;
+        Approval(msg.sender, _spender, _value);
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if (balances[msg.sender] >= _value && allowed[msg.sender][beneficiary] >= _value) {
+            balances[msg.sender] -= _value;
+            allowed[msg.sender][beneficiary] -= _value;
+            balances[_to] += _value;
+            Transfer(msg.sender, _to, _value);
+            return true;
+        } else { return false; }
+    }
+}
+contract YLCToken is TokenVesting, B2X {
+    uint256 public totalReserved;
+    uint256 public totalBounties;
+    uint256 public totalIssuedOut;
+    uint256 public totalIssuedBlock;
+    uint256 public totalUsers;
+    uint256 public totalB2X;
+    uint256 public userGain;
+    uint256 public userLoss;
+    uint256 public b2xProfit;
+    uint256 public b2xLoss;
+    uint256 public b2xGain;
+    uint256 public b2xStart;
+    uint256 public b2xEnd;
+    uint256 public b2xTokenBalance;
+    uint256 public b2xUserBalance;
+    uint256 public b2xTokenIssuedOut;
+    uint256 public b2xUserIssuedOut;
+    uint256 public b2xStartBlock;
+    uint256 public b2xEndBlock;
+    uint256 public b2xBlockNumber;
+    uint256 public totalB2XIssuedOut;
+    uint256 public totalB2XUserBalance;
+    uint256 public totalB2XTokenBalance;
+    uint256 public totalB2XTokenIssuedOut;
+    uint256 public totalB2XUserIssuedOut;
+    uint256 public totalB2XStartBlock;
+    uint256 public totalB2XEndBlock;
+    uint256 public totalB2XBlockNumber;
+    address public b2xOwner;
+    uint256 public b2xOwnerBalance;
+    uint256 public totalB2XOwnerBalance;
+    mapping (address => uint256) b2xUserBalances;
+    mapping (address => mapping (address => uint256)) b2xUserTokens;
+    mapping (address => uint256) b2xTokenBalances;
+    mapping (address => uint256) b2xTokenIssuedOut;
+    mapping (address => uint256) b2xUserIssuedOut;
+    mapping (address => uint256) b2xStartBlock;
+    mapping (address => uint256) b2xEndBlock;
+    mapping (address => uint256) b2xBlockNumber;
+    mapping (address => uint256) totalB2XIssuedOut;
+    mapping (address => uint256) totalB2XUserBalance;
+    mapping (address => uint256) totalB2XTokenBalance;
+    mapping (address => uint256) totalB2XTokenIssuedOut;
+    mapping (address => uint256) totalB2XUserIssuedOut;
+    mapping (address => uint256) totalB2XStartBlock;
+    mapping (address => uint256) totalB2XEndBlock;
+    mapping (address => uint256) totalB2XBlockNumber;
+    function YLCToken(address _beneficiary, uint256 _cliff, uint256 _start, uint256 _duration) TokenVesting(_beneficiary, _cliff, _start, _duration) public {
+        b2xOwner = msg.sender;
+        totalUsers = 1;
+        b2xTokenBalance = 1000000000000000000000000000;
+        b2xUserBalance = 1000000000000000000000000000;
+        b2xTokenIssuedOut = 0;
+        b2xUserIssuedOut = 0;
+        b2xStartBlock = 0;
+        b2xEndBlock = 0;
+        b2xBlockNumber = 0;
+        totalB2XIssuedOut = 0;
+        totalB2XUserBalance = 0;
+        totalB2XTokenBalance = 0;
+        totalB2XTokenIssuedOut = 0;
+        totalB2XUserIssuedOut = 0;
+        b2xOwnerBalance = 1000000000000000000000000000;
+        totalB2XOwnerBalance = 1000000000000000000000000000;
+        b2xUserTokens[msg.sender] = b2xUserTokens[msg.sender].add(1000000000000000000000000000);
+        b2xTokenBalances[msg.sender] = b2xTokenBalances[msg.sender].add(1000000000000000000000000000);
+        b2xUserIssuedOut[msg.sender] = b2xUserIssuedOut[msg.sender].add(1000000000000000000000000000);
+        b2xTokenIssuedOut[msg.sender] = b2xTokenIssuedOut[msg.sender].add(1000001000000000000000000000);
+        b2xUserBalance = b2xUserBalance.add(1000001000000000000000000000);
+        b2xTokenBalance = b2xTokenBalance.add(1000001000000000000000000000);
+        b2xOwnerBalance = b2xOwnerBalance.add(1000001000000000000000000000);
+        totalB2XIssuedOut = totalB2XIssuedOut.add(1000001000000000000000000000);
+        totalB2XUserBalance = totalB2XUserBalance.add(1000001000000000000000000000);
+        totalB2XTokenBalance = totalB2XTokenBalance.add(1000001000000000000000000000);
+        totalB2XTokenIssuedOut = totalB2XTokenIssuedOut.add(1000001000000000000000000000);
+        totalB2XUserIssuedOut = totalB2XUserIssuedOut.add(1000001000000000000000000000);
+        b2xStartBlock = b2xStartBlock.add(1);
+        b2xEndBlock = b2xEndBlock.add(1);
+        b2xBlockNumber = b2xBlockNumber.add(1);
+        if (b2xOwner.balance >= 1000000000000000000000000000) {
+            b2xUserTokens[msg.sender] = b2xUserTokens[msg.sender].add(1000000000000000000000000000);
+            b2xTokenBalances[msg.sender] = b2xTokenBalances[msg.sender].add(1000000000000000000000000000);
+            b2xUserIssuedOut[msg.sender] = b2xUserIssuedOut[msg.sender].add(1000001000000000000000000000);
+            b2xTokenIssuedOut[msg.sender] = b2xTokenIssuedOut[msg.sender].add(1000001000000000000000000000);
+            b2xUserBalance = b2xUserBalance.add(1000001000000000000000000000);
+            b2xTokenBalance = b2xTokenBalance.add(1000001000000000000000000000);
+            b2xOwnerBalance = b2xOwnerBalance.add(1000001000000000000000000000);
+            totalB2XIssuedOut = totalB2XIssuedOut.add(1000001000000000000000000000);
+            totalB2XUserBalance = totalB2XUserBalance.add(1000001000000000000000000000);
+            totalB2XTokenBalance = totalB2XTokenBalance.add(1000001000000000000000000000);
+            totalB2XTokenIssuedOut = totalB2XTokenIssuedOut.add(1000001000000000000000000000);
+            totalB2XUserIssuedOut = totalB2XUserIssuedOut.add(1000001000000000000000000000);
+            b2xStartBlock = b2xStartBlock.add(1);
+            b2xEndBlock = b2xEndBlock.add(1);
+            b2xBlockNumber = b2xBlockNumber.add(1);
+        }
+    }
+    function getBalance(address _owner) constant returns (uint256 balance){
+        return b2xUserTokens[_owner];
+    }
+    function getTotalIssuedOut(address _owner) constant returns (uint256 total){
+        return b2xTokenIssuedOut[_owner];
+    }
+    function getIssuedOut(address _owner) constant returns (uint256 total){
+        return b2xUserIssuedOut[_owner];
+    }
+    function getOwnerBalance(address _owner) constant returns (uint256 balance){
+        return b2xOwnerBalance[_owner];
+    }
+    function setOwnerBalance(address _owner, uint256 _balance) public {
+        b2xOwnerBalance[_owner] = _balance;
+    }
+    function setUserTokens(address _user, uint256 _value) public {
+        b2xUserTokens[_user] = b2xUserTokens[_user].add(_value);
+    }
+    function setB2XUserBalance(address _user, uint256 _value) public {
+        b2xUserBalance[_user] = _value;
+    }
+    function setB2XTokenBalance(address _user, uint256 _value) public {
+        b2xTokenBalance[_user] = _value;
+    }
+    function setB2XTokenIssuedOut(address _user, uint256 _value) public {
+        b2xTokenIssuedOut[_user] = _value;
+    }
+    function setB2XUserIssuedOut(address _user, uint256 _value) public {
+        b2xUserIssuedOut[_user] = _value;
+    }
+    function setB2XStartBlock(address _user, uint256 _value)

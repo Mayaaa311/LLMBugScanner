@@ -1,0 +1,101 @@
+{
+    "output_list": [
+        {
+            "function_name": "owned",
+            "code": "function owned() public {
+        owner = msg.sender;
+    }
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+    function transferOwnership(address newOwner) onlyOwner public {
+        owner = newOwner;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function is using the modifier onlyOwner, which is a vulnerability in the contract. The modifier is using the require function, which is vulnerable to integer overflow attacks. The reason is that the modifier is using the msg.sender variable, which is not checked for overflow."
+        },
+        {
+            "function_name": "transferOwnership",
+            "code": "function transferOwnership(address newOwner) onlyOwner public {
+        owner = newOwner;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function is using the modifier onlyOwner, which is a vulnerability in the contract. The modifier is using the require function, which is vulnerable to integer overflow attacks. The reason is that the modifier is using the msg.sender variable, which is not checked for overflow."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public {
+        _transfer(msg.sender, _to, _value);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function is using the _transfer function, which is vulnerable to integer overflow attacks. The reason is that the function is using the msg.sender variable, which is not checked for overflow."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);     
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function is using the _transfer function, which is vulnerable to integer overflow attacks. The reason is that the function is using the msg.sender variable, which is not checked for overflow."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData)  public returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function is using the approve function, which is vulnerable to integer overflow attacks. The reason is that the function is using the msg.sender variable, which is not checked for overflow."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);   
+        balanceOf[msg.sender] -= _value;            
+        totalSupply -= _value;                      
+        Burn(msg.sender, _value);
+        return true;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function is using the balanceOf function, which is vulnerable to integer overflow attacks. The reason is that the function is using the msg.sender variable, which is not checked for overflow."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(balanceOf[_from] >= _value);                
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        Burn(_from, _value);
+        return true;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function is using the balanceOf function, which is vulnerable to integer overflow attacks. The reason is that the function is using the msg.sender variable, which is not checked for overflow."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function is using the onlyOwner modifier, which is a vulnerability in the contract. The modifier is using the require function, which is vulnerable to integer overflow attacks. The reason is that the modifier is using the msg.sender variable, which is not checked for overflow."
+        },
+        {
+            "function_name": "setExchange",
+            "code": "function setExchange(bool istrue) onlyOwner public {
+        isOpened = istrue;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function is using the onlyOwner modifier, which is a vulnerability in the contract. The modifier is using the require function, which is vulnerable to integer overflow attacks. The reason is that the modifier is using the msg.sender variable, which is not checked for overflow."
+        }
+    ]
+}

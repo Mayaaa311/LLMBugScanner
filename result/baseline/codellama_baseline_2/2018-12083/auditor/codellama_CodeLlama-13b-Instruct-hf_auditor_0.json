@@ -1,0 +1,98 @@
+ Here are the 5 most severe vulnerabilities in the provided smart contract, along with their associated functions and reasons:
+
+1. Integer Overflow Vulnerability in the `_transfer` Function
+
+Function Name: `_transfer`
+
+Vulnerability: Integer Overflow
+
+Function Code:
+```
+function _transfer(address _from, address _to, uint _value) internal {
+    require (_to != 0x0);                               
+    require (balanceOf[_from] > _value);                
+    require (balanceOf[_to] + _value > balanceOf[_to]); 
+    balanceOf[_from] -= _value;                         
+    balanceOf[_to] += _value;                            
+    Transfer(_from, _to, _value);
+}
+```
+Reason: The `_transfer` function uses the `require` statement to check if the `_to` address is not equal to `0x0`. However, this check is not sufficient to prevent integer overflow attacks. An attacker can send a large amount of tokens to a contract that has a balance of `0x0`, causing the contract to overflow and lose all of its tokens.
+
+2. Wrong Logic Vulnerability in the `transferFrom` Function
+
+Function Name: `transferFrom`
+
+Vulnerability: Wrong Logic
+
+Function Code:
+```
+function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    require (_value <= allowance[_from][msg.sender]);     
+    allowance[_from][msg.sender] -= _value;
+    _transfer(_from, _to, _value);
+    return true;
+}
+```
+Reason: The `transferFrom` function uses the `require` statement to check if the `_value` is less than or equal to the allowance of the `_from` address. However, this check is not sufficient to prevent wrong logic attacks. An attacker can send a large amount of tokens to a contract that has a balance of `0x0`, causing the contract to overflow and lose all of its tokens.
+
+3. Bad Randomness Vulnerability in the `approveAndCall` Function
+
+Function Name: `approveAndCall`
+
+Vulnerability: Bad Randomness
+
+Function Code:
+```
+function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+    returns (bool success) {
+    tokenRecipient spender = tokenRecipient(_spender);
+    if (approve(_spender, _value)) {
+        spender.receiveApproval(msg.sender, _value, this, _extraData);
+        return true;
+    }
+}
+```
+Reason: The `approveAndCall` function uses the `approve` function to approve the `_spender` address to spend a certain amount of tokens. However, this function does not check if the `_spender` address is a valid token recipient. An attacker can send a large amount of tokens to a contract that is not a valid token recipient, causing the contract to lose all of its tokens.
+
+4. Access Control Vulnerability in the `burn` Function
+
+Function Name: `burn`
+
+Vulnerability: Access Control
+
+Function Code:
+```
+function burn(uint256 _value) returns (bool success) {
+    require (balanceOf[msg.sender] > _value);            
+    balanceOf[msg.sender] -= _value;                      
+    totalSupply -= _value;                                
+    Burn(msg.sender, _value);
+    return true;
+}
+```
+Reason: The `burn` function uses the `require` statement to check if the `msg.sender` has a balance greater than the `_value` being burned. However, this check is not sufficient to prevent access control attacks. An attacker can burn a large amount of tokens from a contract that they do not own, causing the contract to lose all of its tokens.
+
+5. Typo Constructor Vulnerability in the `owned` Contract
+
+Function Name: `owned`
+
+Vulnerability: Typo Constructor
+
+Function Code:
+```
+contract owned {
+    address public owner;
+    function owned() {
+        owner = msg.sender;
+    }
+    function changeOwner(address newOwner) onlyOwner {
+        owner = newOwner;
+    }
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+}
+```
+Reason: The `owned` contract uses the `onlyOwner` modifier to restrict access to the `changeOwner` function. However, this modifier is not sufficient to prevent typo constructor attacks. An attacker can create a contract that inherits from the `owned` contract and overrides the `onlyOwner` modifier, allowing them to change the owner of the contract without the original owner's permission.

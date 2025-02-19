@@ -1,0 +1,68 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _amount) returns (bool success) {
+    if (balances[msg.sender] >= _amount 
+         && _amount > 0
+         && balances[_to] + _amount > balances[_to]) {
+        balances[msg.sender] -= _amount;
+        balances[_to] += _amount;
+        Transfer(msg.sender, _to, _amount);
+        return true;
+    } else {
+        return false;
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'transfer' function does not check for overflow of the 'balances[_to]' variable, allowing users to transfer more tokens than the contract owner has."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _amount) returns (bool success) {
+    allowed[msg.sender][_spender] = _amount;
+    Approval(msg.sender, _spender, _amount);
+    return true;
+}",
+            "vulnerability": "Incorrect Allowance Logic",
+            "reason": "The 'approve' function does not check if there is already an allowance set for the spender, allowing users to overwrite the allowance of another user."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _amount) returns (bool success) {
+    if (balances[_from] >= _amount 
+        && allowed[_from][msg.sender] >= _amount
+        && _amount > 0
+        && balances[_to] + _amount > balances[_to]) {
+        balances[_from] -= _amount;
+        allowed[_from][msg.sender] -= _amount;
+        balances[_to] += _amount;
+        Transfer(_from, _to, _amount);
+        return true;
+    } else {
+        return false;
+    }
+}",
+            "vulnerability": "Incorrect Allowance Logic",
+            "reason": "The 'transferFrom' function does not check if the spender has enough allowance, allowing users to transfer tokens from another user without their permission."
+        },
+        {
+            "function_name": "Coinlancer",
+            "code": "function Coinlancer() {
+    owner = msg.sender;
+    balances[owner] = _totalSupply;
+}",
+            "vulnerability": "Initial Token Distribution",
+            "reason": "The initial token distribution is set by the owner, allowing the owner to mint new tokens at any time."
+        },
+        {
+            "function_name": "onlyOwner",
+            "code": "modifier onlyOwner() {
+    require(msg.sender != owner); {}
+    _;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'onlyOwner' modifier does not restrict access to the owner, allowing any user to become the owner."
+        }
+    ]
+}

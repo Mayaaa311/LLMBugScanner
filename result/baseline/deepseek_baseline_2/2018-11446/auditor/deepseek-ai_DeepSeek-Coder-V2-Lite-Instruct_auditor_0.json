@@ -1,0 +1,87 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "function_code": "function transfer(address _to, uint256 _value) notICO {
+    require(!frozen[msg.sender]);   
+    if (msg.sender.balance  < minBalanceForAccounts) {
+        sell((minBalanceForAccounts - msg.sender.balance) * sellPrice);
+    }
+    _transfer(msg.sender, _to, _value);
+}",
+            "reason": "The 'transfer' function does not enforce a sufficient access control check. Anyone can call this function, which allows them to transfer tokens from any address, including those that are frozen. This can be exploited by attackers to freeze funds of legitimate users and then transfer them to their own addresses."
+        },
+        {
+            "function_name": "reward",
+            "vulnerability": "Access Control",
+            "function_code": "function reward(address _to, uint256 _value, bool locked, string data) {
+    require(_to != 0x0);
+    require(!frozen[msg.sender]);   
+    if (msg.sender.balance  < minBalanceForAccounts) {
+        sell((minBalanceForAccounts - msg.sender.balance) * sellPrice);
+    }
+    if(!locked) {
+        _transfer(msg.sender, _to, _value);
+    } else {
+        require(balanceOf[msg.sender] >= _value);  
+        require(totalLockedRewardsOf[_to] + _value > totalLockedRewardsOf[_to]);  
+        balanceOf[msg.sender] -= _value;  
+        totalLockedRewardsOf[_to] += _value;  
+        lockedRewardsOf[_to][msg.sender] += _value;
+        if(userRewardCount[_to][msg.sender]==0) {
+            userRewarderCount[_to] += 1;
+            userRewarders[_to][userRewarderCount[_to]]=msg.sender;
+        }
+        userRewardCount[_to][msg.sender]+=1;
+        totalRewardIssuedOut[msg.sender]+= _value;
+        Transfer(msg.sender, _to, _value);
+    }
+    Reward(msg.sender, _to, _value, data, now);
+}",
+            "reason": "The 'reward' function allows anyone to call it and reward tokens to any address, even if they are frozen. This can be exploited by attackers to reward themselves with tokens that they cannot transfer or sell, effectively locking them in the contract."
+        },
+        {
+            "function_name": "transferReward",
+            "vulnerability": "Access Control",
+            "function_code": "function transferReward(address _to, uint256 _value) {
+    require(!frozen[msg.sender]);   
+    require(lockedRewardsOf[msg.sender][_to] >= _value );
+    require(totalLockedRewardsOf[msg.sender] >= _value);
+    if (msg.sender.balance  < minBalanceForAccounts) {
+        sell((minBalanceForAccounts - msg.sender.balance) * sellPrice);
+    }
+    totalLockedRewardsOf[_to] -= _value;  
+    lockedRewardsOf[_to][msg.sender] -= _value;
+    balanceOf[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+}",
+            "reason": "The 'transferReward' function allows the owner of the rewards to transfer them to any address, even if the reward is locked. This can be exploited by attackers to transfer locked rewards to their own addresses, effectively stealing them from the contract."
+        },
+        {
+            "function_name": "unlockReward",
+            "vulnerability": "Access Control",
+            "function_code": "function unlockReward(address addr, uint256 _value) {
+    require(totalLockedRewardsOf[addr] > _value);  
+    require(lockedRewardsOf[addr][msg.sender] >= _value );
+    if(_value==0) _value=lockedRewardsOf[addr][msg.sender];
+    if (msg.sender.balance  < minBalanceForAccounts) {
+        sell((minBalanceForAccounts - msg.sender.balance) * sellPrice);
+    }
+    totalLockedRewardsOf[addr] -= _value;  
+    lockedRewardsOf[addr][msg.sender] -= _value;
+    balanceOf[addr] += _value;
+    Unlock(addr, msg.sender, _value);
+}",
+            "reason": "The 'unlockReward' function allows anyone to unlock rewards for any address, even if the rewards are locked. This can be exploited by attackers to unlock rewards that are meant to be locked and then transfer them to their own addresses, effectively stealing them from the contract."
+        },
+        {
+            "function_name": "setAdmin",
+            "vulnerability": "Access Control",
+            "function_code": "function setAdmin(address addr, bool enabled) onlyOwner {
+    admin[addr]=enabled;
+}",
+            "reason": "The 'setAdmin' function allows the owner to enable or disable admin privileges for any address. If an attacker gains admin privileges, they can exploit other functions that rely on admin privileges to gain control over the contract, leading to potential theft of funds."
+        }
+    ]
+}

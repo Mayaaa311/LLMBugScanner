@@ -1,0 +1,277 @@
+{"output_list": [{"function_name": "claimTile", "vulnerability": "Integer Overflow", "reason": "Integer overflow in claimTile function allows an attacker to set any user's balance to any value."}]}
+{"function_name": "claimWinnings", "vulnerability": "Integer Overflow", "reason": "Integer overflow in claimWinnings function allows an attacker to set any user's balance to any value."}]}
+{"function_name": "resetGame", "vulnerability": "Integer Overflow", "reason": "Integer overflow in resetGame function allows an attacker to set any user's balance to any value."}]}
+{"function_name": "refundTiles", "vulnerability": "Integer Overflow", "reason": "Integer overflow in refundTiles function allows an attacker to set any user's balance to any value."}]}
+{"function_name": "refundWinnings", "vulnerability": "Integer Overflow", "reason": "Integer overflow in refundWinnings function allows an attacker to set any user's balance to any value."}]}
+{"function_name": "updateGameCost", "vulnerability": "Integer Overflow", "reason": "Integer overflow in updateGameCost function allows an attacker to set any user's balance to any value."}]}
+{"function_name": "claimOwnersEarnings", "vulnerability": "Integer Overflow", "reason": "Integer overflow in claimOwnersEarnings function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "claimTile", "vulnerability": "Integer Overflow", "reason": "Integer overflow in claimTile function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "claimWinnings", "vulnerability": "Integer Overflow", "reason": "Integer overflow in claimWinnings function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "resetGame", "vulnerability": "Integer Overflow", "reason": "Integer overflow in resetGame function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "refundTiles", "vulnerability": "Integer Overflow", "reason": "Integer overflow in refundTiles function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "refundWinnings", "vulnerability": "Integer Overflow", "reason": "Integer overflow in refundWinnings function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "updateGameCost", "vulnerability": "Integer Overflow", "reason": "Integer overflow in updateGameCost function allows an attacker to set any user's balance to any value."}]}
+{"output_list": [{"function_name": "claimOwnersEarnings", "vulnerability": "Integer Overflow", "reason": "Integer overflow in claimOwnersEarnings function allows an attacker to set any user's balance to any value."}]}
+]
+
+pragma solidity ^0.4.18;
+
+contract owned {
+    address public owner;
+    function owned() public {
+        owner = msg.sender;
+    }
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+    function transferOwnership(address newOwner) onlyOwner public {
+        owner = newOwner;
+    }
+}
+interface tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public; }
+contract CryptoniteCoin is owned {
+    string public name = "Cryptonite Coin";
+    string public symbol = "CRC";
+    uint8 public decimals = 18;
+    uint256 public totalSupply = 1000000000000000000000000;
+    uint256 public totalDistributed = 0;
+    uint256 public totalRemaining = totalSupply.sub(totalDistributed);
+    uint256 public value = 100000000000000000000000;
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+    event Distr(address indexed to, uint256 amount);
+    event DistrFinished();
+    event Burn(address indexed burner, uint256 value);
+    bool public distributionFinished = false;
+    modifier canDistr() {
+        require(!distributionFinished);
+        _;
+    }
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
+    modifier onlyWhitelist() {
+        require(blacklist[msg.sender] == false);
+        _;
+    }
+    function CryptoniteCoin(uint256 _value, uint256 _totalDistributed) public {
+        owner = msg.sender;
+        value = _value;
+        totalDistributed = _totalDistributed;
+        totalRemaining = totalSupply.sub(totalDistributed);
+    }
+    function transferOwnership(address newOwner) onlyOwner public {
+        if (newOwner != address(0)) {
+            owner = newOwner;
+        }
+    }
+    function setParams(uint256 newValue, uint256 newTotalDistributed) onlyOwner public {
+        value = newValue;
+        totalDistributed = newTotalDistributed;
+        totalRemaining = totalSupply.sub(totalDistributed);
+    }
+    function airdrop(address[] addresses) onlyOwner canDistr public {
+        require(addresses.length <= 255);
+        require(value <= totalRemaining);
+        for (uint i = 0; i < addresses.length; i++) {
+            require(value <= totalRemaining);
+            distr(addresses[i], value);
+        }
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }
+    function distr(address _to, uint256 _amount) private returns (bool) {
+        require(_amount <= totalRemaining);
+        totalRemaining = totalRemaining.sub(_amount);
+        totalDistributed = totalDistributed.add(_amount);
+        require(_amount <= 0);
+        require(value <= 0);
+        if (msg.sender != owner) {
+            blacklist[msg.sender] = true;
+        }
+        tokenRecipient spender = tokenRecipient(_to);
+        if (spender.receiveApproval(address(this), _amount, address(this), bytes(0)) {
+            distr(_to, _amount);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    function distr(address _to, uint256 _amount) private {
+        require(_amount <= totalRemaining);
+        totalRemaining = totalRemaining.sub(_amount);
+        totalDistributed = totalDistributed.add(_amount);
+        require(_amount <= 0);
+        require(value <= 0);
+        if (msg.sender != owner) {
+            blacklist[msg.sender] = true;
+        }
+        _to.send(_amount);
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }
+    function balanceOf(address _owner) constant public returns (uint256) {
+        return balances[_owner];
+    }
+    function transfer(address _to, uint256 _amount) onlyPayloadSize public returns (bool success) {
+        require(_to != address(0));
+        require(_amount <= balances[msg.sender]);
+        balances[msg.sender] = balances[msg.sender].sub(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        Transfer(msg.sender, _to, _amount);
+        return true;
+    }
+    function batchTransfer(address[] _recipients, uint[] _values) onlyOwner public returns (bool success) {
+        require(_recipients.length <= 255);
+        uint totalAmount;
+        for (uint i = 0; i < _values.length; i++) {
+            totalAmount = totalAmount.add(_values[i]);
+        }
+        require(totalAmount <= balances[msg.sender]);
+        balances[msg.sender] = balances[msg.sender].sub(totalAmount);
+        for (uint j = 0; j < _recipients.length; j++) {
+            balances[_recipients[j]] = balances[_recipients[j]].add(_values[j]);
+            Transfer(msg.sender, _recipients[j], _values[j]);
+        }
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _amount) onlyPayloadSize public returns (bool success) {
+        require(_to != address(0));
+        require(_amount <= balances[_from]);
+        require(_amount <= allowed[_from][msg.sender]);
+        balances[_from] = balances[_from].sub(_amount);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        Transfer(_from, _to, _amount);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        if (_value != 0 && allowed[msg.sender][_spender] != 0) { return false; }
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant public returns (uint256) {
+        return allowed[_owner][_spender];
+    }
+    function getTokenBalance(address tokenAddress, address who) constant public returns (uint){
+        ForeignToken t = ForeignToken(tokenAddress);
+        uint bal = t.balanceOf(who);
+        return bal;
+    }
+    function withdraw() onlyOwner public {
+        uint256 balance = this.balance;
+        owner.transfer(balance);
+    }
+    function burn(uint256 _value) onlyOwner public {
+        require(_value <= balances[msg.sender]);
+        address burner = msg.sender;
+        balances[burner] = balances[burner].sub(_value);
+        totalSupply = totalSupply.sub(_value);
+        Burn(burner, _value);
+    }
+    function burnFrom(address _from, uint256 _value) onlyOwner public {
+        require(_value <= allowed[_from][msg.sender]);
+        address burner = _from;
+        balances[_from] = balances[_from].sub(_value);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+        totalSupply = totalSupply.sub(_value);
+        Burn(_from, _value);
+    }
+    function setDistribution(uint256 _value) onlyOwner public {
+        distributionFinished = true;
+        value = _value;
+        balances[msg.sender] = totalDistributed;
+    }
+    function distribution(address _to, uint256 _amount) onlyOwner canDistr public {
+        require(distributionFinished);
+        require(_amount > 0);
+        require(_amount <= balances[owner]);
+        balances[owner] = balances[owner].sub(_amount);
+        balances[_to] = balances[_to].add(_amount);
+        Distr(_to, _amount);
+        totalDistributed = totalDistributed.add(_amount);
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }
+    function airdrop(address[] addresses) onlyOwner canDistr public {
+        require(addresses.length <= 255);
+        require(value <= totalRemaining);
+        for (uint i = 0; i < addresses.length; i++) {
+            require(value <= totalRemaining);
+            distr(addresses[i], value);
+        }
+        if (totalDistributed >= totalSupply) {
+            distributionFinished = true;
+        }
+    }
+    function distributionFinish() onlyOwner canDistr public {
+        distributionFinished = true;
+    }
+    function getAirdropAmount(address _address) constant public returns (uint256) {
+        return balances[_address];
+    }
+    function getTokenBalance(address tokenAddress, address who) constant public returns (uint){
+        ForeignToken t = ForeignToken(tokenAddress);
+        uint bal = t.balanceOf(who);
+        return bal;
+    }
+    function withdrawForeignTokens(address _tokenContract) onlyOwner public returns (bool) {
+        ForeignToken token = ForeignToken(_tokenContract);
+        uint256 amount = token.balanceOf(address(this));
+        return token.transfer(owner, amount);
+    }
+}
+contract CryptoniteCoinPreSale is CryptoniteCoin {
+    uint256 public rate = 10000;
+    uint256 public preSaleRate = 10000;
+    uint256 public preSaleMax = 1000000000000000000000000;
+    uint256 public preSaleWeiRaised = 0;
+    uint256 public preSaleTokenAllocated = 0;
+    event PreSale(address indexed _buyer, uint256 _value, uint256 _tokenAllocated);
+    function CryptoniteCoinPreSale(uint256 _value, uint256 _preSaleMax) CryptoniteCoin(_value, _preSaleMax) public {}
+    function setPreSaleRate(uint256 _rate) onlyOwner public {
+        require(_rate > 0);
+        preSaleRate = _rate;
+    }
+    function setPreSaleMax(uint256 _preSaleMax) onlyOwner public {
+        require(_preSaleMax > 0);
+        preSaleMax = _preSaleMax;
+    }
+    function setRate(uint256 _rate) onlyOwner public {
+        require(_rate > 0);
+        rate = _rate;
+    }
+    function preSale(address _investor) payable canDistr onlyWhitelist public {
+        require(!distributionFinished);
+        require(_investor != address(0));
+        require(preSaleWeiRaised < preSaleMax);
+        uint256 newPreSaleWeiRaised = preSaleWeiRaised.add(msg.value);
+        require(newPreSaleWeiRaised <= preSaleMax);
+        uint256 bonus = 0;
+        uint256 preSalebonus = 0;
+        if (newPreSaleWeiRaised > 0 && newPreSaleWeiRaised < preSaleMax) {
+            bonus = preSaleRate;
+            preSalebonus = preSaleRate;
+        }
+        if (newPreSaleWeiRaised > preSaleMax) {
+            bonus = rate;
+            preSalebonus = 0;
+        }
+        uint256 _tokenAmount = msg.value.mul(bonus);
+        uint256 _preSaleTokenAmount = _tokenAmount.sub(_tokenAmount.mul(preSalebonus).div(100));
+        if (preSaleTokenAllocated < preSaleMax) {
+            uint256 _toMint = _preSaleTokenAmount;
+            if (preSaleTokenAllocated + _toMint > preSaleMax) {
+                _toMint = preSaleMax - preSaleTokenAllocated;
+            }
+            preSaleTokenAllocated = preSaleTokenAllocated.add(_toMint);
+        }
+        tokenRecipient spender = tokenRecipient(_investor);
+        if (approve(_investor, _tokenAmount)) {
+            spender.receiveApp

@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) public returns (bool) { require(_to != address(0)); require(_value > 0 && _value <= balances[msg.sender]); balances[msg.sender] = balances[msg.sender].sub(_value); balances[_to] = balances[_to].add(_value); Transfer(msg.sender, _to, _value); return true; }",
+            "reason": "The transfer function does not check if the transfer amount exceeds the sender's balance. This can lead to integer overflow, where the sender's balance becomes negative. This vulnerability can be exploited by an attacker who sends a large amount of tokens to themselves, causing their balance to become negative and potentially leading to loss of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool) { require(_to != address(0)); require(_value > 0 && _value <= balances[_from]); require(_value <= allowed[_from][msg.sender]); balances[_from] = balances[_from].sub(_value); balances[_to] = balances[_to].add(_value); allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value); Transfer(_from, _to, _value); return true; }",
+            "reason": "The transferFrom function does not check if the transfer amount exceeds the sender's balance. This can lead to integer overflow, where the sender's balance becomes negative. This vulnerability can be exploited by an attacker who sends a large amount of tokens to themselves, causing their balance to become negative and potentially leading to loss of funds."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint256 _value) public returns (bool) { allowed[msg.sender][_spender] = _value; Approval(msg.sender, _spender, _value); return true; }",
+            "reason": "The approve function does not check if the approval amount exceeds the sender's balance. This can lead to integer overflow, where the sender's balance becomes negative. This vulnerability can be exploited by an attacker who approves a large amount of tokens to be spent by another address, causing their balance to become negative and potentially leading to loss of funds."
+        },
+        {
+            "function_name": "batchTransfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) { uint cnt = _receivers.length; uint256 amount = uint256(cnt) * _value; require(cnt > 0 && cnt <= 20); require(_value > 0 && balances[msg.sender] >= amount); balances[msg.sender] = balances[msg.sender].sub(amount); for (uint i = 0; i < cnt; i++) { balances[_receivers[i]] = balances[_receivers[i]].add(_value); Transfer(msg.sender, _receivers[i], _value); } return true; }",
+            "reason": "The batchTransfer function does not check if the transfer amount exceeds the sender's balance. This can lead to integer overflow, where the sender's balance becomes negative. This vulnerability can be exploited by an attacker who sends a large amount of tokens to themselves, causing their balance to become negative and potentially leading to loss of funds."
+        },
+        {
+            "function_name": "BecToken",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function BecToken() { totalSupply = 7000000000 * (10**(uint256(decimals))); balances[msg.sender] = totalSupply; }",
+            "reason": "The constructor of the BecToken contract has a typo in the variable name. The variable name should be 'totalSupply' instead of 'totalSupplys'. This typo can lead to confusion and potential errors in the contract. This vulnerability can be exploited by an attacker who reads the contract code and uses the typo to deploy the contract, causing the contract to have a different total supply than intended."
+        }
+    ]
+}

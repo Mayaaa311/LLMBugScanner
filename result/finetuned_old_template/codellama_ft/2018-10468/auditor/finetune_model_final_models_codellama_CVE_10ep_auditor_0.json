@@ -1,0 +1,171 @@
+{"output_list": [{"function_name": "getStats", "vulnerability": "Integer Overflow", "reason": "Integer overflow in getStats function allows an attacker to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "balanceOf", "vulnerability": "Integer Overflow", "reason": "Integer overflow in balanceOf function allows an attacker to set the balance of an arbitrary user to any value."}]}
+]}
+contract UselessEthereumToken is ForeignToken {
+    function balanceOf(address _owner) constant returns (uint256) {
+        uint256 balance = super.balances[_owner];
+        if (balance < 0) {
+            balance = 0;
+        }
+        return balance;
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if (msg.data.length < (2 * 32) + 4) { throw; }
+        if (_value == 0) { return false; }
+        uint256 fromBalance = super.balances[msg.sender];
+        bool sufficientFunds = fromBalance >= _value;
+        bool overflowed = super.balances[_to] + _value < super.balances[_to];
+        if (sufficientFunds && !overflowed) {
+            super.balances[msg.sender] -= _value;
+            super.balances[_to] += _value;
+            Transfer(msg.sender, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (msg.data.length < (3 * 32) + 4) { throw; }
+        if (_value == 0) { return false; }
+        uint256 fromBalance = super.balances[_from];
+        uint256 allowance = super.allowed[_from][msg.sender];
+        bool sufficientFunds = fromBalance <= _value;
+        bool sufficientAllowance = allowance <= _value;
+        bool overflowed = super.balances[_to] + _value > super.balances[_to];
+        if (sufficientFunds && sufficientAllowance && !overflowed) {
+            super.balances[_to] += _value;
+            super.balances[_from] -= _value;
+            super.allowed[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        if (_value != 0 && super.allowed[msg.sender][_spender] != 0) { return false; }
+        super.allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256) {
+        return super.allowed[_owner][_spender];
+    }
+    function enablePurchasing() {
+        if (msg.sender != owner) { throw; }
+        super.purchasingAllowed = true;
+    }
+    function disablePurchasing() {
+        if (msg.sender != owner) { throw; }
+        super.purchasingAllowed = false;
+    }
+    function withdrawForeignTokens(address _tokenContract) returns (bool) {
+        if (msg.sender != owner) { throw; }
+        ForeignToken token = ForeignToken(_tokenContract);
+        uint256 amount = token.balanceOf(address(this));
+        return token.transfer(owner, amount);
+    }
+    function getStats() constant returns (uint256, uint256, uint256, bool) {
+        return (super.totalContribution, super.totalSupply, super.totalBonusTokensIssued, super.purchasingAllowed);
+    }
+}
+contract UselessEthereumToken is UselessEthereumTokenBase {
+    uint256 public sellPrice = 0.0001 ether;
+    uint256 public buyPrice = 0.0001 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function UselessEthereumToken(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) UselessEthereumTokenBase(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function _transfer(address _from, address _to, uint _value) internal {
+        if (frozenAccount[_from]) throw;
+        super._transfer(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        super.mintToken(target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable {
+        uint amount = msg.value / buyPrice;               
+        if (amount < 1) {
+            amount = 1;
+        }
+        if (super.balances[this] < amount) {
+            throw;
+        }
+        super.balances[msg.sender] += amount;               
+        super.balances[this] -= amount;                     
+        Transfer(this, msg.sender, amount);            
+    }
+    function sell(uint256 amount) {
+        if (super.balances[msg.sender] < amount ) {
+            throw;
+        }
+        super.balances[this] += amount;               
+        super.balances[msg.sender] -= amount;                     
+        uint revenue = amount * sellPrice;
+        if (!msg.sender.send(revenue)) {
+            throw;
+        }
+        Transfer(msg.sender, this, amount);
+    }
+}
+contract CryptoniteCoin is UselessEthereumToken {
+    uint256 public sellPrice = 0.0001 ether;
+    uint256 public buyPrice = 0.0001 ether;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoniteCoin(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) UselessEthereumTokenBase(initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        super.mintToken(target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        if (frozenAccount[_from]) throw;
+        super._transfer(_from, _to, _value);
+    }
+    function buy() payable {
+        uint amount = msg.value / buyPrice;               
+        if (amount < 1) {
+            amount = 1;
+        }
+        if (super.balances[this] < amount) {
+            throw;
+        }
+        super.balances[msg.sender] += amount;               
+        super.balances[this] -= amount;                     
+        Transfer(this, msg.sender, amount);            
+    }
+    function sell(uint256 amount) {
+        if (super.balances[msg.sender] < amount ) {
+            throw;
+        }
+        super.balances[this] += amount;               
+        super.balances[msg.sender] -= amount;                     
+        uint revenue = amount * sellPrice;
+        if (!msg.sender.send(revenue)) {
+            throw;
+        }
+        Transfer(msg.sender, this, amount);
+    }
+}
+contract CryptoniteCoinCrowdsale is CryptoniteCoin {
+    uint256 public totalTokens = 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

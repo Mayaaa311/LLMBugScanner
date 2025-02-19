@@ -1,0 +1,33 @@
+Code Input: 
+
+pragma solidity ^0.4.11;
+contract simplelottery {
+    enum State { Started, Locked }
+    State public state = State.Started;
+    struct Guess{
+      address addr;
+    }
+    uint arraysize=1000;
+    uint constant maxguess=1000000;
+    uint bettingprice = 1 ether;
+    Guess[1000] guesses;
+    uint    numguesses = 0;
+    bytes32 curhash = '';
+    uint _gameindex = 1;
+    uint _starttime = 0;
+    modifier inState(State _state) {
+      require(state == _state);
+      _;
+    }
+    address developer = 0x0;
+    address _winner   = 0x0;
+    event SentPrizeToWinner(address winner, uint money, uint gameindex, uint lotterynumber, uint starttime, uint finishtime);
+    event SentDeveloperFee(uint amount, uint balance);
+    function simplelottery() 
+    {
+      if(developer==address(0)){
+        developer = msg.sender;
+        state = State.Started;
+        _starttime = block.timestamp;
+      }
+    }

@@ -1,0 +1,70 @@
+{
+    "output_list": [
+        {
+            "function_name": "distributeToken",
+            "code": "function distributeToken(address[] addresses, uint256 _value) onlyOwner { for (uint i = 0; i < addresses.length; i++) { _balanceOf[owner] -= _value; _balanceOf[addresses[i]] += _value; Transfer(owner, addresses[i], _value); } }",
+            "vulnerability": "integer overflow",
+            "reason": "Integer overflow in the distributeToken function allows the owner to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0, owner, mintedAmount); Transfer(owner, target, mintedAmount); }",
+            "vulnerability": "integer overflow",
+            "reason": "Integer overflow in the mintToken function allows the owner to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) onlyOwner { balanceOf[msg.sender] -= _value; totalSupply -= _value; Burn(msg.sender, _value); }",
+            "vulnerability": "integer overflow",
+            "reason": "Integer overflow in the burn function allows the owner to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) onlyOwner { require(balanceOf[_from] >= _value); require(_value <= allowance[_from][msg.sender]); balanceOf[_from] -= _value; allowance[_from][msg.sender] -= _value; totalSupply -= _value; Burn(_from, _value); }",
+            "vulnerability": "integer overflow",
+            "reason": "Integer overflow in the burnFrom function allows the owner to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal { require(_to != 0x0); require(balanceOf[_from] >= _value); require(balanceOf[_to] + _value > balanceOf[_to]); assert(balanceOf[_from] + balanceOf[_to] == _value); balanceOf[_from] -= _value; balanceOf[_to] += _value; Transfer(_from, _to, _value); }",
+            "vulnerability": "integer overflow",
+            "reason": "Integer overflow in the _transfer function allows the owner to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public { _transfer(msg.sender, _to, _value); }",
+            "vulnerability": "integer overflow",
+            "reason": "Integer overflow in the transfer function allows the owner to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) { require(_value <= allowance[_from][msg.sender]); _transfer(_from, _to, _value); return true; }",
+            "vulnerability": "integer overflow",
+            "reason": "Integer overflow in the transferFrom function allows the owner to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public returns (bool success) { allowance[msg.sender][_spender] = _value; return true; }",
+            "vulnerability": "integer overflow",
+            "reason": "Integer overflow in the approve function allows the owner to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) public returns (bool success) { require(approve(_spender, _value)); _extraData; return true; }",
+            "vulnerability": "integer overflow",
+            "reason": "Integer overflow in the approveAndCall function allows the owner to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(address _from, uint256 _value) public returns (bool success) { require(balanceOf[_from] >= _value); require(_value <= allowance[_from][msg.sender]); balanceOf[_from] -= _value; allowance[_from][msg.sender] -= _value; totalSupply -= _value; Burn(_from, _value); return true; }",
+            "vulnerability": "integer overflow",
+            "reason": "Integer overflow in the burn function allows the owner to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) public returns (bool success) { require(balanceOf[_from] >= _value); require(_value <= allowance[_from][msg.sender]); require(msg.sender == owner); Burn(_from, _value); return true; }",
+            "vulnerability": "integer overflow",
+            "reason": "Integer overflow in the burnFrom function allows the owner to set the balance of an arbitrary user to any value."
+        }
+    ]
+}

@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address receiver, uint amount) onlyMintAgent public {  totalSupply = totalSupply + amount;  balances[receiver] = balances[receiver] + amount;  Transfer(0, receiver, amount);  }",
+            "vulnerability": "Minting Access Control",
+            "reason": "The mint function allows any minting agent to mint new tokens and assign them to any user account, including minting to arbitrary attacker-controlled addresses and allowing the attacker to steal any arbitrary amount of tokens from any user."
+        },
+        {
+            "function_name": "setMintAgent",
+            "code": "function setMintAgent(address addr, bool state) onlyOwner public {  mintAgents[addr] = state;  MintingAgentChanged(addr, state);  }",
+            "vulnerability": "Minting Access Control",
+            "reason": "The setMintAgent function allows the owner to enable or disable minting capabilities for any arbitrary user address, potentially allowing the attacker to gain minting abilities and issue tokens to attacker-controlled addresses."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint burnAmount) {    address burner = msg.sender;    balances[burner] = safeSub(balances[burner], burnAmount);    totalSupply = safeSub(totalSupply, burnAmount);    Burned(burner, burnAmount);  }",
+            "vulnerability": "Token Burn Functionality",
+            "reason": "The burn function allows any user to burn their own tokens, reducing the total supply and their balance. An attacker can exploit this function to steal tokens from any user by forcing them to call the burn function."
+        },
+        {
+            "function_name": "upgrade",
+            "code": "function upgrade(uint256 value) public {      UpgradeState state = getUpgradeState();      if(!(state == UpgradeState.ReadyToUpgrade || state == UpgradeState.Upgrading)) {        throw;      }      if (value == 0) throw;      balances[msg.sender] = safeSub(balances[msg.sender], value);      totalSupply = safeSub(totalSupply, value);      totalUpgraded = safeAdd(totalUpgraded, value);      upgradeAgent.upgradeFrom(msg.sender, value);      Upgrade(msg.sender, upgradeAgent, value);  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The upgrade function allows users to increase their token balance by an arbitrary amount, causing an integer overflow in the totalSupply variable, which can be exploited to steal tokens from any user."
+        },
+        {
+            "function_name": "setUpgradeAgent",
+            "code": "function setUpgradeAgent(address agent) external {      if(!canUpgrade()) {        throw;      }      if (agent == 0x0) throw;      if (msg.sender != upgradeMaster) throw;      if (getUpgradeState() == UpgradeState.Upgrading) throw;      upgradeAgent = UpgradeAgent(agent);      if(!upgradeAgent.isUpgradeAgent()) throw;      if (upgradeAgent.originalSupply() != totalSupply) throw;      UpgradeAgentSet(upgradeAgent);  }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The setUpgradeAgent function allows the owner to set an arbitrary user as the upgrade agent, which can cause an integer overflow in the totalSupply variable, allowing the attacker to steal tokens from any user."
+        }
+    ]
+}

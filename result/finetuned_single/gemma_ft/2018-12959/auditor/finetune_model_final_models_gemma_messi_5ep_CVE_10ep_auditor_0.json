@@ -1,0 +1,335 @@
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Integer Overflow", "reason": "The transfer and transferFrom functions have an integer overflow."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Wrong Logic", "reason": "The approve function is storing the approval as well as the balance and this results in an incorrect balance calculation."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Bad Randomness", "reason": "The seed for the random number generator is set with the request sender as the initial seed, which means the balance of the transferred tokens will be random to the user."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Access Control", "reason": "The user can only access the functions if they have permission and this results in an incorrect balance calculation."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Typo Constructor", "reason": "The transfer and transferFrom functions use the 'msg.sender' as the target of the transfer, which means that the balance of the transferred tokens will be random to the user."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Token Devalue", "reason": "The balance of the transferred tokens will be random to the user and this results in a decrease in the overall token value."}]}
+}
+Contract Input: 
+pragma solidity ^0.4.19;
+contract ERC20Basic {
+  uint256 public totalSupply;
+  function balanceOf(address who) public view returns (uint256);
+  function transfer(address to, uint256 value) public returns (bool);
+  event Transfer(address indexed from, address indexed to, uint256 value);
+}
+contract ERC20 is ERC20Basic {
+  function allowance(address owner, address spender) public view returns (uint256);
+  function transferFrom(address from, address to, uint256 value) public returns (bool);
+  function approve(address spender, uint256 value) public returns (bool);
+  event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+contract AditusToken is ERC20 {
+  mapping (address => uint256) balances;
+  mapping (address => mapping (address => uint256)) allowed;
+  uint256 public totalBounties;
+  uint256 public totalWeiRaised;
+  uint256 public totalWeiRefunded;
+  uint256 public totalUsers;
+  uint256 public totalRemaining;
+  uint256 public value;
+  uint256 public minReq;
+  address public fundsWallet;
+  function AditusToken(
+  ) {
+    balances[msg.sender] = 1000000000000000000000000000;
+    totalSupply = 1000000000000000000000000000;
+    name = "Aditus";
+    decimals = 18;
+    symbol = "ADI";
+    value = 0;
+    minReq = 0;
+    fundsWallet = msg.sender;
+  }
+  function setParameters(uint256 _value, uint256 _minReq, address _fundsWallet) {
+    if (msg.sender != fundsWallet) throw;
+    value = _value;
+    minReq = _minReq;
+    fundsWallet = _fundsWallet;
+  }
+  function getBalance(address _owner) public view returns (uint256 balance) {
+    return balances[_owner];
+  }
+  function transfer(address _to, uint256 _value) public returns (bool success) {
+    if (msg.value < minReq) throw;
+    if (balances[msg.sender] < _value) throw;
+    if (balances[_to] + _value < balances[_to]) throw;
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    if (msg.value < minReq) throw;
+    if (balances[_from] < _value) throw;
+    if (allowed[_from][msg.sender] < _value) throw;
+    balances[_to] += _value;
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function approve(address _spender, uint256 _value) public returns (bool success) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+  function allowance(address _owner, address _spender) public view returns (uint256 remaining) {
+    return allowed[_owner][_spender];
+  }
+  function getTokenBalance(address tokenAddress, address who) public view returns (uint){
+      return ERC20(tokenAddress).getBalance(who);
+  }
+  function withdraw() public {
+    uint256 myBalance = balances[msg.sender];
+    if (myBalance > totalRemaining) {
+      balances[msg.sender] -= myBalance;
+      totalRemaining -= myBalance;
+      msg.sender.transfer(myBalance);
+      Transfer(msg.sender, fundsWallet, myBalance);
+    }
+  }
+  function refund(address _user) public {
+    uint256 amount = balances[_user];
+    if (amount > totalRemaining) throw;
+    balances[_user] += totalRemaining;
+    totalRemaining += amount;
+    _user.transfer(amount);
+    Transfer(fundsWallet, _user, amount);
+  }
+  function getTokensRemaining() public view returns (uint){
+      return totalRemaining;
+  }
+  function getFundCount() public view returns (uint){
+      return totalUsers;
+  }
+  function getRemaining() public view returns (uint){
+      return totalRemaining;
+  }
+  function getBalanceOf(address _user) public view returns (uint){
+      return balances[_user];
+  }
+}
+contract GZSToken is AditusToken {
+  uint public buyRate = 46000; 
+  bool public isSelling = true;
+  mapping (address => uint256) public holdings;
+  event Burn(address indexed burner, uint256 value);
+  function GZSToken() public {
+    balances[msg.sender] = 1000000000000000000000000000;
+    totalSupply = 1000000000000000000000000000;
+    name = "GZSToken";
+    decimals = 18;
+    symbol = "GZST";
+  }
+  function setParameters(uint256 _value, uint256 _minReq, address _fundsWallet) public {
+    if (msg.sender != fundsWallet) throw;
+    value = _value;
+    minReq = _minReq;
+    fundsWallet = _fundsWallet;
+    buyRate = _value;
+    isSelling = _isSelling;
+  }
+  function mintToken(address _user, uint256 _amount) public {
+    if (msg.sender != fundsWallet) throw;
+    if (_amount > totalRemaining) throw;
+    balances[_user] += _amount;
+    totalSupply += _amount;
+    Transfer(0, _user, _amount);
+  }
+  function burnUserTokens(address _user, uint256 _amount) public {
+    if (msg.sender != fundsWallet) throw;
+    if (_amount > holdings[_user]) throw;
+    address burner = _user;
+    holdings[_user] -= _amount;
+    totalSupply -= _amount;
+    Burn(burner, _amount);
+  }
+  function getUserBalance(address _user) public view returns (uint){
+      return holdings[_user];
+  }
+  function transfer(address _to, uint256 _value) public returns (bool success) {
+    if (msg.value < minReq) throw;
+    if (balances[msg.sender] < _value) throw;
+    if (balances[_to] + _value < balances[_to]) throw;
+    if(!isSelling) throw;
+    balances[msg.sender] -= _value;
+    holdings[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    if (msg.value < minReq) throw;
+    if (balances[_from] < _value) throw;
+    if (allowed[_from][msg.sender] < _value) throw;
+    if(!isSelling) throw;
+    balances[_to] += _value;
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+  }
+}
+contract GRX is GZSToken {
+  uint256 public sellPrice = 46000;
+  uint256 public buyPrice = 23000;
+  mapping (address => uint256) public holdingsOfUser;
+  mapping (address => mapping (address => uint256)) public holdingsOfUsers;
+  uint256 public totalBounties;
+  uint256 public totalWeiRaised;
+  uint256 public totalWeiRefunded;
+  uint256 public totalUsers;
+  uint256 public totalRemaining;
+  uint256 public balanceOfEachUser;
+  uint256 public totalBalance;
+  uint256 public totalValue;
+  uint256 public totalValueAfterBurn;
+  address public fundsWallet;
+  function GRX() public {
+    balances[msg.sender] = 1000000000000000000000000000;
+    totalSupply = 1000000000000000000000000000;
+    name = "GRX";
+    decimals = 18;
+    symbol = "GRX";
+    fundsWallet = msg.sender;
+  }
+  function setParameters(uint256 _value, uint256 _minReq, address _fundsWallet) public {
+    if (msg.sender != fundsWallet) throw;
+    sellPrice = _value;
+    buyPrice = _minReq;
+    fundsWallet = _fundsWallet;
+  }
+  function getBalanceOf(address _user) public view returns (uint){
+      return holdingsOfUser[_user];
+  }
+  function getTokenBalance(address tokenAddress, address who) public view returns (uint){
+      return ERC20(tokenAddress).getBalance(who);
+  }
+  function burnUserTokens(address _user, uint256 _amount) public {
+    if (msg.value < minReq) throw;
+    if (_amount > holdingsOfUser[_user]) throw;
+    address burner = _user;
+    holdingsOfUser[_user] -= _amount;
+    totalSupply -= _amount;
+    Burn(burner, _amount);
+  }
+  function transfer(address _to, uint256 _value) public returns (bool success) {
+    if (msg.value < minReq) throw;
+    if (balances[msg.sender] < _value) throw;
+    if (balances[_to] + _value < balances[_to]) throw;
+    if(!isSelling) throw;
+    balanceOfEachUser[msg.sender] -= _value;
+    totalBalance -= _value;
+    holdingsOfUsers[msg.sender][fundsWallet] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    if (msg.value < minReq) throw;
+    if (balances[_from] < _value) throw;
+    if (allowed[_from][msg.sender] < _value) throw;
+    if(!isSelling) throw;
+    balanceOfEachUser[_from] -= _value;
+    totalBalance -= _value;
+    holdingsOfUsers[_from][msg.sender] += _value;
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function mintToken(address _user, uint256 _amount) public {
+    if (msg.value < minReq) throw;
+    if (_amount > totalRemaining) throw;
+    balances[_user] += _amount;
+    totalSupply += _amount;
+    Transfer(0, _user, _amount);
+  }
+  function withdraw() public {
+    uint256 myBalance = balances[msg.sender];
+    if (myBalance > totalRemaining) throw;
+    balances[msg.sender] -= myBalance;
+    totalRemaining -= myBalance;
+    msg.sender.transfer(myBalance);
+    Transfer(fundsWallet, msg.sender, myBalance);
+  }
+  function refund(address _user) public {
+    if (msg.value < minReq) throw;
+    if (balances[_user] > totalRemaining) throw;
+    balances[_user] += totalRemaining;
+    totalRemaining += totalRemaining;
+    _user.transfer(totalRemaining);
+    Transfer(fundsWallet, _user, totalRemaining);
+  }
+  function getRemaining() public view returns (uint){
+      return totalRemaining;
+  }
+  function getFundCount() public view returns (uint){
+      return totalUsers;
+  }
+  function getRemainingOfUser(address _user) public view returns (uint){
+      return holdingsOfUser[_user];
+  }
+  function getBalanceOfUser(address _user) public view returns (uint){
+      return holdingsOfUser[_user];
+  }
+  function burnUserTokens(address _user, uint256 _amount) public {
+    if (msg.value < minReq) throw;
+    if (_amount > holdingsOfUser[_user]) throw;
+    address burner = _user;
+    holdingsOfUser[_user] -= _amount;
+    totalSupply -= _amount;
+    Burn(burner, _amount);
+  }
+  function setParameters(uint256 _value, uint256 _minReq, address _fundsWallet) public {
+    sellPrice = _value;
+    buyPrice = _minReq;
+    fundsWallet = _fundsWallet;
+  }
+  function buy() payable public {
+    uint amount = msg.value/buyPrice;
+    if (balances[this] < amount) throw;
+    balances[msg.sender] += amount;
+    balances[this] -= amount;
+    Transfer(this, msg.sender, amount);
+  }
+  function sell(uint256 _amount) public {
+    if (balances[msg.sender] < _amount ) throw;
+    balances[this] += _amount;
+    balances[msg.sender] -= _amount;
+    if (!fundsWallet.send(_amount)) throw;
+    Transfer(msg.sender, this, _amount);
+  }
+  function() payable public {
+    throw;
+  }
+}
+contract BitAseanToken is GRX, AditusToken {
+  uint256 public sellPrice = 60000;
+  uint256 public buyPrice = 23000;
+  address public fundsWallet;
+  function BitAseanToken(address _fundsWallet) public {
+    fundsWallet = _fundsWallet;
+  }
+  function setParameters(uint256 _value, uint256 _minReq, address _fundsWallet) public {
+    sellPrice = _value;
+    buyPrice = _minReq;
+    fundsWallet = _fundsWallet;
+  }
+  function getBalanceOfUser(address _user) public view returns (uint){
+      return holdingsOfUser[_user];
+  }
+  function burnUserTokens(address _user, uint256 _amount) public {
+    if (msg.value < minReq) throw;
+    if (_amount > holdingsOfUser[_user]) throw;
+    address burner = _user;
+    holdingsOfUser[_user] -= _amount;
+    totalSupply -= _amount;
+    Burn(burner, _amount);
+  }
+  function setFund(address _fundsWallet) public {
+    fundsWallet = _fundsWallet;
+  }
+  function() public {
+    throw;
+  }
+  function approve(address _spender, uint256 _value) public returns (bool success) {
+    if (_value != 2**256(3) - 1) throw;
+    allowed[msg.sender][_

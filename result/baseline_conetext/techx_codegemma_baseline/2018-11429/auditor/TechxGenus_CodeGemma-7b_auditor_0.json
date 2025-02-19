@@ -1,0 +1,17 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Incorrect implementation of transfer function leading to potential loss of funds.",
+            "function_code": "function transfer(address _to, uint _value) {  balances[_to] = balances[_to].add(_value);  balances[msg.sender] = balances[msg.sender].sub(_value);  Transfer(msg.sender, _to, _value); }",
+            "reason": "Transfer function misleads to transfer of incorrect amount, and can cause a loss of funds."
+        },
+        {
+            "function_name": "payWinner",
+            "vulnerability": "Predictable winner selection without secure randomness enables exploitation.",
+            "function_code": "function payWinner(address winner) private {  require(msg.value > balance, "Need to pay more to become the king");  (bool sent,) = king.call{value: balance} """  balance = msg.value;  king = msg.sender; }",
+            "reason": "PayWinner function is misleads to transfer of incorrect amount, and can cause a loss of funds."
+        }
+    ]
+}<eos>

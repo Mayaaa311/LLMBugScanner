@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "updateSettings",
+            "vulnerability": "Reentrancy",
+            "reason": "The function updateSettings allows the owner to update the addresses of the userStakingPool, tokenSeller, and dao. If the new addresses are the same as the old ones, the function will revert, but the revert is not checked in the nonReentrant modifier. This can lead to reentrancy attacks."
+        },
+        {
+            "function_name": "claimStakingReward",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function claimStakingReward allows the userStakingPool to claim the reward. The amount of reward is added to the claimedReward variable using the add function from the MathUint library. If the addition overflows, the function will revert."
+        },
+        {
+            "function_name": "fundDAO",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function fundDAO allows the owner to fund the DAO. The amount of DAO fund and burn is added to the claimedDAOFund and claimedBurn variables using the add function from the MathUint library. If the addition overflows, the function will revert."
+        },
+        {
+            "function_name": "sellTokenForLRC",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function sellTokenForLRC allows the owner to sell a token for LRC. The amount of token is transferred to the recipient using the safeTransferAndVerify function from the ERC20SafeTransfer library. If the transfer fails, the function will revert."
+        },
+        {
+            "function_name": "getProtocolFeeStats",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function getProtocolFeeStats calculates the accumulated fees, remaining fees, accumulated reward, remaining reward, accumulated DAO fund, remaining DAO fund, accumulated burn, and remaining burn. The calculations involve addition and subtraction operations that can overflow or underflow if the values are too large or small."
+        }
+    ]
+}

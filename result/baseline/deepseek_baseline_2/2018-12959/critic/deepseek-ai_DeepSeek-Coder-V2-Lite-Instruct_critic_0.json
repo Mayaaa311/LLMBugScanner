@@ -1,0 +1,51 @@
+ ```json
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The vulnerability arises because the condition `balances[msg.sender] >= _value && _value > 0` does not prevent integer overflow. If `_value` is large, `balances[msg.sender]` will be decremented beyond the minimum value, leading to an integer overflow. This can be exploited to allow an attacker to transfer more tokens than they should, potentially draining the contract's balance.",
+            "correctness": 8,
+            "severity": 9,
+            "profitability": 7
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The function lacks a check to ensure that the spender (`msg.sender`) has been approved by the owner (`_from`) to spend the specified amount. This can lead to unauthorized token transfers, as an attacker can use `transferFrom` to transfer tokens on behalf of others without their consent.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 6
+        },
+        {
+            "function_name": "approve",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The `approve` function does not check if the spender is allowed to receive the tokens. This allows an attacker to approve a contract to transfer tokens on their behalf without any checks, leading to unauthorized token transfers.",
+            "correctness": 7,
+            "severity": 8,
+            "profitability": 6
+        },
+        {
+            "function_name": "AditusToken",
+            "auditor_idx": 0,
+            "vulnerability": "Typo Constructor",
+            "criticism": "The typo in the constructor where `totalSupply` is assigned twice is a mistake but does not directly introduce a vulnerability. However, it could be considered a mistake in code maintenance as it might lead to confusion or errors during development.",
+            "correctness": 5,
+            "severity": 3,
+            "profitability": 2
+        },
+        {
+            "function_name": "approveAndCall",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The `approveAndCall` function calls a contract with the `receiveApproval` function signature. If the called contract does not implement the `receiveApproval` function, the call will fail, leading to a denial of service (DoS) for the token owner. This is a critical issue as it can prevent legitimate token approvals from being executed.",
+            "correctness": 6,
+            "severity": 9,
+            "profitability": 5
+        }
+    ]
+}
+```

@@ -1,0 +1,44 @@
+Here is the output in JSON format:
+
+```json
+{
+  "output_list": [
+    {
+      "function_name": "_transfer",
+      "auditor_idx": 0,
+      "vulnerability": "Integer Overflow",
+      "criticism": "The vulnerability arises from the condition `require(balanceOf[_to] + _value > balanceOf[_to]);` which can be exploited if `_value` is such that adding it to `balanceOf[_to]` does not exceed the current balance. This can happen if `_value` is very large, leading to an integer overflow. This is a significant issue as it allows attackers to mint arbitrary tokens by manipulating the `_value` parameter.",
+      "correctness": 7,
+      "severity": 9,
+      "profitability": 8
+    },
+    {
+      "function_name": "mintToken",
+      "auditor_idx": 0,
+      "vulnerability": "Integer Overflow",
+      "criticism": "The function `mintToken` allows the owner to mint tokens at will, which can lead to an integer overflow if `mintedAmount` is very large. This is a critical issue because it directly impacts the total supply of tokens, potentially leading to severe financial loss and instability in the token's value.",
+      "correctness": 6,
+      "severity": 9,
+      "profitability": 7
+    },
+    {
+      "function_name": "burnFrom",
+      "auditor_idx": 0,
+      "vulnerability": "Access Control",
+      "criticism": "The function `burnFrom` does not check if the caller is allowed to burn tokens from the target address, which can lead to unauthorized token destruction and potential theft.",
+      "correctness": 5,
+      "severity": 7,
+      "profitability": 5
+    },
+    {
+      "function_name": "burnFrom",
+      "auditor_idx": 0,
+      "vulnerability": "Integer Overflow",
+      "criticism": "The function `burnFrom` has an integer overflow vulnerability in the line `balanceOf[_from] -= _value;`. This can be exploited if `_value` is very large, leading to an underflow and potentially causing a denial of service by making the balance of the `_from` address negative.",
+      "correctness": 6,
+      "severity": 8,
+      "profitability": 7
+    }
+  ]
+}
+```

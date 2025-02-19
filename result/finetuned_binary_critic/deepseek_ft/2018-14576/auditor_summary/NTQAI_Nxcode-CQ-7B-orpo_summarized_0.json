@@ -1,0 +1,65 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(address _to, uint256 _amount) {
+  if (msg.sender != icoContractAddress) throw;
+  if (restrictedAddresses[_to]) throw;
+  if (balances[_to] + _amount < balances[_to]) throw;
+  supply += _amount;
+  balances[_to] += _amount;
+  Mint(_to, _amount);
+  Transfer(0x0, _to, _amount);
+}",
+            "vulnerability": "Minting Access Control",
+            "reason": "The mintTokens function allows the ICO contract to mint new tokens and assign them to any user account, without any access controls. This can lead to undistributed tokens and unfair distribution."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) {
+  if (block.number < tokenFrozenUntilBlock) throw;
+  if (restrictedAddresses[_to]) throw;
+  if (balances[msg.sender] < _value) throw;
+  if (balances[_to] + _value < balances[_to]) throw;
+  balances[msg.sender] -= _value;
+  balances[_to] += _value;
+  Transfer(msg.sender, _to, _value);
+  return true;
+}",
+            "vulnerability": "Time Locking Mechanism",
+            "reason": "The time locking mechanism is not enforced correctly in the transfer function. It only checks if the block number is less than tokenFrozenUntilBlock, allowing transfers to be disabled temporarily without any additional restrictions."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+  tokenRecipient spender = tokenRecipient(_spender);
+  approve(_spender, _value);
+  spender.receiveApproval(msg.sender, _value, this, _extraData);
+  return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The approveAndCall function allows a spender to execute arbitrary code with the owner's tokens, due to the unchecked transferFrom call. This can lead to integer overflow, allowing the spender to acquire more tokens than the owner has."
+        },
+        {
+            "function_name": "burnTokens",
+            "code": "function burnTokens(uint256 _amount) onlyOwner {
+  if(balances[msg.sender] < _amount) throw;
+  if(supply < _amount) throw;
+  supply -= _amount;
+  balances[msg.sender] -= _amount;
+  Burn(msg.sender, _amount);
+  Transfer(msg.sender, 0x0, _amount);
+}",
+            "vulnerability": "Token Burn Mechanism",
+            "reason": "The burnTokens function allows the owner to burn any amount of tokens from any user, without any access controls. This can lead to unfair distribution and unexpected token destruction."
+        },
+        {
+            "function_name": "isRestrictedAddress",
+            "code": "function isRestrictedAddress(address _querryAddress) constant returns (bool answer){
+  return restrictedAddresses[_querryAddress];
+}",
+            "vulnerability": "Account Control",
+            "reason": "The isRestrictedAddress function allows anyone to query if an address is restricted, which can be used to check if an address can receive tokens, potentially leaking private information."
+        }
+    ]
+}

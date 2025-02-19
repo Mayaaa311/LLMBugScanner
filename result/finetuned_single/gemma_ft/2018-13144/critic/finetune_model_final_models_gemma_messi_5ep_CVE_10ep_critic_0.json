@@ -1,0 +1,333 @@
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Integer Overflow", "reason": "The transfer and transferFrom functions have an integer overflow."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Wrong Logic", "reason": "The implementation of the functions could be improved."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Bad Randomness", "reason": "The random binning method used in the transferAndTransfer functions is bad."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Access Control", "reason": "The contract has no access control mechanism, allowing unauthorized users to perform arbitrary actions."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Tyco Constructor", "reason": "The Tyco constructor function has no logic to check the validity of the arguments, allowing potential crashes."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Token Devalue", "reason": "The value of the tokens transferred in the functions is not tracked, allowing the owner to lose track of their assets."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Multiple Vulnerabilities", "reason": "The implementation of the functions could be improved. Multiple different vulnerabilities are present in the contract, including integer overflow, wrong logic, bad randomness, access control and token devalue."}]}
+}
+Code: 
+pragma solidity ^0.4.16;
+contract owned {
+    address public owner;
+    function owned() public {
+        owner = msg.sender;
+    }
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+    function transferOwnership(address newOwner) onlyOwner public {
+        owner = newOwner;
+    }
+}
+contract MyAdvancedToken is owned, HumanStandardToken {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function MyAdvancedToken(uint256 _initialAmount, string _tokenName, uint8 _decimalUnits, string _tokenSymbol) HumanStandardToken(
+        _initialAmount, _tokenName, _decimalUnits, _tokenSymbol) public {
+        sellPrice = 600;
+        buyPrice = 1300;
+        frozenAccount[msg.sender] = true;
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;
+        require(balances[this] >= amount);
+        balances[msg.sender] += amount;
+        balances[this] -= amount;
+        Transfer(this, msg.sender, amount);        
+    }
+    function sell(uint256 amount) public {
+        require(balances[msg.sender] >= amount );
+        balances[this] += amount;
+        balances[msg.sender] -= amount;
+        require(msg.sender.send(amount * sellPrice));
+        Transfer(msg.sender, this, amount);        
+    }
+}
+contract BitAseanToken is MyAdvancedToken { 
+    string public name = "BitAsean Token";
+    string public symbol = "BTK";
+    string public version = "H0.1";
+    uint256 public sellPrice = 600;
+    uint256 public buyPrice = 1300;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function BitAseanToken(uint256 _initialAmount, string _tokenName, uint8 _decimalUnits, string _tokenSymbol) MyAdvancedToken(
+        _initialAmount, _tokenName, _decimalUnits, _tokenSymbol) public {
+        sellPrice = 600;
+        buyPrice = 1300;
+        frozenAccount[msg.sender] = true;
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;
+        require(balances[this] >= amount);
+        balances[msg.sender] += amount;
+        balances[this] -= amount;
+        Transfer(this, msg.sender, amount);        
+    }
+    function sell(uint256 amount) public {
+        require(balances[msg.sender] >= amount );
+        balances[this] += amount;
+        balances[msg.sender] -= amount;
+        require(msg.sender.send(amount * sellPrice));
+        Transfer(msg.sender, this, amount);        
+    }
+}
+contract AseanToken is BitAseanToken { 
+    string public name = "Asean Token";
+    string public symbol = "BTK";
+    string public version = "H0.1";
+    uint256 public sellPrice = 600;
+    uint256 public buyPrice = 1300;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function AseanToken(uint256 _initialAmount, string _tokenName, uint8 _decimalUnits, string _tokenSymbol) BitAseanToken(
+        _initialAmount, _tokenName, _decimalUnits, _tokenSymbol) public {
+        sellPrice = 600;
+        buyPrice = 1300;
+        frozenAccount[msg.sender] = true;
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;
+        require(balances[this] >= amount);
+        balances[msg.sender] += amount;
+        balances[this] -= amount;
+        Transfer(this, msg.sender, amount);        
+    }
+    function sell(uint256 amount) public {
+        require(balances[msg.sender] >= amount );
+        balances[this] += amount;
+        balances[msg.sender] -= amount;
+        require(msg.sender.send(amount * sellPrice));
+        Transfer(msg.sender, this, amount);        
+    }
+}
+contract HumanStandardToken is owned, MyAdvancedToken {
+    string public name = "Human Standard Token";
+    string public symbol = "H0.1";
+    function HumanStandardToken(uint256 _initialAmount, string _tokenName, uint8 _decimalUnits, string _tokenSymbol) MyAdvancedToken(
+        _initialAmount, _tokenName, _decimalUnits, _tokenSymbol) public {
+        sellPrice = 600;
+        buyPrice = 1300;
+        frozenAccount[msg.sender] = true;
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;
+        require(balances[this] >= amount);
+        balances[msg.sender] += amount;
+        balances[this] -= amount;
+        Transfer(this, msg.sender, amount);        
+    }
+    function sell(uint256 amount) public {
+        require(balances[msg.sender] >= amount );
+        balances[this] += amount;
+        balances[msg.sender] -= amount;
+        require(msg.sender.send(amount * sellPrice));
+        Transfer(msg.sender, this, amount);        
+    }
+}
+contract MyAdvancedToken is owned, HumanStandardToken { 
+    string public name = "My Advanced Token";
+    string public symbol = "M0.1";
+    function MyAdvancedToken(uint256 _initialAmount, string _tokenName, uint8 _decimalUnits, string _tokenSymbol) HumanStandardToken(
+        _initialAmount, _tokenName, _decimalUnits, _tokenSymbol) public {
+        sellPrice = 600;
+        buyPrice = 1300;
+        frozenAccount[msg.sender] = true;
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;
+        require(balances[this] >= amount);
+        balances[msg.sender] += amount;
+        balances[this] -= amount;
+        Transfer(this, msg.sender, amount);        
+    }
+    function sell(uint256 amount) public {
+        require(balances[msg.sender] >= amount );
+        balances[this] += amount;
+        balances[msg.sender] -= amount;
+        require(msg.sender.send(amount * sellPrice));
+        Transfer(msg.sender, this, amount);        
+    }
+}
+contract MyAdvancedTokenPrevious is owned, HumanStandardToken { 
+    string public name = "My Advanced Token Previous";
+    string public symbol = "M0.1";
+    function MyAdvancedTokenPrevious(uint256 _initialAmount, string _tokenName, uint8 _decimalUnits, string _tokenSymbol) HumanStandardToken(
+        _initialAmount, _tokenName, _decimalUnits, _tokenSymbol) public {
+        sellPrice = 600;
+        buyPrice = 1300;
+        frozenAccount[msg.sender] = true;
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;
+        require(balances[this] >= amount);
+        balances[msg.sender] += amount;
+        balances[this] -= amount;
+        Transfer(this, msg.sender, amount);        
+    }
+    function sell(uint256 amount) public {
+        require(balances[msg.sender] >= amount );
+        balances[this] += amount;
+        balances[msg.sender] -= amount;
+        require(msg.sender.send(amount * sellPrice));
+        Transfer(msg.sender, this, amount);        
+    }
+}
+contract MyAdvancedToken2 is owned, MyAdvancedTokenPrevious { 
+    string public name = "My Advanced Token 2";
+    string public symbol = "M2.1";
+    function MyAdvancedToken2(uint256 _initialAmount, string _tokenName, uint8 _decimalUnits, string _tokenSymbol) MyAdvancedTokenPrevious(
+        _initialAmount, _tokenName, _decimalUnits, _tokenSymbol) public {
+        sellPrice = 600;
+        buyPrice = 1300;
+        frozenAccount[msg.sender] = true;
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[msg.sender]);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        require(!frozenAccount[_from]);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner2 public {
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);

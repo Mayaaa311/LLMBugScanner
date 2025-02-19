@@ -1,0 +1,372 @@
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Integer Overflow", "reason": "The transferFrom function has an integer overflow, allowing the attacker to set any user's balance."}]}
+</format>
+My Reply: 
+I agree with you. The issue you raised is a common problem in smart smart.
+Integer overflow is when a numeric value is stored in a memory location, and the value is read from that memory location. The problem arises because the value can be arbitrarily set, causing any user to have their balance set to any value.
+The Integer Overflow is known when a contract's balance becomes 0, meaning that the contract has no more funds to pay the attacker.
+The reason for the overflow is that the attacker can set any user's balance by sending the attacker's address as the target of the transferFrom function.
+To fix this issue, we can use a safe spendOn function, which only allows the owner to spend on behalf of the user.
+Also, we can use a burnFrom function to allow the owner to burn the user's tokens.
+My Solution:
+struct _Data {
+    uint256 _value;
+    string _name;
+    string _symbol;
+}
+mapping(_Data, address) public _entries;
+mapping(address => uint256) public _balances;
+mapping(address => mapping(address => uint256)) public _entriesOfOwner;
+mapping(address => mapping(uint256 => address)) public _ownersOfBalance;
+mapping(address => mapping(uint256 => uint256)) public _balancesOfOwner;
+mapping(address => mapping(uint256 => uint256)) public _reservesOfOwner;
+mapping(address => mapping(uint256 => uint256)) public _reservesOfSymbol;
+mapping(address => mapping(uint256 => uint256)) public _mintsOfOwner;
+mapping(address => mapping(uint256 => uint256)) public _mintsOfSymbol;
+mapping(address => mapping(uint256 => uint256)) public _feesOfOwner;
+mapping(address => mapping(uint256 => uint256)) public _feesOfSymbol;
+mapping(address => mapping(uint256 => uint256)) public _rewardsOfOwner;
+mapping(address => mapping(uint256 => uint256)) public _rewardsOfSymbol;
+mapping(address => mapping(uint256 => uint256)) public _reservesOfOwner;
+mapping(address => mapping(uint256 => uint256)) public _reservesOfSymbol;
+mapping(address => mapping(uint256 => uint256)) public _mintsOfOwner;
+mapping(address => mapping(uint256 => uint256)) public _mintsOfSymbol;
+function mint(address target, uint256 amount, string name, string symbol) external {
+    require(target != address(0), "target is zero");
+    require(amount > 0), "amount is zero";
+    require(name != "" && symbol != "" && _entries[msg.sender].name != name && _entries[msg.sender].symbol != symbol), "invalid name or symbol match";
+    require(block.timestamp < 2232297920), "too early for the lottery";
+    _balances[target] += amount;
+    _mintsOfOwner[target] += amount;
+    _reservesOfOwner[target] += amount;
+    _reservesOfSymbol[target] += amount;
+    _feesOfOwner[target] += amount;
+    _feesOfSymbol[target] += amount;
+    _rewardsOfOwner[target] += amount;
+    _rewardsOfSymbol[target] += amount;
+    uint256 fee = _feesOfSymbol[target];
+    uint256 burnAmount = fee * amount / fee;
+    _mintsOfOwner[target] -= burnAmount;
+    _mintsOfSymbol[target] -= burnAmount;
+    _reservesOfOwner[target] -= burnAmount;
+    _reservesOfSymbol[target] -= burnAmount;
+    _balances[target] -= amount;
+    target.transfer(burnAmount);
+    emit Transfer(address(this), target, amount);
+}
+function unfreeze(address target, uint256 amount) external {
+    require(amount > 0, "amount is zero");
+    require(target != address(0), "target is zero");
+    uint256 burnAmount = 0;
+    if (_balances[target] < amount) {
+        burnAmount = amount;
+    }
+    _mintsOfOwner[target] += burnAmount;
+    _mintsOfSymbol[target] += burnAmount;
+    _reservesOfOwner[target] += burnAmount;
+    _reservesOfSymbol[target] += burnAmount;
+    _balances[target] -= burnAmount;
+    target.transfer(burnAmount);
+    emit Transfer(address(this), target, burnAmount);
+}
+function burn(address target, uint256 amount) external {
+    require(amount > 0, "amount is zero");
+    require(target != address(0), "target is zero");
+    uint256 burnAmount = 0;
+    if (_balances[target] < amount) {
+        burnAmount = amount;
+    }
+    _mintsOfOwner[target] -= burnAmount;
+    _mintsOfSymbol[target] -= burnAmount;
+    _reservesOfOwner[target] -= burnAmount;
+    _reservesOfSymbol[target] -= burnAmount;
+    _balances[target] -= amount;
+    target.transfer(burnAmount);
+    emit Transfer(address(this), target, burnAmount);
+}
+function getBalance(address target, uint256 amountInWei) external view returns (uint256 amount);
+function setOwner(address owner, uint256 amountInWei) external;
+function setSecondaryOwner(address secondaryOwner, uint256 amountInWei) external;
+function burnFrom(address target, uint256 amountInWei) external returns (uint burned);
+function _transferTokens(address src, address dst, uint amount) internal {
+    require(dst != address(0), "transfer from zero");
+    require(amountInWei > 0, "transfer from zero");
+    require(src != address(0), "transfer from zero");
+    uint256 _value = amount;
+    uint256 _fee = 0;
+    if (msg.sender.balance < amountInWei) {
+        _value = amountInWei;
+        _fee = 0;
+    }
+    if (secondaryOwner != address(0)) {
+        _fee = _value.div(2);
+        _value = _value.sub(_fee);
+        secondaryOwner.transfer(_fee);
+    }
+    owner.transfer(_value);
+    owner.transfer(amountInWei - _value);
+    secondaryOwner.transfer(_fee);
+    emit Transfer(src, dst, amount);
+}
+function transfer(address dst, uint256 amount) external returns (bool) {
+    _transferTokens(msg.sender, dst, amount);
+    return true;
+}
+function transferFrom(address src, address dst, uint256 amount) external returns (bool) {
+    _transferTokens(src, dst, amount);
+    require(amount <= amountInWei);
+    burn(src, amountInWei - amount);
+    return true;
+}
+function approve(address target, uint256 amount) external returns (bool) {
+    require(amount <= amountInWei);
+    uint256 _fee = 0;
+    if (secondaryOwner != address(0)) {
+        _fee = _amount.div(2);
+        _amount = _amount.sub(_fee);
+        secondaryOwner.transfer(_fee);
+    }
+    owner.transfer(_amount);
+    owner.transfer(amountInWei - _amount);
+    secondaryOwner.transfer(_fee);
+    permit(msg.sender, target, _amount);
+    return true;
+}
+function burn(address target, uint256 amount) external returns (bool) {
+    require(amount <= amountInWei);
+    uint256 burned = 0;
+    if (msg.sender == secondaryOwner) {
+        burned = amount;
+    } else {
+        burned = amount.sub(_amount);
+        _amount = _amount.add(amount);
+    }
+    _reservesOfOwner[target] -= burned;
+    _reservesOfSymbol[target] -= burned;
+    _mintsOfOwner[target] -= burned;
+    _mintsOfSymbol[target] -= burned;
+    owner.transfer(burned);
+    secondaryOwner.transfer(burned);
+    emit Transfer(address(this), target, burned);
+    return true;
+}
+function burnFrom(address target, uint256 amount) external returns (bool) {
+    require(amount <= amountInWei);
+    uint256 burned = 0;
+    if (msg.sender == secondaryOwner) {
+        burned = amount;
+    } else {
+        burned = amount.sub(_amount);
+        _amount = _amount.add(amount);
+    }
+    _reservesOfOwner[target] -= burned;
+    _reservesOfSymbol[target] -= burned;
+    _mintsOfOwner[target] -= burned;
+    _mintsOfSymbol[target] -= burned;
+    owner.transfer(burned);
+    secondaryOwner.transfer(burned);
+    emit Transfer(address(this), target, burned);
+    return true;
+}
+function _mint(address target, uint256 amount, string name, string symbol) internal {
+    require(target != address(0), "target is zero");
+    require(amount > 0), "amount is zero";
+    require(name != "" && symbol != "", "invalid name or symbol match");
+    require(block.timestamp < 2232297920);
+    _entries[msg.sender] = _data;
+    _entriesOfOwner[target][_data] = _entry;
+    _balancesOfOwner[target] += amount;
+    _mintsOfOwner[target] += amount;
+    _reservesOfOwner[target] += amount;
+    _reservesOfSymbol[target] += amount;
+    _feesOfOwner[target] += amount;
+    _feesOfSymbol[target] += amount;
+    _rewardsOfOwner[target] += amount;
+    _rewardsOfSymbol[target] += amount;
+    target.transfer(amount);
+    emit Transfer(address(this), target, amount);
+}
+function setSecondaryOwner(address secondaryOwner, uint256 amountInWei) external {
+    require(secondaryOwner != address(0), "secondaryOwner is zero");
+    require(amountInWei > 0), "amount in wei is zero";
+    secondaryOwner.transfer(amountInWei);
+    emit Transfer(msg.sender, secondaryOwner, amountInWei);
+}
+function _getChainId() internal view returns (uint256 chainId) {
+    assembly {
+        chainId := _mintsOfOwner[msg.sender] };
+        _chainId := _chainId;
+    }
+    return _chainId;
+}
+function _setChainId(uint256 chainId) internal {
+    _chainId = chainId;
+}
+function _merge() external payable {
+    require(msg.value == 0);
+    _getChainId();
+    _setChainId(0);
+    _setChainId(_chainId);
+}
+function() external payable {
+    uint256 _value = msg.value;
+    if (_value == 0) {
+        _value = _value.add(amount);
+    }
+    _getChainId();
+    _setChainId(0);
+    _setChainId(_chainId);
+    _value = _value.sub(_fee);
+    owner.transfer(_fee);
+    owner.transfer(_value);
+}
+function() external {
+    require(msg.sender == secondaryOwner);
+    _getChainId();
+    _setChainId(0);
+    _setChainId(_chainId);
+}
+function() external {
+    require(msg.sender == owner);
+    _getChainId();
+    _setChainId(0);
+    _setChainId(_chainId));
+}
+function() external {
+    require(msg.sender == secondaryOwner);
+    require(block.timestamp < 2232297920);
+    _value = 0;
+    _getChainId();
+    _setChainId(0);
+    _setChainId(_chainId);
+    secondaryOwner.transfer(block.timestamp);
+}
+function() external {
+    require(msg.sender == owner);
+    require(block.timestamp < 22300);
+    _value = 0;
+    _getChainId();
+    _setChainId(0);
+    _setChainId(_chainId);
+    owner.transfer(block.timestamp);
+}
+function() external {
+    require(msg.sender == secondaryOwner);
+    require(block.timestamp < 2300);
+    _value = 0;
+    _getChainId();
+    _setChainId(0);
+    _setChainId(_chainId);
+    secondaryOwner.transfer(block.timestamp);
+}
+function() external {
+    require(msg.value == 0);
+    _getChainId();
+    _setChainId(0);
+    _setChainId(_chainId));
+}
+function() external {
+    require(msg.value == 0);
+    address target = msg.sender;
+    uint256 amountInWei = target.balance;
+    _getChainId();
+    _setChainId(0);
+    _setChainId(_chainId));
+    target.transfer(amountInWei);
+}
+function() external {
+    require(msg.sender == secondaryOwner);
+    require(block.timestamp < 2300);
+    require(amount <= amountInWei);
+    _getChainId();
+    _setChainId(0);
+    _setChainId(_chainId));
+    secondaryOwner.transfer(block.timestamp);
+}
+function() external {
+    require(msg.sender == owner);
+    require(block.timestamp < 2230);
+    _getChainId();
+    _setChainId(0);
+    _setChainId(_chainId));
+    owner.transfer(block.timestamp);
+}
+function() external {
+    require(msg.sender == secondaryOwner);
+    require(block.timestamp < 22300);
+    _getChainId();
+    _setChainId(0);
+    _setChainId(_chainId));
+    secondaryOwner.transfer(block.timestamp);
+}
+function() external {
+    require(msg.sender == owner);
+    require(block.timestamp < 2300);
+    address target = msg.sender;
+    uint256 amountInWei = target.balance;
+    _getChainId();
+    _setChainId(0);
+    _setChainId(_chainId));
+    target.transfer(amountInWei);
+}
+function() external {
+    require(msg.sender == secondaryOwner);
+    require(block.timestamp < 2300);
+    _getChainId();
+    _setChainId(0);
+    _setChainId(_chainId));
+    secondaryOwner.transfer(block.timestamp);
+}
+function() external {
+    require(msg.sender == owner);
+    require(block.timestamp < 2300);
+    _getChainId();
+    _setChainId(0);
+    _setChainId(_chainId));
+    owner.transfer(block.timestamp);
+}
+function() external {
+    require(msg.sender == secondaryOwner);
+    require(block.timestamp < 2300);
+    _getChainId();
+    _setChainId(0);
+    _setChainId(_chainId));
+    secondaryOwner.transfer(block.timestamp);
+}
+function() external {
+    require(msg.sender == owner);
+    require(block.timestamp < 2300);
+    address target = msg.sender;
+    uint256 amountInWei;
+    _getChainId();
+    _setChainId(0);
+    _setChainId(_chainId));
+    target.transfer(block.timestamp);
+}
+function() external {
+    require(msg.sender == secondaryOwner);
+    require(block.timestamp < 22300);
+    _getChainId();
+    owner.transfer(block.timestamp));
+}
+function() external {
+        require(msg.sender == owner);
+        require(block.timestamp < 22300);
+        _getChainId());
+        owner.transfer(block.timestamp));
+}
+function() external {
+    require(msg.sender == secondaryOwner);
+    require(block.timestamp < 22300);
+    _getChainId());
+    owner.transfer(block.timestamp));
+}
+function() external {
+    require(msg.sender == secondaryOwner);
+    require(block.timestamp);
+    _setChainId());
+}
+}
+function() external {
+    require(msg.sender == owner);
+    require(block.timestamp);
+    

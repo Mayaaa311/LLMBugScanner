@@ -1,0 +1,34 @@
+ {
+    "output_list": [
+        {
+            "function_name": "addguess",
+            "code": "function addguess() inState(State.Started) payable { _addguess(); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The numguesses variable is not checked for overflow during the addition of new guesses, allowing attackers to overflow numguesses and take control of the lottery."
+        },
+        {
+            "function_name": "_addguess",
+            "code": "function _addguess() private inState(State.Started) { require(msg.value >= bettingprice); curhash = sha256(block.timestamp, block.coinbase, block.difficulty, curhash); if((uint)(numguesses+1)<=arraysize) { guesses[numguesses++].addr = msg.sender; if((uint)(numguesses)>=arraysize){ _finish(); } } }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The numguesses variable is not checked for overflow during the addition of new guesses, allowing attackers to overflow numguesses and take control of the lottery."
+        },
+        {
+            "function_name": "_finish",
+            "code": "function _finish() private { state = State.Locked; uint block_timestamp = block.timestamp; uint lotterynumber = (uint(curhash)+block_timestamp)%(maxguess+1); findWinner(lotterynumber); uint prize = getLotteryMoney(); uint numwinners = 1; uint remain = this.balance - (prize*numwinners); _winner.transfer(prize); SentPrizeToWinner(_winner, prize, _gameindex, lotterynumber, _starttime, block_timestamp); developer.transfer(remain);  SentDeveloperFee(remain, this.balance); numguesses = 0; _gameindex++; state = State.Started; _starttime = block.timestamp; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The numguesses variable is not checked for overflow during the addition of new guesses, allowing attackers to overflow numguesses and take control of the lottery."
+        },
+        {
+            "function_name": "findWinner",
+            "code": "function findWinner(uint value) { uint i = value % numguesses; _winner = guesses[i].addr; }",
+            "vulnerability": "Incorrect Randomness",
+            "reason": "The 'value' parameter is not a random input, but is used directly to determine the winner, allowing attackers to predict the winner and take control of the lottery."
+        },
+        {
+            "function_name": "simplelottery",
+            "code": "function simplelottery() { if(developer==address(0)){ developer = msg.sender; state = State.Started; _starttime = block.timestamp; } }",
+            "vulnerability": "Initial Wrong Setting",
+            "reason": "The developer address is set to 'address(0)' in the initial function, allowing any user to set their address as the developer and take control of the lottery."
+        }
+    ]
+}

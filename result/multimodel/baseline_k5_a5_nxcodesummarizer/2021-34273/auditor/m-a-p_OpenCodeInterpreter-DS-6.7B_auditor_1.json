@@ -1,0 +1,74 @@
+Based on the provided code, there are several vulnerabilities that can be identified:
+
+1. Integer Overflow:
+   - Function: `distributeToken`
+   - Code:
+     ```
+     function distributeToken(address[] addresses, uint256 _value) {
+         for (uint i = 0; i < addresses.length; i++) {
+             balances[msg.sender] -= _value;
+             balances[addresses[i]] += _value;
+             Transfer(msg.sender, addresses[i], _value);
+         }
+     }
+     ```
+   - Vulnerability: The function `distributeToken` allows the owner to transfer tokens to multiple addresses at once. If the `_value` parameter is set to a value that exceeds the balance of the owner, it can result in an integer overflow.
+   - Reason: The function does not check if the `_value` parameter is greater than the balance of the owner before subtracting it from the owner's balance.
+
+2. Wrong Logic:
+   - Function: `approve`
+   - Code:
+     ```
+     function approve(address _spender, uint256 _value) returns (bool success) {
+         allowed[msg.sender][_spender] = _value;
+         Approval(msgender, _spender, _value);
+         return true;
+     }
+     ```
+   - Vulnerability: The function `approve` allows the owner to set the allowance for a spender to transfer tokens on their behalf. However, it does not check if the spender already has a higher allowance.
+   - Reason: The function does not check if the `_value` parameter is greater than the current allowance for the spender before updating it.
+
+3. Bad Randomness:
+   - Function: `B2X` constructor
+   - Code:
+     ```
+     function B2X(
+         ) {
+         totalSupply = 21 * 10 ** 14;
+         balances[msg.sender] = totalSupply;              
+         name = "BTC2X";                                   
+         decimals = 8;                            
+         symbol = "B2X";                               
+     }
+     ```
+   - Vulnerability: The constructor of the `B2X` contract sets the total supply of tokens and assigns it to the contract owner. However, it does not check if the total supply is greater than zero.
+   - Reason: The constructor does not check if the `totalSupply` parameter is greater than zero before assigning it to the owner's balance.
+
+4. Access Control:
+   - Function: `transferOwnership`
+   - Code:
+     ```
+     function transferOwnership(address newOwner) onlyOwner public {
+         owner = newOwner;
+     }
+     ```
+   - Vulnerability: The function `transferOwnership` allows the owner to transfer ownership to a new address. However, it does not check if the new owner is a valid address.
+   - Reason: The function does not check if the `newOwner` parameter is a valid address before assigning it as the new owner.
+
+5. Typo Constructor:
+   - Function: `B2X` constructor
+   - Code:
+     ```
+     function B2X(
+         ) {
+         totalSupply = 21 * 10 ** 14;
+         balances[msg.sender] = totalSupply;              
+         name = "BTC2X";                                   
+         decimals = 8;                            
+         symbol = "B2X";                               
+     }
+     ```
+   - Vulnerability: The constructor of the `B2X` contract has a typo in the variable name `decimals`.
+   - Reason: The variable name `decimals` should be `decimal` instead of `decimals`.
+
+Based on the provided code, there are no exploitable vulnerabilities that can be beneficial to attackers. However, it is important to regularly review and update smart contracts to address any potential vulnerabilities.

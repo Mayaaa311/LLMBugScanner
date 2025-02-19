@@ -1,0 +1,38 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "getTokens",
+            "vulnerability": "Weak Randomness",
+            "function_code": "function getTokens() payable canDistr onlyWhitelist public {
+    if (value > totalRemaining)
+        value = totalRemaining
+    require(value <= totalRemaining)
+    address investor = msg.sender
+    uint256 toGive = value
+    distr(investor, toGive)
+    if (toGive > 0)
+        blacklist[investor] = true
+    if (totalDistributed >= totalSupply)
+        distributionFinished = true
+    value = value.div(100000).mul(99999)
+}",
+            "reason": "The getTokens function is susceptible to manipulation due to weak random validation. This vulnerability could be exploited by a potential attacker, who could pass invalid data, causing the function to perform incorrect operations."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _amount) onlyPayloadSize(3 * 32) public returns (bool success) {
+    require(_to != address(0))
+    require(_amount <= balances[_from]
+    require(_amount <= allowed[_from][msg.sender]
+    balances[_from] = balances[_from].sub(_amount)
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount)
+    balances[_to] = balances[_to].add(_amount)
+    emit Transfer(_from, _to, _amount)
+    return true
+}",
+            "reason": "The transferFrom function is susceptible to integer overflow if the input amount is large. This vulnerability could be exploited by a potential attacker, who could pass invalid data, causing the function to perform incorrect operations."
+        }
+    ]
+}<eos>

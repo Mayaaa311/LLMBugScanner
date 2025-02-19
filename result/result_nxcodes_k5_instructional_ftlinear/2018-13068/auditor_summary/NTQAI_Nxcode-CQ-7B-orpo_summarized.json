@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public { balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0, owner, mintedAmount); Transfer(owner, target, mintedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function allows the owner to mint new tokens, but it does not check if the totalSupply will overflow. If the totalSupply is too large, it will cause an integer overflow and the contract will be unable to mint new tokens."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) onlyOwner public returns (bool success) { require(balanceOf[msg.sender] >= _value); balanceOf[msg.sender] -= _value; totalSupply -= _value; Burn(msg.sender, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function allows the owner to burn their own tokens, but it does not check if the totalSupply will underflow. If the totalSupply is too small, it will cause an integer underflow and the contract will be unable to burn tokens."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) onlyOwner public returns (bool success) { require(balanceOf[_from] >= _value); require(_value <= allowance[_from][msg.sender]); balanceOf[_from] -= _value; allowance[_from][msg.sender] -= _value; totalSupply -= _value; Burn(_from, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burnFrom function allows the owner to burn tokens on behalf of another address, but it does not check if the totalSupply will underflow. If the totalSupply is too small, it will cause an integer underflow and the contract will be unable to burn tokens."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) { require(_value <= allowance[_from][msg.sender]); allowance[_from][msg.sender] -= _value; _transfer(_from, _to, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function allows an address to transfer tokens on behalf of another address, but it does not check if the balance of the sender will underflow. If the sender's balance is too small, it will cause an integer underflow and the transfer will fail."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public { _transfer(msg.sender, _to, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function allows an address to transfer tokens to another address, but it does not check if the balance of the sender will underflow. If the sender's balance is too small, it will cause an integer underflow and the transfer will fail."
+        }
+    ]
+}

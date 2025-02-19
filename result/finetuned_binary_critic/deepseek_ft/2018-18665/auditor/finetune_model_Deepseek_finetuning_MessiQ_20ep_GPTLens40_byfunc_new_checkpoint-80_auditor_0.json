@@ -1,0 +1,63 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(uint256 _amount) {
+    if (msg.sender == owner) {
+        totalSupply += _amount;
+        balances[owner] += _amount;
+        Transfer(0, owner, _amount);
+    }
+}",
+            "vulnerability": "Token Issuance Control",
+            "reason": "The mintToken function allows the owner to arbitrarily increase the balance of any user, including minting new tokens out of thin air and assigning them to any address, including the caller's address. This is highly dangerous in a crowdsale scenario, allowing the owner to effectively steal funds from the crowdsale contract."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) returns (bool success) {
+    if (disabled != true && balances[msg.sender] >= _value && _value > 0) {
+        balances[msg.sender] -= _value;
+        balances[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    } else { return false; }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function allows users to transfer tokens to any address, including addresses that do not exist, causing a denial of service to any user who attempts to transfer value. This is due to a classic integer overflow vulnerability in the transfer function."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if (disabled != true && balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
+        balances[_to] += _value;
+        balances[_from] -= _value;
+        allowed[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    } else { return false; }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function allows users to transfer tokens from any address to any address, causing a denial of service to any user who attempts to transfer value. This is due to a classic integer overflow vulnerability in the transferFrom function."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    if(!_spender.call(bytes4(bytes32(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, _value, this, _extraData)) { return false; }
+    return true;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The approveAndCall function allows any user to approve an arbitrary address to spend tokens on their behalf, and to call a specified function on the spender contract. This can be exploited to call arbitrary functions on the spender contract, leading to unauthorized usage of funds."
+        },
+        {
+            "function_name": "disableToken",
+            "code": "function disableToken() {
+    if (msg.sender == owner)
+        disabled = true;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The disableToken function allows the owner to disable token transfers, but it does not check if the owner is the caller, allowing any user to disable token transfers, causing a denial of service to any user who attempts to transfer value."
+        }
+    ]
+}

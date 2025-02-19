@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "RC.buyFromRC",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function buyFromRC(address _buyer, uint256 _rcTokenValue, uint256 _remainingTokens) onlyRC isBuyable public payable returns(uint256) {...}",
+            "reason": "In the buyFromRC function, the calculation of the tokenAmount variable can result in an integer overflow if the msg.value is very large. This can lead to the remainingTokens variable becoming negative, which can then be used in the calculation of the refund variable."
+        },
+        {
+            "function_name": "RC.buyImplementation",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function buyImplementation(address buyerAddress, uint64 buyerId, uint maxAmount, uint8 v, bytes32 r, bytes32 s) private returns (bool) {...}",
+            "reason": "In the buyImplementation function, the calculation of the totalPayed variable can result in an integer overflow if the msg.value is very large. This can lead to the alreadyPayed mapping being updated with a value that is larger than the maximum value that can be stored in the mapping."
+        },
+        {
+            "function_name": "RC.takeEther",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function takeEther(address _buyer) internal {...}",
+            "reason": "In the takeEther function, the calculation of the tokenAmount variable can result in an integer overflow if the msg.value is very large. This can lead to the remainingTokens variable becoming negative, which can then be used in the calculation of the refund variable."
+        },
+        {
+            "function_name": "RC.giveToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function giveToken(address _buyer) internal {...}",
+            "reason": "In the giveToken function, the calculation of the addTokenAmount variable can result in an integer overflow if the tokenUser[_buyer] is very large. This can lead to the tokenUser mapping being updated with a value that is larger than the maximum value that can be stored in the mapping."
+        },
+        {
+            "function_name": "RC.claimTokenBonus",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function claimTokenBonus(address _buyer) internal {...}",
+            "reason": "In the claimTokenBonus function, the calculation of the addTokenAmount variable can result in an integer overflow if the tokenUser[_buyer] is very large. This can lead to the tokenUser mapping being updated with a value that is larger than the maximum value that can be stored in the mapping."
+        }
+    ]
+}

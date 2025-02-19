@@ -1,0 +1,64 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _amount) notThisContract(_to) returns (bool success) {
+    require(_to != 0x0);
+    require(_amount > 0);
+    require(balances[msg.sender] >= _amount);
+    require(balances[_to] + _amount > balances[_to]);
+    balances[msg.sender] -= _amount;
+    balances[_to] += _amount;
+    Transfer(msg.sender, _to, _amount);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The code does not handle integer overflow when adding the amount to the recipient's balance. If the recipient's balance is already at its maximum value, adding the amount will result in an overflow."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _amount) notThisContract(_to) returns (bool success) {
+    require(balances[_from] >= _amount);
+    require(allowed[_from][msg.sender] >= _amount);
+    require(_amount > 0);
+    require(balances[_to] + _amount > balances[_to]);
+    balances[_from] -= _amount;
+    allowed[_from][msg.sender] -= _amount;
+    balances[_to] += _amount;
+    Transfer(_from, _to, _amount);
+    return true;
+}",
+            "vulnerability": "Wrong Logic",
+            "reason": "The code does not handle the case where the _to address is the contract itself. If the _to address is the contract itself, the transfer will fail."
+        },
+        {
+            "function_name": None,
+            "code": None,
+            "vulnerability": "Bad Randomness",
+            "reason": "The contract does not use any randomness function."
+        },
+        {
+            "function_name": "transferOwnership",
+            "code": "function transferOwnership(address newOwner) onlyOwner {
+    owner = newOwner;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The code does not check if the new owner is not the contract itself."
+        },
+        {
+            "function_name": "Tracto",
+            "code": "function Tracto() {
+    owner = msg.sender;
+    balances[owner] = _totalSupply;
+}",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor function name is "Tracto", which is a typo."
+        },
+        {
+            "function_name": None,
+            "code": None,
+            "vulnerability": "Token Devalue",
+            "reason": "The contract does not handle token devaluation."
+        }
+    ]
+}

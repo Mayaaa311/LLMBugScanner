@@ -1,0 +1,89 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _amount) returns (bool success) {
+    require(!locked);
+    require(balanceOf[msg.sender] >= _amount);
+    require(balanceOf[_to] + _amount >= balanceOf[_to]);
+    balanceOf[msg.sender] -= _amount;
+    uint256 preBalance = balanceOf[_to];
+    balanceOf[_to] += _amount;
+    bool alreadyMax = preBalance >= singleIDXMQty;
+    if (!alreadyMax) {
+      if (now >= validAfter[_to].ts + mustHoldFor) validAfter[_to].last = preBalance;
+      validAfter[_to].ts = now;
+    }
+    if (validAfter[msg.sender].last > balanceOf[msg.sender]) validAfter[msg.sender].last = balanceOf[msg.sender];
+    Transfer(msg.sender, _to, _amount);
+    return true;
+  }
+",
+            "reason": "In the transfer function, the balanceOf[_to] + _amount may overflow if _amount is large enough. This can be exploited by an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _amount) returns (bool success) {
+    require(!locked);
+    require(balanceOf[_from] >= _amount);
+    require(balanceOf[_to] + _amount >= balanceOf[_to]);
+    require(_amount <= allowance[_from][msg.sender]);
+    balanceOf[_from] -= _amount;
+    uint256 preBalance = balanceOf[_to];
+    balanceOf[_to] += _amount;
+    allowance[_from][msg.sender] -= _amount;
+    bool alreadyMax = preBalance >= singleIDXMQty;
+    if (!alreadyMax) {
+      if (now >= validAfter[_to].ts + mustHoldFor) validAfter[_to].last = preBalance;
+      validAfter[_to].ts = now;
+    }
+    if (validAfter[_from].last > balanceOf[_from]) validAfter[_from].last = balanceOf[_from];
+    Transfer(_from, _to, _amount);
+    return true;
+  }
+",
+            "reason": "In the transferFrom function, the balanceOf[_to] + _amount may overflow if _amount is large enough. This can be exploited by an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint256 _amount) returns (bool success) {
+    require(!locked);
+    allowance[msg.sender][_spender] = _amount;
+    Approval(msg.sender, _spender, _amount);
+    return true;
+  }
+",
+            "reason": "In the approve function, the allowance[msg.sender][_spender] may overflow if _amount is large enough. This can be exploited by an attacker to allow them to transfer more tokens than the owner intended."
+        },
+        {
+            "function_name": "setExportFee",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function setExportFee(address addr, uint256 fee) onlyOwner {
+    require(addr != 0x00000000000000000000000000000000000000ff);
+    exportFee[addr] = fee;
+  }
+",
+            "reason": "In the setExportFee function, the exportFee[addr] is set to a random value. This can be exploited by an attacker to set a fee that is not intended for them."
+        },
+        {
+            "function_name": "feeFor",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function feeFor(address from, address to, uint256 amount) constant external returns (uint256 value) {
+    uint256 fee = exportFee[from];
+    if (fee == 0) return 0;
+    uint256 amountHeld;
+    if (balanceOf[to] != 0) {
+      if (validAfter[to].ts + mustHoldFor < now) amountHeld = balanceOf[to];
+      else amountHeld = validAfter[to].last;
+      if (amountHeld >= singleIDXMQty) return 0;
+      return amount*fee*(singleIDXMQty - amountHeld) / feeDivisor;
+    } else return amount*fee / baseFeeDivisor;
+  }
+",
+            "reason": "In the feeFor function, the amount*fee*(singleIDXMQty - amountHeld) may overflow if amount is large enough. This can be exploited by an attacker to calculate a fee that is too high."
+        }
+    ]
+}

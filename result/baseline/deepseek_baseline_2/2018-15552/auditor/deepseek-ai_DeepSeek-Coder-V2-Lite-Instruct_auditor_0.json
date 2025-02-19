@@ -1,0 +1,88 @@
+ {
+    "output_list": [
+        {
+            "function_name": "withdraw",
+            "vulnerability": "Access Control",
+            "function_code": "function withdraw() public {
+    require(worldOwner == msg.sender);
+    lottoIndex += 1;
+    numtickets = 0;
+    totalBounty = 0;
+    worldOwner.transfer(this.balance);
+}",
+            "reason": "The 'withdraw' function allows the contract owner (worldOwner) to withdraw all the funds from the contract, which can be exploited if the owner is malicious. The owner can drain the contract's balance at any time, effectively locking out other users and potentially stealing their funds."
+        },
+        {
+            "function_name": "PayWinner",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function PayWinner(address winner) private {
+    require(numtickets == maxTickets);
+    uint ownerTax = 6 * totalBounty / 100;
+    uint winnerPrice = totalBounty - ownerTax;
+    LottoComplete(msg.sender, lottoIndex, winnerPrice);
+    lottoIndex += 1;
+    numtickets = 0;
+    totalBounty = 0;
+    if(_direction == 0 && maxTickets < 20) maxTickets += 1;
+    if(_direction == 1 && maxTickets > 10) maxTickets -= 1;
+    if(_direction == 0 && maxTickets == 20) _direction = 1;
+    if(_direction == 1 && maxTickets == 10) _direction = 0;
+    worldOwner.transfer(ownerTax);
+    winner.transfer(winnerPrice);
+}",
+            "reason": "The logic for adjusting 'maxTickets' based on '_direction' can be manipulated by an attacker. If an attacker can control '_direction', they can repeatedly exploit the contract to increase or decrease 'maxTickets' to their advantage, potentially leading to a denial of service or other unintended behavior."
+        },
+        {
+            "function_name": "AddTicket",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function AddTicket() public payable {
+    require(msg.value == ticketPrice);
+    require(numtickets < maxTickets);
+    lastTicketTime = now;
+    numtickets += 1;
+    totalBounty += ticketPrice;
+    bool success = numtickets == maxTickets;
+    NewTicket(msg.sender, success);
+    if(success) {
+        PayWinner(msg.sender);
+    }
+}",
+            "reason": "The 'numtickets' and 'totalBounty' variables are incremented without checking for overflow conditions. If an attacker can manipulate the 'numtickets' or 'totalBounty' values in a way that causes an overflow, it could lead to significant financial loss or control issues within the contract."
+        },
+        {
+            "function_name": "LottoCount",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function LottoCount() public {
+    worldOwner = msg.sender;
+    ticketPrice = 0.0101 * 10**18;
+    maxTickets = 10;
+    _direction = 0;
+    lottoIndex = 1;
+    lastTicketTime = 0;
+    numtickets = 0;
+    totalBounty = 0;
+}",
+            "reason": "There is a typo in the constructor where '_direction' is set to 0. This might be a mistake, but if '_direction' is intended to be used later in the contract, this typo could lead to unexpected behavior or vulnerabilities."
+        },
+        {
+            "function_name": "PayWinner",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function PayWinner(address winner) private {
+    require(numtickets == maxTickets);
+    uint ownerTax = 6 * totalBounty / 100;
+    uint winnerPrice = totalBounty - ownerTax;
+    LottoComplete(msg.sender, lottoIndex, winnerPrice);
+    lottoIndex += 1;
+    numtickets = 0;
+    totalBounty = 0;
+    if(_direction == 0 && maxTickets < 20) maxTickets += 1;
+    if(_direction == 1 && maxTickets > 10) maxTickets -= 1;
+    if(_direction == 0 && maxTickets == 20) _direction = 1;
+    if(_direction == 1 && maxTickets == 10) _direction = 0;
+    worldOwner.transfer(ownerTax);
+    winner.transfer(winnerPrice);
+}",
+            "reason": "The use of 'now' for 'lastTicketTime' can be manipulated by an attacker to influence the outcome of the lottery. By manipulating the block timestamp, an attacker can potentially control when the lottery ends and who wins, leading to potential exploitation."
+        }
+    ]
+}

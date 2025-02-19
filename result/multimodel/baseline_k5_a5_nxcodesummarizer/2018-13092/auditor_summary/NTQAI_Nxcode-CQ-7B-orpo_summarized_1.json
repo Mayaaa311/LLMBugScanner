@@ -1,0 +1,59 @@
+{
+    "output_list": [
+        {
+            "function_name": "ReimburseToken",
+            "code": "function ReimburseToken(uint256 initialSupply) public {
+        totalSupply = initialSupply * 10 ** uint256(decimals);
+        balanceOf[msg.sender] = totalSupply;
+        name = "Reimburse Token"; 
+        symbol = "REIM";
+        decimals = 18;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The multiplication operation can result in an integer overflow if the initialSupply is too large."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal {
+        require(balanceOf[_from] >= _value);
+        require(_to != 0x0);
+        require(balanceOf[_from] >= _value);
+        require(balanceOf[_to] + _value > balanceOf[_to]);
+        uint previousBalances = balanceOf[_from] + balanceOf[_to];
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(_from, _to, _value);
+        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The logic of the _transfer function is incorrect. It does not check if the transfer is valid before updating the balances."
+        },
+        {
+            "function_name": "None",
+            "code": "None",
+            "vulnerability": "Bad Randomness",
+            "reason": "The contract does not use any randomness function."
+        },
+        {
+            "function_name": "transferOwnership",
+            "code": "function transferOwnership(address newOwner) onlyOwner public {
+        owner = newOwner;
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The ownership transfer function does not have proper access control."
+        },
+        {
+            "function_name": "ReimburseToken",
+            "code": "function ReimburseToken(uint256 initialSupply) public {
+        totalSupply = initialSupply * 10 ** uint256(decimals);
+        balanceOf[msg.sender] = totalSupply;
+        name = "Reimburse Token"; 
+        symbol = "REIM";
+        decimals = 18;
+    }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor has a typo."
+        }
+    ]
+}

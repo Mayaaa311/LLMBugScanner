@@ -1,0 +1,33 @@
+ ```json
+{
+    "output_list": [
+        {
+            "function_name": "transferProxy",
+            "auditor_idx": 0,
+            "vulnerability": "Reentrancy",
+            "criticism": "The function `transferProxy` is indeed vulnerable to reentrancy attacks. The contract modifies the state of the contract within the same transaction, which can lead to unexpected behavior or loss of funds. The use of `transferAllowed` modifier does not fully protect against reentrancy as it only checks if the transfer is enabled and not locked, but does not prevent a reentrancy attack that manipulates the state before the transfer function is called. The lack of reentrancy guards such as `locked` status or checks after external calls can lead to exploitation.",
+            "correctness": 6,
+            "severity": 8,
+            "profitability": 7
+        },
+        {
+            "function_name": "approveProxy",
+            "auditor_idx": 0,
+            "vulnerability": "Reentrancy",
+            "criticism": "Similar to `transferProxy`, the function `approveProxy` is also vulnerable to reentrancy attacks. The contract modifies the state of the contract within the same transaction, which can lead to unexpected behavior or loss of funds. The approval function does not implement reentrancy guards effectively, allowing an attacker to manipulate the approval process before the transaction is finalized. The reliance on external calls and the lack of proper state changes after these calls can lead to a reentrancy vulnerability.",
+            "correctness": 6,
+            "severity": 8,
+            "profitability": 7
+        },
+        {
+            "function_name": "allocateTokens",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function `allocateTokens` is vulnerable to integer overflow attacks. The addition of `value` to `totalSupply` and `balances[to]` can lead to an overflow if the sum exceeds the maximum value that can be stored in a uint256 variable. This can be exploited to manipulate the token distribution and potentially lead to a denial of service attack or an unauthorized token allocation. The lack of overflow checks in the addition operations poses a significant risk.",
+            "correctness": 4,
+            "severity": 9,
+            "profitability": 5
+        }
+    ]
+}
+```

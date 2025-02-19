@@ -1,0 +1,113 @@
+ {
+    "output_list": [
+        {
+            "function_name": "reward",
+            "code": "function reward(address _to, uint256 _value, bool locked, string data) {
+    require(_to != 0x0);
+    require(!frozen[_from]);                       
+    if (msg.sender.balance  < minBalanceForAccounts) {
+        sell((minBalanceForAccounts - msg.sender.balance) * sellPrice);
+    }
+    if(!locked) {
+        _transfer(msg.sender, _to, _value);
+    }else{
+        require(balanceOf[msg.sender] >= _value);
+        require(totalLockedRewardsOf[_to] + _value > totalLockedRewardsOf[_to]); 
+        balanceOf[msg.sender] -= _value;     
+        totalLockedRewardsOf[_to] += _value;   
+        lockedRewardsOf[_to][msg.sender] += _value;
+        if(userRewardCount[_to][msg.sender]==0) {
+            userRewarderCount[_to] += 1;
+            userRewarders[_to][userRewarderCount[_to]]=msg.sender;
+        }
+        userRewardCount[_to][msg.sender]+=1;
+        totalRewardIssuedOut[msg.sender]+= _value;
+        Transfer(msg.sender, _to, _value);
+    }
+    Reward(msg.sender, _to, _value, data, now);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'totalLockedRewardsOf[_to] += _value' function has an integer overflow vulnerability. If '_value' is large enough, 'totalLockedRewardsOf[_to]' can overflow and become very small, allowing attackers to lock arbitrary amounts of tokens in users' accounts."
+        },
+        {
+            "function_name": "transferReward",
+            "code": "function transferReward(address _to, uint256 _value) {
+    require(!frozen[msg.sender]);    
+    require(lockedRewardsOf[msg.sender][_to] >= _value );
+    require(totalLockedRewardsOf[msg.sender] >= _value);
+    if (msg.sender.balance  < minBalanceForAccounts) {
+        sell((minBalanceForAccounts - msg.sender.balance) * sellPrice);
+    }
+    totalLockedRewardsOf[msg.sender] -= _value;   
+    lockedRewardsOf[msg.sender][_to] -= _value;
+    balanceOf[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'totalLockedRewardsOf[msg.sender] -= _value' function has an integer overflow vulnerability. If '_value' is large enough, 'totalLockedRewardsOf[msg.sender]' can overflow and become very large, allowing attackers to unlock arbitrary amounts of tokens from users' accounts."
+        },
+        {
+            "function_name": "unlockReward",
+            "code": "function unlockReward(address addr, uint256 _value) {
+    require(totalLockedRewardsOf[addr] > _value);    
+    require(lockedRewardsOf[addr][msg.sender] >= _value );
+    if(_value==0) _value=lockedRewardsOf[addr][msg.sender];
+    if (msg.sender.balance  < minBalanceForAccounts) {
+        sell((minBalanceForAccounts - msg.sender.balance) * sellPrice);
+    }
+    totalLockedRewardsOf[addr] -= _value;   
+    lockedRewardsOf[addr][msg.sender] -= _value;
+    balanceOf[addr] += _value;
+    Unlock(addr, msg.sender, _value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'totalLockedRewardsOf[addr] -= _value' function has an integer overflow vulnerability. If '_value' is large enough, 'totalLockedRewardsOf[addr]' can overflow and become very small, allowing attackers to unlock arbitrary amounts of tokens from users' accounts."
+        },
+        {
+            "function_name": "reward",
+            "code": "function reward(address _to, uint256 _value, bool locked, string data) {
+    require(_to != 0x0);
+    require(!frozen[_from]);    
+    if (msg.sender.balance  < minBalanceForAccounts) {
+        sell((minBalanceForAccounts - msg.sender.balance) * sellPrice);
+    }
+    if(!locked) {
+        _transfer(msg.sender, _to, _value);
+    }else{
+        require(balanceOf[msg.sender] >= _value);
+        require(totalLockedRewardsOf[_to] + _value > totalLockedRewardsOf[_to]); 
+        balanceOf[msg.sender] -= _value;     
+        totalLockedRewardsOf[_to] += _value;   
+        lockedRewardsOf[_to][msg.sender] += _value;
+        if(userRewardCount[_to][msg.sender]==0) {
+            userRewarderCount[_to] += 1;
+            userRewarders[_to][userRewarderCount[_to]]=msg.sender;
+        }
+        userRewardCount[_to][msg.sender]+=1;
+        totalRewardIssuedOut[msg.sender]+= _value;
+        Transfer(msg.sender, _to, _value);
+    }
+    Reward(msg.sender, _to, _value, data, now);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'reward' function does not check if the caller is a rewarder, allowing anyone to reward arbitrary addresses, including smart contract recipients that do not implement the receiveApproval function."
+        },
+        {
+            "function_name": "transferReward",
+            "code": "function transferReward(address _to, uint256 _value) {
+    require(!frozen[msg.sender]);    
+    require(lockedRewardsOf[msg.sender][_to] >= _value );
+    require(totalLockedRewardsOf[msg.sender] >= _value);
+    if (msg.sender.balance  < minBalanceForAccounts) {
+        sell((minBalanceForAccounts - msg.sender.balance) * sellPrice);
+    }
+    totalLockedRewardsOf[msg.sender] -= _value;   
+    lockedRewardsOf[msg.sender][_to] -= _value;
+    balanceOf[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'transferReward' function does not check if the caller is a rewarder, allowing anyone to transfer reward tokens to arbitrary addresses, including smart contract recipients that do not implement the receiveApproval function."
+        }
+    ]
+}

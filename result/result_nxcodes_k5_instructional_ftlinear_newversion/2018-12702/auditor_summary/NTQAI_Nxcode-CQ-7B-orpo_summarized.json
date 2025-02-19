@@ -1,0 +1,15 @@
+{
+    "output_list": [
+        {
+            "function_name": "approveAndCallcode",
+            "code": "function approveAndCallcode(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+                    allowed[msg.sender][_spender] = _value;
+                    Approval(msg.sender, _spender, _value);
+                    if(!_spender.call(_extraData)) { revert(); }
+                    return true;
+                }",
+            "vulnerability": "Access Control",
+            "reason": "The approveAndCallcode function allows asset theft due to unverified callcode, allowing attackers to obtain all tokens in the contract."
+        }
+    ]
+}

@@ -1,0 +1,64 @@
+{
+    "output_list": [
+        {
+            "function_name": "RocketCoin",
+            "code": "function RocketCoin() public {
+        owner = msg.sender;
+        balances[owner] = totalSupply;
+        Transfer(address(0), owner, totalSupply);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The totalSupply is calculated as 10000000 * 10 ** decimals, which can result in an integer overflow if decimals is greater than 18."
+        },
+        {
+            "function_name": "RocketCoin",
+            "code": "function RocketCoin() public {
+        owner = msg.sender;
+        balances[owner] = totalSupply;
+        Transfer(address(0), owner, totalSupply);
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The owner's balance is set to the totalSupply in the constructor, which can lead to a situation where the owner has more tokens than the totalSupply."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _amount) public returns (bool success) {
+        require(balances[msg.sender] >= _amount && _amount > 0);
+        balances[msg.sender] -= _amount;
+        balances[_to] += _amount;
+        Transfer(msg.sender, _to, _amount);
+        return true;
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The contract does not use any randomness in its logic, which can lead to potential attacks."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _amount) public returns (bool success) {
+        require(balances[_from] >= _amount && allowed[_from][msg.sender] >= _amount && _amount > 0);
+        balances[_from] -= _amount;
+        allowed[_from][msg.sender] -= _amount;
+        balances[_to] += _amount;
+        Transfer(_from, _to, _amount);
+        return true;
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The contract does not have any access control mechanisms in place, which can lead to potential attacks."
+        },
+        {
+            "function_name": "withdrawFunds",
+            "code": "function withdrawFunds(address _token) public returns (bool success) {
+        require(msg.sender == owner);
+        if (_token == address(0)) {
+            owner.transfer(this.balance);
+        } else {
+            Token ERC20 = Token(_token);
+            ERC20.transfer(owner, ERC20.balanceOf(this));
+        }
+        return true;
+    }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The function name 'withdrawFunds' is a typo of 'withdrawFunds', which can lead to potential confusion and confusion."
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+ {
+    "output_list": [
+        {
+            "function_name": "makeWallet",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'makeWallet' function has an integer overflow vulnerability. The initial value of 'wallet' is set to 'address(new UserWallet(this))', where 'this' refers to the current contract. If the output of 'new UserWallet(this)' is larger than the maximum value that can be stored in an address (2^160 - 1), it will overflow and set 'wallet' to zero, causing a loss of funds."
+        },
+        {
+            "function_name": "UserWallet.tokenFallback",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'tokenFallback' function in 'UserWallet' contract has a wrong logic where it does not perform any operations and always returns 'false'. This can be problematic if it is called on a target contract with destructive operations, allowing attackers to prevent contract owners from withdrawing funds."
+        },
+        {
+            "function_name": "UserWallet.sweep",
+            "vulnerability": "Bad Randomness",
+            "reason": "The 'UserWallet.sweep' function has a bad randomness function, where it uses 'sweeperList.sweeperOf(_token).delegatecall(msg.data);' to execute the attackers' contract. This can be exploited by attackers to replace the 'sweeperList' contract with a malicious one, causing the user's assets to be stolen."
+        },
+        {
+            "function_name": "Controller.makeWallet",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'makeWallet' function in 'Controller' contract has an integer overflow vulnerability. The initial value of 'wallet' is set to 'address(new UserWallet(this))', where 'this' refers to the current contract. If the output of 'new UserWallet(this)' is larger than the maximum value that can be stored in an address (2^160 - 1), it will overflow and set 'wallet' to zero, causing a loss of funds."
+        },
+        {
+            "function_name": "Controller.addSweeper",
+            "vulnerability": "Access Control",
+            "reason": "The 'addSweeper' function in 'Controller' contract allows the owner to add a sweeper to a token, but it does not check if the sweeper is a contract. If a user adds a sweeper that is not a contract, it can prevent the user from adding more tokens, as the user's assets can be locked in the sweeper contract."
+        }
+    ]
+}

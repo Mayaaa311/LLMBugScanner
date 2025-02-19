@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "INTToken",
+            "code": "function INTToken(uint256 initialSupply, string tokenName, uint8 decimalUnits, string tokenSymbol) token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function INTToken has a potential integer overflow vulnerability. The initialSupply is of type uint256, which is a 256-bit unsigned integer. If the initialSupply is too large, it may cause an overflow and result in incorrect calculations. The totalSupply is initialized with the initialSupply value, but the balanceOf and allowance mappings are not initialized with the initialSupply value. This means that the balanceOf and allowance values can be set to any value, which can lead to incorrect calculations and potential integer overflow."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal { require (_to != 0x0); require (balanceOf[_from] > _value); require (balanceOf[_to] + _value > balanceOf[_to]); require(!frozenAccount[_from]); require(!frozenAccount[_to]); balanceOf[_from] -= _value; balanceOf[_to] += _value; Transfer(_from, _to, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The _transfer function has a potential integer overflow vulnerability. The balanceOf mapping is used to store the balance of each address, and the _value parameter is used to transfer tokens from one address to another. The balanceOf[_from] -= _value; line of code is responsible for reducing the balance of the sender's address by the amount of tokens being transferred. If the sender's balance is too large, this operation may cause an overflow and result in incorrect calculations. Similarly, the balanceOf[_to] += _value; line of code is responsible for increasing the balance of the recipient's address by the amount of tokens being transferred. If the recipient's balance is too large, this operation may cause an overflow and result in incorrect calculations."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner { balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0, this, mintedAmount); Transfer(this, target, mintedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function has a potential integer overflow vulnerability. The balanceOf mapping is used to store the balance of each address, and the mintedAmount parameter is used to mint new tokens. The balanceOf[target] += mintedAmount; line of code is responsible for increasing the balance of the target address by the amount of tokens being minted. If the target's balance is too large, this operation may cause an overflow and result in incorrect calculations. Similarly, the totalSupply += mintedAmount; line of code is responsible for increasing the total supply of tokens by the amount of tokens being minted. If the total supply is too large, this operation may cause an overflow and result in incorrect calculations."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) returns (bool success) { require (balanceOf[msg.sender] > _value); balanceOf[msg.sender] -= _value; totalSupply -= _value; Burn(msg.sender, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function has a potential integer overflow vulnerability. The balanceOf mapping is used to store the balance of each address, and the _value parameter is used to burn tokens. The balanceOf[msg.sender] -= _value; line of code is responsible for reducing the balance of the sender's address by the amount of tokens being burned. If the sender's balance is too large, this operation may cause an overflow and result in incorrect calculations. Similarly, the totalSupply -= _value; line of code is responsible for reducing the total supply of tokens by the amount of tokens being burned. If the total supply is too large, this operation may cause an overflow and result in incorrect calculations."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) returns (bool success) { require(balanceOf[_from] >= _value); require(_value <= allowance[_from][msg.sender]); balanceOf[_from] -= _value; allowance[_from][msg.sender] -= _value; totalSupply -= _value; Burn(_from, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burnFrom function has a potential integer overflow vulnerability. The balanceOf mapping is used to store the balance of each address, and the _value parameter is used to burn tokens. The balanceOf[_from] -= _value; line of code is responsible for reducing the balance of the sender's address by the amount of tokens being burned. If the sender's balance is too large, this operation may cause an overflow and result in incorrect calculations. Similarly, the totalSupply -= _value; line of code is responsible for reducing the total supply of tokens by the amount of tokens being burned. If the total supply is too large, this operation may cause an overflow and result in incorrect calculations."
+        }
+    ]
+}

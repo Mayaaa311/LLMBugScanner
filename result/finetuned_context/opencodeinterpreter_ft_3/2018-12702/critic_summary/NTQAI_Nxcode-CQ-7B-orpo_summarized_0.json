@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The function does not check for integer overflow, which could lead to unexpected behavior or exploitation. The check `require(balances[_to] + _value > balances[_to])` is incorrect because it assumes that `balances[_to]` is always less than `2^256 - 1`, which is not guaranteed. This can be exploited to cause a denial of service or to gain unintended access to funds.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 6
+        },
+        {
+            "function_name": "transferFrom",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "Similar to the `transfer` function, this function also does not check for integer overflow. The check `require(balances[_to] + _value > balances[_to])` is flawed and does not protect against overflow. This could lead to similar issues as in the `transfer` function.",
+            "correctness": 7,
+            "severity": 9,
+            "profitability": 6
+        },
+        {
+            "function_name": "approveAndCall",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The function `approveAndCall` uses a hardcoded function signature `bytes4(sha3("receiveApproval(address,uint256,address,bytes)"))` which is incorrect. This will not call the intended contract function and could lead to unexpected behavior. The fallback function `fallback` in the contract is intended to handle calls, but the use of `revert()` in the fallback function is not ideal for handling such cases.",
+            "correctness": 4,
+            "severity": 8,
+            "profitability": 5
+        },
+        {
+            "function_name": "approveAndCallcode",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "This function is very similar to `approveAndCall` but uses a raw bytes call instead of a fixed signature. This is also incorrect and will not call the intended contract function. The use of `revert()` in the fallback function is problematic for handling such cases.",
+            "correctness": 4,
+            "severity": 8,
+            "profitability": 5
+        },
+        {
+            "function_name": "GVE",
+            "auditor_idx": 0,
+            "vulnerability": "Typo Constructor",
+            "criticism": "The constructor function `GVE` has a typo in the initialization of the `totalSupply`. It incorrectly multiplies `1000000000` by `10 ** uint256(decimals)` instead of `10 ** uint256(decimals) * 1000000000`. This typo will set the total supply to zero, effectively locking the tokens.",
+            "correctness": 2,
+            "severity": 7,
+            "profitability": 3
+        }
+    ]
+}

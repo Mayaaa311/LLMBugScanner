@@ -1,0 +1,64 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint _value) whenNotPaused returns (bool) {
+    require(balances[msg.sender] >= _value);
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }",
+            "reason": "In the transfer function, the subtraction operation can result in an integer overflow if the balance of the sender is less than the value being transferred. This can be exploited by an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint _value) whenNotPaused returns (bool) {
+    require(balances[_from] >= _value && allowed[_from][msg.sender] >= _value);
+    balances[_to] += _value;
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+  }",
+            "reason": "In the transferFrom function, the addition and subtraction operations can result in integer overflow if the balance of the sender is less than the value being transferred or if the allowance is less than the value being transferred. This can be exploited by an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint _value) returns (bool) {
+    require((_value == 0) || (allowed[msg.sender][_spender] == 0));
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }",
+            "reason": "In the approve function, the assignment operation can result in an integer overflow if the value being approved is greater than the maximum value that can be represented by the uint256 data type. This can be exploited by an attacker to overwrite the allowance of the spender."
+        },
+        {
+            "function_name": "mint",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mint(address _x, uint _v) public onlyOwner {
+    require(balances[_x] + _v >= balances[_x]);
+    balances[_x] += _v;
+    totalSupply += _v;
+    Transfer(0x0, _x, _v);
+  }",
+            "reason": "In the mint function, the addition operation can result in an integer overflow if the sum of the current balance and the value being minted is less than the current balance. This can be exploited by an attacker to overwrite the balance of the recipient."
+        },
+        {
+            "function_name": "pricePerWei",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function pricePerWei() public constant returns(uint) {
+    if     (now <  1511799420) return 800.0 * 1 ether;
+    else if(now <  1511885820) return 750.0 * 1 ether;
+    else if(now <  1513181820) return 675.0 * 1 ether;
+    else if(now <  1515514620) return 575.0 * 1 ether;
+    else if(now <  1516205820) return 537.5 * 1 ether;
+    else                                                return 500.0 * 1 ether;
+  }",
+            "reason": "In the pricePerWei function, the return values are based on the current block timestamp, which can be manipulated by an attacker to predict the return value. This can be exploited by an attacker to manipulate the contract's behavior."
+        }
+    ]
+}

@@ -1,0 +1,35 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "AzurionToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "uint256 public totalSupply;",
+            "reason": "The function relies on the uint256 data type, which can hold only a limited number of values. Therefore, when the totalSupply variable is incremented, it will eventually reach its maximum value and cause an integer overflow."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "allowance[_from][msg.sender] -= _value;",
+            "reason": "The function relies on the msg.sender variable, which is determined by the caller of the function. However, the function does not check whether the caller has the necessary allowance to perform the transaction."
+        },
+        {
+            "function_name": "freezeAccount",
+            "vulnerability": "Bad Randomness",
+            "function_code": "frozenAccount[target] = freeze; FrozenFunds(target, freeze);",
+            "reason": "The function relies on the randomness of the input parameter 'freeze'. However, the input parameter is not properly validated, which allows for potential manipulation and exploitation of the function."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0, owner, mintedAmount); Transfer(owner, target, mintedAmount);",
+            "reason": "The function relies on the uint256 data type, which can hold only a limited number of values. Therefore, when the mintedAmount is increased, it will eventually reach its maximum value and cause an integer overflow."
+        },
+        {
+            "function_name": "burnFrom",
+            "vulnerability": "Access Control",
+            "function_code": "balanceOf[_from] -= _value; allowance[_from][msg.sender] -= _value; totalSupply -= _value; Burn(_from, _value);",
+            "reason": "The function relies on the msg.sender variable, which is determined by the caller of the function. However, the function does not check whether the caller has the necessary allowance to perform the transaction."
+        }
+    ]
+}<eos>

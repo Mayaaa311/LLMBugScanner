@@ -1,0 +1,14 @@
+{
+    "output_list": [
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);     
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check if the transfer operation will cause an integer overflow. If the balance of the sender is less than the value being transferred, the transfer operation will result in an integer overflow, which can lead to loss of funds or other unexpected behavior."
+        }
+    ]
+}

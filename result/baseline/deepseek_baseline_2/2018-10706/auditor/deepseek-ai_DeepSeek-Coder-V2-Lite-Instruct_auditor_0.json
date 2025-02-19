@@ -1,0 +1,59 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transferMulti",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferMulti(address[] _to, uint256[] _value) public returns (uint256 amount){
+        require(_to.length == _value.length);
+        uint8 len = uint8(_to.length);
+        for(uint8 j; j<len; j++){
+            amount += _value[j]*10**uint256(decimals);
+        }
+        require(balanceOf[msg.sender] >= amount);
+        for(uint8 i; i<len; i++){
+            address _toI = _to[i];
+            uint256 _valueI = _value[i]*10**uint256(decimals);
+            balanceOf[_toI] += _valueI;
+            balanceOf[msg.sender] -= _valueI;
+            emit Transfer(msg.sender, _toI, _valueI);
+        }
+    }",
+            "reason": "The function does not check if the sum of `_value` exceeds `balanceOf[msg.sender]`, which can lead to an integer overflow and allow the attacker to transfer more tokens than actually available."
+        },
+        {
+            "function_name": "freeze",
+            "vulnerability": "Access Control",
+            "function_code": "function freeze(address _user, uint256 _value, uint8 _step) moreThanZero(_value) onlyController public returns (bool success) {
+        _value=_value*10**uint256(decimals);
+        return _freeze(_user,_value,_step);
+    }",
+            "reason": "The `freeze` function is only restricted to the controller, but it directly calls the internal `_freeze` function without any additional checks. This can lead to unauthorized freezing of tokens."
+        },
+        {
+            "function_name": "generateTokens",
+            "vulnerability": "Access Control",
+            "function_code": "function generateTokens(address _user, uint _amount) onlyController public returns (bool) {
+        _amount=_amount*10**uint256(decimals);
+        return _generateTokens(_user,_amount);
+    }",
+            "reason": "The `generateTokens` function is restricted to the controller, but it directly calls the internal `_generateTokens` function without any additional checks. This can lead to unauthorized minting of tokens."
+        },
+        {
+            "function_name": "destroyTokens",
+            "vulnerability": "Access Control",
+            "function_code": "function destroyTokens(address _user, uint256 _amount) onlyOwner public returns (bool) {
+        _amount=_amount*10**uint256(decimals);
+        return _destroyTokens(_user,_amount);
+    }",
+            "reason": "The `destroyTokens` function is restricted to the owner, but it directly calls the internal `_destroyTokens` function without any additional checks. This can lead to unauthorized burning of tokens."
+        },
+        {
+            "function_name": "changeTokensPerEther",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function changeTokensPerEther(uint256 _newRate) onlyController public {
+        tokensPerEther = _newRate;
+    }",
+            "reason": "The function name `changeTokensPerEther` is similar to the constructor parameter `tokensPerEther`, which could lead to confusion and potential misuse."
+        }
+    ]
+}

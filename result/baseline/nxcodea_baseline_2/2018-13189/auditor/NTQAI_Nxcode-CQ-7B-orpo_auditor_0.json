@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mint(address _x, uint _v) public onlyOwner { balances[_x] += _v; totalSupply += _v; Transfer(0x0, _x, _v); }",
+            "reason": "The function mint() is vulnerable to integer overflow. The addition of _v to balances[_x] and totalSupply can cause an overflow if _v is large enough. This can be exploited by an attacker to mint an excessive amount of tokens, leading to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "pricePerWei",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function pricePerWei() public constant returns(uint) { if     (now <  1511799420) return 800.0 * 1 ether; else if(now <  1511885820) return 750.0 * 1 ether; else if(now <  1513181820) return 675.0 * 1 ether; else if(now <  1515514620) return 575.0 * 1 ether; else if(now <  1516205820) return 537.5 * 1 ether; else                                                return 500.0 * 1 ether; }",
+            "reason": "The function pricePerWei() is vulnerable to wrong logic. The price per wei is determined based on the current time, but it does not account for the time zone differences. This can lead to incorrect pricing if the contract is deployed in a different time zone. An attacker can manipulate the time to exploit this vulnerability and buy tokens at a higher price than intended."
+        },
+        {
+            "function_name": "foreignBuy",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function foreignBuy(address _investor, uint _unlbValue, string _txHash) external onlyOwner { require(!paused && now >= ICO_START_DATE && now < ICO_END_DATE); require(_unlbValue > 0); unlb.mint(_investor, _unlbValue); ForeignBuy(_investor, _unlbValue, _txHash); }",
+            "reason": "The function foreignBuy() is vulnerable to bad randomness. The function does not provide any randomness or security measures to prevent manipulation of the transaction. An attacker can exploit this vulnerability to buy tokens at a higher price than intended. This can lead to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "finish",
+            "vulnerability": "Access Control",
+            "function_code": "function finish(address _team, address _fund, address _bounty, address _backers) external onlyOwner { require(now >= ICO_END_DATE && !isFinished); unlb.unpause(); isFinished = true; uint _total = unlb.totalSupply() * 100 / (100 - 12 - 15 - 5 - 3); unlb.mint(_team,   (_total * 12) / 100); unlb.mint(_fund,   (_total * 15) / 100); unlb.mint(_bounty, (_total *  5) / 100); unlb.mint(_backers, (_total *  3) / 100); }",
+            "reason": "The function finish() is vulnerable to access control. The function is only accessible to the contract owner, but it does not provide any security measures to prevent unauthorized access. An attacker can exploit this vulnerability to mint tokens for themselves or other addresses. This can lead to a loss of funds for the contract owner."
+        },
+        {
+            "function_name": "withdraw",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function withdraw() external onlyOwner { teamWallet.transfer(this.balance); }",
+            "reason": "The function withdraw() is vulnerable to typo constructor. The function name is withdraw(), but the function code is transferring funds to teamWallet. This can lead to a loss of funds for the contract owner if the teamWallet address is incorrect. An attacker can exploit this vulnerability to transfer funds to an arbitrary address."
+        }
+    ]
+}

@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint _value) public { require(!tokensAreFrozen); super.transfer(_to, _value); }",
+            "reason": "The function does not check if the addition of the new balance and the old balance exceeds the maximum uint value. This can lead to an integer overflow, potentially leading to the loss of tokens."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint _value) public { require(!tokensAreFrozen); super.transferFrom(_from, _to, _value); }",
+            "reason": "The function does not check if the addition of the new balance and the old balance exceeds the maximum uint value. This can lead to an integer overflow, potentially leading to the loss of tokens."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint _value) public { require(!tokensAreFrozen); super.approve(_spender, _value); }",
+            "reason": "The function does not check if the addition of the new allowance and the old allowance exceeds the maximum uint value. This can lead to an integer overflow, potentially leading to the loss of tokens."
+        },
+        {
+            "function_name": "mint",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mint(address _holder, uint _value) external { require(msg.sender == ico); require(_value != 0); require(totalSupply + _value <= TOKEN_LIMIT); balances[_holder] += _value; totalSupply += _value; Transfer(0x0, _holder, _value); }",
+            "reason": "The function does not check if the addition of the new totalSupply and the new balance exceeds the maximum uint value. This can lead to an integer overflow, potentially leading to the loss of tokens."
+        },
+        {
+            "function_name": "unfreeze",
+            "vulnerability": "Access Control",
+            "function_code": "function unfreeze() external { require(msg.sender == ico); tokensAreFrozen = false; }",
+            "reason": "The function does not check if the caller is the ico address before setting tokensAreFrozen to false. This can lead to unauthorized access and potential loss of tokens."
+        }
+    ]
+}

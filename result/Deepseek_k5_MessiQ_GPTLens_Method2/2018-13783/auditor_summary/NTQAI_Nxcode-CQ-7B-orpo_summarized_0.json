@@ -1,0 +1,26 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+                balanceOf[target] += mintedAmount;
+                totalSupply += mintedAmount;
+                emit Transfer(0, this, mintedAmount);
+                emit Transfer(this, target, mintedAmount);
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'mintToken' function does not check for overflow of balanceOf, allowing the owner to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable public {
+                require(msg.value == price);
+                uint amount = msg.value / price;               
+                _transfer(this, msg.sender, amount);              
+                price += priceInc;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The 'buy' function allows attackers to overflow the buy price, allowing them to buy an arbitrary large amount of tokens."
+        }
+    ]
+}

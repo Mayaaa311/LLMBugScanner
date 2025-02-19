@@ -1,0 +1,17 @@
+tput:
+{
+    "output_list": [
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Missing access control checks in the function",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success)",
+            "reason": "The function relies on the caller's balance to verify the transaction, allowing potential exploitation of the function by malicious actors. The function does not adequately protect against invalid input, allowing a potential increase in the value of the _value parameter to bypass the function's safety measures and cause a potential loss of funds."
+        },
+        {
+            "function_name": "PayWinner",
+            "vulnerability": "The function's logic is improperly tied to state updates, enabling DoS attacks.",
+            "function_code": "function PayWinner(address winner) private { require(numtickets == maxTickets); uint ownerTax = 6 * totalBounty / 100; uint winnerPrice = totalBounty - ownerTax; LottoComplete(msg.sender, lottoIndex, winnerPrice); lottoIndex += 1; numtickets = 0; totalBounty = 0; if (_direction == 0 && maxTickets < 20) maxTickets += 1; if (_direction == 1 && maxTickets > 10) maxTickets -= 1; if (_direction == 0 && maxTickets == 20) _direction = 1; if (_direction == 1 && maxTickets == 10) _direction = 0; worldOwner.transfer(ownerTax); winner.transfer(winnerPrice); }",
+            "reason": "The function PayWinner is susceptible to exploitation due to its logic being tied to the state update of the contract. This can be manipulated by a potential attacker to cause a contract lockup and potentially make a profit from the resulting chaos."
+        }
+    ]
+}<eos>

@@ -1,0 +1,53 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address _holder, uint _value) external {
+    require(msg.sender == ico);
+    require(_value != 0);
+    require(totalSupply + _value <= TOKEN_LIMIT);
+    balances[_holder] += _value;
+    totalSupply += _value;
+    emit Transfer(0x0, _holder, _value);
+}",
+            "vulnerability": "Token Issuance Control",
+            "reason": "The mint function allows the ICO contract to mint an arbitrary amount of tokens and assign them to any user account, bypassing normal distribution mechanisms and potentially leading to the rapid dilution of token value."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint _value) public {
+    require(msg.sender == ico);
+    super.burn(_value);
+}",
+            "vulnerability": "Token Issuance Control",
+            "reason": "The burn function allows the ICO contract to burn an arbitrary amount of tokens from any user account, bypassing normal distribution mechanisms and potentially leading to the rapid dilution of token value."
+        },
+        {
+            "function_name": "unfreeze",
+            "code": "function unfreeze() external {
+    require(msg.sender == ico);
+    tokensAreFrozen = false;
+}",
+            "vulnerability": "Token Utility Control",
+            "reason": "The unfreeze function allows the ICO contract to disable the token freeze, allowing the token to be transferred freely, which can be exploited to attack a decentralized exchange listing the token."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _value) public {
+    require(!tokensAreFrozen);
+    super.transfer(_to, _value);
+}",
+            "vulnerability": "Token Utility Control",
+            "reason": "The transfer function allows users to transfer tokens at any time, even during a freeze, which can be exploited to attack a decentralized exchange listing the token."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _value) onlyPayloadSize(3 * 32) public {
+        require(!tokensAreFrozen);
+        super.transferFrom(_from, _to, _value);
+    }",
+            "vulnerability": "Token Utility Control",
+            "reason": "The transferFrom function allows users to transfer tokens from any other user account at any time, even during a freeze, which can be exploited to attack a decentralized exchange listing the token."
+        }
+    ]
+}

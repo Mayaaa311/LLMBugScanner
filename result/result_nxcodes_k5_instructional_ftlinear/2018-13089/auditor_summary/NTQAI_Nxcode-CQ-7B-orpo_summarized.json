@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "TokenERC20",
+            "code": "function TokenERC20(uint256 initialSupply, string tokenName, string tokenSymbol) public { totalSupply = initialSupply * 10 ** uint256(decimals); balanceOf[msg.sender] = totalSupply; name = tokenName; symbol = tokenSymbol; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The initialSupply is multiplied by 10 ** uint256(decimals) to get the totalSupply. This can cause an integer overflow if initialSupply is too large. The totalSupply is then assigned to the balanceOf mapping of the contract owner. This can lead to a loss of funds if the contract owner has a large initialSupply."
+        },
+        {
+            "function_name": "_transfer",
+            "code": "function _transfer(address _from, address _to, uint _value) internal { require (_to != 0x0); require (balanceOf[_from] > _value); require (balanceOf[_to] + _value > balanceOf[_to]); require(!frozenAccount[_from]); require(!frozenAccount[_to]); balanceOf[_from] -= _value; balanceOf[_to] += _value; Transfer(_from, _to, _value); assert(balanceOf[_from] + balanceOf[_to] == previousBalances); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The balanceOf[_from] -= _value; line can cause an integer overflow if _value is too large. The balanceOf[_to] += _value; line can also cause an integer overflow if the balance of _to is too large. The assert statement ensures that the balance of _from and _to do not exceed the previousBalances. This can lead to a loss of funds if the transfer is not executed correctly."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public { balanceOf[target] += mintedAmount; totalSupply += mintedAmount; Transfer(0, this, mintedAmount); Transfer(this, target, mintedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The balanceOf[target] += mintedAmount; line can cause an integer overflow if the target's balance is too large. The totalSupply += mintedAmount; line can also cause an integer overflow if the totalSupply is too large. The Transfer(0, this, mintedAmount); and Transfer(this, target, mintedAmount); lines are not executed if the transfer is not executed correctly. This can lead to a loss of funds if the mintToken function is not executed correctly."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable public { uint amount = msg.value / buyPrice; _transfer(this, msg.sender, amount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The amount = msg.value / buyPrice; line can cause an integer overflow if the msg.value is too large. The _transfer(this, msg.sender, amount); line can also cause an integer overflow if the balance of the contract is too large. This can lead to a loss of funds if the buy function is not executed correctly."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) public { require(this.balance >= amount * sellPrice); _transfer(msg.sender, this, amount); msg.sender.transfer(amount * sellPrice); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The require(this.balance >= amount * sellPrice); line can cause an integer overflow if the contract's balance is too large. The _transfer(msg.sender, this, amount); line can also cause an integer overflow if the balance of the contract is too large. The msg.sender.transfer(amount * sellPrice); line can also cause an integer overflow if the amount * sellPrice is too large. This can lead to a loss of funds if the sell function is not executed correctly."
+        }
+    ]
+}

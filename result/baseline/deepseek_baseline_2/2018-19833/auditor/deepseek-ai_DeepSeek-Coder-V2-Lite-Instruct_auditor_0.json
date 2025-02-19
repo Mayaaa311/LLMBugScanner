@@ -1,0 +1,65 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Token Devalue",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public{
+tbalanceOf[target] += mintedAmount;
+ttotalSupply += mintedAmount;
+}",
+            "reason": "The 'mintToken' function allows the owner to increase the total supply of tokens and assign them to any address without any checks. This can lead to token devaluation as the supply increases without a corresponding increase in value or utility. Attackers can exploit this to manipulate the token's market value and potentially drain liquidity from the contract."
+        },
+        {
+            "function_name": "_transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function _transfer(address _from, address _to, uint _value) internal {
+trequire (_to != 0x0);
+trequire (balanceOf[_from] >= _value);
+trequire (balanceOf[_to] + _value >= balanceOf[_to]); 
+trequire(!frozenAccount[_from]);
+trequire(!frozenAccount[_to]);
+tbalanceOf[_from] -= _value;
+tbalanceOf[_to] += _value;
+temit Transfer(_from, _to, _value);
+}",
+            "reason": "The '_transfer' function does not check for integer overflow when subtracting and adding token balances. If an attacker can manipulate the 'balanceOf[_from]' or 'balanceOf[_to]' values, they can cause an integer overflow, leading to incorrect balance updates and potentially freezing funds or allowing unauthorized transfers."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+t_transfer(msg.sender, _to, _value);
+treturn true;
+}",
+            "reason": "The 'transfer' function does not handle the return value of '_transfer', which can be false if '_transfer' reverts due to invalid conditions. This can lead to incorrect logic in the calling function, potentially causing unexpected behavior or loss of funds."
+        },
+        {
+            "function_name": "constructor",
+            "vulnerability": "Typo Constructor",
+            "function_code": "constructor(
+tuint256 initialSupply,
+tstring tokenName,
+tstring tokenSymbol
+) public {
+towner = msg.sender;
+ttotalSupply = initialSupply * 10 ** uint256(decimals);
+tbalanceOf[msg.sender] = totalSupply;
+tname = tokenName;
+tsymbol = tokenSymbol;
+}",
+            "reason": "There is a typo in the constructor function where 'totalSupply' is assigned before 'decimals' is set. This can lead to incorrect initialization of the token's total supply and potentially other unintended consequences."
+        },
+        {
+            "function_name": "burn",
+            "vulnerability": "Access Control",
+            "function_code": "function burn(uint256 _value) onlyOwner public returns (bool success) {
+trequire(balanceOf[msg.sender] >= _value);
+tbalanceOf[msg.sender] -= _value;
+ttotalSupply -= _value;
+temit Burn(msg.sender, _value);
+treturn true;
+}",
+            "reason": "The 'burn' function only requires the owner to burn tokens, which can be risky if there are no other mechanisms in place to prevent malicious users from manipulating the burning process. This can lead to significant token devaluation without proper oversight."
+        }
+    ]
+}

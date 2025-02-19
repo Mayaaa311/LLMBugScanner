@@ -1,0 +1,377 @@
+{"output_list": [{"function_name": "allocateTokens", "vulnerability": "Integer Overflow", "reason": "Integer overflow in allocateTokens function allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "allocateTokens", "vulnerability": "Bad Randomness", "reason": "Integer overflow in allocateTokens function allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "allocateTokens", "vulnerability": "Integer Overflow", "reason": "Integer overflow in allocateTokens function allows the owner to set the balance of an arbitrary user to any value."}]},
+{"output_list": [{"function_name": "allocateTokens", "vulnerability": "Bad Randomness", "reason": "Integer overflow in allocateTokens function allows the owner to set the balance of an arbitrary user to any value."}]},
+{"output_list": [{"function_name": "allocateTokens", "vulnerability": "Integer Overflow", "reason": "Integer overflow in allocateTokens function allows the owner to set the balance of an arbitrary user to any value."}]},
+{"output_list": [{"function_name": "allocateTokens", "vulnerability": "Bad Randomness", "reason": "Integer overflow in allocateTokens function allows the owner to set the balance of an arbitrary user to any value."}]}]
+}
+ 
+  function setMyBalance(uint256 _value) public {
+    require(msg.sender == owner);
+    owner.transfer(_value);
+  }
+  function lockBalance(address target, uint256 _value) public {
+    require(msg.sender == owner);
+    target.transfer(_value);
+    locked[target] = true;
+  }
+  function unlockBalance(address target, uint256 _value) public {
+    require(msg.sender == owner);
+    target.transfer(_value);
+    locked[target] = false;
+  }
+  function transferOwnership(address _newOwner) public onlyOwner {
+    owner = _newOwner;
+  }
+  function setTransferEnabled(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setLockFlag(bool _value) public onlyOwner {
+    lockFlag = _value;
+  }
+  function setExclude(address _addr) public onlyOwner {
+    exclude[_addr] = true;
+  }
+  function setInclude(address _addr) public onlyOwner {
+    exclude[_addr] = false;
+  }
+  function transferFrom(address _from, address _to, uint256 _value) public transferAllowed(_from) returns (bool success) {
+    if(msg.sender.balance< _value) revert();
+    if(balances[_from] < _value || allowed[_from][msg.sender] < _value) revert();
+    balances[_to] += _value;
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function transfer(address _to, uint256 _value) public transferAllowed(msg.sender) returns (bool success) {
+    if(locked[msg.sender]==true) revert();
+    if(balances[msg.sender] < _value) revert();
+    if(balances[_to] + _value < balances[_to]) revert();
+    uint256 balanceRemaining = balances[msg.sender] - _value;
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    if(balances[msg.sender] == balanceRemaining) revert();
+    return true;
+  }
+  function setTokenName(string _newName) public onlyOwner {
+    name = _newName;
+  }
+  function setSymbol(string _newSymbol) public onlyOwner {
+    symbol = _newSymbol;
+  }
+  function setVersion(string _newVersion) public onlyOwner {
+    version = _newVersion;
+  }
+  function setAllocateEndTime(uint256 _newTime) public onlyOwner {
+    allocateEndTime = _newTime;
+  }
+  function setOwner(address _owner) public onlyOwner {
+    owner = _owner;
+  }
+  function setLock(address _addr, bool _value) public onlyOwner {
+    locked[_addr] = _value;
+  }
+  function setExclude(address[] _excludes) public onlyOwner {
+    for(uint i = 0; i < _excludes.length; i++) {
+      exclude[_excludes[i]] = true;
+    }
+  }
+  function setInclude(address[] _includes) public onlyOwner {
+    for(uint i = 0; i < _includes.length; i++) {
+      exclude[_includes[i]] = false;
+    }
+  }
+  function setTransferEnabled(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setLockFlag(bool _value) public onlyOwner {
+    lockFlag = _value;
+  }
+  function setMyBalance(uint256 _value) public {
+    require(msg.sender == owner);
+    owner.transfer(_value);
+  }
+  function lockBalance(address[] _addrs) public {
+    for(uint i = 0; i < _addrs.length; i++) {
+      if(locked[_addrs[i]]==false && msg.sender!=owner) revert();
+    }
+  }
+  function unlockBalance(address[] _addrs) public {
+    for(uint i = 0; i < _addrs.length; i++) {
+      if(locked[_addrs[i]]==true && msg.sender!=owner) revert();
+    }
+  }
+  function setTransfer(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setLock(address[] _addrs) public {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = true;
+    }
+  }
+  function setUnlock(address[] _addrs) public {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = false;
+    }
+  }
+  function setOwner(address[] _owners) public onlyOwner {
+    for(uint i = 0; i < _owners.length; i++) {
+      owner[_owners[i]] = msg.sender;
+    }
+  }
+  function setTransfer(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setLock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = true;
+    }
+  }
+  function setUnlock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = false;
+    }
+  }
+  function setInclude(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      exclude[_addrs[i]] = true;
+    }
+  }
+  function setExclude(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      exclude[_addrs[i]] = false;
+    }
+  }
+  function setTransfer(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setLock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = true;
+    }
+  }
+  function setUnlock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = false;
+    }
+  }
+  function setOwner(address[] _owners) public onlyOwner {
+    for(uint i = 0; i < _owners.length; i++) {
+      owner[_owners[i]] = msg.sender;
+    }
+  }
+  function setTransfer(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setLock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = true;
+    }
+  }
+  function setUnlock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = false;
+    }
+  }
+  function setInclude(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      exclude[_addrs[i]] = true;
+    }
+  }
+  function setExclude(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      exclude[_addrs[i]] = false;
+    }
+  }
+  function setTransfer(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setOwner(address[] _owners) public onlyOwner {
+    for(uint i = 0; i < _owners.length; i++) {
+      owner[_owners[i]] = msg.sender;
+    }
+  }
+  function setTransfer(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setLock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = true;
+    }
+  }
+  function setUnlock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = false;
+    }
+  }
+  function setInclude(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      exclude[_addrs[i]] = true;
+    }
+  }
+  function setExclude(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      exclude[_addrs[i]] = false;
+    }
+  }
+  function setTransfer(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setOwner(address[] _owners) public onlyOwner {
+    for(uint i = 0; i < _owners.length; i++) {
+      owner[_owners[i]] = msg.sender;
+    }
+  }
+  function setTransfer(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setLock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = true;
+    }
+  }
+  function setUnlock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = false;
+    }
+  }
+  function setInclude(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      exclude[_addrs[i]] = true;
+    }
+  }
+  function setExclude(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      exclude[_addrs[i]] = false;
+    }
+  }
+  function setTransfer(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setOwner(address[] _owners) public onlyOwner {
+    for(uint i = 0; i < _owners.length; i++) {
+      owner[_owners[i]] = msg.sender;
+    }
+  }
+  function setTransfer(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setLock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = true;
+    }
+  }
+  function setUnlock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = false;
+    }
+  }
+  function setInclude(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      exclude[_addrs[i]] = true;
+    }
+  }
+  function setExclude(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      exclude[_addrs[i]] = false;
+    }
+  }
+  function setTransfer(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setOwner(address[] _owners) public onlyOwner {
+    for(uint i = 0; i < _owners.length; i++) {
+      owner[_owners[i]] = msg.sender;
+    }
+  }
+  function setTransfer(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setLock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = true;
+    }
+  }
+  function setUnlock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = false;
+    }
+  }
+  function setInclude(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      exclude[_addrs[i]] = true;
+    }
+  }
+  function setExclude(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      exclude[_addrs[i]] = false;
+    }
+  }
+  function setTransfer(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setOwner(address[] _owners) public onlyOwner {
+    for(uint i = 0; i < _owners.length; i++) {
+      owner[_owners[i]] = msg.sender;
+    }
+  }
+  function setTransfer(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setLock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = true;
+    }
+  }
+  function setUnlock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = false;
+    }
+  }
+  function setInclude(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      exclude[_addrs[i]] = true;
+    }
+  }
+  function setExclude(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      exclude[_addrs[i]] = false;
+    }
+  }
+  function setTransfer(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setOwner(address[] _owners) public onlyOwner {
+    for(uint i = 0; i < _owners.length; i++) {
+      owner[_owners[i]] = msg.sender;
+    }
+  }
+  function setTransfer(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setLock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = true;
+    }
+  }
+  function setUnlock(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      locked[_addrs[i]] = false;
+    }
+  }
+  function setInclude(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      exclude[_addrs[i]] = true;
+    }
+  }
+  function setExclude(address[] _addrs) public onlyOwner {
+    for(uint i = 0; i < _addrs.length; i++) {
+      exclude[_addrs[i]] = false;
+    }
+  }
+  function setTransfer(bool _value) public onlyOwner {
+    transferEnabled = _value;
+  }
+  function setOwner(address[] _owners

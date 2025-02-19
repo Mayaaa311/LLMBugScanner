@@ -1,0 +1,66 @@
+ {
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function transfer(address _to, uint256 _value) returns (bool success) {
+    if(funding) throw;
+    if(!allowTransfer)throw;
+    var senderBalance = balances[msg.sender];
+    if (senderBalance >= _value && _value > 0) {
+        senderBalance -= _value;
+        balances[msg.sender] = senderBalance;
+        balances[_to] += _value;
+        lastTransferred[msg.sender]=block.timestamp;
+        Transfer(msg.sender, _to, _value);
+        return true;
+    }
+    return false;
+}",
+            "reason": "The function does not check if the balance of the sender is sufficient before transferring tokens. This can lead to a situation where a user can transfer tokens they do not have, effectively allowing them to steal tokens from other users."
+        },
+        {
+            "function_name": "migrate",
+            "vulnerability": "Access Control",
+            "function_code": "function migrate(uint256 _value) external {
+    if(funding) throw;
+    if(migrationAgent == 0) throw;
+    if(_value == 0) throw;
+    if(_value > balances[msg.sender]) throw;
+    balances[msg.sender] -= _value;
+    totalTokens -= _value;
+    totalMigrated += _value;
+    MigrationAgent(migrationAgent).migrateFrom(msg.sender, _value);
+    Migrate(msg.sender, migrationAgent, _value);
+}",
+            "reason": "The function allows any user to call the migrate function, which can be exploited if the migrationAgent address is set to a malicious contract. This can lead to the loss of tokens from the contract."
+        },
+        {
+            "function_name": "setMigrationAgent",
+            "vulnerability": "Access Control",
+            "function_code": "function setMigrationAgent(address _agent) external {
+    if(funding) throw;
+    if(migrationAgent != 0) throw;
+    if(msg.sender != master) throw;
+    migrationAgent = _agent;
+}",
+            "reason": "The function allows only the master address to set the migrationAgent. However, if the master address is compromised, an attacker can set a malicious migrationAgent, leading to token loss."
+        },
+        {
+            "function_name": "refund",
+            "vulnerability": "Access Control",
+            "function_code": "function refund() external {
+    if(!startRefund) throw;
+    var gntValue = balances[msg.sender];
+    var ethValue = balancesEther[msg.sender];
+    if (gntValue == 0) throw;
+    balances[msg.sender] = 0;
+    balancesEther[msg.sender] = 0;
+    totalTokens -= gntValue;
+    Refund(msg.sender, ethValue);
+    if (!msg.sender.send(ethValue)) throw;
+}",
+            "reason": "The function allows any user to call the refund function, which can be exploited if the user has tokens and the contract does not check the sender's balance before processing the refund. This can lead to a user draining the contract's balance."
+        }
+    ]
+}

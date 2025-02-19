@@ -1,0 +1,84 @@
+{
+    "output_list": [
+        {
+            "function_name": "createChamp",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function createChamp(address _affiliateAddress) external payable
+    whenNotPaused
+    isPaid(createChampFee)
+    distributeInput(_affiliateAddress)
+    {
+        uint256 id = champs.push(Champ(0, 2 + randMod(4), 1 + randMod(4), uint256(1 days)  - uint256(randMod(9) * 1 hours), 0, 0, 0, leaderboard.length + 1, 0, uint256(block.timestamp), 0,0,0, false)) - 1;
+        champs[id].id = id;
+        leaderboard.push(id);
+        champToOwner[id] = msg.sender;
+        addressInfo[msg.sender].champsCount++;
+        emit NewChamp(id, msg.sender);
+    }
+",
+            "reason": "The function uses the SafeMath library to perform arithmetic operations, but it does not handle the case where the addition operation would result in an overflow. This can be exploited by an attacker to create a new champ with an id that is larger than the current champ count, causing the contract to behave unexpectedly."
+        },
+        {
+            "function_name": "getChampReward",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function getChampReward(uint256 _position) public view returns(uint256)
+    {
+        if(_position <= 800){
+            uint256 rewardPercentage = uint256(2000).sub(2 * (_position - 1));
+            uint256 availableWithdrawal = address(this).balance.sub(pendingWithdrawal);
+            return availableWithdrawal / 1000000 * rewardPercentage;
+        }
+        else{
+            return uint256(0);
+        }
+    }
+",
+            "reason": "The function uses the SafeMath library to perform arithmetic operations, but it does not handle the case where the addition operation would result in an overflow. This can be exploited by an attacker to calculate the reward for a champ with a position that is larger than 800, causing the contract to behave unexpectedly."
+        },
+        {
+            "function_name": "randMod",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function randMod(uint256 _modulus) internal returns(uint256)
+    {
+        randNonce++;
+        return uint256(keccak256(randNonce, blockhash(block.number - 1))) % _modulus;
+    }
+",
+            "reason": "The function uses the keccak256 hash of a nonce and the blockhash to generate a random number. However, the nonce is incremented without any synchronization mechanism, which can lead to the same nonce being used multiple times. This can result in the same random number being generated multiple times, making the randomness predictable and potentially exploitable."
+        },
+        {
+            "function_name": "withdrawChamp",
+            "vulnerability": "Access Control",
+            "function_code": "function withdrawChamp(uint _id) external
+    onlyOwnerOfChamp(_id)
+    contractMinBalanceReached
+    isChampWithdrawReady(_id)
+    whenNotPaused {
+        Champ storage champ = champs[_id];
+        require(champ.position <= 800);
+        champ.withdrawCooldown = block.timestamp + 1 days;
+        uint256 withdrawal = getChampReward(champ.position);
+        addressInfo[msg.sender].withdrawal += withdrawal;
+        pendingWithdrawal += withdrawal;
+    }
+",
+            "reason": "The function allows an owner of a champ to withdraw a reward. However, it does not check if the champ is in the leaderboard before allowing withdrawal. This can be exploited by an attacker to withdraw rewards for a champ that is not in the leaderboard, causing the contract to behave unexpectedly."
+        },
+        {
+            "function_name": "withdrawToAddress",
+            "vulnerability": "Access Control",
+            "function_code": "function withdrawToAddress(address _address) external
+    whenNotPaused {
+        address playerAddress = _address;
+        if(playerAddress == address(0)){ playerAddress = msg.sender; }
+        uint256 share = addressInfo[playerAddress].withdrawal;
+        require(share > 0);
+        addressInfo[playerAddress].withdrawal = 0;
+        pendingWithdrawal = pendingWithdrawal.sub(share);
+        playerAddress.transfer(share);
+    }
+",
+            "reason": "The function allows an owner to withdraw funds to a specified address. However, it does not check if the specified address is the owner of the champ. This can be exploited by an attacker to withdraw funds for a champ that they do not own, causing the contract to behave unexpectedly."
+        }
+    ]
+}

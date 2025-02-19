@@ -1,0 +1,66 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        emit Transfer(0, this, mintedAmount);
+        emit Transfer(this, target, mintedAmount);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function has an integer overflow, allowing minted tokens to be retrieved arbitrarily by the contract owner."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable public {
+        require(msg.value == price);
+        uint amount = msg.value / price;               
+        _transfer(this, msg.sender, amount);              
+        price += priceInc;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The buy function has an integer overflow, allowing a potential trap due to overflow of 'amount' variable."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) public {
+        require(amount == 1);
+        require(address(this).balance >= amount * price);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * price - transferFees);          
+        price -= priceInc;
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The sell function has an integer overflow, allowing a potential trap due to overflow of 'amount' variable."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        if (_value <= allowance[_from][msg.sender]) {
+          allowance[_from][msg.sender] -= _value;
+          _transfer(_from, _to, _value);
+          return true;
+        }
+        else
+          return false;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The transferFrom function allows a potential trap due to incorrect comparison of 'allowance' and 'value'."
+        },
+        {
+            "function_name": "burnFrom",
+            "code": "function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(balanceOf[_from] >= _value);                
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        emit Burn(_from, _value);
+        return true;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The burnFrom function allows a potential trap due to incorrect comparison of 'allowance' and 'value'."
+        }
+    ]
+}

@@ -1,0 +1,74 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintTokens",
+            "vulnerability": "Token Devalue",
+            "function_code": "function mintTokens(address _to, uint256 _amount) {
+    if (msg.sender != icoContractAddress) throw;
+    if (restrictedAddresses[_to]) throw;
+    if (balances[_to] + _amount < balances[_to]) throw;
+    supply += _amount;
+    balances[_to] += _amount;
+    Mint(_to, _amount);
+    Transfer(0x0, _to, _amount);
+}",
+            "reason": "Allows unlimited token minting without constraints, disrupting supply-demand balance."
+        },
+        {
+            "function_name": "burnTokens",
+            "vulnerability": "Token Devalue",
+            "function_code": "function burnTokens(uint256 _amount) onlyOwner {
+    if(balances[msg.sender] < _amount) throw;
+    if(supply < _amount) throw;
+    supply -= _amount;
+    balances[msg.sender] -= _amount;
+    Burn(msg.sender, _amount);
+    Transfer(msg.sender, 0x0, _amount);
+}",
+            "reason": "Allows the owner to burn tokens, which can lead to token devaluation and financial losses for holders."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "function_code": "function transfer(address _to, uint256 _value) returns (bool success) {
+    if (block.number < tokenFrozenUntilBlock) throw;
+    if (restrictedAddresses[_to]) throw;
+    if (balances[msg.sender] < _value) throw;
+    if (balances[_to] + _value < balances[_to]) throw;
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+}",
+            "reason": "Missing access control checks allow transfers to restricted addresses, which can lead to unauthorized transfers and financial losses."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Access Control",
+            "function_code": "function approve(address _spender, uint256 _value) returns (bool success) {
+    if (block.number < tokenFrozenUntilBlock) throw;
+    allowances[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+}",
+            "reason": "Missing access control checks allow approvals to any spender, which can lead to unauthorized spending and financial losses."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if (block.number < tokenFrozenUntilBlock) throw;
+    if (restrictedAddresses[_to]) throw;
+    if (balances[_from] < _value) throw;
+    if (balances[_to] + _value < balances[_to]) throw;
+    if (_value > allowances[_from][msg.sender]) throw;
+    balances[_from] -= _value;
+    balances[_to] += _value;
+    allowances[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+}",
+            "reason": "Missing access control checks allow transfers from any sender, which can lead to unauthorized transfers and financial losses."
+        }
+    ]
+}

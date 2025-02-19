@@ -1,0 +1,70 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }",
+            "vulnerability": "Token Issuance Control",
+            "reason": "The mintToken function allows the owner to arbitrarily create new tokens and award them to any user, without any apparent limitations or restrictions. This can be exploited by the owner to create large amounts of tokens and distribute them to associates or attackers, devaluing the token and causing a financial loss to token holders."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (balanceOf[_from] < _value) throw;                  
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;   
+        if (_value > allowance[_from][msg.sender]) throw;    
+        balanceOf[_from] -= _value;                           
+        balanceOf[_to] += _value;                             
+        allowance[_from][msg.sender] -= _value;            
+        Transfer(_from, _to, _value);                       
+        return true;                                        
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not check for integer overflow, allowing users to transfer more tokens than the allowed balance, causing a negative token balance and potentially locking funds."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) {
+        if (balanceOf[msg.sender] < amount ) throw;
+        balanceOf[this] += amount;
+        balanceOf[msg.sender] -= amount;
+        if (!msg.sender.send(amount * sellPrice)) {
+            throw;
+        } else {
+            Transfer(msg.sender, this, amount);
+        }
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The sell function does not check for integer overflow, allowing users to sell more tokens than they own, causing a negative token balance and potentially locking funds."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) throw;            
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+        if (frozenAccount[msg.sender]) throw;                 
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }",
+            "vulnerability": "Token Freeze",
+            "reason": "The transfer function does not check if an account is frozen, allowing transactions from frozen accounts, which can be exploited to lock funds in compromised accounts."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The approveAndCall function does not check for integer overflow, allowing users to approve a large amount of tokens, which can cause a denial of service to any contract that relies on it."
+        }
+    ]
+}

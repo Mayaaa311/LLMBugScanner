@@ -1,0 +1,48 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner{
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0,owner,mintedAmount);
+        Transfer(owner,target,mintedAmount);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function has an integer overflow vulnerability. The totalSupply variable is not checked for overflow before adding the mintedAmount. This can lead to a situation where the totalSupply variable overflows and the contract stops functioning."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The freezeAccount function has a wrong logic. The function is supposed to freeze or unfreeze an account, but the function does not check if the account is already frozen or not. This can lead to a situation where an account is frozen multiple times."
+        },
+        {
+            "function_name": "changeName",
+            "code": "function changeName(string _name) onlyOwner {
+        name = _name;
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The changeName function has bad randomness. The function does not check if the name is already taken or not. This can lead to a situation where the name is changed to a name that is already taken."
+        },
+        {
+            "function_name": "changeSymbol",
+            "code": "function changeSymbol(string _symbol) onlyOwner {
+        symbol = _symbol;
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The changeSymbol function has bad randomness. The function does not check if the symbol is already taken or not. This can lead to a situation where the symbol is changed to a symbol that is already taken."
+        },
+        {
+            "function_name": "changeDecimals",
+            "code": "function changeDecimals(uint8 _decimals) onlyOwner {
+        decimals = _decimals;
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The changeDecimals function has bad randomness. The function does not check if the decimals is already taken or not. This can lead to a situation where the decimals is changed to a decimals that is already taken."
+        }
+    ]
+}

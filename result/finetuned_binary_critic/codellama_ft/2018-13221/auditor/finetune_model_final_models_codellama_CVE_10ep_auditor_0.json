@@ -1,0 +1,338 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "description": "The mintToken function has an integer overflow in the calculation of the minted amount, allowing an attacker to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow in the calculation of the minted amount, allowing an attacker to set the balance of an arbitrary user to any value."}]}
+]}
+
+contract SafeMath {
+  function mul(uint a, uint b) internal returns (uint) {
+    uint c = a * b;
+    assert(a == 0 || c / a == b);
+    return c;
+  }
+  function div(uint a, uint b) internal returns (uint) {
+    uint c = a / b;
+    return c;
+  }
+  function sub(uint a, uint b) internal returns (uint) {
+    assert(b <= a);
+    return a - b;
+  }
+  function add(uint a, uint b) internal returns (uint) {
+    uint c = a + b;
+    assert(c >= a);
+    return c;
+  }
+}
+contract Owned {
+  address public owner;
+  function Owned() { owner = msg.sender; }
+  function setOwner(address _owner) onlyOwner { owner = _owner; }
+  modifier onlyOwner { if (msg.sender != owner) throw; _; }
+}
+contract ERC20Interface {
+  function totalSupply() constant returns (uint256 totalSupply);
+  function balanceOf(address _owner) constant returns (uint256 balance);
+  function transfer(address _to, uint256 _value) returns (bool success);
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success);
+  function approve(address _spender, uint256 _value) returns (bool success);
+  function allowance(address _owner, address _spender) constant returns (uint256 remaining);
+  event Transfer(address indexed _from, address indexed _to, uint256 _value);
+  event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+}
+contract SafeMath {
+  function mul(uint a, uint b) internal returns (uint) {
+    uint c = a * b;
+    assert(a == 0 || c / a == b);
+    return c;
+  }
+  function div(uint a, uint b) internal returns (uint) {
+    assert(b > 0);
+    uint c = a / b;
+    assert(a == b * c + a % b);
+    return c;
+  }
+  function sub(uint a, uint b) internal returns (uint) {
+    assert(b <= a);
+    return a - b;
+  }
+  function add(uint a, uint b) internal returns (uint) {
+    uint c = a + b;
+    assert(c >= a);
+    return c;
+  }
+}
+contract ERC20 is ERC20Interface {
+  uint public totalSupply;
+  function balanceOf(address _owner) constant returns (uint256 balance);
+  function transfer(address _to, uint256 _value) returns (bool success);
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success);
+  function approve(address _spender, uint256 _value) returns (bool success);
+  function allowance(address _owner, address _spender) constant returns (uint256 remaining);
+  event Transfer(address indexed _from, address indexed _to, uint256 _value);
+  event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+}
+contract StandardToken is ERC20, SafeMath {
+  mapping(address => uint) balances;
+  mapping (address => mapping (address => uint)) allowed;
+  function isToken() constant returns (bool weAre) {
+    return true;
+  }
+  function transfer(address _to, uint _value) returns (bool success) {
+    balances[msg.sender] = safeSub(balances[msg.sender], _value);
+    balances[_to] = safeAdd(balances[_to], _value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint _value) returns (bool success) {
+    uint _allowance = allowed[_from][msg.sender];
+    balances[_to] = safeAdd(balances[_to], _value);
+    balances[_from] = safeSub(balances[_from], _value);
+    allowed[_from][msg.sender] = safeSub(_allowance, _value);
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function balanceOf(address _owner) constant returns (uint balance) {
+    return balances[_owner];
+  }
+  function approve(address _spender, uint _value) returns (bool success) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+  function allowance(address _owner, address _spender) constant returns (uint remaining) {
+    return allowed[_owner][_spender];
+  }
+}
+contract Extreme is StandardToken, SafeMath {
+  string public constant name = "Extreme Coin";
+  string public constant symbol = "XT";
+  uint public constant decimals = 2;
+  uint256 public totalSupply = 593479500000000;
+  function Extreme() {
+    balances[msg.sender] = totalSupply;
+  }
+}
+contract Cryptonite is ERC20, SafeMath, Owned {
+  mapping (address => bool) public frozenAccount;
+  event FrozenFunds(address target, bool frozen);
+  function Cryptonite(
+      uint256 initialSupply,
+      string tokenName,
+      uint8 decimalUnits,
+      string tokenSymbol
+  ) ERC20() SafeMath() Owned() {
+      balances[msg.sender] = initialSupply;              
+      totalSupply = initialSupply;                        
+      name = tokenName;                                   
+      symbol = tokenSymbol;                               
+      decimals = decimalUnits;                            
+  }
+  function transfer(address _to, uint256 _value) returns (bool success) {
+      if (balances[msg.sender] < _value) throw;           
+      if (balances[_to] + _value < balances[_to]) throw; 
+      if (frozenAccount[msg.sender]) throw;                     
+      balances[msg.sender] -= _value;                     
+      balances[_to] += _value;                            
+      Transfer(msg.sender, _to, _value);                   
+      return true;                                   
+  }
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+      if (frozenAccount[_from]) throw;                     
+      if (balances[_from] < _value) throw;               
+      if (balances[_to] + _value < balances[_to]) throw; 
+      if (_value > allowed[_from][msg.sender]) throw;   
+      balances[_from] -= _value;                          
+      balances[_to] += _value;                            
+      allowed[_from][msg.sender] -= _value;
+      Transfer(_from, _to, _value);
+      return true;
+  }
+  function mintToken(address target, uint256 mintedAmount) onlyOwner {
+      balances[target] += mintedAmount;
+      totalSupply += mintedAmount;
+      Transfer(0, owner, mintedAmount);
+      Transfer(owner, target, mintedAmount);
+  }
+  function freezeAccount(address target, bool freeze) onlyOwner {
+      frozenAccount[target] = freeze;
+      FrozenFunds(target, freeze);
+  }
+  function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+      sellPrice = newSellPrice;
+      buyPrice = newBuyPrice;
+  }
+  function buy() payable returns (uint amount) {
+      amount = msg.value / buyPrice;               
+      if (balances[this] < amount) throw;               
+      balances[msg.sender] += amount;                   
+      balances[this] -= amount;                     
+      Transfer(this, msg.sender, amount);                
+      return amount;                                    
+  }
+  function sell(uint256 amount) returns (uint revenue){
+      if (balances[msg.sender] < amount ) throw;        
+      balances[this] += amount;                         
+      balances[msg.sender] -= amount;                   
+      revenue = amount * sellPrice;                   
+      msg.sender.send(revenue);                     
+      Transfer(msg.sender, this, amount);            
+      return revenue;                               
+  }
+}
+contract ExtremeToken is SafeMath, Cryptonite {
+uint256 public sellPrice;
+uint256 public buyPrice;
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable returns (uint amount) {
+        amount = msg.value / buyPrice;               
+        if (balances[this] < amount) throw;               
+        balances[msg.sender] += amount;                   
+        balances[this] -= amount;                     
+        Transfer(this, msg.sender, amount);                
+        return amount;                                   
+    }
+    function sell(uint256 amount) returns (uint revenue) {
+        if (balances[msg.sender] < amount ) throw;        
+        balances[this] += amount;                         
+        balances[msg.sender] -= amount;                   
+        revenue = amount * sellPrice;                   
+        msg.sender.send(revenue);                     
+        Transfer(msg.sender, this, amount);            
+        return revenue;                               
+    }
+}
+contract Extreme is SafeMath, Cryptonite {
+  string public constant name = "Extreme Coin";
+  string public constant symbol = "XT";
+  uint public constant decimals = 2;
+  uint256 public totalSupply;
+  function Extreme() { 
+     totalSupply = 59347950076;
+      balances[msg.sender] = totalSupply;
+      Transfer(0, msg.sender, totalSupply);
+  }
+}
+contract Extreme is SafeMath, Cryptonite {
+  string public constant name = "Extreme Coin";
+  string public constant symbol = "XT";
+  uint public constant decimals = 2;
+  uint256 public totalSupply;
+  function Extreme() { 
+     totalSupply = 593479500000;
+      balances[msg.sender] = totalSupply;
+      Transfer(0, msg.sender, totalSupply);
+  }
+}
+contract Extreme is SafeMath, Cryptonite {
+  string public constant name = "Extreme Coin";
+  string public constant symbol = "XT";
+  uint public constant decimals = 2;
+  uint256 public totalSupply;
+  function Extreme() { 
+     totalSupply = 593479500000;
+      balances[msg.sender] = totalSupply;
+      Transfer(0, msg.sender, totalSupply);
+  }
+}
+contract Extreme is SafeMath, Cryptonite {
+  string public constant name = "Extreme Coin";
+  string public constant symbol = "XT";
+  uint public constant decimals = 2;
+  uint256 public totalSupply;
+  function Extreme() { 
+     totalSupply = 593479500000;
+      balances[msg.sender] = totalSupply;
+      Transfer(0, msg.sender, totalSupply);
+  }
+}
+contract Extreme is SafeMath, Cryptonite {
+  string public constant name = "Extreme Coin";
+  string public constant symbol = "XT";
+  uint public constant decimals = 2;
+  uint256 public totalSupply;
+  function Extreme() { 
+     totalSupply = 59347950000;
+      balances[msg.sender] = totalSupply;
+      Transfer(0, msg.sender, totalSupply);
+  }
+}
+contract Extreme is SafeMath, Cryptonite {
+  string public constant name = "Extreme Coin";
+  string public constant symbol = "XT";
+  uint public constant decimals = 2;
+  uint256 public totalSupply;
+  function Extreme() { 
+     totalSupply = 593479500000;
+      balances[msg.sender] = totalSupply;
+      Transfer(0, msg.sender, totalSupply);
+  }
+}
+contract Extreme is SafeMath, Cryptonite {
+  string public constant name = "Extreme Coin";
+  string public constant symbol = "XT";
+  uint public constant decimals = 2;
+  uint256 public totalSupply;
+  function Extreme() { 
+     totalSupply = 593479500000;
+      balances[msg.sender] = totalSupply;
+      Transfer(0, msg.sender, totalSupply);
+  }
+}
+contract Extreme is SafeMath, Cryptonite {
+  string public constant name = "Extreme Coin";
+  string public constant symbol = "XT";
+  uint public constant decimals = 2;
+  uint256 public totalSupply;
+  function Extreme() { 
+     totalSupply = 593479500000;
+      balances[msg.sender] = totalSupply;
+      Transfer(0, msg.sender, totalSupply);
+  }
+}
+contract Extreme is SafeMath, Cryptonite {
+  string public constant name = "Extreme Coin";
+  string public constant symbol = "XT";
+  uint public constant decimals = 2;
+  uint256 public totalSupply;
+  function Extreme() { 
+     totalSupply = 593479500000;
+      balances[msg.sender] = totalSupply;
+      Transfer(0, msg.sender, totalSupply);
+  }
+}
+contract Extreme is SafeMath, Cryptonite {
+  string public constant name = "Extreme Coin";
+  string public constant symbol = "XT";
+  uint public constant decimals = 2;
+  uint256 public totalSupply;
+  function Extreme() { 
+     totalSupply = 593479500000;
+      balances[msg.sender] = totalSupply;
+      Transfer(0, msg.sender, totalSupply);
+  }
+}
+contract Extreme is SafeMath, Cryptonite {
+  string public constant name = "Extreme Coin";
+  string public constant symbol = "XT";
+  uint public constant decimals = 2;
+  uint256 public totalSupply;
+  function Extreme() { 
+     totalSupply = 593479500000;
+      balances[msg.sender] = totalSupply;
+      Transfer(0, msg.sender, totalSupply);
+  }
+}
+contract Extreme is SafeMath, Cryptonite {
+  string public constant name = "Extreme Coin";
+  string public constant symbol = "XT";
+  uint public constant decimals = 2;
+  uint256 public totalSupply;
+  function Extreme() { 
+     totalSupply = 593479500000;
+      balances[msg.sender] = totalSupply;
+      Transfer(0, msg.sender, totalSupply);
+  }
+}
+contract Ext

@@ -1,0 +1,390 @@
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Integer Overflow", "reason": "The transferFrom function has an integer overflow."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Wrong Logic", "reason": "The logic within the transfer and transferFrom functions is incorrect."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Bad Randomness", "reason": "The random number generator used within the transfer and transferFrom functions is faulty."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Access Control", "reason": "The access control of the transfer and transferFrom functions is not sufficient."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Typos Constructor", "reason": "The constructor of the transfer and transferFrom functions has a typo."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Token Devalue", "reason": "The value of the tokens transferred is not maintained."}]}
+}
+Code: 
+pragma solidity ^0.4.19;
+contract LottoCount {
+    uint256 private maxTickets;
+    uint256 public ticketPrice; 
+    uint256 public totalBounty;
+    address public owner;
+    mapping (address => uint256) balances;
+    mapping (address => mapping (address => uint256)) allowed;
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+    function LottoCount() {
+        owner = msg.sender;
+        ticketPrice = 0.0100000000000000000000000000;
+        maxTickets = 100;
+    }
+    function transfer(address _to, uint256 _value) returns (bool success) {
+        if (balances[msg.sender] >= _value && _value > 0) {
+            balances[_to] += _value;
+            balances[msg.sender] -= _value;
+            Transfer(msg.sender, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && _value > 0) {
+            balances[_to] += _value;
+            balances[_from] -= _value;
+            allowed[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        } else { return false; }
+    }
+    function balanceOf(address _owner) constant returns (uint256 balance) {
+        return balances[_owner];
+    }
+    function approve(address _spender, uint256 _value) returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+      return allowed[_owner][_spender];
+    }
+    function getTokenBalance(address tokenAddress, address who, uint256 balance) constant returns (uint){
+        return balances[who];
+    }
+    function withdraw() {
+        if (msg.sender == owner && totalBounty <= maxTickets) {
+            owner.transfer(totalBounty);
+        }
+    }
+    function transferOwner(address newOwner) {
+        if (msg.sender == owner) {
+            newOwner = msg.sender;
+        }
+    }
+    function setMaxTickets(uint newMaxTickets) {
+        maxTickets = newMaxTickets;
+    }
+    function setTicketPrice(uint newTicketPrice) {
+        ticketPrice = newTicketPrice;
+    }
+    function setBalance(address user, uint256 amount) {
+        balances[user] = amount;
+    }
+    function setAllowed(address user, address spender, uint256 amount) {
+        allowed[user][spender] = amount;
+    }
+    function getBalance(address user) constant returns (uint){
+        return balances[user];
+    }
+    function getRemaining(address user, address spender) constant returns (uint){
+        return allowed[user][spender];
+    }
+    function withdrawFrom(address _from, address _to, uint256 _value) {
+        if (msg.sender == owner && totalBounty <= maxTickets) {
+            balances[_to] += _value;
+            balances[_from] -= _value;
+            allowed[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+        }
+    }
+    function withdrawTo(address _to, uint256 _value) {
+        if (msg.sender == owner && totalBounty <= maxTickets) {
+            owner.transfer(_value);
+        }
+    }
+    function setBanker(address banker, address user) {
+        if (msg.sender == owner) {
+            banker = msg.sender;
+        }
+        if (banker == user) {
+            banker = banker;
+        }
+        allowed[user][banker] = 0;
+    }
+    function setBankers(address[] bankers, address user) {
+        if (msg.sender == owner) {
+            bankers.push(msg.sender);
+        }
+        if (bankers.length == 0) {
+            bankers.push(user);
+        }
+        for (uint i = 0; i < bankers.length; i++) {
+            if (bankers[i] == user) {
+                bankers.push(msg.sender);
+            }
+        }
+        allowed[user][bankers] = bankers.length;
+    }
+    function setSpending(address user, uint256 spent) {
+        if (msg.sender == owner) {
+            user.transfer(spent);
+        }
+    }
+    function setUsers(address[] users) {
+        if (msg.sender == owner) {
+            for (uint i = 0; i < users.length; i++) {
+                if (allowed[msg.sender][users[i]] == 0) {
+                    allowed[msg.sender][users[i]] = users.length;
+                }
+            }
+        }
+    }
+    function setVoters(address[] voters) {
+        if (msg.sender == owner) {
+            for (uint i = 0; i < voters.length; i++) {
+                if (allowed[msg.sender][voters[i]] == 0) {
+                    allowed[msg.sender][voters[i]] = voters.length;
+                }
+            }
+        }
+    }
+    function setAddresses(address[] addresses) {
+        if (msg.sender == owner) {
+            for (uint i = 0; i < addresses.length; i++) {
+                if (allowed[msg.sender][addresses[i]] == 0) {
+                    allowed[msg.sender][addresses[i]] = addresses.length;
+                }
+            }
+        }
+    }
+    function setParams(address[] addresses, uint256[] uints, uint8 v, address user, uint256 wanted) {
+        if (msg.sender == owner) {
+            for (uint i = 0; i < addresses.length; i++) {
+                if (allowed[msg.sender][addresses[i]] == 0) {
+                    allowed[msg.sender][addresses[i]] = addresses.length;
+                }
+                if (uints[i] == 0) {
+                    uints[i] = 1;
+                }
+                if (uints[i] == 2) {
+                    uints[i] = 3;
+                }
+                if (uints[i] == 3) {
+                    uints[i] = 2;
+                }
+                if (v == 0) {
+                    v = 1;
+                }
+                if (v == 2) {
+                    v = 3;
+                }
+                if (v == 3) {
+                    v = 2;
+                }
+                if (wanted == 0) {
+                    wanted = 1;
+                }
+                if (wanted == 2) {
+                    wanted = 3;
+                }
+                if (wanted == 3) {
+                    wanted = 2;
+                }
+            }
+            user.transfer(wanted);
+        }
+    }
+    function setExtraData(address[] addresses, uint256[] uints, uint8 v, address user, uint256 wanted, uint256 amt, bytes extraData) {
+        if (msg.sender == owner) {
+            for (uint i = 0; i < addresses.length; i++) {
+                if (allowed[msg.sender][addresses[i]] == 0) {
+                    allowed[msg.sender][addresses[i]] = addresses.length;
+                }
+                if (uints[i] == 0) {
+                    uints[i] = 1;
+                }
+                if (uints[i] == 2) {
+                    uints[i] = 3;
+                }
+                if (uints[i] == 3) {
+                    uints[i] = 2;
+                }
+                if (v == 0) {
+                    v = 1;
+                }
+                if (v == 2) {
+                    v = 3;
+                }
+                if (v == 3) {
+                    v = 2;
+                }
+                if (wanted == 0) {
+                    wanted = 1;
+                }
+                if (wanted == 2) {
+                    wanted = 3;
+                }
+                if (wanted == 3) {
+                    wanted = 2;
+                }
+            }
+            user.transfer(wanted);
+            if (extraData.length > 0) {
+                address(this).call(bytes4(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, wanted, extraData);
+            }
+        }
+    }
+    function setOwner(address user) {
+        if (msg.sender == owner) {
+            owner = user;
+        }
+    }
+    function setBankers(address[] bankers, address user) {
+        if (msg.sender == owner) {
+            bankers.push(msg.sender);
+        }
+        if (bankers.length == 0) {
+            bankers.push(user);
+        }
+        for (uint i = 0; i < bankers.length; i++) {
+            if (bankers[i] == user) {
+                bankers.push(msg.sender);
+            }
+        }
+        allowed[user][bankers] = bankers.length;
+    }
+    function setVoters(address[] voters) {
+        if (msg.sender == owner) {
+            for (uint i = 0; i < voters.length; i++) {
+                if (allowed[msg.sender][voters[i]] == 0) {
+                    allowed[msg.sender][voters[i]] = voters.length;
+                }
+            }
+        }
+    }
+    function setAddresses(address[] addresses) {
+        if (msg.sender == owner) {
+            for (uint i = 0; i < addresses.length; i++) {
+                if (allowed[msg.sender][addresses[i]] == 0) {
+                    allowed[msg.sender][addresses[i]] = addresses.length;
+                }
+            }
+        }
+    }
+    function setParams(address[] addresses, uint256[] uints, uint8 v, address user, uint256 wanted, uint256 amt, bytes extraData) {
+        if (msg.sender == owner) {
+            for (uint i = 0; i < addresses.length; i++) {
+                if (allowed[msg.sender][addresses[i]] == 0) {
+                    allowed[msg.sender][addresses[i]] = addresses.length;
+                }
+                if (uints[i] == 0) {
+                    uints[i] = 1;
+                }
+                if (uints[i] == 2) {
+                    uints[i] = 3;
+                }
+                if (uints[i] == 3) {
+                    uints[i] = 2;
+                }
+                if (v == 0) {
+                    v = 1;
+                }
+                if (v == 2) {
+                    v = 3;
+                }
+                if (v == 3) {
+                    v = 2;
+                }
+                if (wanted == 0) {
+                    wanted = 1;
+                }
+                if (wanted == 2) {
+                    wanted = 3;
+                }
+                if (wanted == 3) {
+                    wanted = 2;
+                }
+            }
+            user.transfer(wanted);
+            if (extraData.length > 0) {
+                address(this).call(bytes4(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, wanted, extraData);
+            }
+        }
+    }
+    function setOwner(address user) {
+        if (msg.sender == owner) {
+            owner = user;
+        }
+    }
+    function setBankers(address[] bankers, address user) {
+        if (msg.sender == owner) {
+            bankers.push(msg.sender);
+        }
+        if (bankers.length == 0) {
+            bankers.push(user);
+        }
+        for (uint i = 0; i < bankers.length; i++) {
+            if (bankers[i] == user) {
+                bankers.push(msg.sender);
+            }
+        }
+        allowed[user][bankers] = bankers.length;
+    }
+    function setVoters(address[] voters) {
+        if (msg.sender == owner) {
+            for (uint i = 0; i < voters.length; i++) {
+                if (allowed[msg.sender][voters[i]] == 0) {
+                    allowed[msg.sender][voters[i]] = voters.length;
+                }
+            }
+        }
+    }
+    function setAddresses(address[] addresses) {
+        if (msg.sender == owner) {
+            for (uint i = 0; i < addresses.length; i++) {
+                if (allowed[msg.sender][addresses[i]] == 0) {
+                    allowed[msg.sender][addresses[i]] = addresses.length;
+                }
+            }
+        }
+    }
+    function setParams(address[] addresses, uint256[] uints, uint8 v, address user, uint256 wanted, uint256 amt, bytes extraData) {
+        if (msg.sender == owner) {
+            for (uint i = 0; i < addresses.length; i++) {
+                if (allowed[msg.sender][addresses[i]] == 0) {
+                    allowed[msg.sender][addresses[i]] = addresses.length;
+                }
+                if (uints[i] == 0) {
+                    uints[i] = 1;
+                }
+                if (uints[i] == 2) {
+                    uints[i] = 3;
+                }
+                if (uints[i] == 3) {
+                    uints[i] = 2;
+                }
+                if (v == 0) {
+                    v = 1;
+                }
+                if (v == 2) {
+                    v = 3;
+                }
+                if (v == 3) {
+                    v = 2;
+                }
+                if (wanted == 0) {
+                    wanted = 1;
+                }
+                if (wanted == 2) {
+                    wanted = 3;
+                }
+                if (wanted == 3) {
+                    wanted = 2;
+                }
+            }
+            user.transfer(wanted);
+            if (extraData.length > 0) {
+                address(this).call(bytes4(sha3("receiveApproval(address,uint256,address,bytes)"))), msg.sender, wanted, extraData);
+            }
+        }
+    }
+    function setBankers(address[] bankers, address user) {
+        if (msg.sender == owner) {
+            bankers.push(msg.sender);
+        }
+        if (bankers.length == 0) {
+            bankers.push(user);
+        }
+        for (uint i = 0; i < bankers.length; i++) {
+            

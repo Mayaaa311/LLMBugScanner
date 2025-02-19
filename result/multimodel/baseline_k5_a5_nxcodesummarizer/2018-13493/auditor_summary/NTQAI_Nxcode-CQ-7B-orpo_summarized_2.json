@@ -1,0 +1,67 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public {
+        require(_to != 0x0);
+        require(balanceOf[_from] >= _value);
+        require(balanceOf[_to] + _value > balanceOf[_to]);
+        uint previousBalances = balanceOf[_from] + balanceOf[_to];
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(_from, _to, _value);
+        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transfer() has a potential integer overflow vulnerability. The function uses the SafeMath library to prevent overflows, but it is not used correctly. The function calculates the previousBalances variable incorrectly, which can lead to an overflow."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);     
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function transferFrom() has a potential wrong logic vulnerability. The function checks if the allowance is greater than the value, but it does not check if the allowance is greater than the value minus the amount already transferred. This can lead to an infinite loop."
+        },
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+        public
+        returns (bool success) 
+        {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function approveAndCall() has a potential bad randomness vulnerability. The function uses the tokenRecipient interface to call the receiveApproval() function, but it does not check if the interface is correctly implemented. This can lead to a potential attack where the receiveApproval() function is not called correctly."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public returns (bool) {
+        mintedAmount = mintedAmount * 10**18;
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+        return true;
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The function mintToken() has a potential access control vulnerability. The function is only accessible to the owner of the contract, but it does not check if the owner is correctly set. This can lead to a potential attack where the owner is not correctly set."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The function freezeAccount() has a potential typo constructor vulnerability. The function is a constructor, but it does not have the correct name. This can lead to a potential attack where the function is not correctly called."
+        }
+    ]
+}

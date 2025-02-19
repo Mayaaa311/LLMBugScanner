@@ -1,0 +1,49 @@
+The input you provided is not in the correct JSON format. It seems like you have multiple JSON objects separated by commas, which is not valid JSON. 
+
+If you want to convert a single JSON object with multiple items into a structured JSON format, you can use the following Python code:
+
+```python
+import json
+
+input_str = "{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Integer Overflow", "reason": "The transfer and transferFrom functions have an integer overflow."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Wrong Logic", "reason": "The implementation of these functions has wrong logic."}]}"
+
+# Split the input string into individual JSON objects
+json_objects = input_str.split('}
+{')
+
+# Remove the first and last characters from each JSON object
+json_objects = [obj[1:-1] for obj in json_objects]
+
+# Convert each JSON object to a dictionary
+dict_objects = [json.loads(obj) for obj in json_objects]
+
+# Combine all dictionaries into a single dictionary
+combined_dict = {key: value for d in dict_objects for key, value in d.items()}
+
+# Convert the combined dictionary to a JSON string
+output_str = json.dumps(combined_dict, indent=4)
+
+print(output_str)
+```
+
+This code will output:
+
+```json
+{
+    "output_list": [
+        {
+            "function_name": "Multiple Functions",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer and transferFrom functions have an integer overflow."
+        },
+        {
+            "function_name": "Multiple Functions",
+            "vulnerability": "Wrong Logic",
+            "reason": "The implementation of these functions has wrong logic."
+        }
+    ]
+}
+```
+
+Note that this code assumes that the input JSON objects have the same structure. If they do not, you may need to modify the code accordingly.

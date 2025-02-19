@@ -1,0 +1,70 @@
+{
+    "output_list": [
+        {
+            "function_name": "sellOffline",
+            "code": "if (remaining > 0)
+{
+    uint finalTokens =  (token_amount  * (10 ** 18));
+    if(finalTokens < remaining)
+        {
+            remaining = remaining - finalTokens;
+            _transfer(owner,rec_address, finalTokens);
+            TransferSell(owner, rec_address, finalTokens,'Offline');
+        }
+    else
+        {
+            revert();
+        }
+}
+else
+{
+    revert();
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function 'sellOffline' does not properly check for overflow when calculating 'finalTokens'. If 'token_amount' is large enough, 'finalTokens' can exceed the 'remaining' variable, leading to an integer overflow and allowing the attacker to mint more tokens than intended."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "if(tokensToMint > 0)
+{
+    var totalTokenToMint = tokensToMint * (10 ** 18);
+    balanceOf[owner] += totalTokenToMint;
+    totalSupply += totalTokenToMint;
+    Transfer(0, owner, totalTokenToMint);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function 'mintToken' does not check for overflow when updating the 'balanceOf[owner]' and 'totalSupply'. If 'tokensToMint' is large, the multiplication can lead to an overflow, allowing the owner to mint an arbitrary amount of tokens."
+        },
+        {
+            "function_name": "transferOwnership",
+            "code": "balanceOf[owner] = 0;
+balanceOf[newOwner] = remaining;
+owner = newOwner;",
+            "vulnerability": "Access Control",
+            "reason": "The function 'transferOwnership' allows the owner to transfer ownership to any address, including malicious addresses, without any checks. This can lead to unauthorized transfer of ownership and potential theft of funds."
+        },
+        {
+            "function_name": "withdraw",
+            "code": "if((msg.sender == owner) || (msg.sender ==  bkaddress)){
+benAddress.transfer(amountWith);
+}
+else{
+    revert();
+}",
+            "vulnerability": "Access Control",
+            "reason": "The function 'withdraw' allows the owner or a potentially compromised 'bkaddress' to withdraw funds from the contract, without any checks. This can lead to unauthorized withdrawal of funds by the owner or any malicious user."
+        },
+        {
+            "function_name": "withdraw_all",
+            "code": "if((msg.sender == owner) || (msg.sender ==  bkaddress) ){
+    var amountWith = this.balance - 10000000000000000;
+benAddress.transfer(amountWith);
+}
+else{
+    revert();
+}",
+            "vulnerability": "Access Control",
+            "reason": "Similar to 'withdraw', 'withdraw_all' also allows the owner or a potentially compromised 'bkaddress' to withdraw funds from the contract, without any checks. This can lead to unauthorized withdrawal of funds by the owner or any malicious user."
+        }
+    ]
+}

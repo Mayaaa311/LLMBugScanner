@@ -1,0 +1,352 @@
+{"output_list": [{"function_name": "mint", "vulnerability": "Integer Overflow", "reason": "The mint function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "unfreeze", "vulnerability": "Access Control", "reason": "The unfreeze function has an access control flaw where the owner can decide the fate of the balance of an arbitrary user."}]}
+{"output_list": [{"function_name": "transfer", "vulnerability": "Integer Overflow", "reason": "The transfer function has an integer overflow where the balance of the owner is subtracted by the balance of the user."}]}
+{"output_list": [{"function_name": "transferFrom", "vulnerability": "Access Control", "reason": "The transferFrom function has an access control flaw where the owner can decide the fate of the balance of an arbitrary user."}]}
+{"output_list": [{"function_name": "approve", "vulnerability": "Access Control", "reason": "The approve function has an access control flaw where the owner can decide the fate of the balance of an arbitrary user."}]}
+{"output_list": [{"function_name": "burn", "vulnerability": "Integer Overflow", "reason": "The burn function has an integer overflow where the owner can decide the balance of the user to be burned."}]}
+}
+Code: 
+pragma solidity ^0.4.21;
+contract ERC223ReceivingContract {
+    function tokenFallback(address _from, uint _value, bytes _data) public;
+}
+contract ERC20Basic {
+    uint public totalSupply;
+    function balanceOf(address who) public constant returns (uint);
+    function transfer(address _to, uint value) public;
+    event Transfer(address indexed from, address indexed to, uint value);
+}
+contract ERC20 is ERC20Basic {
+    function approve(address _spender, uint _value) public returns (bool);
+    function allowance(address _owner, address _spender) public constant returns (uint);
+}
+contract BasicToken is ERC20Basic {
+    mapping (address => uint) balances;
+    function transfer(address _to, uint _value) public {
+        require(msg.sender != ico);
+        balances[msg.sender] = balances[msg.sender].sub(_value);
+        balances[_to] = balances[_to].add(_value);
+        Transfer(msg.sender, _to, _value);
+    }
+    function mint(address _holder, uint _value) public {
+        require(msg.sender == ico);
+        require(_value != 0);
+        require(totalSupply + _value <= TOKEN_LIMIT);
+        balances[_holder] += _value;
+        totalSupply += _value;
+        Transfer(0x0, _holder, _value);
+    }
+    function burn(uint _value) public {
+        require(msg.sender == ico);
+        require(_value > 0);
+        totalSupply -= _value;
+        balances[ico] -= _value;
+        Burn(ico, _value);
+    }
+    function transferFrom(address _from, address _to, uint _value) public onlyPayloadSize(3 * 32) {
+        require(msg.sender != ico);
+        super.transferFrom(_from, _to, _value);
+    }
+    function approve(address _spender, uint _value) public returns (bool success) {
+        require(!msg.data.length < 2 * 32);
+        require(value == 0 || (_value == 0 && length == 0) || (value != 0 && length != 0));
+        require(ico != address(0));
+        require(_spender != address(0));
+        success = true;
+        if(_value != 0){
+            allow(_spender, _value);
+        }
+        Approval(ico, _spender, _value);
+    }
+    function allowance(address _owner, address _spender) public constant returns (uint remaining) {
+        require(ico != address(0));
+        return allowed[_owner, _spender];
+    }
+}
+contract ETY is BasicToken, BurnableToken {
+    string public name = "Etherty Token";
+    string public symbol = "ETY";
+    uint public decimals = 18;
+    uint constant TOKEN_LIMIT = 240 * 1e6 * 1e18;
+    address public ico;
+    bool public tokensAreFrozen = true;
+    function ETY(address _ico) public {
+        ico = _ico;
+    }
+    function unfreeze() public {
+        require(msg.sender == ico);
+        tokensAreFrozen = false;
+    }
+    function transfer(address _to, uint _value) public {
+        require(!tokensAreFrozen);
+        super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint _value) onlyPayloadSize(3 * 32) public {
+        require(!tokensAreFrozen);
+        super.transferFrom(_from, _to, _value);
+    }
+    function approve(address _spender, uint _value) public returns (bool success) {
+        require(!tokensAreFrozen);
+        require(_value == 0 || (_value == 0 && length == 0) || (value != 0 && length != 0));
+        require(ico != address(0));
+        require(_spender != address(0));
+        success = true;
+        if(_value != 0){
+            allow(_spender, _value);
+        }
+        Approval(ico, _spender, _value);
+    }
+    function burn(uint _value) public {
+        require(!tokensAreFrozen);
+        require(_value > 0);
+        totalSupply -= _value;
+        balances[ico] -= _value;
+        Burn(ico, _value);
+    }
+    function allowance(address _owner, address _spender) public constant returns (uint remaining) {
+        require(!tokensAreFrozen);
+        return allowed[_owner, _spender];
+    }
+}
+contract ERC223ReceivingContract {
+    function tokenFallback(address _from, uint _value, bytes _data) public;
+}
+contract Standard223ReceivingContract is ERC223ReceivingContract {
+    function receiveApproval(address _from, uint _value, address _sender, bytes _data) public;
+}
+contract MiniMeToken is Standard223ReceivingContract {
+    string public name = "MiniMe Token";
+    string public symbol = "MMT";
+    uint public decimals = 18;
+    string public version = "H1.0";
+    string public description = "The MiniMe Token is an ERC223 token with a fixed supply of 2000 tokens and no "zero-payout" feature.";
+    function MiniMeToken(address _ico) public {
+        ico = _ico;
+    }
+    function unfreeze() public {
+        require(msg.sender == ico);
+        tokensAreFrozen = false;
+    }
+    function transfer(address _to, uint _value) public {
+        require(!tokensAreFrozen);
+        super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint _value) onlyPayloadSize(3 * 32) public {
+        require(!tokensAreFrozen);
+        super.transferFrom(_from, _to, _value);
+    }
+    function approve(address _spender, uint _value) public returns (bool success) {
+        require(!tokensAreFrozen);
+        require(_value == 0 || (_value == 0 && length == 0) || (value != 0 && length != 0));
+        require(ico != address(0));
+        require(_spender != address(0));
+        success = true;
+        if(_value != 0){
+            allow(_spender, _value);
+        }
+        Approval(ico, _spender, _value);
+    }
+    function burn(uint _value) public {
+        require(!tokensAreFrozen);
+        require(_value > 0);
+        totalSupply -= _value;
+        balances[ico] -= _value;
+        Burn(ico, _value);
+    }
+    function allowance(address _owner, address _spender) public constant returns (uint remaining) {
+        require(!tokensAreFrozen);
+        return allowed[_owner, _spender];
+    }
+}
+contract Burnable223Token is MiniMeToken {
+    event Burn(address indexed burner, uint256 value);
+    function burn(uint256 _value) public {
+        require(msg.sender == ico && value > 0);
+        totalSupply -= _value;
+        balances[ico] -= _value;
+        Burn(ico, _value);
+    }
+}
+contract BitAseanToken is Burnable223Token {
+    string public name = "BitAsean Token";
+    string public symbol = "H1.0";
+    string public version = "H1.0";
+    string public description = "The BitAsean Token is an ERC223 token with a fixed supply of 2000 tokens and no 'zero-payout' feature.";
+    function BitAseanToken(address _ico) public {
+        ico = _ico;
+    }
+    function unfreeze() public {
+        require(msg.sender == ico);
+        tokensAreFrozen = false;
+    }
+    function transfer(address _to, uint _value) public {
+        require(!tokensAreFrozen);
+        super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint _value) onlyPayloadSize(3 * 32) public {
+        require(!tokensAreFrozen);
+        super.transferFrom(_from, _to, _value);
+    }
+    function approve(address _spender, uint _value) public returns (bool success) {
+        require(!tokensAreFrozen);
+        require(_value == 0 || (_value == 0 && length == 0) || (value != 0 && length != 0));
+        require(ico != address(0));
+        require(_spender != address(0));
+        success = true;
+        if(_value != 0){
+            allow(_spender, _value);
+        }
+        Approval(ico, _spender, _value);
+    }
+    function burn(uint256 _value) public {
+        require(!tokensAreFrozen);
+        require(_value > 0);
+        totalSupply -= _value;
+        balances[ico] -= _value;
+        Burn(ico, _value);
+    }
+    function allowance(address _owner, address _spender) public constant returns (uint remaining) {
+        require(!tokensAreFrozen);
+        return allowed[_owner, _spender];
+    }
+}
+contract EETHERToken is Standard223ReceivingContract, BitAseanToken {
+    string public name = "EETHER Token";
+    string public symbol = "EETHER";
+    uint public decimals = 18;
+    string public version = "H1.0";
+    string public description = "The EETHER Token is an ERC223 token with a fixed supply of 2000 tokens and no 'zero-payout' feature.";
+    function EETHERToken(address _ico) public {
+        ico = _ico;
+    }
+    function unfreeze() public {
+        require(msg.sender == ico);
+        tokensAreFrozen = false;
+    }
+    function transfer(address _to, uint _value) public {
+        require(!tokensAreFrozen);
+        super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint _value) onlyPayloadSize(3 * 32) public {
+        require(!tokensAreFrozen);
+        super.transferFrom(_from, _to, _value);
+    }
+    function approve(address _spender, uint _value) public returns (bool success) {
+        require(!tokensAreFrozen);
+        require(_value == 0 || (_value == 0 && length == 0) || (value != 0 && length != 0));
+        require(ico != address(0));
+        require(_spender != address(0));
+        success = true;
+        if(_value != 0){
+            allow(_spender, _value);
+        }
+        Approval(ico, _spender, _value);
+    }
+    function burn(uint256 _value) public {
+        require(!tokensAreFrozen);
+        require(_value > 0);
+        totalSupply -= _value;
+        balances[ico] -= _value;
+        Burn(ico, _value);
+    }
+    function allowance(address _owner, address _spender) public constant returns (uint remaining) {
+        require(!tokensAreFrozen);
+        return allowed[_owner, _spender];
+    }
+}
+contract ERC223ReceivingContract {
+    function receiveApproval(address _from, uint256 _value, address _sender, bytes _data) public;
+}
+contract Standard223ReceivingContract is ERC223ReceivingContract {
+    function unfreeze() public {
+        require(msg.sender == ico);
+        tokensAreFrozen = false;
+    }
+    function transfer(address _to, uint _value) public {
+        require(!tokensAreFrozen && _to != ico);
+        super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint _value) public {
+        require(!tokensAreFrozen && _to != ico);
+        super.transferFrom(_from, _to, _value);
+    }
+    function approve(address _spender, uint _value) public returns (bool success) {
+        require(!tokensAreFrozen && _spender != address(0));
+        require(_value == 0);
+        allow(_spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) public constant returns (uint remaining) {
+        require(!tokensAreFrozen && _owner != ico && _spender != address(0));
+        return allowed[_owner, _spender];
+    }
+    function burn(uint256 _value) public {
+        require(msg.sender == ico && _value > 0);
+        totalSupply -= _value;
+        balances[ico] -= _value;
+        Burn(ico, _value);
+    }
+    function mint(address _holder, uint _value) public {
+        require(msg.sender == ico && _value > 0 && tokensAreFrozen);
+        balances[_holder] += _value;
+        totalSupply += _value;
+        Transfer(0x0, _holder, _value);
+    }
+    function unfreeze(address _user) public {
+        require(msg.sender == ico && _user == address(0));
+        tokensAreFrozen = false;
+    }
+    function transfer(address _to, uint _value) public returns (bool success) {
+        require(!tokensAreFrozen && _to != ico);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
+        require(!tokensAreFrozen && _to != ico);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function approve(address _spender, uint _value) public returns (bool success) {
+        require(!tokensAreFrozen && _spender != address(0));
+        if (_value != 0) {
+            allow(_spender, _value);
+        }
+        return true;
+    }
+    function allowance(address _owner, address _spender) public constant returns (uint remaining) {
+        require(!tokensAreFrozen && _owner != ico && _spender != address(0));
+        return allowed[_owner, _spender];
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        require(msg.sender == ico && _value > 0);
+        totalSupply -= _value;
+        balances[ico] -= _value;
+        Burn(ico, _value);
+        return true;
+    }
+    function mint(address _holder, uint _value) public returns (bool success) {
+        require(msg.sender == ico && _value > 0 && tokensAreFrozen);
+        balances[_holder] += _value;
+        totalSupply += _value;
+        Transfer(0x0, _holder, _value);
+        return true;
+    }
+    function unfreeze(address _user) public returns (bool success) {
+        require(msg.sender == ico && _user == address(0));
+        tokensAreFrozen = false;
+        return true;
+    }
+    function transfer(address _to, uint _value) public returns (bool success) {
+        require(!tokensAreFrozen && _to != ico);
+        return super.transfer(_to, _value);
+    }
+    function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
+        require(!tokensAreFrozen && _to != ico);
+        return super.transferFrom(_from, _to, _value);
+    }
+    function approve(address _spender, uint _value) public returns (bool success) {
+        require(!tokensAreFrozen && _spender != address(0));
+        if (_value != 0) {
+            allow(_spender, _value);
+        }
+        return true;
+    }
+    function

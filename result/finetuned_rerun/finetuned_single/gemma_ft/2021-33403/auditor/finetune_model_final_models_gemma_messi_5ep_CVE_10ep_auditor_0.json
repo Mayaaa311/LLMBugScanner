@@ -1,0 +1,464 @@
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Integer Overflow", "reason": "The transfer and balance functions have an integer overflow."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Wrong Target Selection", "reason": "The transfer function is sending tokens to wrong/unknown targets."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Integer Overflow", "reason": "The balance function does not check the balance before the user's wallet, causing a potential uninitialized wallet."}]}
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Wrong Target Selection", "reason": "The balance Ether function does not check the balance before the user's wallet, causing a potential uninitialized wallet."}]}
+  function master() {
+    if (msg.sender != master) throw;
+  }
+  function setV26(bool b) {
+    if (msg.sender != master) throw;
+    v26 = b;
+  }
+  function setV27(bool b) {
+    if (msg.sender != master) throw;
+    v27 = b;
+  }
+  function setV28(bool b) {
+    if (msg.sender != master) throw;
+    v28 = b;
+  }
+  function setV29(bool b) {
+    if (msg.sender != master) throw;
+    v29 = b;
+  }
+  function setMaster(address m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setBalanceMultiplier(uint256 m) {
+    if (msg.sender != master) throw;
+    balanceMultiplier = m;
+  }
+  function setTransfer(bool b) {
+    if (msg.sender != master) throw;
+    allowTransfer[msg.sender] = b;
+  }
+  function setMigrationAgent(address m) {
+    if (msg.sender != master) throw;
+    migrationAgent = m;
+  }
+  function setEarlyInvestorExchangeRate(uint256 m) {
+    if (msg.sender != master) throw;
+    EarlyInvestorExchangeRate = m;
+  }
+  function setStartDate(uint256 m) {
+    if (msg.sender != master) throw;
+    fundingStart = m;
+  }
+  function setStartRefund(bool m) {
+    if (msg.sender != master) throw;
+    startRefund = m;
+  }
+  function setICORunning(bool m) {
+    if (msg.sender != master) throw;
+    funding = m;
+  }
+  function setExchangeRate(uint256 m) {
+    if (msg.sender != master) throw;
+    exchangeRate = m;
+  }
+  function setICount(uint256 m) {
+    if (msg.sender != master) throw;
+    totalParticipants = m;
+  }
+  function() payable {
+    if (msg.sender != master) throw;
+    if (block.timestamp < fundingStart) throw;
+    if (!allowTransfer) throw;
+    var amount = msg.value * exchangeRate;
+    if (amount > totalTokens) throw;
+    balances[msg.sender] += amount;
+    totalTokens -= amount;
+    Transfer(0, msg.sender, amount);
+  }
+  function refund() {
+    if (msg.sender != master) throw;
+    if (!startRefund) throw;
+    var amount = balances[msg.sender];
+    if (amount == 0) throw;
+    balances[msg.sender] = 0;
+    totalTokens -= amount;
+    Refund(msg.sender, amount);
+    if (!msg.sender.send(amount)) throw;
+  }
+  function transfer(address _to, uint256 _value) returns (bool success) {
+    if (msg.sender != master) throw;
+    if (_to == 0x0) throw;
+    if (!allowTransfer) throw;
+    if (block.timestamp < fundingStart) throw;
+    if (_value > totalTokens) throw;
+    balances[msg.sender] -= _value;
+    totalTokens -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if (msg.sender != master) throw;
+    if (_to == 0x0) throw;
+    if (!allowTransfer) throw;
+    if (block.timestamp < fundingStart) throw;
+    if (_value > totalTokens) throw;
+    var senderBalance = balances[_from];
+    if (_value > senderBalance) throw;
+    balances[_from] -= _value;
+    totalTokens -= _value;
+    balances[_to] += _value;
+    Transfer(_from, _to, _value);
+    if (balances[_from] == 0) throw;
+    if (totalTokens == 0) throw;
+  }
+  function approve(address _spender, uint256 _value) returns (bool success) {
+    if (msg.sender != master) throw;
+    if (_value != 0 && allowed[_spender] != 0) throw;
+    allowed[_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+  function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+    if (msg.sender != master) throw;
+    return allowed[_owner][_spender];
+  }
+  function getTokenBalance(address tokenAddress, address who) constant returns (uint){
+      if (msg.sender != master) throw;
+      if (tokenAddress == 0x0) throw;
+      if (who == 0x0) throw;
+      var myBalance = balances[who];
+      var total = totalTokens;
+      if (myBalance > total) throw;
+      return myBalance;
+  }
+  function withdraw() {
+    if (msg.sender != master) throw;
+    if (this.balance < totalTokens) throw;
+    master.send(this.balance);
+  }
+  function setMaster(address m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setBalanceMultiplier(uint256 m) {
+    if (msg.sender != master) throw;
+    balanceMultiplier = m;
+  }
+  function setTransfer(bool b) {
+    if (msg.sender != master) throw;
+    allowTransfer[msg.sender] = b;
+  }
+  function setMigrationAgent(address m) {
+    if (msg.sender != master) throw;
+    migrationAgent = m;
+  }
+  function setEarlyInvestorExchangeRate(uint256 m) {
+    if (msg.sender != master) throw;
+    EarlyInvestorExchangeRate = m;
+  }
+  function setStartDate(uint256 m) {
+    if (msg.sender != master) throw;
+    fundingStart = m;
+  }
+  function setStartRefund(bool m) {
+    if (msg.sender != master) throw;
+    startRefund = m;
+  }
+  function setICORunning(bool m) {
+    if (msg.sender != master) throw;
+    funding = m;
+  }
+  function setExchangeRate(uint256 m) {
+    if (msg.sender != master) throw;
+    exchangeRate = m;
+  }
+  function setICount(uint256 m) {
+    if (msg.sender != master) throw;
+    totalParticipants = m;
+  }
+  function() payable {
+    if (msg.sender != master) throw;
+    if (block.timestamp < fundingStart) throw;
+    if (!allowTransfer) throw;
+    var amount = msg.value * exchangeRate;
+    if (amount > totalTokens) throw;
+    balances[msg.sender] += amount;
+    totalTokens -= amount;
+    Transfer(0, msg.sender, amount);
+  }
+  function refund() {
+    if (msg.sender != master) throw;
+    if (!startRefund) throw;
+    var amount = balances[msg.sender];
+    if (amount == 0) throw;
+    balances[msg.sender] = 0;
+    totalTokens -= amount;
+    Refund(msg.sender, amount);
+    if (!msg.sender.send(amount)) throw;
+  }
+  function setNetwork(string name, setNetwork(name);
+  function setOwner(address _owner) {
+    if (msg.sender != master) throw;
+    master = _owner;
+  }
+  function setBalance(uint256 _amount) {
+    if (msg.sender != master) throw;
+    master.send(_amount);
+  }
+  function setMaster(address m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setBalanceMultiplier(uint256 m) {
+    if (msg.sender != master) throw;
+    master.send(m);
+  }
+  function setICAR(address m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setNetwork(string m) {
+    if (msg.sender != master) throw;
+    master = setNetwork(m);
+  }
+  function setOwner(address m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setBalance(uint256 m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setMaster(address m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setBalanceMultiplier(uint256 m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setICorId(string m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setICount(uint256 m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setEtherBalance(uint256 m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setNetwork(string name) {
+    if (msg.sender != master) throw;
+    master = setNetwork(name);
+  }
+  function setOwner(address m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setBalance(uint256 m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setMaster(address m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+}
+  function setNetwork(string name) {
+    if (msg.sender != master) throw;
+    master = setNetwork(name);
+  }
+  function setOwner(address m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setBalance(uint256 m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setMaster(address m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+}
+  function set setNetwork(string m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setBalance(uint256 m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setOwner(address m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setMaster(address m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setNetwork(string) { ($.f3d14, theNetwork, string, address, master, true);
+  function setBalance(uint256) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setNetwork(address) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setOwner(address m) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setMaster(address m) { { {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setBalance(uint256) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setNetwork(string) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setBalance(uint256) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setOwner(address) {
+    if (msg.sender != master) throw;
+    master = m;
+  }
+  function setNetwork(string) { ($.f, master, 
+  function setBalance(uint256) { { {
+    if (msg.sender != master) throw;
+  }
+  function set setNetwork(address) {
+    if (msg.sender != master) throw;
+  }
+  function setOwner(address) {
+    if (msg.sender != master) throw;
+  }
+  function setMaster(address) {
+    if (msg.sender != master) throw;
+  }
+  function setNetwork(string) {
+    if (msg.sender != master) throw;
+  }
+  function setBalance(uint256) {
+    if (msg.sender != master) throw;
+  }
+  function setOwner(address) { { { { { { {
+    if (msg.sender != master) throw;
+  }
+  function set set set set set setMaster(address)) { (!!msg.sender) { { { (!!msg.sender != master) ;
+    if (msg.sender != master) throw;
+  }
+  function set setOwner(address) {
+    if (msg.sender != master) throw;
+  }
+  function set setNetworkPolicy(address) { {
+    if (msg.sender != master) throw;
+  }
+  function set set set setMaster,
+  function owner) { { {
+    if (msg.sender == true) throw;
+  }
+  function set set setMaster) { {
+    if (msg.sender == true) throw;
+  }
+ suspic2, they = true;
+ suspic2, they = true;
+  function ownerAddress, they = true) { (!!040, theMaster,,,,, theMaster == true) throw;
+  function userA2, they = true;
+  function userA = true;
+  function owner = true;
+  function userA = true;
+  function userA = true;
+  function ownerAddress = true;
+  function userA = true;
+  function userA = true;
+  function = true;
+  function = true;
+  function = true;
+  function = true;
+  function = true;
+  function = true;
+  function = true;
+  function = true;
+  function = true;
+  function = true;
+  function = true;
+  function = true;
+  function = true;
+  user = true;
+  function = true;
+  user = true;
+  true = true;
+  user = true;
+  true = true;
+  function = true;
+  true = true;
+  true = true;
+  function = true;
+  function = true;
+  function = true;
+  function = true;
+  function = true;
+  true = true;
+  true = true;
+  true = true;
+  true;
+  true = true;
+  true = true;
+  true;
+  true = true;
+  true;
+
+  true = true;
+  true;
+  true = true;
+  true;
+  true;
+  true = true;
+  true;
+  true;
+
+
+
+  true;
+  true = true;
+  true;
+  true;
+
+  true;
+  true;
+
+  true;
+
+  true;
+
+  true;
+  true;
+
+  true;
+
+  true;
+  true;
+
+  true;
+  true;
+  true;
+  true;
+
+  true;
+  true;
+
+250;
+  true;
+  true;
+
+  true;
+
+
+28,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

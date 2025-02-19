@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "quaker",
+            "code": "function quaker(address wallet) public { owner = msg.sender; ownerWallet=wallet; totalSupply = INITIAL_SUPPLY * 10 ** 18; tokenBalances[wallet] = INITIAL_SUPPLY * 10 ** 18;   }",
+            "vulnerability": "Access Control",
+            "reason": "The contract does not have any access control mechanism for the quaker function. Anyone can call this function, which can lead to unauthorized ownership transfer and potentially loss of funds."
+        },
+        {
+            "function_name": "mint",
+            "code": "function mint(address wallet, address buyer, uint256 tokenAmount) public onlyOwner { require(tokenBalances[wallet] >= tokenAmount);               tokenBalances[buyer] = tokenBalances[buyer].add(tokenAmount);                  tokenBalances[wallet] = tokenBalances[wallet].add(tokenAmount);                        Transfer(wallet, buyer, tokenAmount); totalSupply=totalSupply.sub(tokenAmount); }",
+            "vulnerability": "Access Control",
+            "reason": "The mint function is only callable by the contract owner. This means that anyone can mint tokens on behalf of the contract owner, which can lead to unauthorized token transfers and potentially loss of funds."
+        },
+        {
+            "function_name": "pullBack",
+            "code": "function pullBack(address wallet, address buyer, uint256 tokenAmount) public onlyOwner { require(tokenBalances[buyer]>=tokenAmount); tokenBalances[buyer] = tokenBalances[buyer].sub(tokenAmount); tokenBalances[wallet] = tokenBalances[wallet].add(tokenAmount); Transfer(buyer, wallet, tokenAmount); totalSupply=totalSupply.add(tokenAmount); }",
+            "vulnerability": "Access Control",
+            "reason": "The pullBack function is only callable by the contract owner. This means that anyone can pull back tokens from the contract owner's account, which can lead to unauthorized token transfers and potentially loss of funds."
+        },
+        {
+            "function_name": "totalSupply",
+            "code": "function totalSupply() public constant returns (uint) { return totalSupply  - tokenBalances[address(0)]; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The totalSupply function subtracts the balance of the address(0) from the totalSupply, which can lead to integer overflow if the balance of address(0) is very large. This can cause the totalSupply to be incorrectly calculated and potentially lead to loss of funds."
+        },
+        {
+            "function_name": "balanceOf",
+            "code": "function balanceOf(address _owner) constant public returns (uint256 balance) { return tokenBalances[_owner]; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The balanceOf function returns the balance of the given address, which can lead to integer overflow if the balance is very large. This can cause the balance to be incorrectly calculated and potentially lead to loss of funds."
+        }
+    ]
+}

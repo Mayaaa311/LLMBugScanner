@@ -1,0 +1,121 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) {
+        if (balanceOf[msg.sender] < _value) throw;           
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw; 
+        if (frozenAccount[msg.sender]) throw;                
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+        if(_value > 0){
+            if(balanceOf[msg.sender] == 0){
+                addresses[indexes[msg.sender]] = addresses[lastIndex];
+                indexes[addresses[lastIndex]] = indexes[msg.sender];
+                indexes[msg.sender] = 0;
+                delete addresses[lastIndex];
+                lastIndex--;
+            }
+            if(indexes[_to]==0){
+                lastIndex++;
+                addresses[lastIndex] = _to;
+                indexes[_to] = lastIndex;
+            }
+        }
+    }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transfer() has an integer overflow vulnerability. The variable _value is used to calculate the balance of the sender and the balance of the receiver. If the sender has a balance of 2^256 - 1, the calculation will overflow and the function will throw an exception. This vulnerability can be exploited by sending a large amount of tokens to a receiver, causing the sender to lose all their tokens."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if (frozenAccount[_from]) throw;                        
+        if (balanceOf[_from] < _value) throw;                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) throw;  
+        if (_value > allowance[_from][msg.sender]) throw;   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function transferFrom() has a wrong logic. The function checks if the sender has enough tokens to transfer, but it does not check if the receiver has enough tokens to receive. This vulnerability can be exploited by sending a large amount of tokens to a receiver, causing the sender to lose all their tokens."
+        },
+        {
+            "function_name": "distributeTokens",
+            "code": "function distributeTokens(uint startIndex,uint endIndex) onlyOwner returns (uint) {
+        uint distributed = 0;
+        require(startIndex < endIndex);
+        for(uint i = startIndex; i < lastIndex; i++){
+            address holder = addresses[i+1];
+            uint reward = balanceOf[holder] * 3 / 100;
+            balanceOf[holder] += reward;
+            distributed += reward;
+            Transfer(0, holder, reward);
+        }
+        totalSupply += distributed;
+        return distributed;
+    }",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function distributeTokens() has a bad randomness vulnerability. The function distributes tokens to a random set of addresses. However, the function does not check if the addresses are valid or if the tokens are already distributed. This vulnerability can be exploited by sending a large amount of tokens to a receiver, causing the sender to lose all their tokens."
+        },
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(address target, uint256 mintedAmount) onlyOwner {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The function mintToken() has an access control vulnerability. The function can only be called by the owner of the contract. This vulnerability can be exploited by a malicious user to mint tokens on behalf of another user."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The function freezeAccount() has an access control vulnerability. The function can only be called by the owner of the contract. This vulnerability can be exploited by a malicious user to freeze the account of another user."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }",
+            "vulnerability": "Access Control",
+            "reason": "The function setPrices() has an access control vulnerability. The function can only be called by the owner of the contract. This vulnerability can be exploited by a malicious user to set the prices of the contract on behalf of another user."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable {
+        uint amount = msg.value / buyPrice;                
+        if (balanceOf[this] < amount) throw;               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        Transfer(this, msg.sender, amount);                
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function buy() has a wrong logic. The function calculates the amount of tokens to be bought based on the price of the contract. However, the function does not check if the contract has enough tokens to buy. This vulnerability can be exploited by sending a large amount of ether to the contract, causing the contract to lose all its tokens."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) {
+        if (balanceOf[msg.sender] < amount ) throw;        
+        balanceOf[this] += amount;                         
+        balanceOf[msg.sender] -= amount;                   
+        if (!msg.sender.send(amount * sellPrice)) {        
+            throw;                                         
+        } else {
+            Transfer(msg.sender, this, amount);            
+        }
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function sell() has a wrong logic. The function calculates the amount of ether to be sold based on the price of the contract. However, the function does not check if the contract has enough ether to sell. This vulnerability can be exploited by sending a large amount of tokens to the contract, causing the contract to lose all its ether."
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+{
+  "output_list": [
+    {
+      "function_name": "transfer",
+      "code": "function transfer(address _to, uint256 _value) {
+        if (_to == 0x0) revert();
+        if (balanceOf[msg.sender] < _value) revert();
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert();
+        if (frozenAccount[msg.sender]) revert();
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(msg.sender, _to, _value);
+      }",
+      "vulnerability": "Integer Overflow",
+      "reason": "The transfer function allows a potential trap due to overflow of 'balanceOf[_to] + _value < balanceOf[_to]' condition. Attackers can cause a potential trap due to overflow of 'balanceOf[_to]' variable."
+    }
+  ]
+}

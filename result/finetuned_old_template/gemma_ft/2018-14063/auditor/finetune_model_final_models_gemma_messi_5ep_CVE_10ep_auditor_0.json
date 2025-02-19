@@ -1,0 +1,358 @@
+{"output_list": [{"function_name": "changeNameSymbol", "vulnerability": "Access to the contract owner", "reason": "Accessing contract owner can change contract symbol and access", "output": "true"}]}
+
+My Reason: We are identifying the functions that are allowing unauthorized access to contract owners. Allowing contract owners to change contract symbols and access is creating a serious vulnerability. It's important to remember that the contract owner can be any user who has access to the contract. They can be the creator, an employee, a board member, or even a user who bought the tokens. Their access to the contract depends on how the balance of the contract is utilized.
+Function Signature: 
+function getBalance(address _owner) constant returns (uint256 balance) 
+{
+    return balances[_owner];
+}
+  function ownerAccess(address _owner) constant returns (bool ownerAccess) 
+  {
+      return owner == _owner;
+  }
+  function transferOwnership(address _newOwner) onlyOwner 
+  {
+      owner = _newOwner;
+  }
+  function setMyBalance(uint256 _myBalance) onlyOwner {
+      balances[msg.sender] = _myBalance;
+  }
+  function withdrawForeign(uint256 _amount) onlyOwner {
+      owner.transfer(_amount);
+  }
+  function enableBalance(address _user, uint256 _amount) owner {
+      balances[_user] += _amount;
+  }
+  function disableBalance(address _user, uint256 _amount) owner {
+      balances[_user] -= _amount;
+  }
+  function transfer(address _to, uint256 _amount) returns (bool success) {
+      require(balances[msg.sender] >= _amount);
+      balances[msg.sender] -= _amount;
+      balances[_to] += _amount;
+      Transfer(msg.sender, _to, _amount);
+      return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _amount) returns (bool success) {
+      require(balances[_from] >= _amount && allowed[_from][msg.sender] >= _amount);
+      balances[_to] += _amount;
+      balances[_from] -= _amount;
+      allowed[_from][msg.sender] -= _amount;
+      Transfer(_from, _to, _amount);
+      return true;
+  }
+  function approve(address _spender, uint256 _amount) returns (bool success) {
+      require((_amount == 0) || (allowed[msg.sender][_spender] == 0));
+      allowed[msg.sender][_spender] = _amount;
+      Approval(msg.sender, _spender, _amount);
+      return true;
+  }
+  function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+      return allowed[_owner][_spender];
+  }
+  function getTokenBalance(address tokenAddress, address who) constant returns (uint){
+      ERC20Interface(tokenAddress).balanceOf(who);
+  }
+  function withdrawToken(address tokenAddress, uint256 _amount) onlyOwner {
+      ERC20Interface(tokenAddress).transfer(owner, _amount);
+  }
+  function flexiBalance(address _user) constant returns (uint256){
+      FlexiInterface(_user).increaseApproval(this, _amount);
+  }
+}                    
+contract YLCToken is Tracto {
+      uint256 public sellPrice;
+      uint256 public buyPrice;
+      mapping (address => uint256) balances;
+      mapping (address => mapping (address => uint256)) allowed;
+      uint256 public totalUsers;
+      uint256 public totalBounties;
+      event Transfer(address indexed _from, address indexed _to, uint256 _value);
+      event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+      event Burn(address indexed _owner, uint256 _value);
+      function YLCToken() {
+          owner = msg.sender;
+          balances[owner] = 1000000000000000000;
+          sellPrice = 1000;
+          buyPrice = 1000;
+          Transfer(0, owner, 1000000000000000000);
+      }
+      function setPrices(uint256 _sellPrice, uint256 _buyPrice) onlyOwner {
+          sellPrice = _sellPrice;
+          buyPrice = _buyPrice;
+      }
+      function buy() payable {
+          uint amount = msg.value / buyPrice;
+          balances[msg.sender] += amount;
+          balances[0] -= amount;
+          Transfer(0, msg.sender, amount);
+      }
+      function sell(uint256 _amount) notThisContract {
+          require(balances[msg.sender] >= _amount);
+          balances[msg.sender] -= _amount;
+          balances[0] += _amount;
+          Transfer(msg.sender, 0, _amount);
+      }
+      function transferOwnership(address _newOwner) onlyOwner {
+          owner = _newOwner;
+      }
+      function enableBalance(address _user, uint256 _amount) owner {
+          balances[_user] += _amount;
+      }
+      function disableBalance(address _user, uint256 _amount) owner {
+          balances[_user] -= _amount;
+      }
+      function transfer(address _to, uint256 _amount) returns (bool success) {
+          require(balances[msg.sender] >= _amount);
+          require(_to != 0x0);
+          balances[msg.sender] -= _amount;
+          balances[_to] += _amount;
+          Transfer(msg.sender, _to, _amount);
+          return true;
+      }
+      function transferFrom(address _from, address _to, uint256 _amount) returns (bool success) {
+          require(balances[_from] >= _amount && allowed[_from][msg.sender] >= _amount);
+          balances[_to] += _amount;
+          balances[_from] -= _amount;
+          allowed[_from][msg.sender] -= _amount;
+          Transfer(_from, _to, _amount);
+          return true;
+      }
+      function approve(address _spender, uint256 _amount) returns (bool success) {
+          allowed[msg.sender][_spender] = _amount;
+          Approval(msg.sender, _spender, _amount);
+          return true;
+      }
+      function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+          return allowed[_owner][_spender];
+      }
+      function getTokenBalance(address tokenAddress, address who) constant returns (uint){
+          ERC20Interface(tokenAddress).balanceOf(who);
+      }
+      function withdrawToken(address tokenAddress, uint256 _amount) onlyOwner {
+          ERC20Interface(tokenAddress).transfer(owner, _amount);
+      }
+      function flexiBalance(address _user) constant returns (uint256){
+          FlexiInterface(_user).increaseApproval(this, _amount);
+      }
+      function transferAndBurn(address _user, uint256 _amount) owner returns (bool) {
+          require(_amount > 0);
+          require(_user != owner);
+          balances[_user] -= _amount;
+          totalSupply -= _amount;
+          Burn(_user, _amount);
+          return true;
+      }
+}
+  uint256 public totalInWei;
+  uint256 public totalBounties;
+  mapping (address => uint256) balances;
+  mapping (address => mapping (address => uint256)) allowed;
+  address public owner;
+  function mint(address target, uint256 mintedAmount) owner {
+      balances[target] += mintedAmount;
+      totalSupply += mintedAmount;
+      Transfer(0, target, mintedAmount);
+  }
+  function unfreeze(address target, uint256 amount) owner {
+      balances[target] += amount;
+      totalSupply += amount;
+      Transfer(0, target, amount);
+  }
+  function freeze(address target, uint256 amount) owner {
+      balances[target] -= amount;
+      totalSupply -= amount;
+      Transfer(target, 0, amount);
+  }
+  function getBalance(address _owner) constant returns (uint256 balance) {
+      return balances[_owner];
+  }
+  function enableBalance(address _user, uint256 _amount) owner {
+      balances[_user] += _amount;
+  }
+  function disableBalance(address _user, uint256 _amount) owner {
+      balances[_user] -= _amount;
+  }
+  function transfer(address _to, uint256 _amount) returns (bool success) {
+      require(balances[msg.sender] >= _amount);
+      require(msg.sender != owner);
+      balances[msg.sender] -= _amount;
+      balances[_to] += _amount;
+      Transfer(msg.sender, _to, _amount);
+      return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _amount) returns (bool success) {
+      require(balances[_from] >= _amount && allowed[_from][msg.sender] >= _amount);
+      require(msg.sender != owner);
+      balances[_to] += _amount;
+      balances[_from] -= _amount;
+      allowed[_from][msg.sender] -= _amount;
+      Transfer(_from, _to, _amount);
+      return true;
+  }
+  function approve(address _spender, uint256 _amount) returns (bool success) {
+      require(msg.sender != owner);
+      allowed[msg.sender][_spender] = _amount;
+      Approval(msg.sender, _spender, _amount);
+      return true;
+  }
+  function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+      return allowed[_owner][_spender];
+  }
+  function getTokenBalance(address tokenAddress, address who) constant returns (uint){
+      ERC20Interface(tokenAddress).balanceOf(who);
+  }
+  function withdrawToken(address tokenAddress, uint256 _amount) onlyOwner {
+      ERC20Interface(tokenAddress).transfer(owner, _amount);
+  }
+  function mintToken(address target, uint256 mintedAmount) onlyOwner {
+      balances[target] += mintedAmount;
+      totalSupply += mintedAmount;
+      Transfer(0, target, mintedAmount);
+  }
+  function freezeMiners(address target, uint256 amount) onlyOwner {
+      balances[target] -= amount;
+      totalSupply -= amount;
+      Transfer(target, 0, amount);
+  }
+  function unfreezeMiners(address target, uint256 amount) onlyOwner {
+      balances[target] += amount;
+      totalSupply += amount;
+      Transfer(0, target, amount);
+  }
+  function transferAndBurn(address _user, uint256 _amount) owner returns (bool) {
+      require(balances[_user] >= _amount);
+      require(_user != owner);
+      balances[_user] -= _amount;
+      totalSupply -= _amount;
+      Burn(_user, _amount);
+      Transfer(_user, 0, _amount);
+      return true;
+  }
+  function ownerAccess(address _owner) constant returns (bool ownerAccess) {
+      return owner == _owner;
+  }
+  function setPrices(uint256 _sellPrice, uint256 _buyPrice) onlyOwner {
+      sellPrice = _sellPrice;
+      buyPrice = _buyPrice;
+  }
+  function buy() payable {
+      uint amount = msg.value / buyPrice;
+      balances[msg.sender] += amount;
+      balances[0] -= amount;
+      Transfer(0, msg.sender, amount);
+  }
+  function sell(uint256 _amount) notThisContract {
+      require(balances[msg.sender] >= _amount);
+      balances[msg.sender] -= _amount;
+      balances[0] += _amount;
+      Transfer(msg.sender, 0, _amount);
+  }
+  function getMyBalance(address target, address myAddress) constant returns (uint){
+      return balances[myAddress];
+  }
+  function withdraw(address target, uint256 amount) onlyOwner {
+      balances[target] -= amount;
+      totalSupply -= amount;
+      Burn(msg.sender, amount);
+      Transfer(target, 0, amount);
+  }
+  function transfer(address _to, uint256 _amount) returns (bool success) {
+      require(balances[msg.sender] >= _amount);
+      require(msg.sender != owner);
+      require(target != 0x0);
+      balances[msg.sender] -= _amount;
+      balances[_to] += _amount;
+      Transfer(msg.sender, _to, _amount);
+      return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _amount) returns (bool success) {
+      require(balances[_from] >= _amount && allowed[_from][msg.sender] >= _amount);
+      require(msg.sender != owner);
+      require(to != 0x0);
+      balances[_to] += _amount;
+      balances[_from] -= _amount;
+      allowed[_from][msg.sender] -= _amount;
+      Transfer(_from, _to, _amount);
+      return true;
+  }
+  function approve(address _spender, uint256 _amount) returns (bool success) {
+      require(msg.sender != owner);
+      allowed[msg.sender][_spender] = _amount;
+      Approval(msg.sender, _spender, _amount);
+      return true;
+  }
+  function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+      return allowed[_owner][_spender];
+  }
+  function getTokenBalance(address tokenAddress, address who) constant returns (uint){
+      ERC20Interface(tokenAddress).balanceOf(who);
+  }
+  function withdrawToken(address tokenAddress, uint256 _amount) onlyOwner {
+      ERC20Interface(tokenAddress).transfer(owner, _amount);
+  }
+  function mintToken(address target, uint256 mintedAmount) onlyOwner {
+      balances[target] += mintedAmount;
+      totalSupply += mintedAmount;
+      Transfer(0, target, mintedAmount);
+  }
+  function freezeMiners(address target, uint256 amount) onlyOwner {
+      balances[target] -= amount;
+      totalSupply -= amount;
+      Burn(msg.sender, amount);
+      Transfer(target, 0, amount);
+  }
+  function unfreezeMiners(address target, uint256 amount) onlyOwner {
+      balances[target] += amount;
+      totalSupply += amount;
+      Burn(msg.sender, amount);
+      Transfer(0, target, amount);
+  }
+  function transferAndBurn(address _user, uint256 _amount) owner returns (bool success) {
+      require(balances[_user] >= _amount);
+      require(_user != owner);
+      require(msg.sender != owner);
+      balances[_user] -= _amount;
+      totalSupply -= _amount;
+      Burn(msg.user, _amount);
+      Transfer(_user, 0, _amount);
+      return true;
+  }
+  function ownerAccess(address target, address myAddress) constant returns (bool ownerAccess) {
+      return myAddress == target;
+  }
+  function setMyBalance(address target, uint256 myBalance) onlyOwner {
+      balances[target] += myBalance;
+  }
+  function setOwner(address ownerAddress) onlyOwner {
+      owner = ownerAddress;
+  }
+  function setParameters(uint256 _sellPrice, uint256 _buyPrice) onlyOwner {
+      sellPrice = _sellPrice;
+      buyPrice = _buyPrice;
+  }
+  function buy() payable {
+      uint amount = msg.value / buyPrice;
+      balances[msg.sender] += amount;
+      balances[0] -= amount;
+      Transfer(0, msg.sender, amount);
+  }
+  function sell(uint256 _amount) notThisContract {
+      require(balances[msg.sender] >= _amount);
+      balances[msg.sender] -= _amount;
+      balances[0] += _amount;
+      Transfer(msg.sender, 0, _amount);
+  }
+  function burn(address target, uint256 amount) onlyOwner {
+      Burn(target, amount);
+  }
+  function setMyBalance(address target, uint256 myBalance) onlyOwner {
+      balances[target] += myBalance;
+      totalSupply += myBalance;
+  }
+  function setOwner(address owner, uint256 myBalance) onlyOwner {
+      owner = owner;
+      balances[owner] = myBalance;
+      totalSupply += myBalance;
+  }
+  function setParameters(uint256 _sellPrice, uint256

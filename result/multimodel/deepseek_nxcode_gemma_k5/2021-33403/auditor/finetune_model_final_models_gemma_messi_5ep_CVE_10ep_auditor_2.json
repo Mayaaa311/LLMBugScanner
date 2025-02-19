@@ -1,0 +1,352 @@
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Integer Overflow", "reason": "The transfer and transferFrom functions have an integer overflow."}]}
+ 
+
+Code Input: 
+
+pragma solidity ^0.4.19;
+contract ERC20Basic {
+  uint256 public totalSupply;
+  function balanceOf(address who) public view returns (uint256);
+  function transfer(address to, uint256 value) public returns (bool);
+  event Transfer(address indexed from, address indexed to, uint256 value);
+}
+contract ERC20 is ERC20Basic {
+  function allowance(address owner, address spender) public view returns (uint256);
+  function transferFrom(address from, address to, uint256 value) public returns (bool);
+  function approve(address spender, uint256 value) public returns (bool);
+}
+contract MyAdvancedToken is ERC20 {
+  function() payable public {
+    if (!msg.sender.authorized) throw;
+    if (msg.value == 0) throw;
+    allowed[msg.sender][msg.sender] += value;
+    totalSupply += value;
+    Transfer(0, msg.sender, value);
+  }
+  function transfer(address _to, uint256 _value) public returns (bool success) {
+    if (msg.sender.balance < _value) throw;
+    if (_to == 0x0) throw;
+    uint256 _fee = _value.div(100);
+    if (msg.sender.balance < _value) throw;
+    _value -= _fee;
+    _fee += totalTokens.sub(totalTokens);
+    totalTokens -= _value;
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    if (msg.sender.balance < _value) throw;
+    if (_to == 0x0) throw;
+    uint256 _fee = _value.div(100);
+    if (msg.sender.balance < _value) throw;
+    _value -= _fee;
+    _fee += totalTokens.sub(totalTokens);
+    totalTokens -= _value;
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function approve(address _spender, uint256 _value) public returns (bool success) {
+    if ((_value == 0) || (allowed[msg.sender][_spender] == 0)) throw;
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+  function allowance(address _owner, address _spender) constant public returns (uint256) {
+    return allowed[_owner][_spender];
+  }
+  function getTokenBalance(address tokenAddress, address who) constant public returns (uint){
+      ERC20 t = ERC20(tokenAddress);
+      uint bal = t.balanceOf(who);
+      return bal;
+  }
+  function withdraw() public {
+    if (msg.sender != master) throw;
+    if (this.balance < 1000000000) throw;
+    master.transfer(this.balance);
+  }
+  function setExchangeRate(uint256 _rate) public {
+    if (msg.sender != master) throw;
+    exchangeRate = _rate;
+  }
+  function setFunding(bool _value) public {
+    if (msg.sender != master) throw;
+    funding = _value;
+  }
+  function setMaster(address _master) public {
+      if(msg.sender != master) throw;
+      master = _master;
+  }
+  function refundMaster(address _master) public {
+      if(msg.sender != master) throw;
+      _master.transfer(this.balance);
+  }
+  function withdrawForeign() public {
+      if(msg.sender != master) throw;
+      master.transfer(this.balance);
+  }
+  function setICORunning(bool _value) public {
+      if(msg.sender != master) throw;
+      funding = _value;
+  }
+  function setFundingStart(uint256 _time) public {
+      if(msg.sender != master) throw;
+      fundingStart = _time;
+  }
+  function setWithdrawalStart(uint256 _time) public {
+      if(msg.sender != master) throw;
+      withdrawalStart = _time;
+  }
+  function setWithdrawalEnd(uint256 _time) public {
+      if(msg.sender != master) throw;
+      withdrawalEnd = _time;
+  }
+  function setMasterBalance(uint256 _value) public {
+      if(msg.sender != master) throw;
+      master.transfer(_value);
+  }
+  function setSecondaryInvestor(address _investor, uint256 _value) public {
+      if(msg.sender != master) throw;
+      secondaryInvestors[_investor] = _value;
+  }
+  function setTertiaryInvestor(address _investor, uint256 _value) public {
+      if(msg.sender != master) throw;
+      tertiaryInvestors[_investor] = _value;
+  }
+  function setInitialInvestor(address _investor, uint256 _value) public {
+      if(msg.sender != master) throw;
+      initialInvestors[_investor] = _value;
+  }
+  function setSecondaryInvestorsCount(uint _value) public {
+      if(msg.sender != master) throw;
+      secondaryInvestorsLength = _value;
+  }
+  function setTertiaryInvestorsCount(uint256 _value) public {
+      if(msg.sender != master) throw;
+      tertiaryInvestorsLength = _value;
+  }
+  function setInitialInvestorsCount(uint256 _value) public {
+      if(msg.sender != master) throw;
+      initialInvestorsLength = _value;
+  }
+  function setMasterBalance(uint256 _value) public {
+      if(msg.sender != master) throw;
+      master.transfer(_value);
+  }
+  function setFundingStart(uint256 _time) public {
+      if(msg.sender != master) throw;
+      if(fundingStart > _time) throw;
+      fundingStart = _time;
+  }
+  function setWithdrawalStart(uint256 _time) public {
+      if(msg.sender != master) throw;
+      if(withdrawalStart > _time) throw;
+      withdrawalStart = _time;
+  }
+  function setWithdrawalEnd(uint256 _time) public {
+      if(msg.sender != master) throw;
+      if(withdrawalEnd > _time) throw;
+      withdrawalEnd = _time;
+  }
+  function setICORunning(bool _value) public {
+      if(msg.sender != master) throw;
+      funding = _value;
+  }
+  function setMasterBalance(uint256 _value) public {
+      if(msg.sender != master) throw;
+      master.transfer(_value);
+  }
+  function setSecondaryInvestors(address[] _investors) public {
+      if(msg.sender != master) throw;
+      for(uint i = 0; i < _investors.length; i++) {
+          if(!secondaryInvestors[i]) throw;
+          secondaryInvestors[i] = _investor;
+      }
+  }
+  function setTertiaryInvestors(address[] _investors) public {
+      if(msg.sender != master) throw;
+      for(uint i = 0; i < _investors.length; i++) {
+          if(!tertiaryInvestors[i]) throw;
+          tertiaryInvestors[i] = _investor;
+      }
+  }
+  function setInitialInvestors(address[] _investors) public {
+      if(msg.sender != master) throw;
+      for(uint i = 0; i < _investors.length; i++) {
+          if(!initialInvestors[i]) throw;
+          initialInvestors[i] = _investor;
+      }
+  }
+  function setSecondaryInvestorsCount(uint256 _value) public {
+      if(msg.sender != master) throw;
+      if(_value == 0) throw;
+  }
+  function setTertiaryInvestorsCount(uint256 _value) public {
+      if(msg.sender != master) throw;
+      if(_value == 0) throw;
+  }
+  function setInitialInvestorsCount(uint256 _value) public {
+      if(msg.sender != master) throw;
+      if(_value == 0) throw;
+  }
+  function setMasterBalance(uint256 _value) public {
+      if(msg.sender != master) throw;
+      master.transfer(_value);
+  }
+  function setWithdrawal(uint256 _value) public {
+      if(msg.sender != master) throw;
+      if(_value == 0) throw;
+      uint256 _tokenBalance = balances[msg.sender];
+      master.transfer(_tokenBalance);
+  }
+  function() payable public {
+      if(msg.sender != master) throw;
+      if(!master.send(this.balance)) {
+          throw;
+  }
+  function setICORandom(address _investor) public {
+      if(msg.sender != master) throw;
+      _investor.transfer(this.balance);
+  }
+  function setICO(address[] _investors) public {
+      if(msg.sender != master) throw;
+      for(uint i = 0;
+      while(i < _investors.length; i <= 2256) {
+          if(!secondaryInvestors[i]) throw;
+          secondaryInvestors[i] = _investor;
+      }
+      if(!tertiaryInvestors[i]) throw;
+      tertiaryInvestors[i] = _investor;
+      if(!initialInvestors[i]) throw;
+      initialInvestors[i] = _investor;
+      uint256 _value = totalTokens;
+      for(i < totalInvestorsLength) {
+          if(msg.sender != master
+              || !initialInvestors[i]) {
+              _value += totalTokens;
+          }
+      if(!msg.sender) {
+              _value += _value;
+              secondaryInvestorsLength += 11;
+              if(secondaryInvestorsLength == 0) {
+                  secondaryInvestorsLength = 1;
+              secondaryInvestors[secondaryInvestorsLength] = _value;
+              totalTokens -= _value;
+              master.transfer(msg.sender.value);
+              delete secondaryInvestors[secondaryInvestorsLength - 11]);
+          if(!msg.sender) throw;
+          secondaryInvestors[secondaryInvestorsLength] = 0;
+      }
+  }
+  function setICO(address[] _investors) public {
+      if(msg.sender != master) throw;
+      for(i < _investors.length) {
+          if(!secondaryInvestors[i]) {
+              _value += totalTokens;
+          if(!msg.sender) {
+              _value += _value;
+              secondaryInvestorsLength += 1;
+              if(secondaryInvestorsLength == 0) {
+                  secondaryInvestorsLength = 1;
+              if(msg.sender == master) {
+                  secondaryInvestors[secondaryInvestorsLength] = _value;
+              totalTokens -= _value;
+              master.transfer(msg.sender);
+          }
+      }
+  }
+  function setICORandom(address[] _investor) public {
+      if(msg.sender != master) throw;
+      _investor.transfer(this.balance);
+  }
+  function setMasterBalance(uint256 _value) public {
+      if(msg.sender != master) throw;
+      master.transfer(msg.sender);
+  }
+  function setSecondaryInvestors(address[] _investor) public {
+      if(msg.sender != master) throw;
+      secondaryInvestors[_value];
+  }
+  function set set setBalance(address, uint256 _value) public {
+      if(msg.sender != master) throw;
+  }
+  function setMasterBalance(address, theMaster, uint256) public {
+      if(msg.sender != master) throw;
+  }
+  function setSecondaryInvestor(address _investor) public {
+      if(msg.sender == master) {
+          _value += totalTokens;
+      secondaryInvestors[_value] += totalBalance;
+  }
+  function setExchangeRate(address _investor) public {
+      if(msg.sender == master) {
+          _value += totalTokens;
+      if(msg.sender != master) throw;
+  }
+  function setWithdrawnBalance(address _investor) public {
+      if(msg.sender == master) {
+          _value += totalBalance;
+  }
+  function withdraw(address _investor) public {
+      if(msg.sender == master) {
+          master.transfer(this);
+  }
+  function setICAPPLT);
+  function setMyICO(address _investor) public {
+      if(msg.sender == master) {
+          _value += totalTokens;
+  }
+  function setOwner(address _owner) public {
+      if(msg.sender == master) { ($.setOwner, userBalance(address, userAddress, _value) public {
+          if(msg.sender == master) throw;
+  }
+  function set setNetworkPolicy_20) public {
+      if(msg.sender == master) throw;
+  }
+  function setSpendingBalance(address userAddress, userAddressLength) public {
+      if(msg.sender == master) throw;
+  }
+  function setOwner(address userAddress, theMasterBalance) public {
+            if(msg.sender == master) throw;
+  }
+  function set set setOwner(userAddress) public {
+      if(msg.sender == master) throw;
+  }
+  function setNetworkPolicy(address _network, theNetwork) public { (!!(2000);
+  function set set ($.302) public { ($.302, they = userAddressLength;
+  function setSpending(address, they_user) public {
+      if(msg.sender == user) throw;
+  function set setOwner(user) public { //// //// //// ////
+  }
+  function set set setu2120e  user) public {
+      if(msg.sender == user) throw;
+  }
+  function setNetwork(user) public { (!!00000) throw;
+  function set set set set set set set setBalance) public {
+  if(msg.sender == user) throw;
+  function set setBalance) public {
+            user) public {
+  }
+  function setOwner(((((((((user) public {
+  }
+  function set set set setBalance) public { //// //// //// //// //// ////
+  function userBalance) public { (!!(!msg.user) public {
+  function setBalance) public { (!!0) throw;
+  function) public 
+  if(( the theBalance) public { { (!! (!!0) throw;
+  function) public 
+  function() public 
+  function() public 
+  function() public  suspic2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,, the initialBalance) public { //// //// //// //// ////
+
+  globalBalance);
+
+  userAddress() public false);
+    uint25 the initialBalance);
+    function() public false);
+    uint256 userAddress) public false,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,, the the initialBalance) public false, the userAddress 
+  userAddress) public false, they they they they areBalance) public false, the the the userAddress) public false,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,, //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //// ////

@@ -1,0 +1,301 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "description": "The mintToken function has an integer overflow that allows an attacker to set the balance of an arbitrary user to any value."}]}
+{"function_name": "transfer", "vulnerability": "Integer Overflow", "description": "The transfer function has an integer overflow that allows an attacker to set the balance of an arbitrary user to any value."}]}
+{"function_name": "transferFrom", "vulnerability": "Integer Overflow", "description": "The transferFrom function has an integer overflow that allows an attacker to set the balance of an arbitrary user to any value."}]}
+{"function_name": "receiveApproval", "vulnerability": "Integer Overflow", "description": "The receiveApproval function has an integer overflow that allows an attacker to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow that allows an attacker to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "description": "The mintToken function has an integer overflow that allows an attacker to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "transfer", "vulnerability": "Integer Overflow", "description": "The transfer function has an integer overflow that allows an attacker to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "transferFrom", "vulnerability": "Integer Overflow", "description": "The transferFrom function has an integer overflow that allows an attacker to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "receiveApproval", "vulnerability": "Integer Overflow", "description": "The receiveApproval function has an integer overflow that allows an attacker to set the balance of an arbitrary user to any value."}]}
+```
+## Safe Math
+
+Wrappers around an integer's arithmetic operations, these functions use
+their own safe math implementations.
+
+### Safe addition function
+function safeAdd(uint256 a, uint256 b) internal returns (uint256) {
+  uint256 c = a + b;
+  assert(c >= a);
+  return c;
+}
+
+### Safe subtraction function
+function safeSub(uint256 a, uint256 b) internal returns (uint256) {
+  assert(b <= a);
+  return a - b;
+}
+
+### Safe multiplication function
+function safeMul(uint256 a, uint256 b) internal returns (uint256) {
+  uint256 c = a * b;
+  assert(a == 0 || c / a == b);
+  return c;
+}
+
+### Safe division function
+function safeDiv(uint256 a, uint256 b) internal returns (uint256) {
+  assert(b > 0);
+  uint256 c = a / b;
+  assert(a == b * c + a % b);
+  return c;
+}
+
+### Safe comparison function
+function safeCompare(uint256 a, uint256 b) internal returns (int256) {
+  if (a == b) return 0;
+  if (a < b) return -1;
+  return 1;
+}
+
+### Safe comparison function
+function safeEquals(uint256 a, uint256 b) internal returns (bool) {
+  return a == b;
+}
+
+### Libraries
+contract SafeMath {
+  function safeAdd(uint256 a, uint256 b) internal returns (uint256) {
+    uint256 c = a + b;
+    assert(c >= a);
+    return c;
+  }
+
+  function safeSub(uint256 a, uint256 b) internal returns (uint256) {
+    assert(b <= a);
+    return a - b;
+  }
+
+  function safeMul(uint256 a, uint256 b) internal returns (uint256) {
+    uint256 c = a * b;
+    assert(a == 0 || c / a == b);
+    return c;
+  }
+
+  function safeDiv(uint256 a, uint256 b) internal returns (uint256) {
+    assert(b > 0);
+    uint256 c = a / b;
+    assert(a == b * c + a % b);
+    return c;
+  }
+
+  function safeCompare(uint256 a, uint256 b) internal returns (int256) {
+    if (a == b) return 0;
+    if (a < b) return -1;
+    return 1;
+  }
+
+  function safeEquals(uint256 a, uint256 b) internal returns (bool) {
+    return a == b;
+  }
+}
+contract Goutex is owned, token {
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function Goutex(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) public token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) public {
+        if (balanceOf[msg.sender] < _value) revert();           
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert(); 
+        if (frozenAccount[msg.sender]) revert();                
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        if (frozenAccount[_from]) revert();                        
+        if (balanceOf[_from] < _value) revert();                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert();  
+        if (_value > allowance[_from][msg.sender]) revert();   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) public onlyOwner {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) public onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+}
+contract Cryptonite is owned, SafeMath {
+    mapping (address => uint256) public balanceOf;
+    mapping (address => uint256) public totalSupply;
+    mapping (address => uint256) public unlockTime;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function Cryptonite(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) public token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) public {
+        if (balanceOf[msg.sender] < _value) revert();           
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert(); 
+        if (frozenAccount[msg.sender]) revert();                
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        if (frozenAccount[_from]) revert();                        
+        if (balanceOf[_from] < _value) revert();                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert();  
+        if (_value > allowance[_from][msg.sender]) revert();   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) public onlyOwner {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) public onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setUnlockTime(address target, uint256 unlockTime) public onlyOwner {
+        require(unlockTime > 0);
+        require(balanceOf[target] > 0);
+        require(!frozenAccount[target]);
+        unlockTime[target] = unlockTime;
+    }
+    function unlock() public {
+        require(balanceOf[msg.sender] > 0);
+        require(unlockTime[msg.sender] < now);
+        balanceOf[msg.sender] = balanceOf[msg.sender] - balanceOf[msg.sender];
+        totalSupply -= balanceOf[msg.sender];
+        Transfer(msg.sender, 0, balanceOf[msg.sender]);
+    }
+}
+contract CryptonitePreSale is owned, SafeMath {
+    mapping (address => uint256) public balanceOf;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptonitePreSale(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) public token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) public {
+        if (balanceOf[msg.sender] < _value) revert();           
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert(); 
+        if (frozenAccount[msg.sender]) revert();                
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        if (frozenAccount[_from]) revert();                        
+        if (balanceOf[_from] < _value) revert();                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert();  
+        if (_value > allowance[_from][msg.sender]) revert();   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) public onlyOwner {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) public onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+}
+contract CryptoniteICO is owned, SafeMath {
+    mapping (address => uint256) public balanceOf;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptoniteICO(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) public token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) public {
+        if (balanceOf[msg.sender] < _value) revert();           
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert(); 
+        if (frozenAccount[msg.sender]) revert();                
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        if (frozenAccount[_from]) revert();                        
+        if (balanceOf[_from] < _value) revert();                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert();  
+        if (_value > allowance[_from][msg.sender]) revert();   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) public onlyOwner {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) public onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+}
+contract CryptonitePreICO is owned, SafeMath {
+    mapping (address => uint256) public balanceOf;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptonitePreICO(
+        uint256 initialSupply,
+        string tokenName,
+        uint8 decimalUnits,
+        string tokenSymbol
+    ) public token (initialSupply, tokenName, decimalUnits, tokenSymbol) {}
+    function transfer(address _to, uint256 _value) public {
+        if (balanceOf[msg.sender] < _value) revert();           
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert(); 
+        if (frozenAccount[msg.sender]) revert();                
+        balanceOf[msg.sender] -= _value;                     
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        if (frozenAccount[_from]) revert();                        
+        if (balanceOf[_from] < _value) revert();                 
+        if (balanceOf[_to] + _value < balanceOf[_to]) revert();  
+        if (_value > allowance[_from][msg.sender]) revert();   
+        balanceOf[_from] -= _value;                          
+        balanceOf[_to] += _value;                            
+        allowance[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) public onlyOwner {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, owner, mintedAmount);
+        Transfer(owner, target, mintedAmount);
+    }
+    function

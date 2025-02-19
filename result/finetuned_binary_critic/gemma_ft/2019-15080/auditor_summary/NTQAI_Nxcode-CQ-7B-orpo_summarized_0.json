@@ -1,0 +1,173 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(uint256 _mintedAmount) public onlyOwner { owner.transfer(_mintedAmount); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintTokens function has an integer overflow, allowing the owner to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public onlyOwner { require(_value <= balanceOf[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].sub(_value); totalSupply = totalSupply.sub(_value); Burn(burner, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function has an integer overflow, allowing the owner to set the balance of the owner to any value."
+        },
+        {
+            "function_name": "blacklistAccount",
+            "code": "function blacklistAccount(address _target, bool _isBlacklisted) public onlyOwner { isblacklistedAccount[_target] = _isBlacklisted; }",
+            "vulnerability": "Access Control",
+            "reason": "The blacklistAccount function has an owner, allowing the owner to set the blacklist status of any user."
+        },
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(uint256 _mintedAmount) public onlyOwner { require(isBlacklistedAccount[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].add(_mintedAmount); totalSupply = totalSupply.add(_mintedAmount); Burn(burner, _mintedAmount); }",
+            "vulnerability": "Access Control",
+            "reason": "The mintTokens function has an owner, allowing the owner to set the balance of the owner to any value, but only if the user is not blacklisted."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public onlyOwner { require(isBlacklistedAccount[msg.sender]); require(_value <= balanceOf[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].sub(_value); totalSupply = totalSupply.sub(_value); Burn(burner, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function has an integer overflow, allowing the owner to set the balance of the owner to any value, but only if the user is blacklisted."
+        },
+        {
+            "function_name": "blacklistAccount",
+            "code": "function blacklistAccount(address _target, bool _isBlacklisted) public onlyOwner { require(!isBlacklistedAccount[_target]); isblacklistedAccount[_target] = _isBlacklisted; }",
+            "vulnerability": "Access Control",
+            "reason": "The blacklistAccount function has an owner, allowing the owner to set the blacklist status of any user, but only if the user is not blacklisted."
+        },
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(uint256 _mintedAmount) public onlyOwner { require(isBlacklistedAccount[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].add(_mintedAmount); totalSupply = totalSupply.add(_mintedAmount); Burn(burner, _mintedAmount); }",
+            "vulnerability": "Access Control",
+            "reason": "The mintTokens function has an owner, allowing the owner to set the balance of the owner to any value, but only if the user is not blacklisted."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public onlyOwner { require(isBlacklistedAccount[msg.sender]); require(_value <= balanceOf[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].sub(_value); totalSupply = totalSupply.sub(_value); Burn(burner, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function has an integer overflow, allowing the owner to set the balance of the owner to any value, but only if the user is blacklisted."
+        },
+        {
+            "function_name": "blacklistAccount",
+            "code": "function blacklistAccount(address _target, bool _isBlacklisted) public onlyOwner { require(!isBlacklistedAccount[_target]); isblacklistedAccount[_target] = _isBlacklisted; }",
+            "vulnerability": "Access Control",
+            "reason": "The blacklistAccount function has an owner, allowing the owner to set the blacklist status of any user, but only if the user is not blacklisted."
+        },
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(uint256 _mintedAmount) public onlyOwner { require(isBlacklistedAccount[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].add(_mintedAmount); totalSupply = totalSupply.add(_mintedAmount); Burn(burner, _mintedAmount); }",
+            "vulnerability": "Access Control",
+            "reason": "The mintTokens function has an owner, allowing the owner to set the balance of the owner to any value, but only if the user is not blacklisted."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public onlyOwner { require(isBlacklistedAccount[msg.sender]); require(_value <= balanceOf[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].sub(_value); totalSupply = totalSupply.sub(_value); Burn(burner, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function has an integer overflow, allowing the owner to set the balance of the owner to any value, but only if the user is blacklisted."
+        },
+        {
+            "function_name": "blacklistAccount",
+            "code": "function blacklistAccount(address _target, bool _isBlacklisted) public onlyOwner { require(!isBlacklistedAccount[_target]); isblacklistedAccount[_target] = _isBlacklisted; }",
+            "vulnerability": "Access Control",
+            "reason": "The blacklistAccount function has an owner, allowing the owner to set the blacklist status of any user, but only if the user is not blacklisted."
+        },
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(uint256 _mintedAmount) public onlyOwner { require(isBlacklistedAccount[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].add(_mintedAmount); totalSupply = totalSupply.add(_mintedAmount); Burn(burner, _mintedAmount); }",
+            "vulnerability": "Access Control",
+            "reason": "The mintTokens function has an owner, allowing the owner to set the balance of the owner to any value, but only if the user is not blacklisted."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public onlyOwner { require(isBlacklistedAccount[msg.sender]); require(_value <= balanceOf[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].sub(_value); totalSupply = totalSupply.sub(_value); Burn(burner, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function has an integer overflow, allowing the owner to set the balance of the owner to any value, but only if the user is blacklisted."
+        },
+        {
+            "function_name": "blacklistAccount",
+            "code": "function blacklistAccount(address _target, bool _isBlacklisted) public onlyOwner { require(!isBlacklistedAccount[_target]); isblacklistedAccount[_target] = _isBlacklisted; }",
+            "vulnerability": "Access Control",
+            "reason": "The blacklistAccount function has an owner, allowing the owner to set the blacklist status of any user, but only if the user is not blacklisted."
+        },
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(uint256 _mintedAmount) public onlyOwner { require(isBlacklistedAccount[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].add(_mintedAmount); totalSupply = totalSupply.add(_mintedAmount); Burn(burner, _mintedAmount); }",
+            "vulnerability": "Access Control",
+            "reason": "The mintTokens function has an owner, allowing the owner to set the balance of the owner to any value, but only if the user is not blacklisted."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public onlyOwner { require(isBlacklistedAccount[msg.sender]); require(_value <= balanceOf[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].sub(_value); totalSupply = totalSupply.sub(_value); Burn(burner, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function has an integer overflow, allowing the owner to set the balance of the owner to any value, but only if the user is blacklisted."
+        },
+        {
+            "function_name": "blacklistAccount",
+            "code": "function blacklistAccount(address _target, bool _isBlacklisted) public onlyOwner { require(!isBlacklistedAccount[_target]); isblacklistedAccount[_target] = _isBlacklisted; }",
+            "vulnerability": "Access Control",
+            "reason": "The blacklistAccount function has an owner, allowing the owner to set the blacklist status of any user, but only if the user is not blacklisted."
+        },
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(uint256 _mintedAmount) public onlyOwner { require(isBlacklistedAccount[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].add(_mintedAmount); totalSupply = totalSupply.add(_mintedAmount); Burn(burner, _mintedAmount); }",
+            "vulnerability": "Access Control",
+            "reason": "The mintTokens function has an owner, allowing the owner to set the balance of the owner to any value, but only if the user is not blacklisted."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public onlyOwner { require(isBlacklistedAccount[msg.sender]); require(_value <= balanceOf[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].sub(_value); totalSupply = totalSupply.sub(_value); Burn(burner, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function has an integer overflow, allowing the owner to set the balance of the owner to any value, but only if the user is blacklisted."
+        },
+        {
+            "function_name": "blacklistAccount",
+            "code": "function blacklistAccount(address _target, bool _isBlacklisted) public onlyOwner { require(!isBlacklistedAccount[_target]); isblacklistedAccount[_target] = _isBlacklisted; }",
+            "vulnerability": "Access Control",
+            "reason": "The blacklistAccount function has an owner, allowing the owner to set the blacklist status of any user, but only if the user is not blacklisted."
+        },
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(uint256 _mintedAmount) public onlyOwner { require(isBlacklistedAccount[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].add(_mintedAmount); totalSupply = totalSupply.add(_mintedAmount); Burn(burner, _mintedAmount); }",
+            "vulnerability": "Access Control",
+            "reason": "The mintTokens function has an owner, allowing the owner to set the balance of the owner to any value, but only if the user is not blacklisted."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public onlyOwner { require(isBlacklistedAccount[msg.sender]); require(_value <= balanceOf[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].sub(_value); totalSupply = totalSupply.sub(_value); Burn(burner, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function has an integer overflow, allowing the owner to set the balance of the owner to any value, but only if the user is blacklisted."
+        },
+        {
+            "function_name": "blacklistAccount",
+            "code": "function blacklistAccount(address _target, bool _isBlacklisted) public onlyOwner { require(!isBlacklistedAccount[_target]); isblacklistedAccount[_target] = _isBlacklisted; }",
+            "vulnerability": "Access Control",
+            "reason": "The blacklistAccount function has an owner, allowing the owner to set the blacklist status of any user, but only if the user is not blacklisted."
+        },
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(uint256 _mintedAmount) public onlyOwner { require(isBlacklistedAccount[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].add(_mintedAmount); totalSupply = totalSupply.add(_mintedAmount); Burn(burner, _mintedAmount); }",
+            "vulnerability": "Access Control",
+            "reason": "The mintTokens function has an owner, allowing the owner to set the balance of the owner to any value, but only if the user is not blacklisted."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public onlyOwner { require(isBlacklistedAccount[msg.sender]); require(_value <= balanceOf[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].sub(_value); totalSupply = totalSupply.sub(_value); Burn(burner, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The burn function has an integer overflow, allowing the owner to set the balance of the owner to any value, but only if the user is blacklisted."
+        },
+        {
+            "function_name": "blacklistAccount",
+            "code": "function blacklistAccount(address _target, bool _isBlacklisted) public onlyOwner { require(!isBlacklistedAccount[_target]); isblacklistedAccount[_target] = _isBlacklisted; }",
+            "vulnerability": "Access Control",
+            "reason": "The blacklistAccount function has an owner, allowing the owner to set the blacklist status of any user, but only if the user is not blacklisted."
+        },
+        {
+            "function_name": "mintTokens",
+            "code": "function mintTokens(uint256 _mintedAmount) public onlyOwner { require(isBlacklistedAccount[msg.sender]); address burner = msg.sender; balanceOf[burner] = balanceOf[burner].add(_mintedAmount); totalSupply = totalSupply.add(_mintedAmount); Burn(burner, _mintedAmount); }",
+            "vulnerability": "Access Control",
+            "reason": "The mintTokens function has an owner, allowing the owner to set the balance of the owner to any value, but only if the user is not blacklisted."
+        },
+        {
+            "function_name": "burn",
+            "code": "function burn(uint256 _value) public onlyOwner { require(isBlacklistedAccount[msg.

@@ -1,0 +1,290 @@
+{"output_list": [{"function_name": "mint", "vulnerability": "Integer Overflow", "criticism": "The mint function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "unfreeze", "vulnerability": "Access Control", "criticism": "The unfreeze function has an access control flaw where only the team members can call it."}]}
+{"output_list": [{"function_name": "transfer", "vulnerability": "Integer Overflow", "criticism": "The transfer function has an integer overflow where the attacker can manipulate the balance of the victim."}]}
+{"output_list": [{"function_name": "transferFrom", "vulnerability": "Integer Overflow", "criticism": "The transferFrom function has an integer overflow where the attacker can manipulate the balance of the victim."}]}
+{"output_list": [{"function_name": "approve", "vulnerability": "Integer Overflow", "criticism": "The approve function has an integer overflow where the attacker can manipulate the balance of the victim."}]}
+}
+Code: 
+pragma solidity ^0.4.19;
+contract ERC20Basic {
+  uint256 public totalSupply;
+  function balanceOf(address who) public view returns (uint256);
+  function transfer(address to, uint256 value) public returns (bool);
+  event Transfer(address indexed from, address indexed to, uint256 value);
+}
+contract ERC20 is ERC20Basic {
+  function allowance(address owner, address spender) public view returns (uint256);
+  function transferFrom(address from, address to, uint256 value) public returns (bool);
+  function approve(address spender, uint256 value) public returns (bool);
+  event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+contract BasicToken is ERC20Basic {
+  mapping (address => uint256) balances;
+  function transfer(address _to, uint256 _value) public returns (bool) {
+    require(!isFrozen);
+    require(_to != address(0));
+    require(_value <= balances[msg.sender]);
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function unfreeze() external {
+      require(isFrozen);
+      isFrozen = false;
+  }
+  function transfer(address _to, uint _value) public returns (bool) {
+      require(!isFrozen);
+      return super.transfer(_to, _value);
+  }
+  function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+      require(!isFrozen);
+      return super.transferFrom(_from, _to, _value);
+  }
+  function approve(address _spender, uint _value) public returns (bool) {
+      require(!isFrozen);
+      return super.approve(_spender, _value);
+  }
+}
+contract DSPXToken is BasicToken {
+  string public constant name = "SP8DE PreSale Token";
+  string public constant symbol = "DSPX";
+  uint public constant decimals = 18;
+  address public preSale;
+  address public team;
+  bool public isFrozen = true;  
+  uint public constant TOKEN_LIMIT = 888888888 * (1e18);
+  function DSPXToken(address _preSale, address _team) {
+      require(_preSale != address(0));
+      require(_team != address(0));
+      preSale = _preSale;
+      team = _team;
+  }
+  function mint(address holder, uint value) {
+      require(msg.sender == preSale);
+      require(value > 0);
+      require(totalSupply + value <= TOKEN_LIMIT);
+      balances[holder] = balances[holder].add(value);
+      totalSupply = totalSupply + value;
+      Transfer(0x0, holder, value);
+  }
+  function unfreeze() external {
+      require(msg.sender == team);
+      isFrozen = false;
+  }
+  function transfer(address _to, uint _value) public returns (bool) {
+      require(!isFrozen);
+      return super.transfer(_to, _value);
+  }
+  function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+      require(!isFrozen);
+      return super.transferFrom(_from, _to, _value);
+  }
+  function approve(address _spender, uint _value) public returns (bool) {
+      require(!isFrozen);
+      return super.approve(_spender, _value);
+  }
+}
+Output Formatting requirement:
+{"output_list": [{"function_name": "mint", "vulnerability": "Integer Overflow", "criticism": "The mint function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "unfreeze", "vulnerability": "Access Control", "criticism": "The unfreeze function has an access control flaw where only the team members can call it."}]}
+{"output_list": [{"function_name": "transfer", "vulnerability": "Integer Overflow", "criticism": "The transfer function has an integer overflow where the attacker can manipulate the balance of the victim."}]}
+{"output_list": [{"function_name": "transferFrom", "vulnerability": "Integer Overflow", "criticism": "The transferFrom function has an integer overflow where the attacker can manipulate the balance of the victim."}]}
+{"output_list": [{"function_name": "approve", "vulnerability": "Integer Overflow", "criticism": "The approve function has an integer overflow where the attacker can manipulate the balance of the victim."}]}
+}
+Code: 
+pragma solidity ^0.4.19;
+contract ERC20 is ERC20Basic {
+  function allowance(address owner, address spender) public view returns (uint256);
+  function transferFrom(address from, address to, uint256 value) public returns (bool);
+  function approve(address spender, uint256 value) public returns (bool);
+  event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+contract StandardToken is ERC20, BasicToken {
+  mapping (address => mapping (address => uint256)) internal allowed;
+  function transfer(address _to, uint _value) public returns (bool) {
+      require(!isFrozen);
+      require(!allowed[msg.sender][msg.sender] <= _value);
+      allowed[msg.sender][msg.sender] = allowed[msg.sender][msg.sender].sub(_value);
+      allowed[_to][msg.sender] = allowed[_to][msg.sender].add(_value);
+      Transfer(msg.sender, _to, _value);
+      return true;
+  }
+  function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+      require(!isFrozen);
+      require(!allowed[_from][msg.sender] <= _value);
+      allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+      allowed[_to][msg.sender] = allowed[_to][msg.sender].add(_value);
+      Transfer(_from, _to, _value);
+      return true;
+  }
+  function approve(address _spender, uint _value) public returns (bool) {
+      require(!isFrozen);
+      allowed[msg.sender][_spender] = _value;
+      Approval(msg.sender, _spender, _value);
+      return true;
+  }
+  function allowance(address _owner, address _spender) public view returns (uint256) {
+      return allowed[_owner][_spender];
+  }
+  function increaseApproval(address _spender, uint _addedValue) public returns (bool) {
+      allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
+      Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+      return true;
+  }
+  function decreaseApproval(address _spender, uint _subtractedValue) public returns (bool) {
+      uint oldValue = allowed[msg.sender][_spender];
+      if (_subtractedValue > oldValue) {
+      allowed[msg.sender][_spender] = 0;
+      } else {
+      allowed[msg.sender][_spender] = oldValue.sub(_subtractedValue);
+      }
+      Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+      return true;
+  }
+}
+contract DSPXToken is StandardToken {
+  string public constant name = "SP8DE PreSale Token";
+  string public constant symbol = "DSPX";
+  uint public constant decimals = 18;
+  address public preSale;
+  address public team;
+  bool public isFrozen = true;  
+  uint public constant TOKEN_LIMIT = 888888888 * (1e18);
+  function DSPXToken(address _preSale, address _team) {
+      require(_preSale != address(0));
+      require(_team != address(0));
+      preSale = _preSale;
+      team = _team;
+  }
+  function mint(address holder, uint value) {
+      require(msg.sender == preSale);
+      require(value > 0);
+      require(totalSupply + value <= TOKEN_LIMIT);
+      balances[holder] = balances[holder].add(value);
+      totalSupply = totalSupply + value;
+      Transfer(0x0, holder, value);
+  }
+  function unfreeze() external {
+      require(msg.sender == team);
+      isFrozen = false;
+  }
+  function transfer(address _to, uint _value) public returns (bool) {
+      require(!isFrozen);
+      return super.transfer(_to, _value);
+  }
+  function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+      require(!isFrozen);
+      return super.transferFrom(_from, _to, _value);
+  }
+  function approve(address _spender, uint _value) public returns (bool) {
+      require(!isFrozen);
+      return super.approve(_spender, _value);
+  }
+}
+Output Formatting requirement:
+{"output_list": [{"function_name": "mint", "vulnerability": "Integer Overflow", "criticism": "The mint function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "unfreeze", "vulnerability": "Access Control", "criticism": "The unfreeze function has an access control flaw where only the team members can call it."}]}
+{"output_list": [{"function_name": "transfer", "vulnerability": "Integer Overflow", "criticism": "The transfer function has an integer overflow where the attacker can manipulate the balance of the victim."}]}
+{"output_list": [{"function_name": "transferFrom", "vulnerability": "Integer Overflow", "criticism": "The transferFrom function has an integer overflow where the attacker can manipulate the balance of the victim."}]}
+{"output_list": [{"function_name": "approve", "vulnerability": "Integer Overflow", "criticism": "The approve function has an integer overflow where the attacker can manipulate the balance of the victim."}]}
+}
+Code: 
+pragma solidity ^0.4.19;
+contract ERC20 is ERC20Basic {
+  function allowance(address owner, address spender) public view returns (uint256);
+  function transferFrom(address from, address to, uint256 value) public returns (bool);
+  function approve(address spender, uint256 value) public returns (bool);
+  event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+contract StandardToken is ERC20, BasicToken {
+  mapping (address => mapping (address => uint256)) internal allowed;
+  function transfer(address _to, uint _value) public returns (bool) {
+      require(!isFrozen);
+      require(!allowed[msg.sender][msg.sender] <= _value);
+      allowed[msg.sender][msg.sender] = allowed[msg.sender][msg.sender].sub(_value);
+      allowed[_to][msg.sender] = allowed[_to][msg.sender].add(_value);
+      Transfer(msg.sender, _to, _value);
+      return true;
+  }
+  function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+      require(!isFrozen);
+      require(!allowed[_from][msg.sender] <= _value);
+      allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+      allowed[_to][msg.sender] = allowed[_to][msg.sender].add(_value);
+      Transfer(_from, _to, _value);
+      return true;
+  }
+  function approve(address _spender, uint _value) public returns (bool) {
+      require(!isFrozen);
+      allowed[msg.sender][_spender] = _value;
+      Approval(msg.sender, _spender, _value);
+      return true;
+  }
+  function increaseApproval(address _spender, uint _addedValue) public returns (bool) {
+      require(!isFrozen);
+      allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
+      Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+      return true;
+  }
+  function decreaseApproval(address _spender, uint _subtractedValue) public returns (bool) {
+      require(!isFrozen);
+      uint oldValue = allowed[msg.sender][_spender];
+      if (_subtractedValue > oldValue) {
+      allowed[msg.sender][_spender] = 0;
+      } else {
+      allowed[msg.sender][_spender] = oldValue.sub(_subtractedValue);
+      }
+      Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+      return true;
+  }
+}
+contract DSPXToken is StandardToken {
+  string public constant name = "SP8DE PreSale Token";
+  string public constant symbol = "DSPX";
+  uint public constant decimals = 18;
+  address public preSale;
+  address public team;
+  bool public isFrozen = true;  
+  uint public constant TOKEN_LIMIT = 888888888 * (1e18);
+  function DSPXToken(address _preSale, address _team) {
+      require(_preSale != address(0));
+      require(_team != address(0));
+      preSale = _preSale;
+      team = _team;
+  }
+  function mint(address holder, uint value) {
+      require(msg.sender == preSale);
+      require(value > 0);
+      require(totalSupply + value <= TOKEN_LIMIT);
+      balances[holder] = balances[holder].add(value);
+      totalSupply = totalSupply + value;
+      Transfer(0x0, holder, value);
+  }
+  function unfreeze() external {
+      require(msg.sender == team);
+      isFrozen = false;
+  }
+  function transfer(address _to, uint _value) public returns (bool) {
+      require(!isFrozen);
+      return super.transfer(_to, _value);
+  }
+  function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+      require(!isFrozen);
+      return super.transferFrom(_from, _to, _value);
+  }
+  function approve(address _spender, uint _value) public returns (bool) {
+      require(!isFrozen);
+      return super.approve(_spender, _value);
+  }
+}
+Output Formatting requirement:
+{"output_list": [{"function_name": "mint", "vulnerability": "Integer Overflow", "criticism": "The mint function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "unfreeze", "vulnerability": "Access Control", "criticism": "The unfreeze function has an access control flaw where only the team members can call it."}]}
+{"output_list": [{"function_name": "transfer", "vulnerability": "Integer Overflow", "criticism": "The transfer function has an integer overflow where the attacker can manipulate the balance of the victim."}]}
+{"output_list": [{"function_name": "transferFrom", "vulnerability": "Integer Overflow", "criticism": "The transferFrom function has an integer overflow where the attacker can manipulate the balance of the victim."}]}
+{"output_list": [{"function_name": "approve", "vulnerability": "Integer Overflow", "criticism": "The approve function has an integer overflow where the attacker can manipulate the balance of the victim."}]}
+}
+Code: 
+pragma solidity ^0.4.19;
+contract ERC223 is ERC20

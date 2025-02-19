@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "constructor",
+            "vulnerability": "Integer Overflow",
+            "function_code": "constructor(uint256 initialSupply, string tokenName, string tokenSymbol) public { owner = msg.sender; totalSupply = initialSupply * 10 ** uint256(decimals); balanceOf[msg.sender] = totalSupply; name = tokenName; symbol = tokenSymbol; }",
+            "reason": "The constructor function multiplies the initialSupply with 10 to the power of the decimals, which can lead to integer overflow if the initialSupply is too large."
+        },
+        {
+            "function_name": "_transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function _transfer(address _from, address _to, uint _value) internal { require (_to != 0x0); require (balanceOf[_from] >= _value); require (balanceOf[_to] + _value >= balanceOf[_to]); require(!frozenAccount[_from]); require(!frozenAccount[_to]); balanceOf[_from] -= _value; balanceOf[_to] += _value; emit Transfer(_from, _to, _value); }",
+            "reason": "The _transfer function subtracts the _value from the balanceOf[_from] and adds the _value to the balanceOf[_to]. If the balanceOf[_from] is too large, it can lead to an integer overflow."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner public{ balanceOf[target] += mintedAmount; totalSupply += mintedAmount; }",
+            "reason": "The mintToken function adds the mintedAmount to the balanceOf[target] and totalSupply. If the mintedAmount is too large, it can lead to an integer overflow."
+        },
+        {
+            "function_name": "burn",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function burn(uint256 _value) onlyOwner public returns (bool success) { require(balanceOf[msg.sender] >= _value); balanceOf[msg.sender] -= _value; totalSupply -= _value; emit Burn(msg.sender, _value); return true; }",
+            "reason": "The burn function subtracts the _value from the balanceOf[msg.sender] and totalSupply. If the _value is too large, it can lead to an integer overflow."
+        },
+        {
+            "function_name": "freezeAccount",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function freezeAccount(address target, bool freeze) onlyOwner public { frozenAccount[target] = freeze; emit FrozenFunds(target, freeze); }",
+            "reason": "The freezeAccount function sets the frozenAccount[target] to the value of freeze. If freeze is too large, it can lead to an integer overflow."
+        }
+    ]
+}

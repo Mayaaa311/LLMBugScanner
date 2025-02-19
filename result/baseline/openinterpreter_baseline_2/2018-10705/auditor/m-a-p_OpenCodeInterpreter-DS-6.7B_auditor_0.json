@@ -1,0 +1,53 @@
+{
+    "output_list": [
+        {
+            "function_name": "safeMul",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function safeMul(uint256 a, uint256 b) returns (uint256) {
+    uint256 c = a * b;
+    require(a == 0 || c / a == b);
+    return c;
+  }",
+            "reason": "The multiplication operation in the safeMul function does not check for overflow. If the multiplication result exceeds the maximum value of uint256, it will cause an integer overflow and the function will not work correctly."
+        },
+        {
+            "function_name": "safeSub",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function safeSub(uint256 a, uint256 b) returns (uint256) {
+    require(b <= a);
+    return a - b;
+  }",
+            "reason": "The subtraction operation in the safeSub function does not check for overflow. If the subtraction result is negative, it will cause an integer overflow and the function will not work correctly."
+        },
+        {
+            "function_name": "safeAdd",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function safeAdd(uint256 a, uint256 b) returns (uint256) {
+    uint c = a + b;
+    require(c >= a && c >= b);
+    return c;
+  }",
+            "reason": "The addition operation in the safeAdd function does not check for overflow. If the addition result exceeds the maximum value of uint256, it will cause an integer overflow and the function will not work correctly."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+    _transfer(msg.sender, _to, _value);
+    return true;
+  }",
+            "reason": "The transfer function does not check if the recipient address is zero. If the recipient address is zero, the transfer function will revert and the tokens will not be transferred."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    require(_value <= allowance[_from][msg.sender]);
+    allowance[_from][msg.sender] -= _value;
+    _transfer(_from, _to, _value);
+    return true;
+  }",
+            "reason": "The transferFrom function does not check if the allowance is sufficient. If the allowance is not sufficient, the transferFrom function will revert and the tokens will not be transferred."
+        }
+    ]
+}

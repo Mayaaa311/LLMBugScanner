@@ -1,0 +1,43 @@
+ Here are the 5 most severe vulnerabilities in the provided smart contract, along with their associated functions and reasons:
+
+1. Integer Overflow Vulnerability in `safeAdd()` and `safeSub()`
+
+Functions: `safeAdd()` and `safeSub()`
+
+Vulnerability: These functions use the `assert()` statement to check if the result of the addition or subtraction is greater than or equal to the first operand, respectively. However, this check is not sufficient to prevent integer overflow, as the result of the addition or subtraction may still be greater than the maximum value that can be represented by the `uint256` type.
+
+Reason: This vulnerability can be exploited by providing a large value as the first operand, which will cause the result of the addition or subtraction to overflow and become negative. This can lead to a loss of funds for the contract owner, as the `safeAdd()` and `safeSub()` functions are used in the `transfer()` and `transferFrom()` functions to update the balances of the tokens.
+
+2. Wrong Logic Vulnerability in `transferFrom()`
+
+Function: `transferFrom()`
+
+Vulnerability: This function uses the `if` statement to check if the `_to` address is not equal to the `fights` address. However, this check is not sufficient to prevent the transfer of tokens to the `fights` address, as the `fights` address can be set to any value, including the `address(0)` value.
+
+Reason: This vulnerability can be exploited by setting the `fights` address to the `address(0)` value, which will cause the `transferFrom()` function to transfer tokens to the `address(0)` address, which is not a valid address. This can lead to a loss of funds for the contract owner, as the `transferFrom()` function is used in the `batchTransfer()` function to transfer tokens to multiple addresses.
+
+3. Bad Randomness Vulnerability in `batchTransfer()`
+
+Function: `batchTransfer()`
+
+Vulnerability: This function uses the `for` loop to transfer tokens to multiple addresses. However, the loop does not use a random order for the addresses, which can lead to a bias in the distribution of tokens.
+
+Reason: This vulnerability can be exploited by providing a list of addresses that are not randomly ordered. This can lead to a loss of funds for the contract owner, as the `batchTransfer()` function is used in the `create()` function to transfer tokens to multiple addresses.
+
+4. Access Control Vulnerability in `setFightsAddress()`
+
+Function: `setFightsAddress()`
+
+Vulnerability: This function allows any address to set the `fights` address, which can lead to a loss of control over the contract.
+
+Reason: This vulnerability can be exploited by providing a malicious address as the `fights` address, which can lead to a loss of control over the contract.
+
+5. Typo Constructor Vulnerability in `Ownable()`
+
+Function: `Ownable()`
+
+Vulnerability: This function uses the `msg.sender` variable to set the `owner` address, which can lead to a loss of control over the contract.
+
+Reason: This vulnerability can be exploited by providing a malicious address as the `msg.sender` variable, which can lead to a loss of control over the contract.
+
+Note: These vulnerabilities can be exploited in real-world scenarios, and can lead to a loss of funds for the contract owner. It is important to address these vulnerabilities to ensure the security and integrity of the smart contract.

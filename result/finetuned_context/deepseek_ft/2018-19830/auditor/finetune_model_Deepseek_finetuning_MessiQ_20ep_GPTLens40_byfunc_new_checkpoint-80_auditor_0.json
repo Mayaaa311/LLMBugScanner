@@ -1,0 +1,29 @@
+ {
+    "output_list": [
+        {
+            "function_name": "distribute",
+            "vulnerability": "Integer Overflow",
+            "reason": "The vulnerability exists in the line `totalAmount += _amounts[a];`. If the sum exceeds the maximum value representable by the `uint` type (`2^256 - 1`), it causes an integer overflow. This bypasses the subsequent `require` check, leading to unauthorized deductions and logical inconsistencies."
+        },
+        {
+            "function_name": "claimThrone",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function allows users to become the king only if the amount of Ether sent is greater than the current balance. However, the check is vulnerable to a typo where the comparison operator is mistakenly reversed, allowing attackers to exploit this mistake and become the king regardless of the amount of Ether sent."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Access Control",
+            "reason": "The minting function is only restricted to the owner, but it does not check if the target address is a smart contract. If the target is a smart contract, the minted tokens can be stolen, leading to a severe loss for the token holders."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "reason": "The transferFrom function does not check if the spender has sufficient allowance before transferring tokens, allowing attackers to steal tokens from other users."
+        },
+        {
+            "function_name": "MorphToken",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor function is named 'MorphToken' instead of 'initialize' or 'constructor', which can unintentionally expose the function as public, allowing attackers to claim ownership and funds."
+        }
+    ]
+}

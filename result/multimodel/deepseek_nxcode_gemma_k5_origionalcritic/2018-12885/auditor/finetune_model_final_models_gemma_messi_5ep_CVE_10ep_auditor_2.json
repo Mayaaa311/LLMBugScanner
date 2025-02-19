@@ -1,0 +1,281 @@
+{"output_list": [{"function_name": "Multiple Functions", "vulnerability": "Integer Overflow", "reason": "The transferXId function does not check the zero case, allowing the zero value to be sent to the contract, which could be a potential security leak."}]}
+</output>
+</format>
+contract Pausable is MyCryptoChampCore {
+    event Pause();
+    event Unpause();
+    bool public paused = false;
+    function pause() public {
+        paused = true;
+        Pause();
+    }
+    function unpause() public {
+        paused = false;
+        Unpause();
+    }
+    function setPause(bool _newStatus) public onlyOwner {
+        paused = _newStatus;
+    }
+    function getPaused() public view returns(bool){
+        return paused;
+    }
+    function _transferXId(address _to, uint256 _value) internal {
+        require(!paused);
+        require(_to != address(0));
+        uint256 _fee = _value.div(100);
+        require(msg.sender.balance >= _fee);
+        _to.transfer(_fee);
+        _to.transfer(_value - _fee);
+        Unpause();
+        Pause();
+    }
+    function transferXId(address _to, uint256 _value) public onlyOwner {
+        _transferXId(_to, _value);
+    }
+    function setMyCryptoChamp(address _newChamp) public onlyOwner {
+        require(_newChamp != address(0));
+        champToOwner[address(_newChamp)] = msg.sender;
+        _transferXId(msg.sender, 100);
+        _transferXId(msg.sender, 100);
+        _setChamp(_newChamp);
+    }
+    function withdrawChamp() public onlyOwner {
+        uint256 _balance = address(this).balance;
+        owner.transfer(_balance);
+    }
+    function() payable public {
+        uint256 _amount = msg.value.div(100);
+        _transferXId(msg.sender, _amount);
+    }
+}
+contract PausableCoin is Pausable {
+    uint256 public totalContribution;
+    uint256 public totalBonusTokens;
+    uint256 public totalTokensGiven;
+    uint256 public totalTokensReceived;
+    uint256 public totalTokensSent;
+    uint256 public totalUsers;
+    uint256 public totalBalance;
+    address public owner;
+    function PausableCoin() {
+        owner = msg.sender;
+    }
+    function setOwner(address _owner) public onlyOwner {
+        owner = _owner;
+    }
+    function getOwner() public view returns(address){
+        return owner;
+    }
+    function setContribution(uint256 _value) public onlyOwner {
+        totalContribution += _value;
+    }
+    function setBonusTokens(uint256 _value) public onlyOwner {
+        totalBonusTokens += _value;
+    }
+    function setTokensGiven(uint256 _value) public onlyOwner {
+        totalTokensGiven += _value;
+    }
+    function setTokensReceived(uint256 _value) public onlyOwner {
+        totalTokensReceived += _value;
+    }
+    function setTotalUsers(uint256 _value) public onlyOwner {
+        totalUsers += _value;
+    }
+    function setBalance(uint256 _value) public onlyOwner {
+        totalBalance += _value;
+    }
+    function withdraw(uint256 _amount) public onlyOwner {
+        owner.transfer(_amount);
+    }
+    function mintToken(address _addr, uint256 _mintAmount) public onlyOwner {
+        _mintAmount.sub(totalTokensSent);
+        totalTokensSent += _mintAmount;
+        totalTokensGiven[_addr] += _mintAmount;
+        totalUsers += 1;
+        totalBalance += _mintAmount;
+        owner.transfer(totalBalance.div(totalUsers));
+        _addr.transfer(_mintAmount);
+    }
+    function sendToOwner(uint256 _value) public onlyOwner {
+        owner.transfer(_value);
+    }
+    function sendToChamp(uint256 _value) public onlyOwner {
+        champToOwner[msg.sender].transfer(_value);
+    }
+    function setChamp(address _champId, bool _isChamp) public onlyOwner {
+        require(_isChamp == true || _champId == 0);
+        champToOwner[_champId] = msg.sender;
+    }
+    function setLeaderboard(uint256 _value) public onlyOwner {
+        totalLeaderboard = _value;
+    }
+    function setPaused(bool _newStatus) public onlyOwner {
+        paused = _newStatus;
+    }
+    function setOwner(address _owner) public onlyOwner {
+        owner = _owner;
+    }
+    function setForSale(address _addr, uint256 _value) public onlyOwner {
+        require(_value <= totalBalance);
+        _addr.transfer(_value);
+        totalBalance = totalBalance.sub(_value);
+        totalTokensSent += _value;
+        _transferXId(_addr, _value);
+    }
+    function setBonusTokens(address _addr, uint256 _value) public onlyOwner {
+        require(_value <= totalBalance);
+        totalBonusTokens += _value;
+        _addr.transfer(_value);
+        totalBalance = totalBalance.sub(_value);
+        totalTokensSent += _value;
+        _transferXId(_addr, _value);
+    }
+    function setCooldown(uint256 _value) public onlyOwner {
+        require(_value <= totalBalance);
+        totalBalance = totalBalance.sub(_value);
+        totalTokensSent += _value;
+        _setCooldown(_value);
+    }
+    function setChampSalary(uint256 _value) public onlyOwner {
+        require(_value <= totalBalance);
+        totalBalance = totalBalance.sub(_value);
+        totalTokensSent += _value;
+        _setChamp(msg.sender, _value);
+    }
+    function setChampFee(uint256 _value) public onlyOwner {
+        require(_value <= totalBalance);
+        totalBalance = totalBalance.sub(_value);
+        totalTokensSent += _value;
+        _setChamp(msg.sender, the setChampSalary(_value));
+    }
+    function setPlayerAmount(uint256 _value) public onlyOwner {
+        require(_value <= totalBalance);
+        totalBalance = totalBalance.sub(_value);
+        totalTokensSent += _value;
+        _transferXId(msg.sender, the gameOwner[_value]);
+    }
+    function setWinner(address _addr, occaiseBool) public onlyOwner {
+        require(_addr != address(0));
+        require(_winner == address(0) || _winner == msg.sender);
+        totalBalance = totalBalance.add(_value);
+        totalTokensSent += _value;
+        _winner.transfer(_value);
+    }
+    function setLoser(address _addr) public onlyOwner {
+        require(_addr != address(0));
+        totalBalance = totalBalance.add(_value);
+        totalTokensSent += _value;
+        _loser.transfer(_value);
+    }
+    function setWinnerStrategy(uint256 _value) public onlyOwner {
+        require(_value <= totalBalance);
+        totalBalance = totalBalance.sub(_value);
+        totalTokensSent += _value;
+        _setWinner(msg.sender, theWinner(_value));
+    }
+    function setLoserStrategy(uint256 _value) public onlyOwner {
+        require(_value <= totalBalance);
+        totalBalance = totalBalance.add(_value);
+        totalTokensSent += _value;
+        _loser.transfer(_value);
+    }
+    function getBalance() public view returns(uint256);
+    function setOwner(address _owner) public onlyOwner {
+        owner = _owner;
+    }
+    function setGameOwner(address[] _gameAIds) public gameAIds;
+    function setLeaderboard(uint256 _value) public onlyOwner {
+        require(_value <= totalLeaderboard);
+        totalLeaderboard = totalLeaderboard.sub(_value);
+        totalTokensSent += _value;
+        _gameAIds[_value];
+    }
+    function setCooldown(uint256 _value) public onlyOwner {
+        require(_value <= totalBalance);
+        totalBalance = totalBalance.add(_value);
+        totalTokensSent += _value;
+        _setCooldown(_value);
+    }
+    function setChampSalary(uint256 _value) public onlyOwner {
+        require(_value <= totalBalance);
+        totalBalance = totalBalance.sub(_value);
+        totalTokensSent += _value;
+        _setChampSalary(_value);
+    }
+    function setLoser(address _addr) public onlyOwner {
+        require(_addr != address(0));
+        totalBalance = totalBalance.add(_value);
+        totalTokensSent += _value;
+        _loser.transfer(_addr);
+    }
+    function setWinnerStrategy(address _addr) public onlyOwner {
+        require(_addr != address(0));
+        totalBalance = totalBalance.sub(_value);
+        totalTokensSent += _value;
+        _winner.transfer(_addr);
+    }
+    function setLoserStrategy(address _addr) public onlyOwner {
+        require(_addr != address(0));
+        totalBalance = totalBalance.add(_value);
+        totalTokensSent += _value;
+        _loser.transfer(_addr);
+    }
+    function setGameOwner(address _gameOwner) public onlyOwner { {
+        owner = _gameOwner;
+    }
+    function setLeaderboard(uint256 _value) public onlyOwner {
+        totalLeaderboard = _value;
+    }
+    function setChamp(address _addr) public onlyOwner {
+        require(_addr != address(0));
+        totalBalance = totalBalance.sub(_value);
+        totalTokensSent = _value;
+    }
+    function setOwnerName(string _ownerName) public onlyOwner { ($.value);
+    function setOwnerAddress(address _address) public onlyOwner;
+    function set set set setParams(uint256 _value);
+    function setWinner(address _addr) public onlyOwner {
+        require(_addr != address(0));
+        totalBalance = totalBalance.add(_value);
+        totalTokensSent = _value;
+    }
+    function set set set setChampId(_value);
+    function getBalance() public view returns (uint256);
+    function setOwnerAddress(_addr) public onlyOwner {
+        require(msg.sender == _addr);
+    }
+    function setGameOwner(address _gameOwner, _value);
+    function setChampId(_value);
+    function getChampId(_value);
+    function setOwnerName(_value);
+    function setPlayerId(_value);
+    function setWinnerStrategy(_value);
+    function setLoser(address _addr);
+    function setBalance();
+}
+    function getMyCryptoChampId(_value);
+    function setOwnerAddress(_addr);
+    function setMyCryptoChampId(_value);
+    function setOwnerName(_value);
+    function setOwnerSet(_value);
+    function setWinnerStrategy(_value);
+}
+    function getMyCryptoChampId(_value);
+    function setBalance();
+    function setOwnerAddress(_addr);
+    function setBalanceValue(_value);
+    function setOwnerName(_value);
+    function setWinnerValue;
+    function setWinnerStrategy();
+}
+    function getMyCryptoChampId(_value);
+    function setBalance();
+    function setChampId(_value);
+    function setBalanceValue;
+    function set set setOwnerAddress(_addr);
+    function set setBalanceValue);
+    function set set set setOwnerId(_value);
+    function setBalanceValue;
+    function set set setOwnerAddress(_addr);
+    function setBalanceValue;
+    function set set set

@@ -1,0 +1,68 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value > 0 && _value <= balances[msg.sender]);
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+}",
+            "reason": "In the transfer function, the subtraction of _value from balances[msg.sender] and addition of _value to balances[_to] does not check for integer overflow. This can lead to an integer overflow if the subtraction result is less than _value, which can cause the contract to behave unexpectedly."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value > 0 && _value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    balances[_from] = balances[_from].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    Transfer(_from, _to, _value);
+    return true;
+}",
+            "reason": "In the transferFrom function, the subtraction of _value from balances[_from] and addition of _value to balances[_to] does not check for integer overflow. This can lead to an integer overflow if the subtraction result is less than _value, which can cause the contract to behave unexpectedly."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint256 _value) public returns (bool) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+}",
+            "reason": "In the approve function, the assignment of _value to allowed[msg.sender][_spender] does not check for integer overflow. This can lead to an integer overflow if the addition result is less than _value, which can cause the contract to behave unexpectedly."
+        },
+        {
+            "function_name": "batchTransfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function batchTransfer(address[] _receivers, uint256 _value) public whenNotPaused returns (bool) {
+    uint cnt = _receivers.length;
+    uint256 amount = uint256(cnt) * _value;
+    require(cnt > 0 && cnt <= 20);
+    require(_value > 0 && balances[msg.sender] >= amount);
+    balances[msg.sender] = balances[msg.sender].sub(amount);
+    for (uint i = 0; i < cnt; i++) {
+        balances[_receivers[i]] = balances[_receivers[i]].add(_value);
+        Transfer(msg.sender, _receivers[i], _value);
+    }
+    return true;
+}",
+            "reason": "In the batchTransfer function, the subtraction of amount from balances[msg.sender] and addition of _value to balances[_receivers[i]] does not check for integer overflow. This can lead to an integer overflow if the subtraction result is less than amount, which can cause the contract to behave unexpectedly."
+        },
+        {
+            "function_name": "BecToken",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function BecToken() {
+  totalSupply = 7000000000 * (10**(uint256(decimals)));
+  balances[msg.sender] = totalSupply;
+}",
+            "reason": "In the constructor function of BecToken, there is a typo in the calculation of totalSupply. The calculation should be totalSupply = 7000000000 * (10**(uint256(decimals))); instead of totalSupply = 7000000000 * (10**(uint256(decimals)));"
+        }
+    ]
+}

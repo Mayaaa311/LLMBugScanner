@@ -1,0 +1,76 @@
+{"output_list": [{"output_list": [{"function_name": "<function_name_1>", "code": "<function_code_1>", "vulnerability": "<vulnerability_1>", "reason": "<reason_1>"}, {"function_name": "<function_name_2>", "code": "<function_code_2>", "vulnerability": "<vulnerability_2>", "reason": "<reason_2>"}], "function_name": "<function_name_3>", "code": "<function_code_3>", "vulnerability": "<vulnerability_3>", "reason": "<reason_3>"}, {"function_name": "<function_name_4>", "code": "<function_code_4>", "vulnerability": "<vulnerability_4>", "reason": "<reason_4>"}, {"function_name": "<function_name_5>", "code": "<function_code_5>", "vulnerability": "<vulnerability_5>", "reason": "<reason_5>"}
+]}
+The list of output functions: 
+function getBalance() public view returns (uint256 balance);
+function getTotalSupply() public view returns (uint256 totalSupply);
+function getOwner() public view returns (address owner);
+function getName() public view returns (string name);
+function getSymbol() public view returns (string symbol);
+function getDecimals() public view returns (uint8 decimals);
+function getBuyPrice() public view returns (uint256 buyPrice);
+function getSellPrice() public view returns (uint256 sellPrice);
+function getBalance(address _investor) public view returns (uint256 balance);
+function getTotalSupply() public view returns (uint256 totalSupply);
+function getOwner() public view returns (address owner);
+function getName() public view returns (string name);
+function getSymbol() public view returns (string symbol);
+function getDecimals() public view returns (uint8 decimals);
+function getBuyPrice() public view returns (uint256 buyPrice);
+function getSellPrice() public view returns (uint256 sellPrice);
+function getBalance(address _investor) public view returns (uint256 balance);
+function getTotalSupply() public view returns (uint256 totalSupply);
+function getOwner() public view returns (address owner);
+function getName() public view returns (string name);
+function getSymbol() public view returns (string symbol);
+function getDecimals() public view returns (uint8 decimals);
+function getBuyPrice() public view returns (uint256 buyPrice);
+function getSellPrice() public view returns (uint256 sellPrice);
+function getBalance(address _investor) public view returns (uint256 balance);
+function getTotalSupply() public view returns (uint256 totalSupply);
+function getOwner() public view returns (address owner);
+function getName() public view returns (string name);
+function getSymbol() public view returns (string symbol);
+function getDecimals() public view returns (uint8 decimals);
+function getBuyPrice() public view returns (uint256 buyPrice);
+function getSellPrice() public view returns (uint256 sellPrice);
+contract CryptonCoin is owned, MyAdvancedToken {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function CryptonCoin(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) MyAdvancedToken(initialSupply, tokenName, tokenSymbol) public {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}
+contract CryptonCoinPreSale is owned {
+    uint256 public totalTokens = 100000000000000000000000000;
+    uint256 public totalPreSaleTokens = 0;
+    uint256 public totalBonusTokens = 0;
+    uint256 public totalPreSaleWei = 0;
+    uint256 public minPreSaleWei = 100000000000000000000;
+    uint256 public maxPreSaleWei = 1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

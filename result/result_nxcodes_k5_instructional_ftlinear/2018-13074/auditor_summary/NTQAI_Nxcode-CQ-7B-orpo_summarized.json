@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "TokenERC20",
+            "code": "function TokenERC20() public { totalSupply = initialSupply * 10 ** uint256(decimals); balanceOf[msg.sender] = totalSupply; name = tokenName; symbol = tokenSymbol; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The initialSupply is a uint256 type variable, which can hold a maximum value of 2^256 - 1. If initialSupply is set to 5000000000, it will exceed the maximum value and cause an integer overflow. This will result in an incorrect totalSupply and balanceOf[msg.sender] values."
+        },
+        {
+            "function_name": "TokenERC20",
+            "code": "function _transfer(address _from, address _to, uint _value) internal { require (_to != 0x0); require (balanceOf[_from] >= _value); require (balanceOf[_to] + _value > balanceOf[_to]); uint previousBalances = balanceOf[_from] + balanceOf[_to]; balanceOf[_from] -= _value; balanceOf[_to] += _value; emit Transfer(_from, _to, _value); assert(balanceOf[_from] + balanceOf[_to] == previousBalances); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The _transfer function is used to transfer tokens from one address to another. It checks if the recipient address is not 0x0, if the sender has sufficient balance, and if the recipient's balance will not exceed the maximum value. However, the balanceOf[_from] -= _value and balanceOf[_to] += _value operations can cause an integer overflow if _value is large enough. This will result in an incorrect balanceOf[_from] and balanceOf[_to] values."
+        },
+        {
+            "function_name": "TokenERC20",
+            "code": "function transfer(address _to, uint256 _value) public { _transfer(msg.sender, _to, _value); }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function is a public function that allows users to transfer tokens to a specified address. It calls the _transfer function to perform the transfer. The _transfer function checks if the recipient address is not 0x0, if the sender has sufficient balance, and if the recipient's balance will not exceed the maximum value. However, the balanceOf[_from] -= _value and balanceOf[_to] += _value operations can cause an integer overflow if _value is large enough. This will result in an incorrect balanceOf[_from] and balanceOf[_to] values."
+        },
+        {
+            "function_name": "TokenERC20",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) { require(_value <= allowance[_from][msg.sender]);     allowance[_from][msg.sender] -= _value; _transfer(_from, _to, _value); return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function is a public function that allows users to transfer tokens from one address to another on behalf of the sender. It checks if the sender has sufficient allowance, deducts the allowance, and performs the transfer using the _transfer function. The _transfer function checks if the recipient address is not 0x0, if the sender has sufficient balance, and if the recipient's balance will not exceed the maximum value. However, the balanceOf[_from] -= _value and balanceOf[_to] += _value operations can cause an integer overflow if _value is large enough. This will result in an incorrect balanceOf[_from] and balanceOf[_to] values."
+        },
+        {
+            "function_name": "TokenERC20",
+            "code": "function approve(address _spender, uint256 _value) public returns (bool success) { allowance[msg.sender][_spender] = _value; return true; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The approve function is a public function that allows users to approve a spender to transfer a certain amount of tokens on their behalf. It sets the allowance[msg.sender][_spender] to the specified value. However, if the value is large enough, it can cause an integer overflow. This will result in an incorrect allowance[msg.sender][_spender] value."
+        }
+    ]
+}

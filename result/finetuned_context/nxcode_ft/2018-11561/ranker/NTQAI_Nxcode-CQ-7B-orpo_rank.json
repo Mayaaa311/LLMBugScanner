@@ -1,0 +1,83 @@
+[
+  {
+    "function_name": "totalSupply",
+    "auditor_idx": 0,
+    "vulnerability": "Constant Function",
+    "criticism": "The function is correctly marked as constant, allowing it to be called without modifying the state of the contract. However, it exposes the total supply of tokens, which is a critical piece of information that should be protected unless intended for public use.",
+    "correctness": 7,
+    "severity": 6,
+    "profitability": 5
+  },
+  {
+    "function_name": "balanceOf",
+    "auditor_idx": 0,
+    "vulnerability": "Constant Function",
+    "criticism": "Similar to `totalSupply`, this function is correctly marked as constant, allowing it to be called without modifying the state. It exposes the balance of any address, which could be sensitive information if not handled properly. The lack of access control on this function is concerning.",
+    "correctness": 7,
+    "severity": 7,
+    "profitability": 5
+  },
+  {
+    "function_name": "transfer",
+    "auditor_idx": 0,
+    "vulnerability": "Non-Constant Function",
+    "criticism": "This function is correctly marked as non-constant, as it modifies the state of the contract by transferring tokens. However, it lacks proper access control checks. For example, it does not verify that the sender has enough balance before attempting the transfer, which could lead to a denial of service attack.",
+    "correctness": 6,
+    "severity": 8,
+    "profitability": 6
+  },
+  {
+    "function_name": "transferFrom",
+    "auditor_idx": 0,
+    "vulnerability": "Non-Constant Function",
+    "criticism": "This function is also non-constant and modifies the state. It allows an approved spender to transfer tokens on behalf of the owner. The function does not check if the spender has been approved by the owner or if the owner has enough balance. This could lead to unauthorized token transfers.",
+    "correctness": 6,
+    "severity": 8,
+    "profitability": 6
+  },
+  {
+    "function_name": "approve",
+    "auditor_idx": 0,
+    "vulnerability": "Non-Constant Function",
+    "criticism": "This function is non-constant and modifies the state by approving a spender. However, it does not check if the spender is a valid contract that can handle the approval (via the `approveAndCall` function). This could lead to unexpected behavior if the spender is not a trusted contract.",
+    "correctness": 6,
+    "severity": 7,
+    "profitability": 6
+  },
+  {
+    "function_name": "allowance",
+    "auditor_idx": 0,
+    "vulnerability": "Constant Function",
+    "criticism": "This function is correctly marked as constant, allowing it to be called without modifying the state. It is useful for checking the remaining allowance of a spender for a specific owner. However, it exposes allowance information, which should be protected unless intended for public use.",
+    "correctness": 7,
+    "severity": 6,
+    "profitability": 5
+  },
+  {
+    "function_name": "distributeToken",
+    "auditor_idx": 0,
+    "vulnerability": "Non-Constant Function",
+    "criticism": "This function is non-constant and modifies the state by transferring tokens to multiple addresses. However, it does not check if the sender has enough balance for all transfers. This could lead to a denial of service attack if the sender does not have enough tokens.",
+    "correctness": 5,
+    "severity": 8,
+    "profitability": 5
+  },
+  {
+    "function_name": "ERC20Token",
+    "auditor_idx": 0,
+    "vulnerability": "Constructor",
+    "criticism": "The constructor function correctly initializes the total supply and assigns it to the contract creator. However, it does not handle the case where the total supply exceeds the available balance, which could lead to a critical error.",
+    "correctness": 8,
+    "severity": 7,
+    "profitability": 6
+  },
+  {
+    "function_name": "approveAndCall",
+    "auditor_idx": 0,
+    "vulnerability": "Non-Constant Function",
+    "criticism": "This function is non-constant and modifies the state by approving a spender and then calling a function on the spender. However, it does not check if the spender is a valid contract that can handle the call. This could lead to unexpected behavior if the spender is not a trusted contract.",
+    "correctness": 6,
+    "severity": 7,
+    "profitability": 6
+  }
+]

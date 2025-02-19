@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintTokens",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function 'mintTokens' does not check for overflow when updating the 'totalSupply' and 'balances' of the investor. Since 'promoValue' is set to a high value (777 * 1e18), an attacker can exploit this by repeatedly calling 'mintTokens' with a large value, causing an overflow and gaining tokens without any investment."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function 'transfer' incorrectly subtracts the amount from both the sender's and the recipient's balances. This is a mistake because it incorrectly assumes that both sender and recipient have enough balance, which can lead to a situation where the transfer fails unexpectedly. This can be exploited by an attacker to create a denial of service condition for the token holders."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Access Control",
+            "reason": "The 'approve' function does not check if the allowance is being reset to zero. This allows an attacker to call 'approve' multiple times with the same spender and the same amount, effectively locking up tokens that were previously approved for transfer. This is a significant vulnerability as it can lead to loss of funds for token holders."
+        },
+        {
+            "function_name": "Play2LivePromo",
+            "vulnerability": "Typo Constructor",
+            "reason": "There is a typo in the constructor function name. The correct function name should be 'Play2LivePromo()' but the code mistakenly uses 'Play2LivePromo' without parentheses. This typo prevents the constructor from being called correctly, making the contract uninitializable and potentially leading to other issues."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "reason": "The 'transferFrom' function incorrectly subtracts the amount from both the owner's and the spender's allowance without checking if the allowance is sufficient. This can lead to a situation where a user mistakenly or maliciously uses 'transferFrom' without ensuring there is allowance, causing tokens to be incorrectly deducted from allowance and potentially leading to loss of funds."
+        }
+    ]
+}

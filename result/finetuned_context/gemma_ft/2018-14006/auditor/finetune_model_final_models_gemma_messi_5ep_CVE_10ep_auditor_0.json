@@ -1,0 +1,305 @@
+{"output_list": [{"function_name": "batchTransfer", "impact": "Integer Overflow", "function_args": ["address[]", "_value"], "msg_content": "Integer overflow in batchTransfer function allows an attacker to create arbitrary tokens for any user."}]}
+{"output_list": [{"function_name": "multipleTransfer", "impact": "Integer Overflow", "function_args": ["address[]", "_value"], "msg_content": "Integer overflow in multipleTransfer function allows an attacker to create arbitrary tokens for any user."}]}
+{"output_list": [{"function_name": "batchTransfer", "impact": "Integer Overflow", "function_args": ["address[]", "_value"], "msg_content": "Integer overflow in batchTransfer function allows an attacker to create arbitrary tokens for any user."}]}
+{"output_list": [{"function_name": "multipleTransfer", "impact": "Integer Overflow", "function_args": ["address[]", "_value"], "msg_content": "Integer overflow in multipleTransfer function allows an attacker to create arbitrary tokens for any user."}]}
+{"output_list": [{"function_name": "batchTransfer", "impact": "Integer Overflow", "function_args": ["address[]", "_value"], "msg_content": "Integer overflow in batchTransfer function allows an attacker to create arbitrary tokens for any user."}]}
+{"output_list": [{"function_name": "multipleTransfer", "impact": "Integer Overflow", "function_args": ["address[]", "_value"], "msg_content": "Integer overflow in multipleTransfer function allows an attacker to create arbitrary tokens for any user."}]}
+{"output_list": [{"function_name": "transferFrom", "impact": "Integer Overflow", "function_args": ["address", "_value"], "msg_content": "Integer overflow in transferFrom function allows an attacker to create arbitrary tokens for any user."}]}
+{"output_list": [{"function_name": "transfer", "impact": "Integer Overflow", "function_args": ["address", "_value"], "msg_content": "Integer overflow in transfer function allows an attacker to create arbitrary tokens for any user."}]}
+{"output_list": [{"function_name": "transferToContract", "impact": "Integer Overflow", "function_args": ["address", "_value"], "msg_content": "Integer overflow in transferToContract function allows an attacker to create arbitrary tokens for any user."}]}
+{"output_list": [{"function_name": "isContract", "impact": "Integer Overflow", "function_args": ["address"], "msg_content": "Integer overflow in isContract function allows an attacker to create arbitrary tokens for any user."}]}
+{"output_list": [{"function_name": "initialSupply", "impact": "Integer Overflow", "function_args": [], "msg_content": "Integer overflow in initialSupply function allows an attacker to create arbitrary tokens for any user."}]}
+{"output_list": [{"function_name": "currentBurned", "impact": "Integer Overflow", "function_args": [], "msg_content": "Integer overflow in currentBurned function allows an attacker to create arbitrary tokens for any user."}]}
+{"output_list": [{"function_name": "burn", "impact": "Integer Overflow", "function_args": ["uint256", "_data"], "msg_content": "Integer overflow in burn function allows an attacker to create arbitrary tokens for any user."}]}
+{"output_list": [{"function_name": "burnFrom", "impact": "Integer Overflow", "function_args": ["address", "_value", "_data"], "msg_content": "Integer overflow in burnFrom function allows an attacker to create arbitrary tokens for any user."}]}
+  function owner() public view returns (address owner) {
+    owner = msg.sender;
+  }
+  function setOwner(address _owner) public {
+    owner = _owner;
+  }
+  function setInitialSupply(uint256 _value) public {
+    INITIAL_SUPPLY = _value;
+  }
+  function setWorldOwner(address _addr) public {
+    worldOwner = _addr;
+  }
+  function setNextOwner(address _addr) public {
+    owner = _addr;
+  }
+  function setBalanceOfOwner(uint256 _value) public {
+    balances[msg.sender] = _value;
+  }
+  function setSender(address _sender) public {
+    msg.sender = _sender;
+  }
+  function setBalances(address[] _owners, uint256[] _balances) public {
+    for (uint i = 0; i < _owners.length; i++) {
+      balances[_owners[i]] = _balances[i];
+    }
+  }
+  function setTokens(address[] _owners, uint256[] _tokens) public {
+    for (uint i = 0; i < _owners.length; i++) {
+      balances[_owners[i]] = _tokens[i];
+      allowed[_owners[i], msg.sender] = _tokens[i];
+    }
+  }
+  function setZero(address[] _owners, uint256[] _zeros) public {
+    for (uint i = 0; i < _owners.length; i++) {
+      balances[_owners[i]] = _zeros[i];
+    }
+  }
+  function setMinimumRequirement(uint256 _minimumRequirement) public {
+    DECIMALS = _minimumRequirement;
+  }
+  function setMaximumRequirement(uint256 _maximumRequirement) public {
+    MAX_DECIMALS = _maximumRequirement;
+  }
+  function setCurrency(address[] _currencyAgents, uint256[] _rates) public {
+    _currencyAgents = _currencyAgents;
+    _rates = _rates;
+  }
+  function setFee(uint256 _fee) public {
+    _fee = _fee;
+  }
+  function setOwnerAndAgents(address[] _owners, address[] _agents) public {
+    for (uint i = 0; i < _owners.length; i++) {
+      balances[_owners[i]] = _rates[i];
+      allowed[_owners[i], _agents[i]] = _rates[i];
+    }
+    owner = _owner;
+    worldOwner = _worldOwner;
+  }
+  function() public payable {
+    uint256 amount = msg.value * _fee;
+    assert(balances[msg.sender] >= amount);
+    balances[msg.sender] -= amount;
+    balances[worldOwner] += amount;
+  }
+  function distribute(address[] _addresses, uint256[] _values) public returns (bool success) {
+    require(_addresses.length <= 255);
+    require(_values.length <= 255);
+    require(_addresses.length == _values.length);
+    for (uint i = 0; i < _addresses.length; i++) {
+      balances[msg.sender] -= _values[i];
+      balances[_addresses[i]] += _values[i];
+    }
+    Transfer(msg.sender, _addresses[i], _values[i]);
+    return true;
+  }
+  function transfer(address _to, uint256 _value) public returns (bool success) {
+    assert(balances[msg.sender] >= _value);
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    assert(balances[_from] >= _value && allowed[_from][msg.sender] >= _value);
+    balances[_to] += _value;
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function approve(address _spender, uint256 _value) public
+    returns (bool success) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+  function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+    public
+    returns (bool success) {
+    TokenRecipient spender = TokenRecipient(_spender);
+    if (approve(_spender, _value)) {
+      spender.receiveApproval(msg.sender, _value, this, _extraData);
+      return true;
+    }
+  }
+  function burn(address _owner, uint256 _value) public returns (bool success) {
+    require(_value <= balances[_owner]);
+    address burner = msg.sender;
+    balances[_owner] -= _value;
+    totalSupply -= _value;
+    Burn(burner, _value, totalSupply, _extraData);
+    return true;
+  }
+  function burnFrom(address _owner, uint256 _value, bytes _extraData) public returns (bool success) {
+    require(_value <= balances[_owner] && allowed[_owner][msg.sender] >= _value);
+    address burner = msg.sender;
+    balances[_owner] -= _value;
+    allowed[_owner][msg.sender] -= _value;
+    totalSupply -= _value;
+    Burn(burner, _value, totalSupply, _extraData);
+    return true;
+  }
+  function setMyTokens(address[] _myTokens) public {
+    _myTokens = _myTokens;
+  }
+  function setMyBalance(uint256[] _myBalance) public {
+    _myBalance = _myBalance;
+  }
+  function setMyOwner(address[] _myOwner) public {
+    _myOwner = _myOwner;
+  }
+  function setNextOwner(address[] _nextOwner) public {
+    _myOwner = _nextOwner;
+  }
+  function setWorldOwner(address[] _worldOwner) public {
+    _worldOwner = _worldOwner;
+  }
+  function setSender(address[] _sender) public {
+    _sender = _sender;
+  }
+  function setZero(address[] _zero) public {
+    _zero = _zero;
+  }
+  function minimumRequirement(uint256 _minimumRequirement) public {
+    DECIMALS = _minimumRequirement;
+  }
+  function maximumRequirement(uint256 _maximumRequirement) public {
+    MAX_DECIMALS = _maximumRequirement;
+  }
+  function setCurrency(address[] _currencyAgents, uint256[] _rates) public {
+    _currencyAgents = _currencyAgents;
+    _rates = _rates;
+  }
+  function setFee(uint256 _fee) public {
+    _fee = _fee;
+  }
+  function setOwnerAndAgents(address[] _owners, address[] _agents) public {
+    for (uint i = 0; i < _owners.length; i++) {
+      balances[_owners[i]] = _rates[i];
+      allowed[_owners[i], _agents[i]] = _rates[i];
+    }
+    owner = _owner;
+    worldOwner = _worldOwner;
+  }
+  function() public payable {
+    uint256 amount = msg.value * _fee;
+    assert(balances[msg.sender] >= amount);
+    balances[msg.sender] -= amount;
+    balances[worldOwner] += amount;
+  }
+  function transfer(address _to, uint256 _value) public returns (bool success) {
+    assert(balances[msg.sender] >= _value && _value <= allowed[msg.sender][this]);
+    balances[msg.sender] -= _value;
+    allowed[msg.sender][this] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    assert(balances[_from] >= _value && allowed[_from][msg.sender] >= _value);
+    balances[_to] += _value;
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function approve(address _spender, uint256 _value) public
+    returns (bool success) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+  function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+    public
+    returns (bool success) {
+    TokenRecipient spender = TokenRecipient(_spender);
+    if (approve(_spender, _value)) {
+      spender.receiveApproval(msg.sender, _value, this, _extraData);
+      return true;
+    }
+  }
+  function burn(address _owner, uint256 _value) public returns (bool success) {
+    require(_value <= balances[_owner]);
+    address burner = msg.sender;
+    balances[_owner] -= _value;
+    totalSupply -= _value;
+    Burn(burner, _value, totalSupply, _extraData);
+    return true;
+  }
+  function burnFrom(address _owner, uint256 _value, bytes _extraData) public returns (bool success) {
+    require(_value <= balances[_owner] && allowed[_owner][msg.sender] >= _value);
+    address burner = msg.sender;
+    balances[_owner] -= _value;
+    allowed[_owner][msg.sender] -= _value;
+    totalSupply -= _value;
+    Burn(burner, _value, totalSupply, _extraData);
+    return true;
+  }
+  function setMyTokens(address[] _myTokens) public {
+    _myTokens = _myTokens;
+  }
+  function setMyBalance(uint256[] _myBalance) public {
+    _myBalance = _myBalance;
+  }
+  function setMyOwner(address[] _myOwner) public {
+    _myOwner = _myOwner;
+  }
+  function setNextOwner(address[] _nextOwner) public {
+    _myOwner = _nextOwner;
+  }
+  function setWorldOwner(address[] _worldOwner) public {
+    _worldOwner = _worldOwner;
+  }
+  function setSender(address[] _sender) public {
+    _sender = _sender;
+  }
+  function setZero(address[] _zero) public {
+    _zero = _zero;
+  }
+  function minimumRequirement(uint256 _minimumRequirement) public {
+    DECIMALS = _minimumRequirement;
+  }
+  function maximumRequirement(uint256 _maximumRequirement) public {
+    MAX_DECIMALS = _maximumRequirement;
+  }
+  function setCurrency(address[] _currencyAgents, uint256[] _rates) public {
+    _currencyAgents = _currencyAgents;
+    _rates = _rates;
+  }
+  function setFee(uint256 _fee) public {
+    _fee = _fee;
+  }
+  function setOwnerAndAgents(address[] _owners, address[] _agents) public {
+    for (uint i = 0; i < _owners.length; i++) {
+      balances[_owners[i]] = _rates[i];
+      allowed[_owners[i], _agents[i]] = _rates[i];
+    }
+    owner = _owner;
+    worldOwner = _worldOwner;
+  }
+  function() public payable {
+    uint256 amount = msg.value * _fee;
+    assert(balances[msg.sender] >= amount);
+    balances[msg.sender] -= amount;
+    balances[worldOwner] += amount;
+  }
+  function transfer(address _to, uint256 _value) public returns (bool success) {
+    assert(balances[msg.sender] >= _value && _value <= allowed[msg.sender][this]);
+    balances[msg.sender] -= _value;
+    allowed[msg.sender][this] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+    assert(balances[_from] >= _value && allowed[_from][msg.sender] >= _value);
+    balances[_to] += _value;
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function approve(address _spender, uint256 _value) public returns (bool success) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+  function approveAndCall(address _spender, uint256 _value, bytes _extraData) public returns (bool success) {
+    TokenRecipient spender = TokenRecipient(_spender);
+    if (approve(_spender, _value)) {
+      

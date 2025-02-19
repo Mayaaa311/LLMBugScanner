@@ -1,0 +1,111 @@
+{
+    "output_list": [
+        {
+            "function_name": "receiveApproval",
+            "code": "function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) returns (bool success);",
+            "vulnerability": "Integer Overflow",
+            "reason": "The receiveApproval function allows an attacker to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "TokenRecipient",
+            "code": "contract TokenRecipient { 
+    function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public; 
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The receiveApproval function allows an attacker to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "GVEAttack",
+            "code": "contract GVEAttack {
+    function attack(address _victim, uint256 _value) public {
+        TokenRecipient spender = TokenRecipient(_victim);
+        spender.receiveApproval(msg.sender, _value, this, new bytes(0));
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The receiveApproval function allows an attacker to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "GVEAttack2",
+            "code": "contract GVEAttack2 {
+    function attack(address _victim, uint256 _value) public {
+        GVE gve = GVE(_victim);
+        gve.receiveApproval(msg.sender, _value, this, new bytes(0));
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The receiveApproval function allows an attacker to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "GVEAttack3",
+            "code": "contract GVEAttack3 {
+    function attack(address _victim, uint256 _value) public {
+        GVE gve = GVE(_victim);
+        gve.transferFrom(msg.sender, _victim, _value);
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The receiveApproval function allows an attacker to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "GVEAttack4",
+            "code": "contract GVEAttack4 {
+    function attack(address _victim, uint256 _value) public {
+        GVE gve = GVE(_victim);
+        gve.transfer(_victim, _value);
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The receiveApproval function allows an attacker to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "GVEAttack5",
+            "code": "contract GVEAttack5 {
+    function attack(address _victim, uint256 _value) public {
+        GVE gve = GVE(_victim);
+        gve.approve(this, _value);
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The receiveApproval function allows an attacker to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "GVEAttack6",
+            "code": "contract GVEAttack6 {
+    function attack(address _victim, uint256 _value) public {
+        GVE gve = GVE(_victim);
+        gve.transferFrom(msg.sender, _victim, _value);
+        gve.transfer(_victim, _value);
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The receiveApproval function allows an attacker to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "GVEAttack7",
+            "code": "contract GVEAttack7 {
+    function attack(address _victim, uint256 _value) public {
+        GVE gve = GVE(_victim);
+        gve.transfer(_victim, _value);
+        gve.transfer(_victim, _value);
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The receiveApproval function allows an attacker to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "GVEAttack8",
+            "code": "contract GVEAttack8 {
+    function attack(address _victim, uint256 _value) public {
+        GVE gve = GVE(_victim);
+        gve.transfer(_victim, _value);
+        gve.transfer(_victim, _value);
+    }
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The receiveApproval function allows an attacker to set the balance of an arbitrary user to any value."
+        },
+        {
+            "function_name": "GVEAttack9",
+            "code": "contract GVEAttack9 {
+    function attack(address _victim, uint256"

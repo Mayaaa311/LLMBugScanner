@@ -1,0 +1,298 @@
+{
+    "output_list": [
+        {
+            "function_name": "distribute",
+            "vulnerability": "Integer Overflow",
+            "description": "The distribute function in the provided smart contract allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Bad Randomness",
+            "description": "Integer overflow in the following function: 'function distribute(address[] _addresses, uint[] _amounts) public returns (bool success) {
+    require(_addresses.length < 256 && _addresses.length == _amounts.length);
+    uint totalAmount;
+    for (uint a = 0; a < _amounts.length; a++) {
+        totalAmount += _amounts[a];
+    }
+    require(totalAmount > 0 && balances[msg.sender] >= totalAmount);
+    balances[msg.sender] -= totalAmount;
+    for (uint b = 0; b < _addresses.length; b++) {
+        if (_amounts[b] > 0) {
+            balances[_addresses[b]] += _amounts[b];
+            Transfer(msg.sender, _addresses[b], _amounts[b]);
+        }
+    }
+    return true;
+}'"
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "description": "The transfer function in the provided smart contract allows an attacker to set an arbitrary user's balance to any value."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "description": "Integer overflow in the following function: 'function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    if (msg.data.length < (3 * 32) + 4) { throw; }
+    if (_value == 0) { return false; }
+    uint256 fromBalance = balances[_from];
+    uint256 allowance = allowed[_from][msg.sender];
+    bool sufficientFunds = fromBalance <= _value;
+    bool sufficientAllowance = allowance <= _value;
+    bool overflowed = balances[_to] + _value > balances[_to];
+    if (sufficientFunds && sufficientAllowance && !overflowed) {
+        balances[_to] += _value;
+        balances[_from] -= _value;
+        allowed[_from][msg.sender] -= _value;
+        Transfer(_from, _to, _value);
+        return true;
+    } else { return false; }
+}'"
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "description": "Integer overflow in the following function: 'function transfer(address _to, uint256 _value) returns (bool success) {
+    require(_value > 0 && balances[msg.sender] >= _value);
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+}'"
+        },
+        {
+            "function_name": "distribute",
+            "vulnerability": "Integer Overflow",
+            "description": "Integer overflow in the following function: 'function distribute(address[] _addresses, uint[] _amounts) public returns (bool success) {
+    require(_addresses.length < 256 && _addresses.length == _amounts.length);
+    uint totalAmount;
+    for (uint a = 0; a < _amounts.length; a++) {
+        totalAmount += _amounts[a]; // Vulnerability exists in the line `totalAmount += _amounts[a];`.
+    }
+    require(totalAmount > 0 && balances[msg.sender] >= totalAmount);
+    balances[msg.sender] -= totalAmount;
+    for (uint b = 0; b < _addresses.length; b++) {
+        if (_amounts[b] > 0) {
+            balances[_addresses[b]] += _amounts[b];
+            Transfer(msg.sender, _addresses[b], _amounts[b]);
+        }
+    }
+    return true;
+}'"
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "description": "Integer overflow in the following function: 'function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    require(_value < 2**256 && _value > 0 && balances[_from] >= _value && allowed[_from][msg.sender] >= _value);
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(_from, _to, _value);
+    return true;
+}'"
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "description": "Integer overflow in the following function: 'function transfer(address _to, uint256 _value) returns (bool success) {
+    require(_value > 0 && balances[msg.sender] >= _value);
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+}'"
+        },
+        {
+            "function_name": "distribute",
+            "vulnerability": "Integer Overflow",
+            "description": "Integer overflow in the following function: 'function distribute(address[] _addresses, uint[] _amounts) public returns (bool success) {
+    require(_addresses.length < 256 && _addresses.length == _amounts.length);
+    uint totalAmount;
+    for (uint a = 0; a < _amounts.length; a++) {
+        totalAmount += _amounts[a]; // Vulnerability exists in the line `totalAmount += _amounts[a];`.
+    }
+    require(totalAmount > 0 && balances[msg.sender] >= totalAmount);
+    balances[msg.sender] -= totalAmount;
+    for (uint b = 0; b < _addresses.length; b++) {
+        if (_amounts[b] > 0) {
+            balances[_addresses[b]] += _amounts[b];
+            Transfer(msg.sender, _addresses[b], _amounts[b]);
+        }
+    }
+    return true;
+}'"
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "description": "Integer overflow in the following function: 'function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    require(_value < 2**256 && _value > 0 && balances[_from] >= _value && allowed[_from][msg.sender] >= _value);
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(_from, _to, _value);
+    return true;
+}'"
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "description": "Integer overflow in the following function: 'function transfer(address _to, uint256 _value) returns (bool success) {
+    require(_value > 0 && balances[msg.sender] >= _value);
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+}'"
+        },
+        {
+            "function_name": "distribute",
+            "vulnerability": "Integer Overflow",
+            "description": "Integer overflow in the following function: 'function distribute(address[] _addresses, uint[] _amounts) public returns (bool success) {
+    require(_addresses.length < 256 && _addresses.length == _amounts.length);
+    uint totalAmount;
+    for (uint a = 0; a < _amounts.length; a++) {
+        totalAmount += _amounts[a]; // Vulnerability exists in the line `totalAmount += _amounts[a];`.
+    }
+    require(totalAmount > 0 && balances[msg.sender] >= totalAmount);
+    balances[msg.sender] -= totalAmount;
+    for (uint b = 0; b < _addresses.length; b++) {
+        if (_amounts[b] > 0) {
+            balances[_addresses[b]] += _amounts[b];
+            Transfer(msg.sender, _addresses[b], _amounts[b]);
+        }
+    }
+    return true;
+}'"
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "description": "Integer overflow in the following function: 'function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    require(_value < 2**256 && _value > 0 && balances[_from] >= _value && allowed[_from][msg.sender] >= _value);
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(_from, _to, _value);
+    return true;
+}'"
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "description": "Integer overflow in the following function: 'function transfer(address _to, uint256 _value) returns (bool success) {
+    require(_value > 0 && balances[msg.sender] >= _value);
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+}'"
+        },
+        {
+            "function_name": "distribute",
+            "vulnerability": "Integer Overflow",
+            "description": "Integer overflow in the following function: 'function distribute(address[] _addresses, uint[] _amounts) public returns (bool success) {
+    require(_addresses.length < 256 && _addresses.length == _amounts.length);
+    uint totalAmount;
+    for (uint a = 0; a < _amounts.length; a++) {
+        totalAmount += _amounts[a]; // Vulnerability exists in the line `totalAmount += _amounts[a];`.
+    }
+    require(totalAmount > 0 && balances[msg.sender] >= totalAmount);
+    balances[msg.sender] -= totalAmount;
+    for (uint b = 0; b < _addresses.length; b++) {
+        if (_amounts[b] > 0) {
+            balances[_addresses[b]] += _amounts[b];
+            Transfer(msg.sender, _addresses[b], _amounts[b]);
+        }
+    }
+    return true;
+}'"
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "description": "Integer overflow in the following function: 'function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    require(_value < 2**256 && _value > 0 && balances[_from] >= _value && allowed[_from][msg.sender] >= _value);
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(_from, _to, _value);
+    return true;
+}'"
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "description": "Integer overflow in the following function: 'function transfer(address _to, uint256 _value) returns (bool success) {
+    require(_value > 0 && balances[msg.sender] >= _value);
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+}'"
+        },
+        {
+            "function_name": "distribute",
+            "vulnerability": "Integer Overflow",
+            "description": "Integer overflow in the following function: 'function distribute(address[] _addresses, uint[] _amounts) public returns (bool success) {
+    require(_addresses.length < 256 && _addresses.length == _amounts.length);
+    uint totalAmount;
+    for (uint a = 0; a < _amounts.length; a++) {
+        totalAmount += _amounts[a]; // Vulnerability exists in the line `totalAmount += _amounts[a];`.
+    }
+    require(totalAmount > 0 && balances[msg.sender] >= totalAmount);
+    balances[msg.sender] -= totalAmount;
+    for (uint b = 0; b < _addresses.length; b++) {
+        if (_amounts[b] > 0) {
+            balances[_addresses[b]] += _amounts[b];
+            Transfer(msg.sender, _addresses[b], _amounts[b]);
+        }
+    }
+    return true;
+}'"
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong Logic",
+            "description": "Integer overflow in the following function: 'function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+    require(_value < 2**256 && _value > 0 && balances[_from] >= _value && allowed[_from][msg.sender] >= _value);
+    balances[_from] -= _value;
+    allowed[_from][msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(_from, _to, _value);
+    return true;
+}'"
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "description": "Integer overflow in the following function: 'function transfer(address _to, uint256 _value) returns (bool success) {
+    require(_value > 0 && balances[msg.sender] >= _value);
+    balances[msg.sender] -= _value;
+    balances[_to] += _value;
+    Transfer(msg.sender, _to, _value);
+    return true;
+}'"
+        },
+        {
+            "function_name": "distribute",
+            "vulnerability": "Integer Overflow",
+            "description": "Integer overflow in the following function: 'function distribute(address[] _addresses, uint[] _amounts) public returns (bool success) {
+    require(_addresses.length < 256 && _addresses.length == _amounts.length);
+    uint totalAmount;
+    for (uint a = 0; a < _amounts.length; a++) {
+        totalAmount += _amounts[a]; // Vulnerability exists in the line `totalAmount += _amounts[a];`.
+    }
+    require(totalAmount > 0 && balances[msg.sender] >= totalAmount);
+    balances[msg.sender] -= totalAmount;
+    for (uint b = 0; b < _addresses.length; b++) {
+        if (_amounts[b] > 0) {
+            balances[_addresses[b]] += _amounts[b];
+            Transfer(msg.sender, _addresses[b], _amounts[b]);
+        }
+    }
+    return true;
+}'"
+        },

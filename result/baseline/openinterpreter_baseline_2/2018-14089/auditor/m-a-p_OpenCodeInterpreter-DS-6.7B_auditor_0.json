@@ -1,0 +1,72 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address _to, uint256 _value) returns (bool success) {
+        if(msg.data.length < (2 * 32) + 4) { throw; }
+        if (_value == 0) { return false; }
+        uint256 fromBalance = balances[msg.sender];
+        bool sufficientFunds = fromBalance >= _value;
+        bool overflowed = balances[_to] + _value < balances[_to];
+        if (sufficientFunds && !overflowed) {
+            balances[msg.sender] -= _value;
+            balances[_to] += _value;
+            Transfer(msg.sender, _to, _value);
+            return true;
+        } else { return false; }
+    }",
+            "reason": "In the transfer function, the addition operation for balances[_to] + _value can cause an integer overflow if the sum of balances[_to] and _value is less than balances[_to]. This can be exploited by an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address _from, address _to, uint256 _value) returns (bool success) {
+        if(msg.data.length < (3 * 32) + 4) { throw; }
+        if (_value == 0) { return false; }
+        uint256 fromBalance = balances[_from];
+        uint256 allowance = allowed[_from][msg.sender];
+        bool sufficientFunds = fromBalance <= _value;
+        bool sufficientAllowance = allowance <= _value;
+        bool overflowed = balances[_to] + _value > balances[_to];
+        if (sufficientFunds && sufficientAllowance && !overflowed) {
+            balances[_to] += _value;
+            balances[_from] -= _value;
+            allowed[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        } else { return false; }
+    }",
+            "reason": "In the transferFrom function, the addition operation for balances[_to] + _value can cause an integer overflow if the sum of balances[_to] and _value is less than balances[_to]. This can be exploited by an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function approve(address _spender, uint256 _value) returns (bool success) {
+        if (_value != 0 && allowed[msg.sender][_spender] != 0) { return false; }
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }",
+            "reason": "In the approve function, the assignment operation for allowed[msg.sender][_spender] = _value can cause an integer overflow if the sum of allowed[msg.sender][_spender] and _value is less than allowed[msg.sender][_spender]. This can be exploited by an attacker to allow them to transfer more tokens than the owner's balance."
+        },
+        {
+            "function_name": "setAIRDROPBounce",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function setAIRDROPBounce(uint _newPrice)  {
+        if (msg.sender != owner) { throw; }
+        AIRDROPBounce = _newPrice;
+    }",
+            "reason": "In the setAIRDROPBounce function, the function does not have any randomness or input validation, which can be exploited by an attacker to set the AIRDROPBounce value to any value they want."
+        },
+        {
+            "function_name": "setICORatio",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function setICORatio(uint _newPrice)  {
+        if (msg.sender != owner) { throw; }
+        ICORatio = _newPrice;
+    }",
+            "reason": "In the setICORatio function, the function does not have any randomness or input validation, which can be exploited by an attacker to set the ICORatio value to any value they want."
+        }
+    ]
+}

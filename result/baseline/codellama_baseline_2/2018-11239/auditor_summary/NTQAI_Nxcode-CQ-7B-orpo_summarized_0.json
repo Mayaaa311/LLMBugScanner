@@ -1,0 +1,29 @@
+{
+    "output_list": [
+        {
+            "function_name": "_transfer",
+            "vulnerability": "Integer overflow in the calculation of the burn amount",
+            "reason": "The burn amount is calculated as burnPerTransaction + _value, where burnPerTransaction is a fixed value and _value is the amount of tokens being transferred. If _value is large enough, the sum of burnPerTransaction and _value can overflow, resulting in a negative burn amount."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Wrong logic in the allowance check",
+            "reason": "The transferFrom function checks the allowance of the sender before transferring tokens. However, the allowance is not checked against the amount of tokens being transferred. This means that an attacker can transfer tokens without having enough allowance, effectively bypassing the allowance check."
+        },
+        {
+            "function_name": "burn",
+            "vulnerability": "Bad randomness in the burn amount",
+            "reason": "The burn function burns a fixed amount of tokens, regardless of the amount of tokens being transferred. This can be exploited by an attacker to burn a large amount of tokens, effectively devaluing the token."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Lack of access control in the allowance check",
+            "reason": "The approve function allows any address to set the allowance of another address. This means that an attacker can set the allowance of another address to a large amount, effectively allowing them to transfer a large amount of tokens without having enough allowance."
+        },
+        {
+            "function_name": "Hexagon",
+            "vulnerability": "Typo in the constructor",
+            "reason": "The Hexagon constructor sets the balance of the contract creator to the initial supply, but it does not set the balance of the contract itself to the initial supply. This means that the contract does not have enough tokens to transfer or burn, effectively making it unable to function properly."
+        }
+    ]
+}

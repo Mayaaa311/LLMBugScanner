@@ -1,0 +1,292 @@
+{"output_list": [{"function_name": "My CryptoCoin 1.0", "vulnerability": "Integer Overflow", "description": "The 'toUint256' function allows an attacker to set an arbitrary user's balance to any value."}]}
+{"function_name": "Integer Overflow", "vulnerability": "Integer Overflow", "description": "The 'toUint256' function allows an attacker to set an arbitrary user's balance to any value."}]}
+{"output_list": [
+  {
+    "function_name": "toUint256",
+    "vulnerability": "Integer Overflow",
+    "description": "The 'toUint256' function allows an attacker to set an arbitrary user's balance to any value."
+  }
+]
+}
+```
+pragma solidity ^0.4.18;
+contract MyCryptoChampCore {
+    function balanceOf(address _owner) public view returns (uint256 balance);
+    function transfer(address _to, uint256 _value) public returns (bool success);
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success);
+    function approve(address _spender, uint256 _value) public returns (bool success);
+    function allowance(address _owner, address _spender) public view returns (uint256 remaining);
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
+}
+contract CryptoChamp is MyCryptoChampCore {
+    uint256 constant private MAX_UINT256 = 2**256 - 1;
+    uint256 private totalSupply = 0;
+    string public constant symbol = "CCH";
+    uint8 public constant decimals = 18;
+    uint256 public totalBounty = 0;
+    uint256 public rewardRate = 48;
+    uint256 public minContribution = 10000;
+    address public owner = msg.sender;
+    mapping (address => uint256) public balanceOf;
+    mapping (address => bool) public frozenAccount;
+    mapping (address => uint256) public lockedBalance;
+    mapping (address => uint256) public unlockTime;
+    mapping (address => uint256) public lastUnlockTime;
+    mapping (address => uint256) public unlockBalance;
+    mapping (address => uint256) public unlockTokens;
+    mapping (address => uint256) public lastUnlockTokens;
+    mapping (address => uint256) public unlockTimeTokens;
+    mapping (address => uint256) public lastUnlockTimeTokens;
+    mapping (address => uint256) public unlockBalanceTokens;
+    mapping (address => uint256[16] public unlockTimeTokens;
+    mapping (address => uint256[16] public lastUnlockTimeTokens;
+    mapping (address => uint256) public unlockBalanceTokens;
+    mapping (address => uint256) public unlockTokens;
+    mapping (address => uint256) public lastUnlockTokens;
+    mapping (address => uint256) public unlockTimeTokens;
+    mapping (address => uint256) public lastUnlockTimeTokens;
+    mapping (address => uint256) public unlockBalanceTokens;
+    mapping (address => uint256) public unlockTokens;
+    mapping (address => uint256) public lastUnlockTokens;
+    mapping (address => uint256) public unlockTimeTokens;
+    event FrozenFunds(address target, bool frozen);
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event FrozenFunds(address target, bool frozen);
+    event Locked(address indexed _owner, uint256 amount);
+    event Unlocked(address indexed _owner, uint256 amount);
+    event Burn(address indexed _from, uint256 _value);
+    function CryptoChamp() public {
+        balanceOf[msg.sender] = 10000000000000000000000000;
+        totalSupply = 100000000000000000000000000;
+    }
+    function _transfer(address _from, address _to, uint _value) internal {
+        require(_to != 0x0);
+        require(balanceOf[_from] >= _value);
+        require(!frozenAccount[_from]);
+        require(!frozenAccount[_to]);
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(_from, _to, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        require(target != 0x0);
+        require(mintedAmount > 0);
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        require(target != 0x0);
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setRewardRate(uint256 _rewardRate) onlyOwner public {
+        require(_rewardRate > 0);
+        rewardRate = _rewardRate;
+    }
+    function setMinContribution(uint256 _minContribution) onlyOwner public {
+        require(_minContribution > 0);
+        minContribution = _minContribution;
+    }
+    function setMaxTickets(uint256 _maxTickets) onlyOwner public {
+        require(_maxTickets > 0);
+        maxTickets = _maxTickets;
+    }
+    function setLottery(uint256 _lottery) onlyOwner public {
+        require(_lottery > 0);
+        lottery = _lottery;
+    }
+    function setLotteryTime(uint256 _lotteryTime) onlyOwner public {
+        require(_lotteryTime > 0);
+        lotteryTime = _lotteryTime;
+    }
+    function setLotteryTimeTokens(uint256 _lotteryTimeTokens) onlyOwner public {
+        require(_lotteryTimeTokens > 0);
+        lotteryTimeTokens = _lotteryTimeTokens;
+    }
+    function setLottery(uint256 _lottery) onlyOwner public {
+        require(_lottery > 0);
+        lottery = _lottery;
+    }
+    function setLotteryTime(uint256 _lotteryTime) onlyOwner public {
+        require(_lotteryTime > 0);
+        lotteryTime = _lotteryTime;
+    }
+    function setLotteryTimeTokens(uint256 _lotteryTimeTokens) onlyOwner public {
+        require(_lotteryTimeTokens > 0);
+        lotteryTimeTokens = _lotteryTimeTokens;
+    }
+    function setRewardRateTokens(uint256 _rewardRateTokens) onlyOwner public {
+        require(_rewardRateTokens > 0);
+        rewardRateTokens = _rewardRateTokens;
+    }
+    function setMinContributionTokens(uint256 _minContributionTokens) onlyOwner public {
+        require(_minContributionTokens > 0);
+        minContributionTokens = _minContributionTokens;
+    }
+    function setMaxTicketsTokens(uint256 _maxTicketsTokens) onlyOwner public {
+        require(_maxTicketsTokens > 0);
+        maxTicketsTokens = _maxTicketsTokens;
+    }
+    function setLotteryTokens(uint256 _lotteryTokens) onlyOwner public {
+        require(_lotteryTokens > 0);
+        lotteryTokens = _lotteryTokens;
+    }
+    function setLotteryTimeTokens(uint256 _lotteryTimeTokens) onlyOwner public {
+        require(_lotteryTimeTokens > 0);
+        lotteryTimeTokens = _lotteryTimeTokens;
+    }
+    function setLotteryTokens(uint256 _lotteryTokens) onlyOwner public {
+        require(_lotteryTokens > 0);
+        lotteryTokens = _lotteryTokens;
+    }
+    function setLotteryTimeTokens(uint256 _lotteryTimeTokens) onlyOwner public {
+        require(_lotteryTimeTokens > 0);
+        lotteryTimeTokens = _lotteryTimeTokens;
+    }
+    function setRewardRateTokens(uint256 _rewardRateTokens) onlyOwner public {
+        require(_rewardRateTokens > 0);
+        rewardRateTokens = _rewardRateTokens;
+    }
+    function setMinContributionTokens(uint256 _minContributionTokens) onlyOwner public {
+        require(_minContributionTokens > 0);
+        minContributionTokens = _minContributionTokens;
+    }
+    function setMaxTicketsTokens(uint256 _maxTicketsTokens) onlyOwner public {
+        require(_maxTicketsTokens > 0);
+        maxTicketsTokens = _maxTicketsTokens;
+    }
+    function setLottery(uint256 _lottery) onlyOwner public {
+        require(_lottery > 0);
+        lottery = _lottery;
+    }
+    function setLotteryTime(uint256 _lotteryTime) onlyOwner public {
+        require(_lotteryTime > 0);
+        lotteryTime = _lotteryTime;
+    }
+    function setLottery(uint256 _lottery) onlyOwner public {
+        require(_lottery > 0);
+        lottery = _lottery;
+    }
+    function setLottery(uint256 _lottery) onlyOwner public {
+        require(_lottery > 0);
+        lottery = _lottery;
+    }
+    function setLotteryTime(uint256 _lotteryTime) onlyOwner public {
+        require(_lotteryTime > 0);
+        lotteryTime = _lotteryTime;
+    }
+    function setLottery(uint256 _lottery) onlyOwner public {
+        require(_lottery > 0);
+        lottery = _lottery;
+    }
+    function setLotteryTime(uint256 _lotteryTime) onlyOwner public {
+        require(_lotteryTime > 0);
+        lotteryTime = _lotteryTime;
+    }
+    function setLottery(uint256 _lottery) onlyOwner public {
+        require(_lottery > 0);
+        lottery = _lottery;
+    }
+    function setLotteryTime(uint256 _lotteryTime) onlyOwner public {
+        require(_lotteryTime > 0);
+        lotteryTime = _lotteryTime;
+    }
+    function setLotteryTimeTokens(uint256 _lotteryTimeTokens) onlyOwner public {
+        require(_lotteryTimeTokens > 0);
+        lotteryTimeTokens = _lotteryTimeTokens;
+    }
+    function setLotteryTokens(uint256 _lotteryTokens) onlyOwner public {
+        require(_lotteryTokens > 0);
+        lotteryTokens = _lotteryTokens;
+    }
+    function setLotteryTimeTokens(uint256 _lotteryTimeTokens) onlyOwner public {
+        require(_lotteryTimeTokens > 0);
+        lotteryTimeTokens = _lotteryTimeTokens;
+    }
+    function setRewardRateTokens(uint256 _rewardRateTokens) onlyOwner public {
+        require(_rewardRateTokens > 0);
+        rewardRateTokens = _rewardRateTokens;
+    }
+    function setMinContributionTokens(uint256 _minContributionTokens) onlyOwner public {
+        require(_minContributionTokens > 0);
+        minContributionTokens = _minContributionTokens;
+    }
+    function setMaxTicketsTokens(uint256 _maxTicketsTokens) onlyOwner public {
+        require(_maxTicketsTokens > 0);
+        maxTicketsTokens = _maxTicketsTokens;
+    }
+    function setLottery(uint256 _lottery) onlyOwner public {
+        require(_lottery > 0);
+        lottery = _lottery;
+    }
+    function setLotteryTime(uint256 _lotteryTime) onlyOwner public {
+        require(_lotteryTime > 0);
+        lotteryTime = _lotteryTime;
+    }
+    function setLottery(uint256 _lottery) onlyOwner public {
+        require(_lottery > 0);
+        lottery = _lottery;
+    }
+    function setLotteryTime(uint256 _lotteryTime) onlyOwner public {
+        require(_lotteryTime > 0);
+        lotteryTime = _lotteryTime;
+    }
+    function setLottery(uint256 _lottery) onlyOwner public {
+        require(_lottery > 0);
+        lottery = _lottery;
+    }
+    function setLotteryTime(uint256 _lotteryTime) onlyOwner public {
+        require(_lotteryTime > 0);
+        lotteryTime = _lotteryTime;
+    }
+    function setLottery(uint256 _lottery) onlyOwner public {
+        require(_lottery > 0);
+        lottery = _lottery;
+    }
+    function setLotteryTime(uint256 _lotteryTime) onlyOwner public {
+        require(_lotteryTime > 0);
+        lotteryTime = _lotteryTime;
+    }
+    function setLottery(uint256 _lottery) onlyOwner public {
+        require(_lottery > 0);
+        lottery = _lottery;
+    }
+    function setLotteryTime(uint256 _lotteryTime) onlyOwner public {
+        require(_lotteryTime > 0);
+        lotteryTime = _lotteryTime;
+    }
+    function setLottery(uint256 _lottery) onlyOwner public {
+        require(_lottery > 0);
+        lottery = _lottery;
+    }
+    function setLotteryTime(uint256 _lotteryTime) onlyOwner public {
+        require(_lotteryTime > 0);
+        lotteryTime = _lotteryTime;
+    }
+    function setLottery(uint256 _lottery) onlyOwner public {
+        require(_lottery > 0);
+        lottery = _lottery;
+    }
+    function setLotteryTime(uint256 _lotteryTime) onlyOwner public {
+        require(_lotteryTime > 0);
+        lotteryTime = _lotteryTime;
+    }
+    function setLottery(uint256 _lottery) onlyOwner public {
+        require(_lottery > 0);
+        lottery = _lottery;
+    }
+    function setLotteryTime(uint256 _lotteryTime) onlyOwner public {
+        require(_lotteryTime > 0);
+        lotteryTime = _lotteryTime;
+    }
+    function setLottery(uint256 _lottery) onlyOwner public {
+        require(_lottery > 0);
+        lottery = _lottery;
+    }
+    function setLotteryTime(uint256 _lotteryTime) onlyOwner public {
+        require(_lotteryTime > 0);
+        lotteryTime = _lotteryTime;
+    }

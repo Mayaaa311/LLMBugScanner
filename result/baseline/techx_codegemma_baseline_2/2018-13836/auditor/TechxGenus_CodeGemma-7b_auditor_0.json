@@ -1,0 +1,35 @@
+tput:
+{
+    "output_list": [
+        {
+            "function_name": "RocketCoin()",
+            "vulnerability": "Integer Overflow",
+            "function_code": "owner = msg.sender; balances[owner] = totalSupply; Transfer(address(0), owner, totalSupply);",
+            "reason": "The function has no checks to prevent an integer overflow when setting the balance of the owner. This can be exploited to set the balance of the owner to a very large value, potentially making the airdrop ineffective."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "function_code": "require(balances[msg.sender] >= _amount && _amount > 0); balances[msg.sender] -= _amount; balances[_to] += _amount; Transfer(msg.sender, _to, _amount);",
+            "reason": "The function transfer does not check if the sender has sufficient funds before attempting the transfer. This can result in a false positive transfer, causing a significant reduction in the balance of the sender."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Access Control",
+            "function_code": "require(balances[_from] >= _amount && allowed[_from][msg.sender] >= _amount && _amount > 0);",
+            "reason": "The function transferFrom does not have proper access control checks. This can allow unauthorized transfers from the account owner to other accounts, potentially leading to a misallocation of funds."
+        },
+        {
+            "function_name": "setupAirDrop",
+            "vulnerability": "Typo Constructor",
+            "function_code": "require(msg.sender == owner); airDropStatus = _status; airDropAmount = _amount * 10 ** decimals; airDropGasPrice = _Gwei * 10 ** 9; return true;",
+            "reason": "The function setupAirDrop does not have a constructor to properly initialize the variables. This can lead to incorrect variable values being set, potentially causing the airdrop functionality to fail."
+        },
+        {
+            "function_name": "withdrawFunds",
+            "vulnerability": "Token Devalue",
+            "function_code": "require(msg.sender == owner); if (_token == address(0)) { owner.transfer(this.balance); } else { Token ERC20 = Token(_token); ERC20.transfer(owner, ERC20.balanceOf(this)); } return true;",
+            "reason": "The function withdrawFunds can be exploited to transfer all the funds from the contract to the owner, potentially causing a severe financial loss for the contract creator."
+        }
+    ]
+}<eos>

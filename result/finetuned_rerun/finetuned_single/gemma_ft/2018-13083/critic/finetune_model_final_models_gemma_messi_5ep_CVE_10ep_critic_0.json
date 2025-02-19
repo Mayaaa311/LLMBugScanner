@@ -1,0 +1,315 @@
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Wrong Logic", "reason": "The mintToken function allows the owner to set the balance of an arbitrary user to any value, which is not a good practice."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Bad Randomness", "reason": "The mintToken function uses the `newArr` function, which generates random numbers with bad randomness."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Access Control", "reason": "The mintToken function does not have a proper access control, allowing unauthorized users to set arbitrary values."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Typos Constructor", "reason": "The mintToken function has a typo constructor, allowing the owner to set the balance of an arbitrary user to any value, which is not a good practice."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Token Devalue", "reason": "The mintToken function allows the owner to set the balance of an arbitrary user to any value, reducing the overall value of the token."}]}
+}
+Code: 
+pragma solidity ^0.4.21;
+contract YLCToken is owned, TokenERC20 {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => uint256) public total burned;
+    event Burn(address indexed from, uint256 value);
+    function YLCToken(
+        uint256 initialSupply,
+        string tokenName,
+        string tokenSymbol
+    ) TokenERC20(initialSupply, tokenName, tokenSymbol) public {}
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        emit Transfer(0, this, mintedAmount);
+        emit Transfer(this, target, mintedAmount);
+        totalBurned[msg.sender] += mintedAmount;
+    }
+    function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(balanceOf[_from] >= _value);                 
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        emit Burn(_from, _value);
+        return true;
+    }
+    function burnFromNewArr(address _from, uint256 _value, uint256[] _newArr) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);    
+        for (uint i = 0; i < _newArr.length; i++) {
+            require(_value <= totalburned[_from]);         
+            require(_newArr[i] <= _value);               
+            totalburned[_from] -= _newArr[i];
+            totalSupply -= _newArr[i];
+            emit Burn(_from, _newArr[i]);
+        }
+        return true;
+    }
+    function transfer(address _to, uint256 _value) public {
+        require(!frozenAccount[msg.sender]);           
+        _transfer(msg.sender, _to, _value);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[_from]);                 
+        require(_value <= allowance[_from][msg.sender]);    
+        allowance[_from][msg.sender] -= _value;
+        _transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public
+        returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes _extraData)
+        public
+        returns (bool success) {
+        tokenRecipient spender = tokenRecipient(_spender);
+        if (approve(_spender, _value)) {
+            spender.receiveApproval(msg.sender, _value, this, _extraData);
+            return true;
+        }
+    }
+    function transferToWallet(uint256 _value) public {
+        require(!frozenAccount[msg.sender]);           
+        address wallet = msg.sender;
+        balanceOf[wallet] += _value;
+        totalSupply -= _value;
+        emit Transfer(0, this, _value);
+        emit Transfer(this, wallet, _value);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        totalBurned[msg.sender] += mintedAmount;
+        emit Transfer(0, this, mintedAmount);
+        emit Transfer(this, target, mintedAmount);
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);           
+        require(_value <= allowance[msg.sender][this]);    
+        balanceOf[msg.sender] -= _value;                   
+        allowance[msg.sender][this] -= _value;             
+        totalSupply -= _value;                              
+        totalBurned[msg.sender] += _value;                
+        emit Burn(msg.sender, _value);
+        return true;
+    }
+    function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[_from]);                 
+        require(_value <= allowance[_from][msg.sender]);    
+        require(_value <= totalburned[_from]);            
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        totalBurned[_from] -= _value;                        
+        emit Burn(_from, _value);
+        return true;
+    }
+    function transferToWallet(uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);           
+        address wallet = msg.sender;
+        balanceOf[wallet] += _value;                   
+        totalSupply -= _value;                          
+        totalBurned[msg.sender] += _value;                
+        emit Transfer(0, this, _value);                   
+        emit Transfer(this, wallet, _value);               
+        return true;
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        balanceOf[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        totalBurned[msg.sender] += mintedAmount;
+        emit Transfer(0, this, mintedAmount);
+        emit Transfer(this, target, mintedAmount);
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        emit FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        require(balanceOf[this] >= amount);               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        totalBurned[msg.sender] += amount;                
+        emit Transfer(this, msg.sender, amount);          
+    }
+    function sell(uint256 amount) public {
+        require(balanceOf[msg.sender] >= amount );         
+        balanceOf[this] += amount;                         
+        balanceOf[msg.sender] -= amount;                   
+        totalBurned[msg.sender] -= amount;                
+        if(msg.sender.balance < amount) {                
+            sellPrice += amount;                          
+        }
+        if(msg.sender.balance > amount) {                
+            sellPrice -= amount;                          
+        }
+        if(totalBurned[msg.sender] > amount) {            
+        amount = totalBurned[msg.sender] - amount;         
+        }
+        msg.sender.transfer(amount);                     
+        emit Transfer(msg.sender, this, amount);          
+    }
+}
+Output formatting requirement:
+{
+    "output_list": [{"function_name": "mintToken", "vulnerability": "Integer Overflow", "reason": "The mintToken function has an integer overflow that allows the owner to set the balance of an arbitrary user to any value."}]
+}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Wrong Logic", "reason": "The mintToken function allows the owner to set the balance of an arbitrary user to any value, which is not a good practice."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Bad Randomness", "reason": "The mintToken function uses the `newArr` function, which generates random numbers with bad randomness."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Access Control", "reason": "The mintToken function does not have a proper access control, allowing unauthorized users to set arbitrary values."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Typos Constructor", "reason": "The mintToken function has a typo constructor, allowing the owner to set the balance of an arbitrary user to any value, which is not a good practice."}]}
+{"output_list": [{"function_name": "mintToken", "vulnerability": "Token Devalue", "reason": "The mintToken function allows the owner to set the balance of an arbitrary user to any value, reducing the overall value of the token."}]}
+Code:
+pragma solidity ^0.4.21;
+contract ERC20Basic {
+    uint256 public totalSupply;
+    function balanceOf(address who) public view returns (uint256);
+    function transfer(address to, uint256 value) public returns (bool);
+}
+contract ERC20 is ERC20Basic {
+    function allowance(address owner, address spender) public view returns (uint256);
+    function transferFrom(address from, address to, uint256 value) public returns (bool);
+    function approveAndCall(address spender, uint256 value, bytes extraData) public returns (bool);
+}
+contract owned {
+    address public owner;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address target, bool frozen);
+    function owned() {
+        owner = msg.sender;
+    }
+    function transferFrozen(address target, bool frozen) onlyOwner public {
+        frozenAccount[target] = frozen;
+        emit FrozenFunds(target, frozen);
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        require(!frozenAccount[msg.sender]);           
+        balanceOf[target] += mintedAmount;                   
+        totalSupply += mintedAmount;                         
+        totalBurned[msg.sender] += mintedAmount;                
+        emit Transfer(0, this, mintedAmount);                   
+        emit Transfer(this, target, mintedAmount);          
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+    }
+}
+contract YLCToken is owned, ERC20 {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => uint256) public totalBurned;
+    event Burn(address indexed from, uint256 value);
+    function YLCToken(uint256 initialSupply, string tokenName, string tokenSymbol) owned public {
+        require(initialSupply <= totalBurned[msg.sender]);         
+        balanceOf[msg.sender] += initialSupply;                   
+        totalSupply += initialSupply;                         
+        sellPrice = initialPrice;                          
+        buyPrice = initialPrice;                        
+    }
+    function mintToken(address target, uint256 mintedAmount) onlyOwner public {
+        require(!frozenAccount[msg.sender]);           
+        require(mintedAmount <= totalBurned[msg.sender]);    
+        balanceOf[target] += mintedAmount;                   
+        totalSupply += mintedAmount;                          
+        totalBurned[msg.sender] += mintedAmount;                
+        emit Transfer(0, this, mintedAmount);                   
+        emit Transfer(this, target, mintedAmount);          
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);           
+        if (_to == this) {
+            require(balanceOf[msg.sender] >= _value);       
+        } else {
+            require(balanceOf[this] >= _value);             
+            require(!frozenAccount[msg.sender]);           
+        }
+        balanceOf[msg.sender] -= _value;                   
+        balanceOf[_to] += _value;                         
+        emit Transfer(msg.sender, _to, _value);          
+        return true;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[_from]);                 
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        balanceOf[_to] += _value;                           
+        totalBurned[_from] -= _value;                        
+        emit Transfer(_from, _to, _value);          
+        return true;
+    }
+    function approveAndCall(address _spender, uint256 _value, bytes extraData) public returns (bool success) {
+        allowance[msg.sender][_spender] = _value;
+        if(!_spender.call(extraData)) {
+            revert();
+        }
+        emit Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function burn(uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);           
+        require(_value <= balanceOf[msg.sender]);     
+        balanceOf[msg.sender] -= _value;                   
+        totalSupply -= _value;                              
+        totalBurned[msg.sender] += _value;                
+        emit Burn(msg.sender, _value);          
+        return true;
+    }
+    function burnFrom(address _from, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[_from]);                 
+        require(_value <= allowance[_from][msg.sender]);    
+        balanceOf[_from] -= _value;                         
+        allowance[_from][msg.sender] -= _value;             
+        totalSupply -= _value;                              
+        totalBurned[_from] += _value;                        
+        emit Burn(_from, _value);          
+        return true;
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;                          
+        buyPrice = newBuyPrice;                        
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        require(balanceOf[this] >= amount);               
+        balanceOf[msg.sender] += amount;                   
+        balanceOf[this] -= amount;                         
+        totalBurned[msg.sender] += amount;                
+        emit Transfer(this, msg.sender, amount);          
+    }
+    function sell(uint256 amount) public {
+        require(balanceOf[msg.sender] >= amount );         
+        balanceOf[this] += amount;                         
+        balanceOf[msg.sender] -= amount;                   
+        totalBurned[msg.sender] -= amount;                
+        if(msg.sender.balance < amount) {                
+            sellPrice += amount;                          
+        }
+        if(totalBurned[msg.sender] > amount) {            
+        amount = totalBurned[msg.sender] - amount;         
+        }
+        msg.sender.transfer(amount);                     
+        emit Transfer(msg.sender, this, amount);          
+    }
+    function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+    }
+}
+contract MyAdvancedToken is owned, ERC20, owned {
+    uint256 public sellPrice;
+    uint256 public buyPrice;
+    mapping (address => bool) public frozenAccount;
+    event FrozenFunds(address indexed target, bool frozen);
+    function MyAdvancedToken(uint256 initialSupply, string tokenName, string tokenSymbol) owned public ERC20(initialSupply, tokenName, tokenSymbol) {
+        sellPrice = initialPrice;                          
+        buyPrice = initialPrice;                        
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(!frozenAccount[msg.sender]);           
+        if (_to == this) {

@@ -1,0 +1,29 @@
+ {
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function has an integer overflow vulnerability. The initialSupply is directly assigned to the balanceOf[target], without checking if the initialSupply is too large. If initialSupply is set to a large value, attackers can mint arbitrary tokens to any user's account."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function has an integer overflow vulnerability. The function checks if (balanceOf[msg.sender] < _value) throw; and if (balanceOf[_to] + _value < balanceOf[_to]) throw; but it does not check if _value is zero. If _value is a large number, it will cause overflow and make the check always true, allowing attackers to transfer arbitrary tokens to any user's account."
+        },
+        {
+            "function_name": "sell",
+            'vulnerability': "Integer Overflow",
+            "reason": "The sell function has an integer overflow vulnerability. The function checks if (balanceOf[msg.sender] < amount ) throw; but it does not check if amount is zero. If amount is a large number, it will cause overflow and make the check always true, allowing attackers to sell arbitrary tokens from any user's account."
+        },
+        {
+            "function_name": "setMinBalance",
+            'vulnerability': "Integer Overflow",
+            "reason": "The setMinBalance function has an integer overflow vulnerability. The function multiplies minimumBalanceInFinney by 1 finney, and assigns it to minBalanceForAccounts. If minimumBalanceInFinney is a large number, it will cause overflow and make the function unusable."
+        },
+        {
+            "function_name": "buy",
+            'vulnerability': "Integer Overflow",
+            "reason": "The buy function has an integer overflow vulnerability. The function divides msg.value by buyPrice, and assigns it to amount. If buyPrice is zero, it will cause overflow and make the function unusable."
+        }
+    ]
+}

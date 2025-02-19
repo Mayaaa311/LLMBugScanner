@@ -1,0 +1,130 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(uint256 _initialSupply, uint256 _maxTokens, uint _minBalanceForAccounts, address _owner) public {
+        totalSupply = _initialSupply * 10 ** uint256(_maxTokens);  
+        balanceOf[msg.sender] = _initialSupply;                
+        name = 'My Crypto Token';                                   
+        symbol = 'MCT';                               
+        decimals = 18;                            
+        allowance[msg.sender][msg.sender] = _maxTokens;
+        Transfer(0x0, msg.sender, _initialSupply);
+    }
+    function transfer(address _to, uint256 _value) public {
+        require(_to != 0x0);                               
+        require(balanceOf[msg.sender] >= _value);               
+        require(balanceOf[_to] + _value > balanceOf[_to]); 
+        uint previousBalances = balanceOf[msg.sender] + balanceOf[_to];
+        balanceOf[msg.sender] -= _value;                         
+        balanceOf[_to] += _value;                            
+        Transfer(msg.sender, _to, _value);                   
+        assert(balanceOf[msg.sender] + balanceOf[_to] == previousBalances);
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(_value <= allowance[_from][msg.sender]);     
+        allowance[_from][msg.sender] -= _value;
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        Transfer(_from, _to, _value);
+        return true;
+    }
+    function approve(address _spender, uint256 _value) public
+        returns (bool success) {
+        require(_value == 0 || allowance[msg.sender][_spender] == 0);
+        allowance[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant public returns (uint256 remaining) {
+        return allowance[_owner][_spender];
+    }
+    function balanceOf(address _owner) constant public returns (uint256 balance) {
+        return balanceOf[_owner];
+    }
+    function withdrawToOwner(uint256 amountWei) public onlyOwner {
+        owner.transfer(amountWei);
+    }
+}",
+            "vulnerability": "Lack of Access Control",
+            "reason": "The `mintToken` function allows anyone to mint tokens, which can lead to inflation of the token supply. This can be exploited by malicious actors to mint more tokens than intended."
+        },
+        {
+            "function_name": "freezeAccount",
+            "code": "function freezeAccount(address target, bool freeze) onlyOwner public {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}",
+            "vulnerability": "Lack of Access Control",
+            "reason": "The `freezeAccount` function allows anyone to freeze or unfreeze accounts, which can lead to account freezing and prevent users from trading their tokens. This can be exploited by malicious actors to freeze accounts and prevent users from trading their tokens."
+        },
+        {
+            "function_name": "setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }
+    function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}",
+            "vulnerability": "Lack of Access Control",
+            "reason": "The `setPrices` function allows anyone to set the buy and sell prices, which can lead to price manipulation and arbitrage opportunities. This can be exploited by malicious actors to manipulate the price of the token and gain an unfair advantage."
+        },
+        {
+            "function_name": "buy",
+            "code": "function buy() payable public {
+        uint amount = msg.value / buyPrice;               
+        _transfer(this, msg.sender, amount);              
+    }
+    function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}",
+            "vulnerability": "Lack of Access Control",
+            "reason": "The `buy` function allows anyone to buy tokens at the current buy price, which can lead to price manipulation and arbitrage opportunities. This can be exploited by malicious actors to buy tokens at a lower price and sell them at a higher price to gain an unfair advantage."
+        },
+        {
+            "function_name": "sell",
+            "code": "function sell(uint256 amount) public {
+        require(this.balance >= amount * sellPrice);      
+        _transfer(msg.sender, this, amount);              
+        msg.sender.transfer(amount * sellPrice);          
+    }
+}",
+            "vulnerability": "Lack of Access Control",
+            "reason": "The `sell` function allows anyone to sell tokens at the current sell price, which can lead to price manipulation and arbitrage opportunities. This can be exploited by malicious actors to sell tokens at a higher price and buy them at a lower price to gain an unfair advantage."
+        },
+        {
+            "function_name": "withdrawToOwner",
+            "code": "function withdrawToOwner(uint256 amountWei) public onlyOwner {
+        owner.transfer(amountWei);
+    }
+}",
+            "vulnerability": "Lack of Access Control",
+            "reason": "The `withdrawToOwner` function allows the owner to withdraw any amount of Ether from the contract, which can lead to theft of funds. This can be exploited by malicious actors to withdraw funds from the contract and gain an unfair advantage."
+        }
+    ]
+}

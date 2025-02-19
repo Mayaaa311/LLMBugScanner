@@ -1,0 +1,28 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "vulnerability": "Integer Overflow",
+            "function_code": "mint(address holder, uint value) public {
+    require(msg.sender == ico)
+    require(value > 0)
+    require(totalSupply + value <= TOKEN_LIMIT)
+    balances[holder] += value
+    totalSupply += value
+    Transfer(0x0, holder, value)
+}",
+            "reason": "The function 'mint' does not check for integer overflow. This can allow for potential loss of funds."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Wrong Logic",
+            "function_code": "transfer(address _to, uint _value) public returns (bool) {
+    require(_to != address(0))
+    require(!isFrozen)
+    return super.transfer(_to, _value)
+}",
+            "reason": "The function 'transfer' does not check for incorrect logic. It can allow malicious users to transfer funds to other users without proper authorization."
+        }
+    ]
+}<eos>

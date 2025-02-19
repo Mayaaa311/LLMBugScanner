@@ -1,0 +1,57 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address _holder, uint _value) external {
+  require(msg.sender == presale);
+  require(_value > 0);
+  require(totalSupply + _value <= TOKEN_LIMIT);
+  balances[_holder] += _value;
+  totalSupply += _value;
+  Transfer(0x0, _holder, _value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The integer overflow vulnerability in the mint function allows the owner of the presale contract to mint an unlimited number of tokens."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+  require(_to != address(0));
+  require(_value <= balances[_from]);
+  require(_value <= allowed[_from][msg.sender]);
+  balances[_from] = balances[_from].sub(_value);
+  balances[_to] = balances",
+            "vulnerability": "Wrong Logic",
+            "reason": "The wrong logic in the transferFrom function can lead to incorrect token transfers and potential loss of funds."
+        },
+        {
+            "function_name": "MoxyOnePresale",
+            "code": "function MoxyOnePresale() public {
+  team = msg.sender;
+  token = new SpendToken(this, team);
+}",
+            "vulnerability": "Bad Randomness",
+            "reason": "The use of msg.sender as the team address in the constructor of the MoxyOnePresale contract can lead to potential security vulnerabilities."
+        },
+        {
+            "function_name": "pausePreSale",
+            "code": "function pausePreSale() external teamOnly {
+  require(!isPaused);
+  require(preSaleState == PreSaleState.PreSaleStarted);
+  isPaused = true;
+  PreSalePaused();
+}",
+            "vulnerability": "Access Control",
+            "reason": "The lack of proper access control in the pausePreSale, resumePreSale, finishPreSale, and withdrawFunds functions can lead to unauthorized access and potential security vulnerabilities."
+        },
+        {
+            "function_name": "MoxyOnePresale",
+            "code": "function MoxyOnePresale() public {
+  team = msg.sender;
+  token = new SpendToken(this, team);
+}",
+            "vulnerability": "Typo Constructor",
+            "reason": "The typo in the constructor of the MoxyOnePresale contract can lead to potential security vulnerabilities."
+        }
+    ]
+}

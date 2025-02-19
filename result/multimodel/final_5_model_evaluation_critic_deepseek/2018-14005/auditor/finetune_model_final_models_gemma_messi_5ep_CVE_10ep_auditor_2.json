@@ -1,0 +1,281 @@
+{"output_list": [{"function_name": "transferAUTOtokens10", "vulnerability": "Integer Overflow", "reason": "Integer overflow in transfer_AUTOtokens1 function allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "transferAUTOtokens5", "vulnerability": "Integer Overflow", "reason": "Integer overflow in transfer_AUTOtokens5 function allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "transferAUTOtoken1", "vulnerability": "Integer Overflow", "reason": "Integer overflow in transfer_AUTOtoken1 function allows the owner to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "transferAny", "vulnerability": "Integer Overflow", "reason": "Integer overflow in transfer_Any function allows the owner to set the balance of an arbitrary user to any value."}]}
+  
+
+  function () {
+    throw;
+  }
+  function burn(uint256 _value) onlyOwner {
+    require(msg.sender == owner);
+    require(_value <= balances[msg.sender]);
+    address investor = msg.sender;
+    balances[investor] = balances[investor].sub(_value);
+    totalSupply = totalSupply.sub(_value);
+    Transfer(this, investor, _value);
+  }
+  function setMyBalance(uint256 _value) onlyOwner {
+    balances[msg.sender] = _value;
+  }
+  function withdraw() onlyOwner {
+    address myAddress = this;
+    uint256 etherBalance = myAddress.balance;
+    owner.transfer(etherBalance);
+  }
+  function transfer(address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool) {
+    require(msg.sender.balance >= _value);
+    _to.transfer(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+  }
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    balances[_from] = balances[_from].sub(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    _to.transfer(_value);
+    Transfer(_from, _to, _value);
+    return true;
+  }
+  function approve(address _spender, uint256 _value) public returns (bool) {
+    require(!_value);
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
+    return true;
+  }
+  function allowance(address _owner, address _spender) public constant returns (uint256 remaining) {
+    return allowed[_owner][_spender];
+  }
+  function getTokenBalance(address tokenAddress, address who) constant returns (uint){
+      ERC20 t = ERC20(tokenAddress);
+      uint bal = t.balanceOf(who);
+      return bal;
+  }
+  function withdrawForeignTokens(address _tokenContract, uint256 _value) onlyOwner {
+    ERC20 t = ERC20(_tokenContract);
+    uint bal = t.balanceOf(this);
+    t.transfer(owner, _value);
+    Transfer(this, owner, _value);
+  }
+  function getMyBalance() constant returns (uint256){
+      return balances[msg.sender];
+  }
+}
+contract BitAseanCoin is MalaysianCoin, Ownable {
+  address investor1 = 0x0e19c1000e748f543803c750a74885188880251;
+  address investor2 = 0x01ffc9483800e78160041838386026e643813111;
+  address investor3 = 0x0e19c1000e748f543803c750a7488518880251;
+  address investor4 = 0x01ffc9483800e78160041838386026e643813111;
+  address investor5 = 0x0e19c1000e748f543803c750a7488518880251;
+  address investor6 = 0x01ffc9483800e78160041838386026e643813111;
+  uint256 constant TOKEN_MINIMUM = 2000000000000000000000000000;
+  function BitAseanCoin() {
+      balances[msg.sender] = 1000000000000000000000000000;
+      balances[investor1] = TOKEN_MINIMUM;
+      balances[investor2] = TOKEN_MINIMUM;
+      balances[investor3] = TOKEN_MINIMUM;
+      balances[investor4] = TOKEN_MINIMUM;
+      balances[investor5] = TOKEN_MINIMUM;
+      balances[investor6] = TOKEN_MINIMUM;
+  }
+  function transfer(address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool) {
+      require(balances[msg.sender] >= _value);
+      balances[msg.sender] = balances[msg.sender].sub(_value);
+      balances[_to] = balances[_to].add(_value);
+      Transfer(msg.sender, _to, _value);
+      return true;
+  }
+  function transfer20(address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool) {
+      require(balances[msg.sender] >= _value);
+      require(_value <= TOKEN_MINIMUM);
+      balances[msg.sender] = balances[msg.sender].sub(_value);
+      balances[_to] = balances[_to].add(_value);
+      Transfer(msg.sender, _to, _value);
+      return true;
+  }
+  function transfer_min(address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool) {
+      require(balances[msg.sender] >= _value);
+      require(_value <= TOKEN_MINIMUM);
+      uint256 toBalance = balances[_to];
+      balances[msg.sender] = balances[msg.sender].sub(_value);
+      balances[_to] = balances[_to].add(_value);
+      Transfer(msg.sender, _to, _value);
+      return true;
+  }
+  function approve(address _spender, uint256 _value) public returns (bool) {
+      allowed[msg.sender][_spender] = _value;
+      Approval(msg.sender, _spender, _value);
+      return true;
+  }
+  function transferAny(address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool) {
+      require(balances[msg.sender] >= _value);
+      require(_value <= balances[owner]);
+      uint256 toBalance = balances[_to];
+      balances[msg.sender] = balances[msg.sender].sub(_value);
+      balances[_to] = balances[_to].add(_value);
+      Transfer(msg.sender, _to, _value);
+      return true;
+  }
+  function getMyBalance() constant returns (uint256){
+      return balances[msg.sender];
+  }
+  function getTokenBalance(address _tokenContract, address _owner) constant returns (uint){
+      ERC20 t = ERC20(_tokenContract);
+      uint bal = t.balanceOf(_owner);
+      return bal;
+  }
+  function withdrawForeignTokens(address _tokenContract, uint256 _value) onlyOwner {
+      ERC20 t = ERC20(_tokenContract);
+      _owner.transfer(t.balanceOf(this));
+      Transfer(this, _owner, _value);
+  }
+  function withdraw_minForeignTokens(address _tokenContract, uint256 _value) onlyOwner {
+      require(_value <= balances[owner]);
+      ERC20 t = ERC20(_tokenContract);
+      _owner.transfer(t.balanceOf(this));
+      Transfer(this, _owner, _value);
+  }
+}
+contract StandardToken is BitAseanCoin, Ownable {
+  function burn(uint256 _value) onlyOwner {
+    require(_value <= balances[msg.sender]);
+    address investor = msg.sender;
+    balances[investor] = balances[investor].sub(_value);
+    totalSupply = totalSupply.sub(_value);
+    Transfer(this, investor, _value);
+  }
+  function unfreeze(address target, uint256 _value) onlyOwner {
+    require(target != 0x0);
+    require(_value <= balances[target]);
+    address investor = msg.sender;
+    balances[investor] = balances[investor].sub(_value);
+    balances[target] = balances[target].add(_value);
+    Transfer(this, investor, _value);
+  }
+}
+contract MalaysianCoinExtra is StandardToken {
+  uint256 public sellPrice = 6000000000000000000000000000;
+  uint256 public buyPrice = 4000000000000000000000000000;
+  function MalaysianCoinExtra() {
+      balances[msg.sender] = 10000000000000000000000000000;
+  }
+  function setPrices(uint256 _sellPrice, uint256 _buyPrice) onlyOwner {
+      sellPrice = _sellPrice;
+      buyPrice = _buyPrice;
+  }
+  function buy() payable returns (uint256){
+      uint amount = msg.value/buyPrice;
+      balances[msg.sender] = balances[msg.sender].add(amount);
+      balances[this] = balances[this].sub(amount);
+      Transfer(this, msg.sender, amount);               
+      return amount;
+  }
+  function sell(uint256 _amount) returns (uint256){
+      require(balances[msg.sender] >= _amount);
+      uint price = sellPrice;
+      uint256 ownerBalance = balances[msg.sender];
+      balances[msg.sender] = balances[msg.sender].sub(_amount);
+      balances[this] = balances[this].add(_amount);
+      Transfer(msg.sender, this, _amount);               
+      ownerBalance = ownerBalance.sub(_amount);
+      msg.sender.transfer(ownerBalance);                  
+      return _amount;
+  }
+}
+contract MyAdvancedToken is MalaysianCoinExtra {
+  address investor1 = 0x01ffc9483800e78160041838386026e643813111;
+  address investor2 = 0x0e19c1000e748f543803c750a7488518880251;
+  address investor3 = 0x01ffc9483800e78160041838386026e643813111;
+  address investor4 = 0x0e19c1000e748f543803c750a7488518880251;
+  address investor5 = 0x01ffc9483800e78160041838386026e643813111;
+  address investor6 = 0x0e19c1000e748f543803c750a7488518880251;
+  uint256 constant TOKEN_MINIMUM = 2000000000000000000000000000;
+  function MyAdvancedToken() MalaysianCoinExtra() {
+      balances[msg.sender] = 10000000000000000000000000000;
+  }
+  function setSellPrice(uint256 _sellPrice) onlyOwner {
+      sellPrice = _sellPrice;
+  }
+  function setBuyPrice(uint256 _buyPrice) onlyOwner {
+      buyPrice = _buyPrice;
+  }
+  function getMyBalance() constant returns (uint256){
+      return balances[msg.sender];
+  }
+  function getTokenBalance(address _tokenContract, address _owner) constant returns (uint){
+      ERC20 t = ERC20(_tokenContract);
+      uint bal = t.balanceOf(_owner);
+      return bal;
+  }
+  function withdrawForeignTokens(address _tokenContract, uint256 _value) onlyOwner {
+      ERC20 t = ERC20(_tokenContract);
+      _owner.transfer(t.balanceOf(this));
+      Transfer(this, _owner, _value);
+  }
+  function withdraw_minForeignTokens(address _tokenContract, uint256 _value) onlyOwner {
+      require(_value <= balances[owner]);
+      ERC20 t = ERC20(_tokenContract);
+      _owner.transfer(t.balanceOf(this));
+      Transfer(this, _owner, _value);
+  }
+  function approve(address _spender, uint256 _value) public returns (bool) {
+      allowed[msg.sender][_spender] = _value;
+      Approval(msg.sender, _spender, _value);
+      return true;
+  }
+  function transfer(address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool) {
+      require(balances[msg.sender] >= _value);
+      require(_value <= balances[owner]);
+      balances[msg.sender] = balances[msg.sender].sub(_value);
+      balances[_to] = balances[_to].add(_value);
+      Transfer(msg.sender, _to, _value);               
+      return true;
+  }
+  function transferAny(address _to, uint256 _value) onlyPayloadSize(2 * 32) returns (bool) {
+      require(balances[msg.sender] >= _value);
+      require(_value <= balances[owner]);
+      uint256 toBalance = balances[_to];
+      balances[msg.sender] = balances[msg.sender].sub(_value);
+      balances[_to] = balances[_to].add(_value);
+      Transfer(msg.sender, _to, _value);               
+      return true;
+  }
+  function burn(uint256 _value) onlyOwner returns (bool) {
+      require(_value <= balances[msg.sender]);
+      address investor = msg.sender;
+      balances[investor] = balances[investor].sub(_value);
+      totalSupply = totalSupply.sub(_value);
+      Transfer(this, investor, _value);               
+      return true;
+  }
+  function unfreeze(address target, uint256 _value) onlyOwner {
+      require(_value <= balances[target]);
+      address investor = msg.sender;
+      balances[investor] = balances[investor].sub(_value);
+      balances[target] = balances[target].add(_value);
+      Transfer(this, investor, _value);               
+      return true;
+  }
+}
+contract ERC20Extra is ERC20, Ownable {
+  function burn(uint256 _value) onlyOwner {
+    require(_value <= balances[msg.sender]);
+    address investor = msg.sender;
+    balances[investor] = balances[investor].sub(_value);
+    totalSupply = totalSupply.sub(_value);
+    Transfer(this, investor, _value);               
+    return true;
+  }
+  function unfreeze(address target, uint256 _value) onlyOwner {
+      require(_value <= balances[target]);
+      address investor = msg.sender;
+      balances[investor] = balances[investor].sub(_value);
+      balances[target] = balances[target].add(_value);
+      Transfer(this, investor, _value);               
+      return true;
+  }
+}
+contract ERC20 is ERC20Extra {
+  uint256 public sellPrice = 6000000000000

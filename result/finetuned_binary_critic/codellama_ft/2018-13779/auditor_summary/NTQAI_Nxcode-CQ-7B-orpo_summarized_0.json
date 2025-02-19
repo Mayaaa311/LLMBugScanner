@@ -1,0 +1,18 @@
+{
+    "output_list": [
+        {
+            "function_name": "mintToken",
+            "code": "function mintToken(uint256 _value) public returns (bool) {
+                require(_value > 0);
+                require(balanceOf[msg.sender] + _value > balanceOf[msg.sender]);
+                balanceOf[msg.sender] += _value;
+                totalSupply += _value;
+                emit Transfer(address(0), msg.sender, _value);
+                emit Approval(msg.sender, address(0), _value);
+                return true;
+            }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mintToken function has an integer overflow in the _value * sellPrice calculation."
+        }
+    ]
+}

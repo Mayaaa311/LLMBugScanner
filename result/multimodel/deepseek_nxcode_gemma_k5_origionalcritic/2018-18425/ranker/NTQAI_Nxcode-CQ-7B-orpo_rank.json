@@ -1,0 +1,51 @@
+[
+  {
+    "function_name": "adminClaimAirdrop",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The function does not properly check for overflow when updating totalDistributed, which can lead to a denial of service attack.",
+    "correctness": 6,
+    "severity": 7,
+    "profitability": 4,
+    "reason": "The function adds amount to totalDistributed without ensuring that totalDistributed does not exceed totalSupply. This can be exploited to increase the totalSupply, and the owner can drain the funds."
+  },
+  {
+    "function_name": "adminClaimAirdropMultiple",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The function does not properly check for overflow when calling doAirdrop for each address in the array, which can lead to a denial of service attack.",
+    "correctness": 6,
+    "severity": 7,
+    "profitability": 4,
+    "reason": "The function iterates over an array of addresses, and for each address, it calls doAirdrop with amount as the airdrop amount. The doAirdrop function has an integer overflow vulnerability, allowing the totalDistributed to exceed totalSupply, and the owner can drain the funds."
+  },
+  {
+    "function_name": "burn",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The function does not properly check for overflow when updating balances, which can lead to a denial of service attack.",
+    "correctness": 6,
+    "severity": 7,
+    "profitability": 4,
+    "reason": "The function subtracts amount from balances[burner] without ensuring that balances[burner] is not less than amount. This can be exploited to increase the totalSupply, and the owner can drain the funds."
+  },
+  {
+    "function_name": "distr",
+    "auditor_idx": 0,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The function does not properly check for overflow when updating totalDistributed, which can lead to a denial of service attack.",
+    "correctness": 6,
+    "severity": 7,
+    "profitability": 4,
+    "reason": "The function adds tokens to totalDistributed without ensuring that totalDistributed does not exceed totalSupply. This can be exploited to increase the totalSupply, and the owner can drain the funds."
+  },
+  {
+    "function_name": "distributeToken",
+    "auditor_idx": 1,
+    "vulnerability": "Integer Overflow",
+    "criticism": "The function distributeToken is susceptible to integer overflow, which can be exploited by an attacker to manipulate the balance of any user, potentially leading to a denial of service or other malicious actions.",
+    "correctness": 7,
+    "severity": 9,
+    "profitability": 6
+  }
+]

@@ -1,0 +1,49 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "auditor_idx": 0,
+            "vulnerability": "Integer Overflow",
+            "criticism": "The condition `if (balances[_to] + _value < balances[_to]) throw;` is overly simplistic and can be bypassed by an attacker. This check is meant to prevent overflow but does not handle all cases correctly. For example, if `balances[_to]` is already at its maximum value and `_value` is non-zero, this condition will not throw, allowing an overflow to occur.",
+            "correctness": 6,
+            "severity": 8,
+            "profitability": 5
+        },
+        {
+            "function_name": "mintTokens",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The minting function is restricted to the ICO contract address only. However, the check `if (restrictedAddresses[_to]) throw;` does not prevent the ICO contract from minting tokens to restricted addresses. This could be exploited if the ICO contract is compromised, allowing the attacker to mint tokens for themselves or any other address, effectively devaluing the token.",
+            "correctness": 5,
+            "severity": 7,
+            "profitability": 6
+        },
+        {
+            "function_name": "transfer",
+            "auditor_idx": 0,
+            "vulnerability": "Access Control",
+            "criticism": "The check `if (restrictedAddresses[_to]) throw;` prevents transfers to restricted addresses. However, if an attacker can manipulate the `restrictedAddresses` mapping, they can effectively block transfers to any address they want, leading to a loss of funds for legitimate users. This is a significant vulnerability as it affects the core functionality of the token.",
+            "correctness": 4,
+            "severity": 9,
+            "profitability": 4
+        },
+        {
+            "function_name": "approveAndCall",
+            "auditor_idx": 0,
+            "vulnerability": "Wrong Logic",
+            "criticism": "The code attempts to cast the `_spender` address to a `tokenRecipient` interface. If the `_spender` address does not implement the `tokenRecipient` interface correctly, this line will throw an error, causing the function to revert and potentially blocking future approvals. This is a critical issue as it can lead to a denial of service.",
+            "correctness": 3,
+            "severity": 8,
+            "profitability": 2
+        },
+        {
+            "function_name": "burnTokens",
+            "auditor_idx": 0,
+            "vulnerability": "Token Devalue",
+            "criticism": "The check `if(balances[msg.sender] < _amount) throw;` ensures that the caller has enough balance to burn. However, if an attacker can manipulate the `balances` mapping, they can cause a denial of service by making it impossible for legitimate users to burn their tokens. This is a significant vulnerability as it affects the core functionality of the token.",
+            "correctness": 4,
+            "severity": 7,
+            "profitability": 5
+        }
+    ]
+}

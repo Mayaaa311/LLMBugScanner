@@ -1,0 +1,65 @@
+{
+    "output_list": [
+        {
+            "function_name": "mint",
+            "code": "function mint(address holder, uint value) {
+  require(msg.sender == preSale);
+  require(value > 0);
+  require(totalSupply + value <= TOKEN_LIMIT);
+  balances[holder] += value;
+  totalSupply += value;
+  Transfer(0x0, holder, value);
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The mint function does not have a check to prevent overflow of the totalSupply variable, allowing attackers to mint arbitrary amounts of tokens."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value <= balances[msg.sender]);
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    Transfer(msg.sender, _to, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transfer function does not have a check to prevent overflow of the balances mapping, allowing attackers to exploit the overflow to grant themselves arbitrary token balance."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint _value) public returns (bool) {
+    require(_to != address(0));
+    require(_value <= balances[_from]);
+    require(_value <= allowed[_from][msg.sender]);
+    balances[_from] = balances[_from].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+    Transfer(_from, _to, _value);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The transferFrom function does not have a check to prevent overflow of the balances mapping, allowing attackers to exploit the overflow to grant themselves arbitrary token balance."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint _value) public returns (bool) {
+    allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The approve function does not have a check to prevent overflow of the allowed mapping, allowing attackers to set arbitrary token balance for a spender."
+        },
+        {
+            "function_name": "increaseApproval",
+            "code": "function increaseApproval(address _spender, uint _addedValue) public returns (bool) {
+    allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    return true;
+}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The increaseApproval function does not have a check to prevent overflow of the allowed mapping, allowing attackers to increase arbitrary token balance for a spender."
+        }
+    ]
+}

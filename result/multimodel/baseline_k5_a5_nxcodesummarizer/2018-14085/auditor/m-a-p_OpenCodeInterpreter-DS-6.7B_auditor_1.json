@@ -1,0 +1,61 @@
+Based on the provided code, there are several vulnerabilities that can be identified:
+
+1. Integer Overflow:
+   - Function: `DefaultSweeper.sweep()`
+   - Code:
+     ```
+     uint amount = _amount;
+     if (amount > token.balanceOf(this)) {
+         return false;
+     }
+     ```
+   - Vulnerability: The code checks if the amount to be swept is greater than the balance of the token. However, there is no check to ensure that the amount does not exceed the maximum value that can be stored in the `uint` data type.
+   - Reason: If the amount to be swept is greater than the maximum value that can be stored in a `uint`, it will result in an integer overflow, leading to incorrect calculations and potentially causing the contract to behave unexpectedly.
+
+2. Wrong Logic:
+   - Function: `DefaultSweeper.sweep()`
+   - Code:
+     ```
+     if (success) {
+         controller.logSweep(this, destination, _token, _amount);
+     }
+     return success;
+     ```
+   - Vulnerability: The code logs the sweep transaction only if the transfer is successful. However, it does not check if the transfer was successful before logging the transaction.
+   - Reason: If the transfer fails, the logSweep function will be called regardless of the success of the transfer. This can lead to incorrect data being logged and potentially misleading in terms of transaction analysis.
+
+3. Bad Randomness:
+   - Function: `Controller.makeWallet()`
+   - Code:
+     ```
+     address wallet = address(new UserWallet(this));
+     LogNewWallet(wallet);
+     ```
+   - Vulnerability: The code creates a new UserWallet contract and logs the creation of the wallet. However, it does not generate a random address for the wallet.
+   - Reason: If the address of the new wallet is predictable or easily guessable, it can lead to potential security vulnerabilities. Attackers can potentially target specific wallet addresses and manipulate the contract's behavior.
+
+4. Access Control:
+   - Function: `Controller.changeAuthorizedCaller()`
+   - Code:
+     ```
+     function changeAuthorizedCaller(address _newCaller) onlyOwner {
+         authorizedCaller = _newCaller;
+     }
+     ```
+   - Vulnerability: The code allows the owner to change the authorized caller, but it does not have any access control mechanisms in place to ensure that only authorized callers can change the authorized caller.
+   - Reason: If the owner's address is compromised, an attacker can change the authorized caller to themselves, leading to unauthorized access to sensitive functions or actions within the contract.
+
+5. Typo Constructor:
+   - Function: `Controller.Controller()`
+   - Code:
+     ```
+     function Controller() 
+     {
+         owner = msg.sender;
+         destination = msg.sender;
+         authorizedCaller = msg
+     ```
+   - Vulnerability: The code has a typo in the constructor function of the Controller contract. The closing curly brace is missing.
+   - Reason: This typo can lead to incorrect code execution and potential errors during contract deployment.
+
+Please note that these vulnerabilities are exploitable in real-world scenarios and can be used by attackers to manipulate the contract's behavior or steal funds. It is important to address these vulnerabilities by implementing appropriate security measures and code reviews.

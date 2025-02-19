@@ -1,0 +1,79 @@
+ {
+    "output_list": [
+        {
+            "function_name": "buyHeart",
+            "code": "function buyHeart(address referred) public payable {
+    require(msg.value >= 1000000000, "pocket lint: not a valid currency");
+    require(msg.value <= 100000000000000000000000, "no vitalik, no");
+    address _addr = msg.sender;
+    uint256 _codeLength;
+    assembly {_codeLength := extcodesize(_addr)}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function 'buyHeart' does not properly handle the overflow of the 'RoundHeart' and 'RoundETH' variables, which can lead to a situation where an attacker can exploit the overflow to gain more control over the contract's funds or manipulate the outcome of the contract's operations."
+        },
+        {
+            "function_name": "win",
+            "code": "function win() public {
+    require(now > RoundTime[Round] && RoundTime[Round] != 0);
+    RoundLastGreedyMan[Round].transfer(RoundETH[Round]);
+    emit winnerEvent(RoundLastGreedyMan[Round], RoundETH[Round], Round);
+    Round++;",
+            "vulnerability": "Wrong Logic",
+            "reason": "The 'win' function does not check if the 'RoundTime[Round]' is greater than 'now' before allowing the contract to transfer funds, which can lead to a situation where the contract can be exploited to transfer funds to the attacker's address."
+        },
+        {
+            "function_name": "luckyBuy",
+            "code": "function luckyBuy() private view returns(bool)
+{
+    uint256 seed = uint256(keccak256(abi.encodePacked(
+        (block.timestamp).add
+        (block.difficulty).add
+        ((uint256(keccak256(abi.encodePacked(block.coinbase)))) / (now)).add
+        (block.gaslimit).add
+        ((uint256(keccak256(abi.encodePacked(msg.sender)))) / (now)).add
+        (block.number)
+    )));
+    if((seed - ((seed / 1000) * 1000)) < luckybuyTracker_)
+        return(true);
+    else
+        return(false);
+}",
+            "vulnerability": "Bad Randomness",
+            "reason": "The 'luckyBuy' function relies on block.timestamp, block.difficulty, block.coinbase, block.gaslimit, msg.sender, and block.number for generating a random seed. This can be manipulated by attackers to influence the outcome, leading to potential vulnerabilities."
+        },
+        {
+            "function_name": "transferOwnership",
+            "code": "function transferOwnership(address _newOwner) public onlyOwner {
+    newOwner = _newOwner;
+}",
+            "vulnerability": "Access Control",
+            "reason": "The 'transferOwnership' function allows the owner of the contract to set 'newOwner' to any address. If an attacker can manipulate the 'newOwner' address, they can gain ownership of the contract, leading to potential vulnerabilities."
+        },
+        {
+            "function_name": "Owned",
+            "code": "contract Owned {
+    address public owner;
+    address public newOwner;
+    event OwnershipTransferred(address indexed _from, address indexed _to);
+    function Owned() public {
+        owner = msg.sender;
+    }
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+    function transferOwnership(address _newOwner) public onlyOwner {
+        newOwner = _newOwner;
+    }
+    function acceptOwnership() public {
+        require(msg.sender == newOwner);
+        emit OwnershipTransferred(owner, newOwner);
+        owner = newOwner;
+        newOwner = address(0);
+    }
+}",
+            "vulnerability": "Typo Constructor",
+            "reason": "The constructor function in the 'Owned' contract is named 'Owned' instead of 'Owned()', which is a typo. This can lead to confusion and potential vulnerabilities if developers mistakenly call the constructor function."
+        }
+    ]
+}

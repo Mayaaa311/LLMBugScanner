@@ -1,0 +1,76 @@
+ {
+    "output_list": [
+        {
+            "function_name": "findWinner",
+            "vulnerability": "Wrong Logic",
+            "function_code": "function findWinner(uint value)
+{
+  uint i = value % numguesses;
+  _winner = guesses[i].addr;
+}",
+            "reason": "The `findWinner` function uses a predictable and easily guessable index for selecting a winner, which can be manipulated by an attacker to always pick a specific address as the winner. This is a critical vulnerability because it allows an attacker to control the outcome of the lottery, leading to potential theft of funds."
+        },
+        {
+            "function_name": "_finish",
+            "vulnerability": "Access Control",
+            "function_code": "function _finish() private
+{
+  state = State.Locked;
+  uint block_timestamp = block.timestamp;
+  uint lotterynumber = (uint(curhash)+block_timestamp)%(maxguess+1);
+  findWinner(lotterynumber);
+  uint prize = getLotteryMoney();
+  uint numwinners = 1;
+  uint remain = this.balance - (prize*numwinners);
+  _winner.transfer(prize);
+  SentPrizeToWinner(_winner, prize, _gameindex, lotterynumber, _starttime, block_timestamp);
+  developer.transfer(remain); 
+  SentDeveloperFee(remain, this.balance);
+  numguesses = 0;
+  _gameindex++;
+  state = State.Started;
+  _starttime = block.timestamp;
+}",
+            "reason": "The `_finish` function does not properly check if the developer address is valid or if the lottery state is correct before transferring funds. This can lead to unauthorized access where an attacker can force the transfer of funds to their address by manipulating the state or the developer address."
+        },
+        {
+            "function_name": "simplelottery",
+            "vulnerability": "Typo Constructor",
+            "function_code": "function simplelottery()
+{
+  if(developer==address(0)){
+    developer = msg.sender;
+    state = State.Started;
+    _starttime = block.timestamp;
+  }
+}",
+            "reason": "There is a typo in the constructor function where `_starttime` is assigned the value of `block.timestamp` instead of `_starttime`. This typo can lead to incorrect initialization of the contract's state variables, potentially causing the contract to function improperly."
+        },
+        {
+            "function_name": "_addguess",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function _addguess() private
+{
+  require(msg.value >= bettingprice);
+  curhash = sha256(block.timestamp, block.coinbase, block.difficulty, curhash);
+  if((uint)(numguesses+1)<=arraysize) {
+    guesses[numguesses++].addr = msg.sender;
+    if((uint)(numguesses)>=arraysize){
+      _finish();
+    }
+  }
+}",
+            "reason": "The `_addguess` function contains a potential integer overflow vulnerability. Specifically, the condition `if((uint)(numguesses)>=arraysize)` can lead to an overflow because `numguesses` is incremented before the check. This can cause the function to behave unpredictably, potentially allowing attackers to bypass the check and execute unintended code."
+        },
+        {
+            "function_name": "getDeveloperFee",
+            "vulnerability": "Token Devalue",
+            "function_code": "function getDeveloperFee() constant returns(uint)
+{
+  uint developerfee = this.balance/100;
+  return developerfee;
+}",
+            "reason": "The `getDeveloperFee` function calculates the developer fee by dividing the contract's balance by 100. This can lead to a significant reduction in the contract's value if the balance is small, as the fee will be a large fraction of the balance. This can be exploited by an attacker to devalue the token or contract, potentially leading to its deprecation."
+        }
+    ]
+}

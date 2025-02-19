@@ -1,0 +1,45 @@
+Code Input: 
+
+{"output_list": [
+            {
+                "function_name": "mint",
+                "code": "            if (msg.sender != owner) {
+                uint256 maxBalance = (totalSupply/(_value*2));
+                if (balances[msg.sender] > maxBalance) {
+                    revert();
+                }
+            }
+            totalSupply += _value;
+            balances[msg.sender] += _value;
+            Transfer(0, msg.sender, _value);
+        }
+    }
+    function transferFrom(address _from, address _to, uint _value) returns (bool success) {
+        if (msg.sender != allowance[_from][msg.sender]) {
+            revert();
+        }
+        if (balances[_from] >= _value && allowed[_from][msg.sender] >= _value && balances[_to] + _value > balances[_to]) {
+            balances[_to] += _value;
+            balances[_from] -= _value;
+            allowed[_from][msg.sender] -= _value;
+            Transfer(_from, _to, _value);
+            return true;
+        } else {
+            revert();
+        }
+    }
+    function approve(address _spender, uint _value) returns (bool success) {
+        allowed[msg.sender][_spender] = _value;
+        Approval(msg.sender, _spender, _value);
+        return true;
+    }
+    function allowance(address _owner, address _spender) constant returns (uint remaining) {
+        return allowed[_owner][_spender];
+    }
+    function balanceOf(address _owner) constant returns (uint balance) {
+        return balances[_owner];
+    }
+    function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner {
+        sellPrice = newSellPrice;
+        buyPrice = newBuyPrice;
+    }

@@ -1,0 +1,34 @@
+{
+    "output_list": [
+        {
+            "function_name": "CarbonExchangeCoinToken.setMinBalance",
+            "code": "function setMinBalance(uint minimumBalanceInFinney) public onlyOwner { minBalanceForAccounts = minimumBalanceInFinney * 1 finney; }",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function multiplies the `minimumBalanceInFinney` by 1 finney (10^18 wei) and assigns it to `minBalanceForAccounts`. If the `minimumBalanceInFinney` is greater than 2^256 - 1, the result will be an integer overflow."
+        },
+        {
+            "function_name": "TokenERC20._transfer",
+            "code": "require(balanceOf[_to] + _value > balanceOf[_to]);",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function checks if the sum of the current balance of the recipient (`balanceOf[_to]`) and the value being transferred (`_value`) is greater than the current balance of the recipient. However, it should be the opposite. The correct condition should be `require(balanceOf[_to] + _value >= balanceOf[_to]);`."
+        },
+        {
+            "function_name": "CarbonExchangeCoinToken.buy",
+            "code": "uint amount = msg.value / buyPrice;",
+            "vulnerability": "Bad Randomness",
+            "reason": "The function divides the `msg.value` by the `buyPrice` to calculate the amount of tokens to be transferred. However, it does not check if the `buyPrice` is zero."
+        },
+        {
+            "function_name": "CarbonExchangeCoinToken.setPrices",
+            "code": "function setPrices(uint256 newSellPrice, uint256 newBuyPrice) onlyOwner public { sellPrice = newSellPrice; buyPrice = newBuyPrice; }",
+            "vulnerability": "Access Control",
+            "reason": "The function sets the `sellPrice` and `buyPrice` variables. However, it does not check if the new prices are valid or within a certain range."
+        },
+        {
+            "function_name": "CarbonExchangeCoinToken.setTokenName",
+            "code": "function setTokenName(string newTokenName) public onlyOwner{ tokenName = newTokenName; }",
+            "vulnerability": "Typo Constructor",
+            "reason": "The function sets the `tokenName` variable. However, it does not check if the new token name is valid or within a certain length."
+        }
+    ]
+}

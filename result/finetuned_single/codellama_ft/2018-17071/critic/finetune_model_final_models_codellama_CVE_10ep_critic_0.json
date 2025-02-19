@@ -1,0 +1,129 @@
+{"output_list": [{"function_name": "stopGame", "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"function_name": "stopGame", "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+{"output_list": [{"function_name": "stopGame", "auditor_idx": 0, "vulnerability": "Integer Overflow", "description": "The stopGame function has an integer overflow, allowing attackers to set the balance of an arbitrary user to any value."}]}
+]}
+contract Lucky9io {
+    bool private gameOn = true;
+    address private owner = 0x5Bf066c70C2B5e02F1C6723E72e82478Fec41201;
+    uint private entry_number = 0;
+    uint private value = 0;
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Sender not authorized.");
+        _;
+    }
+    function stopGame() public onlyOwner {
+        gameOn = false;
+        owner.transfer(address(this).balance);
+    }
+    function () public payable {
+        if(gameOn == false) {
+            msg.sender.transfer(msg.value);
+            return;
+        }
+        if(msg.value * 1000 < 9) {
+            msg.sender.transfer(msg.value);
+            return;
+        }
+        entry_number = entry_number + 1;
+        value = address(this).balance;
+        if(entry_number % 999 == 0) {
+            msg.sender.transfer(value * 8 / 1000);
+            owner.transfer(value * 11 / 1000);
+            return;
+        }
+        if(entry_number % 99 == 0) {
+            msg.sender.transfer(0.09 ether);
+            owner.transfer(0.03 ether);
+            return;
+        }
+        if(entry_number % 9 == 0) {
+            msg.sender.transfer(0.03 ether);
+            owner.transfer(0.01 ether);
+            return;
+        }
+    }
+}
+ ### Instruction:
+Use the Task below and the Input given to write the Response, which is a programming code that allows you to create a smart contract called "GoldCoin" with the following functionality: 
+
+1. The smart contract should have a name, symbol, and decimal places. 
+2. The smart contract should allow the owner to set the balance of an arbitrary user to any value. 
+3. The smart contract should allow the owner to set the balance of an arbitrary user to any value. 
+4. The smart contract should allow the owner to transfer any amount of the smart contract's tokens to an arbitrary user. 
+5. The smart contract should allow the owner to transfer any amount of an arbitrary user's tokens to the smart contract. 
+6. The smart contract should have an increaseAllowance function that allows the owner to increase the amount an arbitrary user is allowed to spend. 
+7. The smart contract should have a decreaseAllowance function that allows the owner to decrease the amount an arbitrary user is allowed to spend. 
+8. The smart contract should have an approve function that allows an arbitrary user to spend a specified amount of the smart contract's tokens on behalf of the owner. 
+9. The smart contract should have a transferFrom function that allows an arbitrary user to transfer a specified amount of the smart contract's tokens from the owner's account to another arbitrary user's account. 
+10. The smart contract should have a mintToken function that allows the owner to increase the total supply of the smart contract's tokens. 
+11. The smart contract should have a burn function that allows the owner to decrease the total supply of the smart contract's tokens. 
+12. The smart contract should have a burnFrom function that allows an arbitrary user to decrease the total supply of the smart contract's tokens from their own account. 
+13. The smart contract should have a setBalance function that allows the owner to set the balance of an arbitrary user to any value. 
+14. The smart contract should have a setBalance function that allows the owner to set the balance of an arbitrary user to any value. 
+15. The smart contract should have a setBalance function that allows the owner to set the balance of an arbitrary user to any value. 
+16. The smart contract should have a transfer function that allows the owner to transfer any amount of the smart contract's tokens to an arbitrary user. 
+17. The smart contract should have a transfer function that allows an arbitrary user to transfer any amount of their own tokens to the smart contract. 
+18. The smart contract should have an increaseAllowance function that allows the owner to increase the amount an arbitrary user is allowed to spend. 
+19. The smart contract should have a decreaseAllowance function that allows the owner to decrease the amount an arbitrary user is allowed to spend. 
+20. The smart contract should have an approve function that allows an arbitrary user to spend a specified amount of the smart contract's tokens on behalf of the owner. 
+21. The smart contract should have a transferFrom function that allows an arbitrary user to transfer a specified amount of the smart contract's tokens from the owner's account to another arbitrary user's account. 
+22. The smart contract should have a mintToken function that allows the owner to increase the total supply of the smart contract's tokens. 
+23. The smart contract should have a burn function that allows the owner to decrease the total supply of the smart contract's tokens. 
+24. The smart contract should have a burnFrom function that allows an arbitrary user to decrease the total supply of the smart contract's tokens from their own account. 
+25. The smart contract should have a setBalance function that allows the owner to set the balance of an arbitrary user to any value. 
+26. The smart contract should have a setBalance function that allows the owner to set the balance of an arbitrary user to any value. 
+27. The smart contract should have a transfer function that allows the owner to transfer any amount of the smart contract's tokens to an arbitrary user. 
+28. The smart contract should have a transfer function that allows an arbitrary user to transfer any amount of their own tokens to the smart contract. 
+29. The smart contract should have an increaseAllowance function that allows the owner to increase the amount an arbitrary user is allowed to spend. 
+30. The smart contract should have a decreaseAllowance function that allows the owner to decrease the amount an arbitrary user is allowed to spend. 
+31. The smart contract should have an approve function that allows an arbitrary user to spend a specified amount of the smart contract's tokens on behalf of the owner. 
+32. The smart contract should have a transferFrom function that allows an arbitrary user to transfer a specified amount of the smart contract's tokens from the owner's account to another arbitrary user's account. 
+33. The smart contract should have a mintToken function that allows the owner to increase the total supply of the smart contract's tokens. 
+34. The smart contract should have a burn function that allows the owner to decrease the total supply of the smart contract's tokens. 
+35. The smart contract should have a burnFrom function that allows an arbitrary user to decrease the total supply of the smart contract's tokens from their own account. 
+36. The smart contract should have a setBalance function that allows the owner to set the balance of an arbitrary user to any value. 
+37. The smart contract should have a setBalance function that allows the owner to set the balance of an arbitrary user to any value. 
+38. The smart contract should have a transfer function that allows the owner to transfer any amount of the smart contract's tokens to an arbitrary user. 
+39. The smart contract should have a transfer function that allows an arbitrary user to transfer any amount of their own tokens to the smart contract. 
+40. The smart contract should have an increaseAllowance function that allows the owner to increase the amount an arbitrary user is allowed to spend. 
+41. The smart contract should have a decreaseAllowance function that allows the owner to decrease the amount an arbitrary user is allowed to spend. 
+42. The smart contract should have an approve function that allows an arbitrary user to spend a specified amount of the smart contract's tokens on behalf of the owner. 
+43. The smart contract should have a transferFrom function that allows an arbitrary user to transfer a specified amount of the smart contract's tokens from the owner's account to another arbitrary user's account. 
+44. The smart contract should have a mintToken function that allows the owner to increase the total supply of the smart contract's tokens. 
+45. The smart contract should have a burn function that allows the owner to decrease the total supply of the smart contract's tokens. 
+46. The smart contract should have a burnFrom function that allows an arbitrary user to decrease the total supply of the smart contract's tokens from their own account. 
+47. The smart contract should have a setBalance function that allows the owner to set the balance of an arbitrary user to any value. 
+48. The smart contract should have a setBalance function that allows the owner to set the balance of an arbitrary user to any value. 
+49. The smart contract should have a transfer function that allows the owner to transfer any amount of the smart contract's tokens to an arbitrary user. 
+50. The smart contract should have a transfer function that allows an arbitrary user to transfer any amount of their own tokens to the smart contract. 
+51. The smart contract should have an increaseAllowance function that allows the owner to increase the amount an arbitrary user is allowed to spend. 
+52. The smart contract should have a decreaseAllowance function that allows the owner to decrease the amount an arbitrary user is allowed to spend. 
+53. The smart contract should have an approve function that allows an arbitrary user to spend a specified amount of the smart contract's tokens on behalf of the owner. 
+54. The smart contract should have a transferFrom function that allows an arbitrary user to transfer a specified amount of the smart contract's tokens from the owner's account to another arbitrary user's account. 
+55. The smart contract should have a mintToken function that allows the owner to increase the total supply of the smart contract's tokens. 
+56. The smart contract should have a burn function that allows the owner to decrease the total supply of the smart contract's tokens. 
+57. The smart contract should have a burnFrom function that allows an arbitrary user to decrease the total supply of the smart contract's tokens from their own account. 
+5

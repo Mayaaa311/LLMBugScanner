@@ -1,0 +1,72 @@
+Based on the provided smart contract code, there are several vulnerabilities that can be identified. Here are the five most severe vulnerabilities:
+
+1. Integer Overflow:
+   - Function Name: `mintTokens`
+   - Vulnerability: The function `mintTokens` allows the owner of the contract to mint new tokens by increasing the supply and the balance of the specified address. However, there is a potential integer overflow vulnerability in the line `supply += _amount;`. If the supply exceeds the maximum value that can be represented by the `supply` variable, it will result in an overflow error.
+   - Function Code:
+     ```
+     function mintTokens(address _to, uint256 _amount) {         
+       if (msg.sender != icoContractAddress) throw;            
+       if (restrictedAddresses[_to]) throw;                    
+       if (balances[_to] + _amount < balances[_to]) throw;     
+       supply += _amount;                                      
+       balances[_to] += _amount;                               
+       Mint(_to, _amount);                                     
+       Transfer(0x0, _to, _amount);                            
+     }
+     ```
+   - Reason: The integer overflow vulnerability arises when the supply exceeds the maximum value that can be represented by the `supply` variable. To mitigate this vulnerability, it is recommended to use safe math operations or check for overflow conditions before performing arithmetic operations.
+
+2. Wrong Logic:
+   - Function Name: `transfer`
+   - Vulnerability: The `transfer` function allows the transfer of tokens from the sender's balance to the recipient's balance. However, there is a potential wrong logic vulnerability in the line `balances[_to] + _value < balances[_to]`. This condition checks if the sum of the recipient's balance and the value being transferred is less than the recipient's balance, which is incorrect. It should instead check if the sum of the recipient's balance and the value being transferred is greater than the recipient's balance.
+   - Function Code:
+     ```
+     function transfer(address _to, uint256 _value) returns (bool success) {
+       if (block.number < tokenFrozenUntilBlock) throw;    
+       if (restrictedAddresses[_to]) throw;                
+       if (balances[msg.sender] < _value) throw;           
+       if (balances[_to] + _value < balances[_to]) throw;  
+       balances[msg.sender] -= _value;                     
+       balances[_to] += _value;                            
+       Transfer(msg.sender, _to, _value);                  
+       return true;
+     }
+     ```
+   - Reason: The wrong logic vulnerability arises when the condition `balances[_to] + _value < balances[_to]` is incorrectly checking if the sum of the recipient's balance and the value being transferred is less than the recipient's balance. This condition should instead check if the sum of the recipient's balance and the value being transferred is greater than the recipient's balance.
+
+3. Bad Randomness:
+   - Function Name: N/A
+   - Vulnerability: The provided smart contract does not seem to have any functions that involve randomness. However, it is important to review any functions that use randomness to ensure that they are implemented correctly and securely.
+
+4. Access Control:
+   - Function Name: `burnTokens`
+   - Vulnerability: The `burnTokens` function allows the owner of the contract to burn tokens by decreasing the supply and the balance of the sender. However, there is a potential access control vulnerability. The function checks if the sender has sufficient balance to burn tokens, but it does not check if the sender is the owner of the contract. This means that any address can call the `burnTokens` function and decrease the supply and balance of any address.
+   - Function Code:
+     ```
+     function burnTokens(uint256 _amount) onlyOwner {
+       if(balances[msg.sender] < _amount) throw;               
+       if(supply < _amount) throw;                             
+       supply -= _amount;                                      
+       balances[msg.sender] -= _amount;                        
+       Burn(msg.sender, _amount);                              
+       Transfer(msg.sender, 0x0, _amount);                     
+     }
+     ```
+   - Reason: The access control vulnerability arises when the function does not check if the sender is the owner of the contract before allowing the burning of tokens. To mitigate this vulnerability, it is recommended to add an access control check to ensure that only the owner of the contract can call the `burnTokens` function.
+
+5. Typo Constructor:
+   - Function Name: `SunContractToken`
+   - Vulnerability: The constructor function `SunContractToken` initializes the `restrictedAddresses` mapping with the address `0x0` and the address of the ICO contract. However, there is a typo in the constructor code. The line `restrictedAddresses[0x0] = true;` should be `restrictedAddresses[_icoAddress] = true;` to correctly initialize the `restrictedAddresses` mapping with the address of the ICO contract.
+   - Function Code:
+     ```
+     function SunContractToken(address _icoAddress) {
+       restrictedAddresses[0x0] = true;
+       restrictedAddresses[_icoAddress] = true;
+       restrictedAddresses[address(this)] = true;
+       icoContractAddress = _icoAddress;
+     }
+     ```
+   - Reason: The typo in the constructor code results in the initialization of the `restrictedAddresses` mapping with the address `0x0` instead of the address of the ICO contract. This can lead to incorrect access control and potential security vulnerabilities. To fix this, the line `restrictedAddresses[0x0] = true;` should be changed to `restrictedAddresses[_icoAddress] = true;` to correctly initialize the `restrictedAddresses` mapping with the address of the ICO contract.
+
+Please note that the provided code is just an example and may not represent the actual implementation of the smart contract. It is recommended to thoroughly review and test the smart contract code before deploying it to a live network.

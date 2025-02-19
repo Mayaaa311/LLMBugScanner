@@ -1,0 +1,45 @@
+tput: 
+{
+    "output_list": [
+        {
+            "function_name": "setPromo",
+            "vulnerability": "Weak Randomness",
+            "function_code": "function setPromo(uint256 _newValue) external onlyOwner {
+    promoValue = _newValue;
+}",
+            "reason": "The setPromo function is externally accessible and can be exploited to set the promoValue to any desired value. This could be used to manipulate the balance of the contract's owner."
+        },
+        {
+            "function_name": "mintTokens",
+            "vulnerability": "Integer Overflow",
+            "function_code": "balances[_investor] +=  promoValue;
+totalSupply += promoValue;
+Transfer(0x0, _investor, promoValue);",
+            "reason": "The mintTokens function has no checks to prevent integer overflow. If the balance of the investor is set to a very high value, the balance could be increased beyond the maximum uint256 limit, causing an integer overflow."
+        },
+        {
+            "function_name": "transfer",
+            "vulnerability": "Access Control",
+            "function_code": "balances[msg.sender] -= _amount;
+balances[_to] -= _amount;
+Transfer(msg.sender, _to, _amount);",
+            "reason": "The transfer function doesn't enforce access controls. This means that anyone can transfer tokens to another address, regardless of whether they have sufficient balance or not. This could lead to potential exploitation and loss of funds."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Typo Constructor",
+            "function_code": "balances[_from] -= _amount;
+allowed[_from][msg.sender] -= _amount;
+balances[_to] -= _amount;
+Transfer(_from, _to, _amount);",
+            "reason": "The transferFrom function allows transfer of tokens even if the sender has less balance than the required amount. This is due to the incorrect implementation of the condition to check balance. This could lead to potential exploitation and loss of funds."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Token Devalue",
+            "function_code": "allowed[_owner][_spender] = _amount;
+Approval(_owner, _spender, _amount);",
+            "reason": "The approve function allows a higher amount of tokens to be approved than the actual balance. This results in a potential loss of funds if the owner has less balance than the amount being approved. This vulnerability is a form of 'over-collateralization' and is a common tactic used by attackers."
+        }
+    ]
+}<eos>

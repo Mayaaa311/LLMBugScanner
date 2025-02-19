@@ -1,0 +1,64 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transfer(address to, uint value) returns (bool success) {
+        if (frozenAccount[msg.sender]) return false;
+        if(balances[msg.sender] < value) return false;
+        if(balances[to] + value < balances[to]) return false;
+        balances[msg.sender] -= value;
+        balances[to] += value;
+        Transfer(msg.sender, to, value);
+        return true;
+    }",
+            "reason": "In the transfer function, the addition operation for balances[to] can result in an integer overflow if the sum of balances[to] and value is less than balances[to]. This can be exploited by an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "transferFrom",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function transferFrom(address from, address to, uint value) returns (bool success) {
+        if (frozenAccount[msg.sender]) return false;
+        if(balances[from] < value) return false;
+        if( allowed[from][msg.sender] >= value ) return false;
+        if(balances[to] + value < balances[to]) return false;
+        balances[from] -= value;
+        allowed[from][msg.sender] -= value;
+        balances[to] += value;
+        Transfer(from, to, value);
+        return true;
+    }",
+            "reason": "In the transferFrom function, the addition operation for balances[to] can result in an integer overflow if the sum of balances[to] and value is less than balances[to]. This can be exploited by an attacker to drain the contract's balance."
+        },
+        {
+            "function_name": "mintToken",
+            "vulnerability": "Integer Overflow",
+            "function_code": "function mintToken(address target, uint256 mintedAmount) onlyOwner{
+        balances[target] += mintedAmount;
+        totalSupply += mintedAmount;
+        Transfer(0,owner,mintedAmount);
+        Transfer(owner,target,mintedAmount);
+    }",
+            "reason": "In the mintToken function, the addition operation for balances[target] can result in an integer overflow if the sum of balances[target] and mintedAmount is less than balances[target]. This can be exploited by an attacker to mint more tokens than the contract's totalSupply allows."
+        },
+        {
+            "function_name": "approve",
+            "vulnerability": "Bad Randomness",
+            "function_code": "function approve(address _spender, uint256 _amount) returns (bool success) {
+        allowed[msg.sender][_spender] = _amount;
+        Approval(msg.sender, _spender, _amount);
+        return true;
+    }",
+            "reason": "In the approve function, the function does not implement any randomness or checks to ensure that the approved amount is within a reasonable range. This can be exploited by an attacker to set an unusually high allowance for a spender, potentially leading to a denial of service or other malicious actions."
+        },
+        {
+            "function_name": "freezeAccount",
+            "vulnerability": "Access Control",
+            "function_code": "function freezeAccount(address target, bool freeze) onlyOwner {
+        frozenAccount[target] = freeze;
+        FrozenFunds(target, freeze);
+    }",
+            "reason": "In the freezeAccount function, the function does not check if the caller is the owner of the contract. An attacker with knowledge of the contract's owner address could call this function to freeze an account, potentially leading to a denial of service or other malicious actions."
+        }
+    ]
+}

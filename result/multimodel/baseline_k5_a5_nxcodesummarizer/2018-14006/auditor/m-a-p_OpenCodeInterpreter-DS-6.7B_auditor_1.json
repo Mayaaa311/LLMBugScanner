@@ -1,0 +1,73 @@
+{
+    "output_list": [
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) public returns (bool success) {
+ttif (isContract(_to)) {
+tttbytes memory empty;
+tttreturn transferToContract(_to, _value, empty);
+tt} else {
+tttrequire(_to != address(0x0));
+tttrequire(balances[msg.sender] >= _value);
+tttbalances[msg.sender] -= _value;
+tttbalances[_to] += _value;
+tttTransfer(msg.sender, _to, _value);
+tt}
+ttreturn true;
+t}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transfer does not check if the sum of balances[msg.sender] and balances[_to] exceeds the maximum value of uint256. This can lead to an integer overflow, potentially causing the contract to behave incorrectly or fail to execute the transfer."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+ttrequire(_to != address(0x0));
+ttrequire(balances[_from] >= _value && allowed[_from][msg.sender] >= _value);
+ttbalances[_from] -= _value;
+ttbalances[_to] += _value;
+ttallowed[_from][msg.sender] -= _value;
+ttTransfer(_from, _to, _value);
+ttbytes memory empty;
+ttTransfer(_from, _to, _value, empty);
+ttreturn true;
+t}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function transferFrom does not check if the sum of balances[_from], balances[_to], and allowed[_from][msg.sender] exceeds the maximum value of uint256. This can lead to an integer overflow, potentially causing the contract to behave incorrectly or fail to execute the transfer."
+        },
+        {
+            "function_name": "approve",
+            "code": "function approve(address _spender, uint256 _value) public returns (bool success) {
+ttrequire((_value == 0) || (allowed[msg.sender][_spender] == 0));
+ttallowed[msg.sender][_spender] = _value;
+ttApproval(msg.sender, _spender, _value);
+ttreturn true;
+t}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function approve does not check if the sum of allowed[msg.sender][_spender] and _value exceeds the maximum value of uint256. This can lead to an integer overflow, potentially causing the contract to behave incorrectly or fail to execute the approval."
+        },
+        {
+            "function_name": "increaseApproval",
+            "code": "function increaseApproval(address _spender, uint256 _addValue) public returns (bool) {
+ttallowed[msg.sender][_spender] += _addValue;
+ttApproval(msg.sender, _spender, allowed[msg.sender][_spender]);
+ttreturn true;
+t}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function increaseApproval does not check if the sum of allowed[msg.sender][_spender] and _addValue exceeds the maximum value of uint256. This can lead to an integer overflow, potentially causing the contract to behave incorrectly or fail to execute the approval increase."
+        },
+        {
+            "function_name": "decreaseApproval",
+            "code": "function decreaseApproval(address _spender, uint256 _subValue) public returns (bool) {
+ttif (_subValue > allowed[msg.sender][_spender]) {
+tt  allowed[msg.sender][_spender] = 0;
+tt} else {
+tt  allowed[msg.sender][_spender] -= _subValue;
+tt}
+ttApproval(msg.sender, _spender, allowed[msg.sender][_spender]);
+ttreturn true;
+t}",
+            "vulnerability": "Integer Overflow",
+            "reason": "The function decreaseApproval does not check if the difference between allowed[msg.sender][_spender] and _subValue is negative. This can lead to an integer overflow, potentially causing the contract to behave incorrectly or fail to execute the approval decrease."
+        }
+    ]
+}

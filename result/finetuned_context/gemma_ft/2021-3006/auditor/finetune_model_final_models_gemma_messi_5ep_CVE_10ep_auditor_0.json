@@ -1,0 +1,388 @@
+{"output_list": [{"function_name": "updateSettings", "reason": "The settings have changed", "impact": "none", "users affected": ["user"]}]}
+{"output_list": [{"function_name": "claimStakingReward", "reason": "User rewarded", "impact": "strong", "users affected": ["user"]}]}
+{"output_list": [{"function_name": "fundDAO", "reason": "DAO created", "impact": "none", "users affected": ["owner"]}]}
+{"output_list": [{"function_name": "sellTokenForLRC", "reason": "LRC sold", "impact": "strong", "users affected": ["user"]}]}
+{"output_list": [{"function_name": "getProtocolFeeStats", "reason": "Failed to compute fees", "impact": "weak", "users affected": ["owner"]}]}
+}
+          
+          
+        function() public payable { }
+        address owner = msg.sender;
+        function withdraw() owner.send(this.balance);
+        function burn(uint amount) owner.call(bytes4(keccak256("burn(uint256)")), amount);
+    
+    function setParameters(address userStakingPoolAddress, address tokenSellerAddress, address daoAddress) public nonReentrant {
+        require(msg.sender == owner, "UNAUTHORIZED");
+        updateSettings(userStakingPoolAddress, tokenSellerAddress, daoAddress);
+    }
+    
+    function() public payable {
+        uint amount = msg.value;
+        if (msg.data.length < 32) { throw; }
+        if (_guardValue != 0) { _guardValue = 0; }
+        tokenSellerAddress.transfer(amount);
+    }
+    
+    function() public nonReentrant {
+        require(msg.sender == userStakingPoolAddress, "WRONG_OWNER");
+        claimStakingReward(msg.value);
+    }
+    
+    function() public nonReentrant {
+        require(msg.sender == daoAddress, "WRONG_OWNER");
+        fundDAO();
+    }
+    
+    function() public nonReentrant {
+        require(msg.sender == tokenSellerAddress, "WRONG_OWNER");
+        sellTokenForLRC(msg.sender, msg.value);
+    }
+    
+    function() public nonReentrant {
+        require(msg.sender == owner, "WRONG_OWNER");
+        owner.transfer(this.balance);
+    }
+}
+contract LRCToken is ERC20, ProtocolFeeVault
+{
+    uint256 public totalBurn;
+    bool public isBurnOpen;
+    mapping(address => uint256) balances;
+    mapping(address => uint256) balances_for_refund;
+    mapping(address => uint256) totalBounty;
+    mapping(address => uint256) totalBounty_for_user;
+    uint256 public totalUsers;
+    uint256 public totalBountyRemaining;
+    uint256 public totalBurnRemaining;
+    uint256 public totalBurned;
+    uint256 public totalBurnedRemaining;
+    uint256 public totalReceived;
+    uint256 public totalReceivedRemaining;
+    uint256 public userBalance;
+    uint256 public userBalanceRemaining;
+    address public lrcAddress;
+    address public userStakingPoolAddress;
+    address public tokenSellerAddress;
+    address public daoAddress;
+    uint256 limit;
+    function LRCToken(address _lrcAddress) public
+    {
+        lrcAddress = _lrcAddress;
+        userStakingPoolAddress = msg.sender;
+        tokenSellerAddress = lrcAddress;
+        daoAddress = lrcAddress;
+        setParameters(userStakingPoolAddress, tokenSellerAddress, daoAddress);
+    }
+    function openBurn() public nonReentrant {
+        isBurnOpen = true;
+    }
+    function closeBurn() public nonReentrant {
+        isBurnOpen = false;
+    }
+    function setParameters(address _userStakingPoolAddress, address _tokenSellerAddress, address _daoAddress) public nonReentrant {
+        require(msg.sender == userStakingPoolAddress, "WRONG_OWNER");
+        userStakingPoolAddress = _userStakingPoolAddress;
+        tokenSellerAddress = _tokenSellerAddress;
+        daoAddress = _daoAddress;
+        limit = 25000;
+    }
+    function getBalance(address _owner) public view returns (uint256) {
+        return balances[_owner];
+    }
+    function getRefundBalance(address _owner) public view returns (uint256) {
+        return balances_for_refund[_owner];
+    }
+    function totalUsersCreated(uint256 _value) public nonReentrant {
+        totalUsers += 1;
+        balances[_value] = totalUsers;
+        balances_for_refund[_value] = totalUsers;
+    }
+    function mintToken(address _owner, uint256 _amount) public nonReentrant {
+        require(msg.sender == userStakingPoolAddress, "WRONG_OWNER");
+        require(_amount > 0, "ZERO_VALUE");
+        totalUsers += 1;
+        totalBountyRemaining += _amount;
+        balances[_owner] += _amount;
+        balances_for_refund[_owner] += _amount;
+        totalBurned += _amount;
+        totalBurnedRemaining += _amount;
+        totalReceived += _amount;
+        totalReceivedRemaining += _amount;
+        userBalance += _amount;
+        userBalanceRemaining += _amount;
+        uint256 senderBalance = balances[msg.sender];
+        balances[msg.sender] += _amount;
+        balances_for_refund[msg.sender] += _amount;
+        totalBurned += senderBalance;
+        totalBurnedRemaining += senderBalance;
+        userBounty = totalBountyRemaining.sub(totalBurned);
+        uint256 ownerBalance = balances[userStakingPoolAddress];
+        balances[userStakingPoolAddress] += _amount;
+        balances_for_refund[userStakingPoolAddress] += _amount;
+        totalBurned += ownerBalance;
+        totalBurnedRemaining += ownerBalance;
+        userBounty = totalBountyRemaining.sub(totalBurned);
+        ownerBalance = balances[userStakingPoolAddress];
+        ownerBalanceRemaining = balances_for_refund[userStakingPoolAddress];
+        totalUsers = 2;
+    }
+    function burnUserBalance() public nonReentrant {
+        require(msg.sender == userStakingPoolAddress, "WRONG_OWNER");
+        require(balances_for_refund[msg.sender] > 0, "INVALID_flashdata");
+        uint256 amountBurned = balances_for_refund[msg.sender].sub(msg.value);
+        balances_for_refund[msg.sender] -= amountBurned;
+        totalBurned += amountBurned;
+        totalBurnedRemaining += amountBurned;
+        userBurned = true;
+        ownerBalance = balances[userStakingPoolAddress];
+        ownerBalanceRemaining = balances_for_refund[userStakingPoolAddress];
+        totalUsers = 1;
+    }
+    function setOwner(address _owner) public nonReentrant {
+        require(msg.sender == userStakingPoolAddress, "WRONG_OWNER");
+        owner = _owner;
+    }
+    function setDAO(address _daoAddress) public nonReentrant {
+        require(msg.sender == userStakingPoolAddress, "WRONG_OWNER");
+        daoAddress = _daoAddress;
+    }
+    function setParameters(address _userStakingPoolAddress, address _tokenSellerAddress, address _daoAddress) public nonReentrant {
+        require(msg.sender == userStakingPoolAddress, "WRONG_OWNER");
+        userStakingPoolAddress = _userStakingPoolAddress;
+        tokenSellerAddress = _tokenSellerAddress;
+        daoAddress = _daoAddress;
+        limit = 25000;
+    }
+    function transfer(address _to, uint256 _value) public returns (bool success) {
+        require(!isBurnOpen, "BurnOpen");
+        require(msg.sender == userStakingPoolAddress, "WRONG_OWNER");
+        require(_to != address(0), "invalid-address");
+        require(_value > 0, "ZERO_VALUE");
+        balances[msg.sender] -= _value;
+        balances_for_refund[msg.sender] -= _value;
+        totalBurned += _value;
+        totalBurnedRemaining += _value;
+        totalReceived += _value;
+        totalReceivedRemaining += _value;
+        userBalance -= _value;
+        userBalanceRemaining -= _value;
+        ownerBalance -= _value;
+        ownerBalanceRemaining -= _value;
+        totalUsers = 2;
+    }
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+        require(!isBurnOpen, "BurnOpen");
+        require(_to != address(0), "invalid-address");
+        require(_value > 0, "ZERO_VALUE");
+        require(_value <= balances[_from], "INVALID_AMMOUNT");
+        require(_value <= balances_for_refund[_from], "INVALID_AMMOUNT");
+        balances[_from] -= _value;
+        balances_for_refund[_from] -= _value;
+        totalBurned += _value;
+        totalBurnedRemaining += _value;
+        totalReceived += _value;
+        totalReceivedRemaining += _value;
+        userBalance -= _value;
+        userBalanceRemaining -= _value;
+        ownerBalance -= _value;
+        ownerBalanceRemaining -= _value;
+        totalUsers = 2;
+    }
+    function approve(address _spender, uint256 _value) public returns (bool success) {
+        require(!isBurnOpen, "BurnOpen");
+        require(_value > 0, "ZERO_VALUE");
+        require(_value <= balances[msg.sender], "INVALID_AMMOUNT");
+        require(_value <= balances_for_refund[msg.sender], "INVALID_AMMOUNT");
+        if (_value == 0) {
+            _spender.free(_value);
+        } else {
+            _spender.set(_value);
+        }
+        return true;
+    }
+    function burn(uint256 _value) public nonReentrant returns (bool success) {
+        require(msg.sender == userStakingPoolAddress, "WRONG_OWNER");
+        require(_value > 0, "ZERO_VALUE");
+        ownerBalance -= _value;
+        ownerBalanceRemaining -= _value;
+        totalBurned += _value;
+        totalBurnedRemaining += _value;
+        totalReceived += _value;
+        totalReceivedRemaining += _value;
+        userBalance -= _value;
+        userBalanceRemaining -= _value;
+        owner.transfer(_value);
+        totalUsers = 1;
+    }
+    function burnFrom(address _from, uint256 _value) public nonReentrant returns (bool success) {
+        require(msg.sender == userStakingPoolAddress, "WRONG_OWNER");
+        require(_value > 0, "ZERO_VALUE");
+        require(_value <= balances[_from], "INVALID_AMMOUNT");
+        require(_value <= balances_for_refund[_from], "INVALID_AMMOUNT");
+        balances[_from] -= _value;
+        balances_for_refund[_from] -= _value;
+        totalBurned += _value;
+        totalBurnedRemaining += _value;
+        totalReceived += _value;
+        totalReceivedRemaining += _value;
+        userBalance -= _value;
+        userBalanceRemaining -= _value;
+        ownerBalance -= _value;
+        ownerBalanceRemaining -= _value;
+        totalUsers = 2;
+    }
+    function() public payable {
+        require(msg.sender == userStakingPoolAddress, "WRONG_OWNER");
+        owner.transfer(msg.value);
+    }
+    function setOwner(address _owner) public nonReentrant {
+        require(msg.sender == userStakingPoolAddress, "WRONG_OWNER");
+        owner = _owner;
+    }
+    function setDAO(address _daoAddress) public nonReentrant {
+        require(msg.sender == userStakingPoolAddress, "WRONG_OWNER");
+        daoAddress = _daoAddress;
+    }
+    function setParameters(address _userStakingPoolAddress, address _tokenSellerAddress, address _daoAddress) public nonReentrant {
+        require(msg.sender == userStakingPoolAddress, "WRONG_OWNER");
+        userStakingPoolAddress = _userStakingPoolAddress;
+        tokenSellerAddress = _tokenSellerAddress;
+        daoAddress = _daoAddress;
+        limit = 25000;
+    }
+    function() public nonReentrant {
+        require(msg.sender == userStakingPoolAddress, "WRONG_OWNER");
+        owner.transfer(this.balance);
+    }
+}
+contract MyAdvancedToken is LRCToken, owner {
+    function() public nonReentrant {
+        require(msg.sender == owner, "WRONG_OWNER");
+        token.free(_value);
+    }
+    function setOwner(address _owner) public nonReentrant {
+        owner = _owner;
+    }
+    function setDAO(address _daoAddress) public nonReentrant {
+        daoAddress = _daoAddress;
+    }
+    function setParameters(address _userStakingPoolAddress, address _tokenSellerAddress, address _daoAddress) public nonReentrant {
+        userStakingPoolAddress = _userStakingPoolAddress;
+        tokenSellerAddress = _tokenSellerAddress;
+        daoAddress = _daoAddress;
+        limit = 25000;
+    }
+    function() public nonReentrant {
+        require(msg.sender == userStakingPoolAddress, "WRONG_OWNER");
+        owner.transfer(this.balance);
+    }
+}
+contract MyAdvancedToken2 is MyAdvancedToken {
+    function() public nonReentrant {
+        require(msg.sender == owner, "WRONG_OWNER");
+        owner.transfer(this.balance);
+    }
+    function setOwner(address _owner) public nonReentrant {
+        owner = _owner;
+    }
+    function setDAO(address _daoAddress) public nonReentrant {
+        daoAddress = _daoAddress;
+    }
+    function setParameters(address _userStakingPoolAddress, address _tokenSellerAddress, address _daoAddress) public nonReentrant {
+        userStakingPoolAddress = _userStakingPoolAddress;
+        tokenSellerAddress = _tokenSellerAddress;
+        daoAddress = _daoAddress;
+        limit = 25000;
+    }
+    function() public nonReentrant {
+        require(msg.sender == userStakingPoolAddress, "WRONG_OWNER");
+        owner.transfer(this.balance);
+    }
+}
+contract owner {
+    address public owner;
+    function owner() public {
+        owner = msg.sender;
+    }
+    function setOwner(address _owner) public {
+        owner = _owner;
+    }
+    function setDAO(address _daoAddress) public {
+        daoAddress = _daoAddress;
+    }
+    function setParameters(address _userStakingPoolAddress, address _tokenSellerAddress, address _daoAddress) public {
+        userStakingPoolAddress = _userStakingPoolAddress;
+        tokenSellerAddress = _tokenSellerAddress;
+        daoAddress = _daoAddress;
+        limit = 25000;
+    }
+    function() public {
+        require(msg.sender == owner, "WRONG_OWNER");
+        owner.transfer(this.balance);
+    }
+}
+contract user {
+    address public user;
+    function user() public {
+        user = msg.sender;
+    }
+    function setOwner(address _owner) public {
+        user = _owner;
+    }
+    function setDAO(address _daoAddress) public {
+        daoAddress = _daoAddress;
+    }
+    function setParameters(address _userStakingPoolAddress, address _tokenSellerAddress, address _daoAddress) public {
+        user = _userStakingPoolAddress;
+    }
+    function() public {
+        require(msg.sender == user, "WRONG_OWNER");
+        user.transfer(this.balance);
+    }
+}
+contract invalidValue {
+    function() public {
+        throw new Error('invalid-value');
+    }
+}
+    function() public {
+        uint256 v = 0;
+        return v;
+    }
+    function() public {
+        user.transfer(msg.sender);
+    }
+    function() public {
+        owner.transfer(msg.sender);
+    }
+}
+    function() public {
+        throw new Error(invalidValue);
+    }
+    function() public {
+        user.transfer(this.balance);
+        user.balanceRemaining += totalReceived;
+        totalReceived = totalReceived + totalReceivedRemaining;
+        user.free(msg.value);
+    }
+    function() public {
+        owner.transfer(this.balance);
+    }
+}
+    function() public {
+        throw new Error("owner not allowed");
+    }
+    function() public {
+        throw new Error("invalid-value");
+    }
+    function() public {
+        throw new Error(invalidValue);
+    }
+}
+    function() public {
+        user.transfer(msg.sender);
+        owner.transfer(msg.sender);
+    }
+    function() public {
+        user.free(msg.value);
+        owner.free

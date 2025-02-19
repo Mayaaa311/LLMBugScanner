@@ -1,0 +1,333 @@
+{
+    "output_list": [
+        {
+            "function_name": "developer_Coin_Character",
+            "code": "function developer_Coin_Character(string change_coin_character) {
+    if (msg.sender == owner) Coin_Character = change_coin_character;
+  }",
+            "vulnerability": "Lack of Access Control",
+            "reason": "The function developer_Coin_Character allows anyone to change the Coin_Character, which could lead to unauthorized changes and potential security risks."
+        },
+        {
+            "function_name": "developer_new_address_for_funds",
+            "code": "function developer_new_address_for_funds(address new_address_for_funds) {
+    if (msg.sender == owner) funds = new_address_for_funds;
+  }",
+            "vulnerability": "Lack of Access Control",
+            "reason": "The function developer_new_address_for_funds allows anyone to change the funds address, which could lead to unauthorized changes and potential security risks."
+        },
+        {
+            "function_name": "developer_add_Exchanges",
+            "code": "function developer_add_Exchanges(string _add_Exchanges) {
+    if (msg.sender == owner) Exchanges = _add_Exchanges;
+  }",
+            "vulnerability": "Lack of Access Control",
+            "reason": "The function developer_add_Exchanges allows anyone to change the Exchanges, which could lead to unauthorized changes and potential security risks."
+        },
+        {
+            "function_name": "developer_add_cost_of_transfers",
+            "code": "function developer_add_cost_of_transfers(string _add_cost_of_transfers) {
+    if (msg.sender == owner) cost_of_transfers = _add_cost_of_transfers;
+  }",
+            "vulnerability": "Lack of Access Control",
+            "reason": "The function developer_add_cost_of_transfers allows anyone to change the cost_of_transfers, which could lead to unauthorized changes and potential security risks."
+        },
+        {
+            "function_name": "developer_new_price",
+            "code": "function developer_new_price(string _new_price) {
+    if (msg.sender == owner) price = _new_price;
+  }",
+            "vulnerability": "Lack of Access Control",
+            "reason": "The function developer_new_price allows anyone to change the price, which could lead to unauthorized changes and potential security risks."
+        },
+        {
+            "function_name": "developer_crowdsale_text",
+            "code": "function developer_crowdsale_text(string _crowdsale_text) {
+    if (msg.sender == owner) crowdsale  = _crowdsale_text;
+  }",
+            "vulnerability": "Lack of Access Control",
+            "reason": "The function developer_crowdsale_text allows anyone to change the crowdsale text, which could lead to unauthorized changes and potential security risks."
+        },
+        {
+            "function_name": "developer_new_symbol",
+            "code": "function developer_new_symbol(string _new_symbol) {
+    if (msg.sender == owner) symbol = _new_symbol;
+  }",
+            "vulnerability": "Lack of Access Control",
+            "reason": "The function developer_new_symbol allows anyone to change the symbol, which could lead to unauthorized changes and potential security risks."
+        },
+        {
+            "function_name": "transfer_tokens_after_ICO",
+            "code": "function transfer_tokens_after_ICO(address[] addresses, uint256 _value) {
+    for (uint i = 0; i < addresses.length; i++) {
+      require(balances[msg.sender] >= _value);
+      balances[msg.sender] -= _value;
+      balances[addresses[i]] += _value;
+      Transfer(msg.sender, addresses[i], _value);
+    }
+  }",
+            "vulnerability": "Unchecked Array Length",
+            "reason": "The function transfer_tokens_after_ICO does not check if the length of the addresses array is within the expected range, which could lead to out-of-bounds access and potential security risks."
+        },
+        {
+            "function_name": "distribute_100_tokens_to_many",
+            "code": "function distribute_100_tokens_to_many(address[] addresses) {
+    for (uint i = 0; i < addresses.length; i++)
+    {
+      require(balances[msg.sender] >= 100000);
+      balances[msg.sender] -= 100000;
+      balances[addresses[i]] += 100000;
+      Transfer(msg.sender, addresses[i], 100000);
+    }
+  }",
+            "vulnerability": "Unchecked Array Length",
+            "reason": "The function distribute_100_tokens_to_many does not check if the length of the addresses array is within the expected range, which could lead to out-of-bounds access and potential security risks."
+        },
+        {
+            "function_name": "transfer_tokens",
+            "code": "function transfer_tokens(address _to, uint256 _value) {
+      require(balances[msg.sender] >= _value);
+      balances[msg.sender] -= _value;
+      balances[_to] += _value;
+      Transfer(msg.sender, _to, _value);
+    }",
+            "vulnerability": "Unchecked Array Length",
+            "reason": "The function transfer_tokens does not check if the length of the addresses array is within the expected range, which could lead to out-of-bounds access and potential security risks."
+        },
+        {
+            "function_name": "buy_coin",
+            "code": "function buy_coin(address target, uint256 amount) {
+      require(balances[this] >= amount);
+      balances[msg.sender] += amount;
+      balances[target] += amount;
+      Transfer(balances[this], msg.sender, amount);
+      return target;
+    }",
+            "vulnerability": "Unchecked Array Length",
+            "reason": "The function buy_coin does not check if the length of the addresses array is within the expected range, which could lead to out-of-bounds access and potential security risks."
+        },
+        {
+            "function_name": "crowdsale",
+            "code": "function crowdsale() {
+      uint256 tokens;
+      uint256 total_reward;
+      uint256 total_balance = balances[this];
+      address investor = msg.sender;
+      function setBalance(uint256 newBalance) {
+          balances[investor] = newBalance;
+      }
+      function getBalance() constant returns (uint256 balance) {
+          return balances[investor];
+      }
+      function withdraw() {
+          require(balances[investor] > 0);
+          tokens = (total_balance - total_reward) * 100000;
+          total_reward += tokens;
+          total_balance -= tokens;
+          balances[investor] -= tokens;
+          fee.transfer(msg.value);
+      }
+      function transfer(address _to, uint256 _value) returns (bool success) {
+          require(balances[msg.sender] >= _value);
+          balances[msg.sender] -= _value;
+          balances[_to] += _value;
+          Transfer(msg.sender, _to, _value);
+          return true;
+      }
+      function approve(address _spender, uint256 _value) returns (bool success) {
+          require((_value == 0) || (allowed[msg.sender][_spender] == 0));
+          allowed[msg.sender][_spender] = _value;
+          Approval(msg.sender, _spender, _value);
+          return true;
+      }
+      function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+          return allowed[_owner][_spender];
+      }
+      function getTokenBalance(address tokenAddress, address who) constant returns (uint){
+          StandardToken t = StandardToken(tokenAddress, this);
+          return t.getBalance(who);
+      }
+      function withdraw_log(string log, uint256 val) {
+          require(msg.sender == investor && val <= balances[investor]);
+          token.transfer(msg.sender, val);
+          log.push(msg.sender, val);
+          val = 0;
+          return log;
+      }
+      function withdraw_logSize(string log, uint256 size) {
+          require(msg.sender == investor && size <= 25);
+          uint256 v = 0;
+          uint256 u = 0;
+          uint256 b = 0;
+          uint256 i = 0;
+          while(i < size) {
+              v = 0;
+              u = 0;
+              b = 0;
+              for (uint256 j = 0; j < 25; j++) {
+                  v = v + log[j];
+                  u = u + size - j;
+                  b = b + val;
+                  if(v == 0) {
+                      v = b;
+                  }
+                  if(u < 25) {
+                      u = u - 1;
+                  }
+                  if(u == 0) {
+                      u = 32;
+                  }
+                  if(b > 0) {
+                      b = b - 1;
+                  }
+                  if(v > 0) {
+                      v = v - 1;
+                  }
+                  if(u > 0) {
+                      u = u - 1;
+                  }
+                  if(b > 0) {
+                      b = b - 1;
+                  }
+                  i = i + 1;
+            }
+            uint256 m = 0;
+            uint256 n = 0;
+            uint256 o = 0;
+            uint256 l = 0;
+            uint256 k = 0;
+            uint256 c = 0;
+            uint256 d = 0;
+            uint256 e = 0;
+            uint256 f = 0;
+            uint256 g = 0;
+            uint256 h = 0;
+            uint256 i1 = 0;
+            uint256 j1 = 0;
+            uint256 k1 = 0;
+            uint256 l1 = 0;
+            uint256 m1 = 0;
+            uint256 n1 = 0;
+            uint256 o1 = 0;
+            uint256 p1 = 0;
+            uint256 q1 = 0;
+            uint256 r1 = 0;
+            uint256 s1 = 0;
+            uint256 t1 = 0;
+            uint256 u1 = 0;
+            uint256 v1 = 0;
+            uint256 w1 = 0;
+            uint256 x1 = 0;
+            uint256 y1 = 0;
+            uint256 z1 = 0;
+            uint256 aa1 = 0;
+            uint256 ba = 0;
+            uint256 bd = 0;
+            uint256 bf = 0;
+            uint256 bu = 0;
+            uint256 ca = 0;
+            uint256 cb = 0;
+            uint256 cd = 0;
+            uint256 d1_ = 0;
+            uint256 e1_ = 0;
+            uint256 f1_ = 0;
+            uint256 g1_ = 0;
+            uint256 h1_ = 0;
+            uint256 i2 = 0;
+            uint256 j2 = 0;
+            uint256 k2 = 0;
+            uint256 l2 = 0;
+            uint256 m2 = 0;
+            uint256 n2 = 0;
+            uint256 o2 = 0;
+            uint256 p2 = 0;
+            uint256 q2 = 0;
+            uint256 r2 = 0;
+            uint256 s2 = 0;
+            uint256 t2 = 0;
+            uint256 u2 = 0;
+            uint256 v2 = 0;
+            uint256 w2 = 0;
+            uint256 x2 = 0;
+            uint256 y2 = 0;
+            uint256 z2 = 0;
+            uint256 aa2 = 0;
+            uint256 ba_ = 0;
+            uint256 bd_ = 0;
+            uint256 bf_ = 0;
+            uint256 bu_ = 0;
+            uint256 ca_ = 0;
+            uint256 cb_ = 0;
+            uint256 cd_ = 0;
+            uint256 d1_ = 0;
+            uint256 e1_ = 0;
+            uint256 f1_ = 0;
+            uint256 g1_ = 0;
+            uint256 h1_ = 0;
+            uint256 i3 = 0;
+            uint256 j3 = 0;
+            uint256 k3 = 0;
+            uint256 l3 = 0;
+            uint256 m3 = 0;
+            uint256 n3 = 0;
+            uint256 o3 = 0;
+            uint256 p3 = 0;
+            uint256 q3 = 0;
+            uint256 r3 = 0;
+            uint256 s3 = 0;
+            uint256 t3 = 0;
+            uint256 u3 = 0;
+            uint256 v3 = 0;
+            uint256 w3 = 0;
+            uint256 x3 = 0;
+            uint256 y3 = 0;
+            uint256 z3 = 0;
+            uint256 aa3 = 0;
+            uint256 ba_ = 0;
+            uint256 bd_ = 0;
+            uint256 bf_ = 0;
+            uint256 bu_ = 0;
+            uint256 ca_ = 0;
+            uint256 cb_ = 0;
+            uint256 cd_ = 0;
+            uint256 d1_ = 0;
+            uint256 e1_ = 0;
+            uint256 f1_ = 0;
+            uint256 g1_ = 0;
+            uint256 h1_ = 0;
+            uint256 i4 = 0;
+            uint256 j4 = 0;
+            uint256 k4 = 0;
+            uint256 l4 = 0;
+            uint256 m4 = 0;
+            uint256 n4 = 0;
+            uint256 o4 = 0;
+            uint256 p4 = 0;
+            uint256 q4 = 0;
+            uint256 r4 = 0;
+            uint256 s4 = 0;
+            uint256 t4 = 0;
+            uint256 u4 = 0;
+            uint256 v4 = 0;
+            uint256 w4 = 0;
+            uint256 x4 = 0;
+            uint256 y4 = 0;
+            uint256 z4 = 0;
+            uint256 aa4 = 0;
+            uint256 ba = 0;
+            uint256 bd = 0;
+            uint256 bf = 0;
+            uint256 bu = 0;
+            uint256 ca = 0;
+            uint256 cb = 0;
+            uint256 cd = 0;
+            uint256 d1_ = 0;
+            uint256 e1_ = 0;
+            uint256 f1_ = 0;
+            uint256 g1_ = 0;
+            uint256 h1_ = 0;
+            uint256 i5 = 0;
+            uint256 j5 = 0;
+            uint256 k5 = 0;
+            uint256 l5 = 0;
+            uint256 m5 = 0;

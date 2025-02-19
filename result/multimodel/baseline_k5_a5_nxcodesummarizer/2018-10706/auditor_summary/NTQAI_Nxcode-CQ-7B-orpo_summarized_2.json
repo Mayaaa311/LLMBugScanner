@@ -1,0 +1,158 @@
+{
+    "output_list": [
+        {
+            "function_name": "approveAndCall",
+            "code": "function approveAndCall(address _spender, uint256 _amount, bytes _extraData) public returns (bool success) {
+        require(approve(_spender, _amount));
+        ApproveAndCallReceiver(_spender).receiveApproval(
+        msg.sender,
+        _amount,
+        this,
+        _extraData
+        );
+        return true;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function approveAndCall is vulnerable to reentrancy attack. The function approveAndCall calls the receiveApproval function of the contract ApproveAndCallReceiver, which can lead to a reentrancy attack."
+        },
+        {
+            "function_name": "transfer",
+            "code": "function transfer(address _to, uint256 _value) realUser(_to) moreThanZero(_value) public returns (bool success) {
+        require(balanceOf[msg.sender] >= _value);           
+        require(balanceOf[_to] + _value > balanceOf[_to]); 
+        balanceOf[msg.sender] = balanceOf[msg.sender] - _value;                     
+        balanceOf[_to] = balanceOf[_to] + _value;                            
+        emit Transfer(msg.sender, _to, _value);                   
+        return true;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function transfer is vulnerable to reentrancy attack. The function transfer calls the realUser modifier, which can lead to a reentrancy attack."
+        },
+        {
+            "function_name": "transferFrom",
+            "code": "function transferFrom(address _from, address _to, uint256 _value) realUser(_from) realUser(_to) moreThanZero(_value) public returns (bool success) {
+        require(balanceOf[_from] >= _value);                 
+        require(balanceOf[_to] + _value > balanceOf[_to]);  
+        require(_value <= allowance[_from][msg.sender]);     
+        balanceOf[_from] = balanceOf[_from] - _value;                           
+        balanceOf[_to] = balanceOf[_to] + _value;                             
+        allowance[_from][msg.sender] = allowance[_from][msg.sender] + _value;
+        emit Transfer(_from, _to, _value);
+        return true;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function transferFrom is vulnerable to reentrancy attack. The function transferFrom calls the realUser modifier, which can lead to a reentrancy attack."
+        },
+        {
+            "function_name": "transferMulti",
+            "code": "function transferMulti(address[] _to, uint256[] _value) public returns (uint256 amount){
+        require(_to.length == _value.length);
+        uint8 len = uint8(_to.length);
+        for(uint8 j; j<len; j++){
+            amount += _value[j]*10**uint256(decimals);
+        }
+        require(balanceOf[msg.sender] >= amount);
+        for(uint8 i; i<len; i++){
+            address _toI = _to[i];
+            uint256 _valueI = _value[i]*10**uint256(decimals);
+            balanceOf[_toI] += _valueI;
+            balanceOf[msg.sender] -= _valueI;
+            emit Transfer(msg.sender, _toI, _valueI);
+        }
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function transferMulti is vulnerable to reentrancy attack. The function transferMulti calls the realUser modifier, which can lead to a reentrancy attack."
+        },
+        {
+            "function_name": "freeze",
+            "code": "function freeze(address _user, uint256 _value, uint8 _step) moreThanZero(_value) onlyController public returns (bool success) {
+        _value=_value*10**uint256(decimals);
+        return _freeze(_user,_value,_step);
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function freeze is vulnerable to reentrancy attack. The function freeze calls the _freeze function, which can lead to a reentrancy attack."
+        },
+        {
+            "function_name": "unFreeze",
+            "code": "function unFreeze(uint8 _step) onlyOwner public returns (bool unlockOver) {
+        uint8 _end = lastFreezeSeq[_step];
+        require(_end > 0);
+        unlockOver=false;
+        uint8  _start=0;
+        for(; _end>_start; _end--){
+            FreezeInfo storage fInfo = freezeOf[_step][_end-1];
+            uint256 _amount = fInfo.amount;
+            balanceOf[fInfo.user] += _amount;
+            delete freezeOf[_step][_end-1];
+            lastFreezeSeq[_step]--;
+            emit Unfreeze(fInfo.user, _amount);
+        }
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function unFreeze is vulnerable to reentrancy attack. The function unFreeze calls the _freeze function, which can lead to a reentrancy attack."
+        },
+        {
+            "function_name": "generateTokens",
+            "code": "function generateTokens(address _user, uint _amount) onlyController public returns (bool) {
+        _amount=_amount*10**uint256(decimals);
+        return _generateTokens(_user,_amount);
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function generateTokens is vulnerable to reentrancy attack. The function generateTokens calls the _generateTokens function, which can lead to a reentrancy attack."
+        },
+        {
+            "function_name": "destroyTokens",
+            "code": "function destroyTokens(address _user, uint256 _amount) onlyOwner public returns (bool) {
+        _amount=_amount*10**uint256(decimals);
+        return _destroyTokens(_user,_amount);
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function destroyTokens is vulnerable to reentrancy attack. The function destroyTokens calls the _destroyTokens function, which can lead to a reentrancy attack."
+        },
+        {
+            "function_name": "changeOwner",
+            "code": "function changeOwner(address newOwner) onlyOwner public returns (bool) {
+        balanceOf[newOwner] += balanceOf[owner];
+        balanceOf[owner] = 0;
+        owner = newOwner;
+        return true;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function changeOwner is vulnerable to reentrancy attack. The function changeOwner calls the _generateTokens function, which can lead to a reentrancy attack."
+        },
+        {
+            "function_name": "changeTokensPerEther",
+            "code": "function changeTokensPerEther(uint256 _newRate) onlyController public {
+        tokensPerEther = _newRate;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function changeTokensPerEther is vulnerable to reentrancy attack. The function changeTokensPerEther calls the _generateTokens function, which can lead to a reentrancy attack."
+        },
+        {
+            "function_name": "changeAirdropQty",
+            "code": "function changeAirdropQty(uint256 _airdropQty) onlyController public {
+        airdropQty = _airdropQty;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function changeAirdropQty is vulnerable to reentrancy attack. The function changeAirdropQty calls the _generateTokens function, which can lead to a reentrancy attack."
+        },
+        {
+            "function_name": "changeAirdropTotalQty",
+            "code": "function changeAirdropTotalQty(uint256 _airdropTotalQty) onlyController public {
+        uint256 _token =_airdropTotalQty*10**uint256(decimals);
+        require(balanceOf[owner] >= _token);
+        airdropTotalQty = _airdropTotalQty;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function changeAirdropTotalQty is vulnerable to reentrancy attack. The function changeAirdropTotalQty calls the _generateTokens function, which can lead to a reentrancy attack."
+        },
+        {
+            "function_name": "changePaused",
+            "code": "function changePaused(bool _paused) onlyController public {
+        paused = _paused;
+    }",
+            "vulnerability": "Wrong Logic",
+            "reason": "The function changePaused is vulnerable to reentrancy attack. The function changePaused calls the _generateTokens function, which can lead to a reentrancy attack."
+        }
+    ]
+}

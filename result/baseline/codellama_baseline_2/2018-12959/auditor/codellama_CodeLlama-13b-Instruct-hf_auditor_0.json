@@ -1,0 +1,43 @@
+ Here are the 5 most severe vulnerabilities in the provided smart contract, along with their associated functions and reasons:
+
+1. Integer Overflow:
+
+Function: `transfer`
+
+Vulnerability: Integer overflow in the `transfer` function can occur when the `balances` mapping is updated with a value that exceeds the maximum value of a 256-bit unsigned integer. This can lead to a loss of funds, as the overflowed value will be truncated to the maximum value.
+
+Reason: The `transfer` function uses the `balances` mapping to update the balance of the sender and the recipient. However, the `balances` mapping is defined as a mapping from address to uint256, which means that the value stored for each address is a 256-bit unsigned integer. If the value to be stored exceeds the maximum value of a 256-bit unsigned integer, it will be truncated to the maximum value, leading to a loss of funds.
+
+2. Wrong Logic:
+
+Function: `transferFrom`
+
+Vulnerability: The `transferFrom` function has a wrong logic in the `if` statement. The function checks if the balance of the sender is greater than or equal to the value to be transferred, but it does not check if the balance of the recipient is greater than or equal to the value to be transferred. This can lead to a loss of funds, as the recipient may not have enough funds to receive the transferred amount.
+
+Reason: The `transferFrom` function is used to transfer tokens from one address to another. However, the function does not check if the recipient has enough funds to receive the transferred amount. This can lead to a loss of funds, as the recipient may not have enough funds to receive the transferred amount.
+
+3. Bad Randomness:
+
+Function: `approveAndCall`
+
+Vulnerability: The `approveAndCall` function uses the `sha3` function to generate a random number, but the generated number is not truly random. The `sha3` function is a hash function that takes a string as input and generates a 256-bit hash value. However, the generated hash value is not truly random, as it is deterministic and can be predicted by an attacker.
+
+Reason: The `approveAndCall` function is used to approve a transfer of tokens and call a function on the recipient's contract. However, the function uses the `sha3` function to generate a random number, which is not truly random. This can lead to a loss of funds, as the generated number can be predicted by an attacker and used to steal funds.
+
+4. Access Control:
+
+Function: `AditusToken`
+
+Vulnerability: The `AditusToken` constructor sets the `totalSupply` and `balances` mapping to a fixed value, which can be exploited by an attacker to manipulate the token supply and transfer funds.
+
+Reason: The `AditusToken` constructor sets the `totalSupply` and `balances` mapping to a fixed value, which can be exploited by an attacker to manipulate the token supply and transfer funds. The attacker can create a new contract that inherits from `AditusToken` and sets the `totalSupply` and `balances` mapping to a different value, leading to a loss of funds.
+
+5. Typo Constructor:
+
+Function: `AditusToken`
+
+Vulnerability: The `AditusToken` constructor has a typo in the `symbol` variable, which can be exploited by an attacker to manipulate the token symbol.
+
+Reason: The `AditusToken` constructor sets the `symbol` variable to "ADI", but the variable is misspelled as "ADI". This can lead to a loss of funds, as the attacker can create a new contract that inherits from `AditusToken` and sets the `symbol` variable to a different value, leading to a loss of funds.
+
+Note: These vulnerabilities are exploitable in real-world scenarios and can be beneficial to attackers. It is important to fix these vulnerabilities to prevent a loss of funds and ensure the security of the token.
